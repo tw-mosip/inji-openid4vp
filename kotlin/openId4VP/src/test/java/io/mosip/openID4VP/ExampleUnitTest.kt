@@ -1,4 +1,4 @@
-package io.mosip.openid4vp
+package io.mosip.openID4VP
 
 import org.junit.Test
 
