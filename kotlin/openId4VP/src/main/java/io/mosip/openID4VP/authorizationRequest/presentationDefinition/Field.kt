@@ -65,9 +65,17 @@ class Field(
             )
         }
     }
-    fun validate(index: Number) {
+    fun validate(fieldIndex: Number) {
         try {
-            require(path.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("field - $index : path") }
+            require(path.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("field - $fieldIndex : path") }
+
+            val pathPrefixes = listOf("$.","$[")
+            path.forEachIndexed{ pathIndex, p ->
+                val isNotValidPrefix = !(pathPrefixes.any{p.startsWith(it)})
+                if (isNotValidPrefix) {
+                    throw AuthorizationRequestExceptions.InvalidInputPattern("field - $fieldIndex : path - $pathIndex")
+                }
+            }
 
             filter?.validate()
         }catch (e: Exception){
