@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest
 
 import android.net.Uri
-import io.mosip.openID4VP.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.shared.Decoder
 
 class AuthorizationRequest(

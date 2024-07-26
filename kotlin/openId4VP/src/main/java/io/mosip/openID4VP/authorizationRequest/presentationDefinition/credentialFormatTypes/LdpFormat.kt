@@ -1,6 +1,6 @@
-package io.mosip.openID4VP.credentialFormatTypes
+package io.mosip.openID4VP.authorizationRequest.presentationDefinition.credentialFormatTypes
 
-import io.mosip.openID4VP.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException

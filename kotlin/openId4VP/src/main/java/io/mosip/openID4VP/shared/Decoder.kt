@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.shared
 
 import android.util.Base64
-import io.mosip.openID4VP.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import java.nio.charset.Charset
 
 class Decoder {

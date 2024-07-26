@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-import io.mosip.openID4VP.credentialFormatTypes.Format
-import io.mosip.openID4VP.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.credentialFormatTypes.Format
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -10,7 +10,7 @@ import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.CompositeDecoder
 
 @Serializable
-class InputDescriptor (val id: String,val name:String?,val purpose: String?,val format: Format?,val constraints: Constraints){
+class InputDescriptor (val id: String, val name:String?, val purpose: String?, val format: Format?, val constraints: Constraints){
 
     companion object Serializer: DeserializationStrategy<InputDescriptor>{
 

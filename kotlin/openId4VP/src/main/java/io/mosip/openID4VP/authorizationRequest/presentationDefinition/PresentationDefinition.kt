@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-import io.mosip.openID4VP.credentialFormatTypes.Format
-import io.mosip.openID4VP.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.credentialFormatTypes.Format
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -16,7 +16,7 @@ class PresentationDefinition (
     @SerialName("input_descriptors") val inputDescriptors: List<InputDescriptor>,
     val name: String?,
     val purpose: String?,
-    val format:Format? ) {
+    val format: Format? ) {
 
     companion object Serializer : DeserializationStrategy<PresentationDefinition> {
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("PresentationDefinition") {

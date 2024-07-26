@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.authorizationRequest.presentationDefinition.utils
+package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import kotlinx.serialization.json.Json

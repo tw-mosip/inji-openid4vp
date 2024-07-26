@@ -1,9 +1,9 @@
 package io.mosip.openID4VP.authenticationResponse
 
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.utils.validatePresentationDefinition
-import io.mosip.openID4VP.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.models.Verifier
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.validatePresentationDefinition
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.dto.Verifier
 
 data class AuthenticationResponse(val verifier: Verifier, val presentationDefinition: PresentationDefinition) {
     companion object{

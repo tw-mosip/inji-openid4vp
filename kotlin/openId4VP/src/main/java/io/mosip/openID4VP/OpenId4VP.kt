@@ -2,7 +2,7 @@ package io.mosip.openID4VP
 
 import io.mosip.openID4VP.authenticationResponse.AuthenticationResponse
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.models.Verifier
+import io.mosip.openID4VP.dto.Verifier
 
 class OpenId4VP (val traceabilityId: String){
 
