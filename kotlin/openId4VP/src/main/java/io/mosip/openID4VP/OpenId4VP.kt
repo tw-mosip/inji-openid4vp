@@ -6,13 +6,17 @@ import io.mosip.openID4VP.dto.Verifier
 
 class OpenId4VP (val traceabilityId: String){
 
-    private lateinit var authorizationRequest: AuthorizationRequest
+    lateinit var authorizationRequest: AuthorizationRequest
+    lateinit var presentationDefinitionId: String
 
-    fun authenticateVerifier(encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>): AuthenticationResponse{
+
+    fun authenticateVerifier(encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>): Map<String,String>{
         try {
             this.authorizationRequest = AuthorizationRequest.getAuthorizationRequest(encodedAuthorizationRequest)
 
-            return AuthenticationResponse.getAuthenticationResponse(this.authorizationRequest.clientId, authorizationRequest.presentationDefinition, authorizationRequest.responseUri, trustedVerifiers)
+            val authenticationResponse = AuthenticationResponse.getAuthenticationResponse(trustedVerifiers, this)
+
+            return authenticationResponse
         }catch (e: Exception){
             throw e
         }
