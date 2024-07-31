@@ -1,18 +1,18 @@
 package io.mosip.openID4VP.shared
 
-import android.util.Base64
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import java.nio.charset.Charset
+import org.apache.commons.codec.binary.Base64
+import java.nio.charset.StandardCharsets
 
 class Decoder {
     companion object {
         fun decodeBase64ToString(encodedData: String): String {
             when {
-                encodedData.isEmpty() -> throw IllegalArgumentException("Error occurred while decoding data: input cannot be empty")
+                encodedData.isEmpty() -> throw AuthorizationRequestExceptions.InvalidInput("encoded data")
                 else -> {
                     try {
-                        val decodedByteArray: ByteArray = Base64.decode(encodedData, Base64.DEFAULT)
-                        return String(decodedByteArray, Charset.forName("UTF-8"))
+                        val decodedBytes: ByteArray = Base64.decodeBase64(encodedData.toByteArray(StandardCharsets.UTF_8))
+                        return String(decodedBytes, StandardCharsets.UTF_8)
                     } catch (e: Exception) {
                         throw AuthorizationRequestExceptions.DecodingException("Error occurred while decoding data: ${e.message}") // More specific exception type
                     }
