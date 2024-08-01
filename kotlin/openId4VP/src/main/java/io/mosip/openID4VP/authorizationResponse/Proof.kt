@@ -1,9 +1,11 @@
 package io.mosip.openID4VP.authorizationResponse
 
+import kotlinx.serialization.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Serializable
 class Proof(
     val type: String,
     val created: String,
