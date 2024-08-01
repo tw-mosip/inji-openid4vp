@@ -9,4 +9,17 @@ data class VPToken (
     val id: String,
     val holder: String,
     val proof: Proof
-)
+){
+    companion object{
+        fun constructVpToken(signingVPToken: VPTokenForSigning, proof: Proof): VPToken{
+            return VPToken(
+                signingVPToken.context,
+                signingVPToken.type,
+                signingVPToken.verifiableCredential,
+                signingVPToken.id,
+                signingVPToken.holder,
+                proof
+            )
+        }
+    }
+}
