@@ -10,7 +10,13 @@ import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.CompositeDecoder
 
 @Serializable
-class InputDescriptor (val id: String, val name:String?, val purpose: String?, val format: Format?, val constraints: Constraints){
+class InputDescriptor (
+    val id: String,
+    val name:String? = null,
+    val purpose: String? = null,
+    val format: Format? = null,
+    val constraints: Constraints)
+{
 
     companion object Serializer: DeserializationStrategy<InputDescriptor>{
 

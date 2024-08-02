@@ -13,24 +13,24 @@ import kotlinx.serialization.encoding.Decoder
 
 @Serializable
 class Constraints(
-    val fields: List<Field>?,
-    @SerialName("limit_disclosure") val limitDisclosure: String?
+    val fields: List<Fields>? = null,
+    @SerialName("limit_disclosure") val limitDisclosure: String? = null
 ) {
     companion object Serializer : DeserializationStrategy<Constraints> {
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Constraints") {
-            element<List<Field>>("fields", isOptional = true)
+            element<List<Fields>>("fields", isOptional = true)
             element<String>("limit_disclosure", isOptional = true)
         }
 
         override fun deserialize(decoder: Decoder): Constraints {
             val builtInDecoder = decoder.beginStructure(descriptor)
-            var fields: List<Field>? = null
+            var fields: List<Fields>? = null
             var limitDisclosure: String? = null
 
             loop@ while (true) {
                 when (builtInDecoder.decodeElementIndex(descriptor)) {
                     CompositeDecoder.DECODE_DONE -> break@loop
-                    0 -> fields = builtInDecoder.decodeSerializableElement(descriptor, 0, ListSerializer(Field.serializer()))
+                    0 -> fields = builtInDecoder.decodeSerializableElement(descriptor, 0, ListSerializer(Fields.serializer()))
                     1 -> limitDisclosure = builtInDecoder.decodeStringElement(descriptor, 1)
                 }
             }
@@ -50,8 +50,10 @@ class Constraints(
                 field.validate(index)
             }
 
-            LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
-                ?: throw AuthorizationRequestExceptions.InvalidInput("constraints : limit_disclosure")
+            limitDisclosure?.let {
+                LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
+                    ?: throw AuthorizationRequestExceptions.InvalidLimitDisclosure()
+            }
         }catch (e: AuthorizationRequestExceptions.InvalidInput){
             throw e
         }

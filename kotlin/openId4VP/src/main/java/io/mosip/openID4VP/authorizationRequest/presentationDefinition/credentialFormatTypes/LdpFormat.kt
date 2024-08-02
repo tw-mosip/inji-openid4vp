@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition.credentia
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
@@ -13,7 +14,9 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 
 @Serializable
-data class LdpFormat(val proofType: List<String>){
+data class LdpFormat(
+    @SerialName("proof_type")
+    val proofType: List<String>){
 
     companion object Serializer : DeserializationStrategy<LdpFormat> {
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("LdpFormat") {

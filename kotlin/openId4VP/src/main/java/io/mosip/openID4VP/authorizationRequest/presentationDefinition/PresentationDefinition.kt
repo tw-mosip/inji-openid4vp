@@ -14,9 +14,9 @@ import kotlinx.serialization.encoding.Decoder
 class PresentationDefinition (
     val id: String,
     @SerialName("input_descriptors") val inputDescriptors: List<InputDescriptor>,
-    val name: String?,
-    val purpose: String?,
-    val format: Format? ) {
+    val name: String? = null,
+    val purpose: String? = null,
+    val format: Format? = null) {
 
     companion object Serializer : DeserializationStrategy<PresentationDefinition> {
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("PresentationDefinition") {

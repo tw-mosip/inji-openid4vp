@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
@@ -12,15 +13,15 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 
 @Serializable
-class Field(
+class Fields(
     val path: List<String>,
-    val id: String?,
-    val purpose: String?,
-    val name: String?,
-    val filter: Filter?,
-    val optional: Boolean?
+    val id: String? = null,
+    val purpose: String? = null,
+    val name: String? = null,
+    val filter: Filter? = null,
+    val optional: Boolean? = null
 ) {
-    companion object Serializer : DeserializationStrategy<Field> {
+    companion object Serializer : DeserializationStrategy<Fields> {
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Fields") {
             element<List<String>>("path")
             element<String>("id", isOptional = true)
@@ -30,7 +31,7 @@ class Field(
             element<Boolean>("optional", isOptional = true)
         }
 
-        override fun deserialize(decoder: Decoder): Field {
+        override fun deserialize(decoder: Decoder): Fields {
             val builtInDecoder = decoder.beginStructure(descriptor)
             var path: List<String>? = null
             var id: String? = null
@@ -55,7 +56,7 @@ class Field(
 
             requireNotNull(path) { throw AuthorizationRequestExceptions.MissingInput("fields : path") }
 
-            return Field(
+            return Fields(
                 path = path,
                 id = id,
                 purpose = purpose,

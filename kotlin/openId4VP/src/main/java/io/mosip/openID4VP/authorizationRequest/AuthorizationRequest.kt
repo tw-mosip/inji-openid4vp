@@ -87,8 +87,8 @@ class AuthorizationRequest(
                 clientId = params["client_id"]!!,
                 responseType = params["response_type"]!!,
                 responseMode = params["response_mode"]!!,
-                presentationDefinition = params["presentation_definition"]!!,
-                scope= params["scope"]!!,
+                presentationDefinition = params["presentation_definition"],
+                scope= params["scope"],
                 responseUri = params["response_uri"]!!,
                 nonce = params["nonce"]!!,
                 state = params["state"]!!
