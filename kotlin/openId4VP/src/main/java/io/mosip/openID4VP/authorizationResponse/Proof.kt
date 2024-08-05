@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.authorizationResponse
 
+import io.mosip.openID4VP.dto.VPResponseMetadata
 import kotlinx.serialization.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -17,23 +18,20 @@ class Proof(
 ){
     companion object{
         fun constructProof(
-            signingAlgorithm: String,
+            vpResponseMetadata: VPResponseMetadata,
             challenge: String,
-            domain: String,
-            jws: String,
-            publicKey: String,
         ): Proof {
 
             val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
             val createdDateAndTime = formatter.format(Date())
 
             return Proof(
-                type = signingAlgorithm,
+                type = vpResponseMetadata.signatureAlgorithm,
                 created = createdDateAndTime,
                 challenge = challenge,
-                domain = domain,
-                jws = jws,
-                verificationMethod = publicKey
+                domain = vpResponseMetadata.domain,
+                jws = vpResponseMetadata.jws,
+                verificationMethod = vpResponseMetadata.publicKey
             )
         }
     }

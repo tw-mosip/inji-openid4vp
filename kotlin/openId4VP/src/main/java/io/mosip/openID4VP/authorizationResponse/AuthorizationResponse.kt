@@ -5,10 +5,12 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.Descripto
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
-import io.mosip.openID4VP.networkManager.NetworkManager.Companion.sendHttpPostRequest
+import io.mosip.openID4VP.dto.VPResponseMetadata
+import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Response
+import java.io.IOException
 
 class AuthorizationResponse {
 
@@ -27,34 +29,38 @@ class AuthorizationResponse {
         return Json.encodeToString(this.vpTokenForSigning)
     }
 
-    fun shareVP(jws: String, signatureAlgorithm: String, publicKey: String, domain: String, openId4VP: OpenId4VP): Response{
-        var pathIndex = 0
-        val proof = Proof.constructProof(signingAlgorithm = signatureAlgorithm, challenge = openId4VP.authorizationRequest.nonce, domain = domain, jws = jws, publicKey = publicKey )
-        val descriptorMap = mutableListOf<DescriptorMap>()
+    fun shareVP(vpResponseMetadata: VPResponseMetadata, openId4VP: OpenId4VP): Response? {
+        try {
+            vpResponseMetadata.validate()
+            var pathIndex = 0
+            val proof = Proof.constructProof( vpResponseMetadata, challenge = openId4VP.authorizationRequest.nonce)
+            val descriptorMap = mutableListOf<DescriptorMap>()
 
-        selectedVerifiableCredentials.forEach { (inputDescriptorId, vcs) ->
-            vcs.forEach { _ ->
-                descriptorMap.add(DescriptorMap(inputDescriptorId,"ldp_vp","$.verifiableCredential[${pathIndex++}]"))
+            selectedVerifiableCredentials.forEach { (inputDescriptorId, vcs) ->
+                vcs.forEach { _ ->
+                    descriptorMap.add(DescriptorMap(inputDescriptorId,"ldp_vp","$.verifiableCredential[${pathIndex++}]"))
+                }
             }
+
+            val presentationSubmission = PresentationSubmission("123", openId4VP.presentationDefinitionId, descriptorMap)
+            val vpToken =  VPToken.constructVpToken(this.vpTokenForSigning, proof)
+
+            return constructHttpRequestBody(vpToken, presentationSubmission, openId4VP.authorizationRequest.responseUri, vpResponseMetadata.sharingTimeoutInMilliseconds)
+        }catch (exception: IOException){
+            throw exception
         }
-
-        val presentationSubmission = PresentationSubmission("123", openId4VP.presentationDefinitionId, descriptorMap)
-        val vpToken =  VPToken.constructVpToken(this.vpTokenForSigning, proof)
-
-        return constructHttpRequestBody(vpToken, presentationSubmission, openId4VP.authorizationRequest.responseUri)
     }
 
-    private fun constructHttpRequestBody(vpToken: VPToken, presentationSubmission: PresentationSubmission, responseUri: String): Response{
-        val encodedVPToken = Json.encodeToString(vpToken)
-        val encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
+    private fun constructHttpRequestBody(vpToken: VPToken, presentationSubmission: PresentationSubmission, responseUri: String, sharingTimeoutInMilliseconds: Number): Response? {
+        try {
+            val encodedVPToken = Json.encodeToString(vpToken)
+            val encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
 
-        val requestBody = """
-        {
-        "vp_token": $encodedVPToken,
-        "presentation_submission": $encodedPresentationSubmission
+            val queryParams = mapOf("vp_token" to encodedVPToken, "presentation_submission" to encodedPresentationSubmission)
+
+            return sendHttpPostRequest(responseUri, queryParams, sharingTimeoutInMilliseconds)
+        }catch (exception: IOException){
+            throw exception
         }
-        """.trimIndent()
-
-        return sendHttpPostRequest(requestBody, responseUri)
     }
 }
