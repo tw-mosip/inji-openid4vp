@@ -7,6 +7,7 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
+import io.mosip.openID4VP.shared.UUIDGenerator
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Response
@@ -24,7 +25,7 @@ class AuthorizationResponse {
                 verifiableCredential.add(vcJson)
             }
         }
-        this.vpTokenForSigning = VPTokenForSigning(verifiableCredential = verifiableCredential, id="", holder ="")
+        this.vpTokenForSigning = VPTokenForSigning(verifiableCredential = verifiableCredential, id = UUIDGenerator.generateUUID(), holder = "")
 
         return Json.encodeToString(this.vpTokenForSigning)
     }
@@ -42,7 +43,7 @@ class AuthorizationResponse {
                 }
             }
 
-            val presentationSubmission = PresentationSubmission("123", openId4VP.presentationDefinitionId, descriptorMap)
+            val presentationSubmission = PresentationSubmission(UUIDGenerator.generateUUID(), openId4VP.presentationDefinitionId, descriptorMap)
             val vpToken =  VPToken.constructVpToken(this.vpTokenForSigning, proof)
 
             return constructHttpRequestBody(vpToken, presentationSubmission, openId4VP.authorizationRequest.responseUri, vpResponseMetadata.sharingTimeoutInMilliseconds)
