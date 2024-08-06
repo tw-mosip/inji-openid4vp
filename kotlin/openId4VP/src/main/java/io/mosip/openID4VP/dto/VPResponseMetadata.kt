@@ -19,7 +19,7 @@ data class VPResponseMetadata (
         )
 
         requiredParams.forEach { (key, value) ->
-            if(value != "") { throw AuthorizationRequestExceptions.InvalidInput(key) }
+            if(value == "") { throw AuthorizationRequestExceptions.InvalidInput(key) }
         }
     }
 }
