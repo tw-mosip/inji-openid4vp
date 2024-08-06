@@ -33,7 +33,7 @@ class OpenId4VP (val traceabilityId: String){
         return authorizationResponse.constructVPTokenForSigning(selectedVerifiableCredentials)
     }
 
-    fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata):Response?{
+    fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata):String{
         try{
             return authorizationResponse.shareVP(vpResponseMetadata, this)
         }catch (exception: IOException){

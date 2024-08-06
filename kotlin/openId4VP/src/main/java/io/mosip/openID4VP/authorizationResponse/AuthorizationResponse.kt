@@ -30,7 +30,7 @@ class AuthorizationResponse {
         return Json.encodeToString(this.vpTokenForSigning)
     }
 
-    fun shareVP(vpResponseMetadata: VPResponseMetadata, openId4VP: OpenId4VP): Response? {
+    fun shareVP(vpResponseMetadata: VPResponseMetadata, openId4VP: OpenId4VP): String {
         try {
             vpResponseMetadata.validate()
             var pathIndex = 0
@@ -52,7 +52,7 @@ class AuthorizationResponse {
         }
     }
 
-    private fun constructHttpRequestBody(vpToken: VPToken, presentationSubmission: PresentationSubmission, responseUri: String, sharingTimeoutInMilliseconds: Number): Response? {
+    private fun constructHttpRequestBody(vpToken: VPToken, presentationSubmission: PresentationSubmission, responseUri: String, sharingTimeoutInMilliseconds: Number): String {
         try {
             val encodedVPToken = Json.encodeToString(vpToken)
             val encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
