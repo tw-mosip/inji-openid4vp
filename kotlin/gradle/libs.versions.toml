@@ -11,6 +11,8 @@ serializationJson = "1.7.1"
 serialization = "2.0.0"
 okhttp3 = "4.12.0"
 commonsCodecVersion = "1.16.0"
+mockk = "1.13.10"
+mockwebserver = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -20,8 +22,10 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 jetbrains-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref="serializationJson"}
-okhttp3 = {group = "com.squareup.okhttp3", name = "okhttp", version.ref="okhttp3"}
-commons-codec = {group = "commons-codec", name ="commons-codec", version.ref="commonsCodecVersion"}
+okhttp3 = {group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3"}
+commons-codec = {group = "commons-codec", name ="commons-codec", version.ref = "commonsCodecVersion"}
+mockk = {group = "io.mockk", name = "mockk", version.ref = "mockk"}
+mockwebserver = {group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "mockwebserver"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
