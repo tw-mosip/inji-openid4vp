@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.shared
+package io.mosip.openID4VP.common
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import org.junit.Assert.assertEquals

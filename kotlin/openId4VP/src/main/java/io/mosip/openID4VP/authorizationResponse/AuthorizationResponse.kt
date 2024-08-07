@@ -7,7 +7,7 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
-import io.mosip.openID4VP.shared.UUIDGenerator
+import io.mosip.openID4VP.common.UUIDGenerator
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Response

@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.shared
+package io.mosip.openID4VP.common
 
 import java.util.UUID
 object UUIDGenerator {

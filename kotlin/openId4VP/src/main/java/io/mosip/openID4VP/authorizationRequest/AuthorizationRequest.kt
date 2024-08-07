@@ -2,7 +2,7 @@ package io.mosip.openID4VP.authorizationRequest
 
 import androidx.core.graphics.scaleMatrix
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.shared.Decoder
+import io.mosip.openID4VP.common.Decoder
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
