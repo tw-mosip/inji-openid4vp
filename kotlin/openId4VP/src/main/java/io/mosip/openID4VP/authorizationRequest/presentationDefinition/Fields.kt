@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -22,6 +23,8 @@ class Fields(
     val optional: Boolean? = null
 ) {
     companion object Serializer : DeserializationStrategy<Fields> {
+        private val logTag = Logger.getLogTag(this::class.simpleName!!)
+
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Fields") {
             element<List<String>>("path")
             element<String>("id", isOptional = true)
@@ -79,8 +82,9 @@ class Fields(
             }
 
             filter?.validate()
-        }catch (e: Exception){
-            throw  e
+        }catch (exception: Exception){
+            Logger.error(logTag, exception)
+            throw exception
         }
     }
 

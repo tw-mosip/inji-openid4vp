@@ -1,9 +1,16 @@
 package io.mosip.openID4VP.authorizationRequest
 
+import android.util.Log
+import io.mockk.Runs
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenId4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.dto.Verifier
 import org.apache.commons.codec.binary.Base64
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -18,14 +25,24 @@ class AuthorizationRequestTests {
 
     @Before
     fun setUp() {
-        openId4VP = OpenId4VP("123")
+        openId4VP = OpenId4VP("test-OpenId4VP")
         trustedVerifiers = listOf(Verifier("https://injiverify.dev2.mosip.net", listOf("https://injiverify.qa-inji.mosip.net/redirect", "https://injiverify.dev2.mosip.net/redirect")), Verifier("https://injiverify.dev1.mosip.net",
             listOf( "https://injiverify.qa-inji.mosip.net/redirect","https://injiverify.dev1.mosip.net/redirect")
         ))
         presentationDefinition = "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
+        mockkStatic(android.util.Log::class)
+        every { Log.e(any(), any()) } answers {
+            val tag = arg<String>(0)
+            val msg = arg<String>(1)
+            println("Error: logTag: $tag | Message: $msg")
+            0
+        }
     }
 
-
+    @After
+    fun tearDown(){
+        clearAllMocks()
+    }
 
     @Test
     fun `should throw missing input exception if client_id is missing`() {
@@ -39,7 +56,7 @@ class AuthorizationRequestTests {
     }
 
     @Test
-    fun `should throw error if both presentation_definition and scope request params are present in Authorization Request`(){
+    fun `should throw exception if both presentation_definition and scope request params are present in Authorization Request`(){
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(presentationDefinition=presentationDefinition,scope="sunbird_health_insurance_vc")
         val expectedValue = "Only one of presentation_definition or scope request param can be present"
 
@@ -50,8 +67,8 @@ class AuthorizationRequestTests {
     }
 
     @Test
-    fun `should throw error if both presentation_definition and scope request params are not present in Authorization Request`(){
-        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(clientId="https://injiverify.dummy.mosip.net")
+    fun `should throw exception if both presentation_definition and scope request params are not present in Authorization Request`(){
+        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(clientId="https://injiverify.dev2.mosip.net")
         val expectedValue = "Either presentation_definition or scope request param must be present"
 
         val illegalArgumentException = assertThrows(IllegalArgumentException::class.java ){openId4VP.authenticateVerifier(encodedAuthorizationRequestUrl,trustedVerifiers)}
@@ -61,7 +78,7 @@ class AuthorizationRequestTests {
     }
 
     @Test
-    fun `should throw error if received client_id is not matching with predefined Verifiers list client_id`(){
+    fun `should throw exception if received client_id is not matching with predefined Verifiers list client_id`(){
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(clientId="https://injiverify.dummy.mosip.net",presentationDefinition=presentationDefinition)
         val expectedValue = "VP sharing is stopped as the verifier authentication is failed"
 
@@ -71,6 +88,17 @@ class AuthorizationRequestTests {
         assertEquals(expectedValue,actualValue)
     }
 
+    @Test
+    fun `should throw invalid limit disclosure exception if limit disclosure is present and not matching with predefined values`() {
+        presentationDefinition = "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}], \"limit_disclosure\": \"not preferred\"}}]}"
+        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(clientId = "https://injiverify.dev2.mosip.net", presentationDefinition = presentationDefinition)
+        val expectedValue = "Invalid Input: limit_disclosure value should be either required or preferred"
+
+        val missingInputException = assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java ){openId4VP.authenticateVerifier(encodedAuthorizationRequestUrl,trustedVerifiers)}
+        val actualValue = missingInputException.message
+
+        assertEquals(expectedValue,actualValue)
+    }
 
     @Test
     fun `should return Authentication Response if all the fields are present and valid in Authorization Request`(){

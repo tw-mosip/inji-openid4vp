@@ -1,8 +1,8 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import androidx.core.graphics.scaleMatrix
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Decoder
+import io.mosip.openID4VP.common.Logger
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -19,6 +19,8 @@ class AuthorizationRequest(
     val state: String
 ) {
     companion object {
+        private val logTag = Logger.getLogTag(this::class.simpleName!!)
+
         fun getAuthorizationRequest(encodedAuthorizationRequest: String):AuthorizationRequest{
             try {
                 val decodedAuthorizationRequest = Decoder.decodeBase64ToString(encodedAuthorizationRequest)
@@ -30,10 +32,6 @@ class AuthorizationRequest(
 
         private fun parseAuthorizationRequest(decodedAuthorizationRequest: String): AuthorizationRequest {
             try {
-                if (!decodedAuthorizationRequest.startsWith("OPENID4VP://")) {
-                    throw IllegalArgumentException("Invalid authorization request format")
-                }
-
                 val queryStart = decodedAuthorizationRequest.indexOf('?') + 1
                 val queryString = decodedAuthorizationRequest.substring(queryStart)
                 val encodedQuery = URLEncoder.encode(queryString, StandardCharsets.UTF_8.toString())
@@ -45,15 +43,20 @@ class AuthorizationRequest(
                 val params = extractQueryParams(query)
                 validateRequiredParams(params)
                 return createAuthorizationRequest(params)
-            }catch (e: Exception){
-                throw e
+            }catch (exception: Exception){
+                Logger.error(logTag, exception)
+                throw exception
             }
         }
 
         private fun extractQueryParams(query: String): Map<String, String> {
-            return query.split("&")
-                .map { it.split("=") }
-                .associateBy({ it[0] }, { if (it.size > 1) URLDecoder.decode(it[1], StandardCharsets.UTF_8.toString()) else "" })
+            try {
+                return query.split("&")
+                    .map { it.split("=") }
+                    .associateBy({ it[0] }, { if (it.size > 1) URLDecoder.decode(it[1], StandardCharsets.UTF_8.toString()) else "" })
+            }catch (exception: Exception){
+                throw Exception("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
+            }
         }
 
         private fun validateRequiredParams(params: Map<String, String>) {

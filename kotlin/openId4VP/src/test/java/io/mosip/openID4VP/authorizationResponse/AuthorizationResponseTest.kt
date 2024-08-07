@@ -1,7 +1,11 @@
 package io.mosip.openID4VP.authorizationResponse
 
+import android.util.Log
+import io.mockk.clearAllMocks
+import io.mockk.clearStaticMockk
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenId4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
@@ -60,10 +64,18 @@ class AuthorizationResponseTest {
         openId4VP.presentationDefinitionId = "6498781c-f291-4969-9cd5-2c273858f38f"
         openId4VP.authorizationRequest = AuthorizationRequest(clientId="https://injiverify.dev2.mosip.net", responseType = "vp_token", responseMode = "direct_post", presentationDefinition=presentationDefinition, nonce = "bMHvX1HGhbh8zqlSWf/fuQ==", state = "fsnC8ixCs6mWyV+00k23Qg==", scope= null, responseUri = mockWebServer.url("/https://injiverify.dev2.mosip.net/redirect").toString())
         openId4VP.constructVPToken(selectedCredentialsList)
+        mockkStatic(Log::class)
+        every { Log.e(any(), any()) } answers {
+            val tag = arg<String>(0)
+            val msg = arg<String>(1)
+            println("Error: logTag: $tag | Message: $msg")
+            0
+        }
     }
 
     @After
     fun tearDown(){
+        clearAllMocks()
         mockWebServer.shutdown()
     }
 
@@ -89,7 +101,7 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    fun `should throw error if Authorization Response request call returns the response with http status other than 200`(){
+    fun `should throw exception if Authorization Response request call returns the response with http status other than 200`(){
         val mockResponse: MockResponse = MockResponse().setResponseCode(500)
         mockWebServer.enqueue(mockResponse)
         vpResponseMetadata = VPResponseMetadata("eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ","RsaSignature2018",publicKey, "https://123", 1000)
@@ -101,7 +113,7 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    fun `should throw error if Authorization Response request call takes more time to return response than specified time`(){
+    fun `should throw exception if Authorization Response request call takes more time to return response than specified time`(){
         vpResponseMetadata = VPResponseMetadata("eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ","RsaSignature2018",publicKey, "https://123", 1000)
         expectedValue = "VP sharing failed due to connection timeout"
 

@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -17,6 +18,7 @@ class InputDescriptor (
 {
 
     companion object Serializer: DeserializationStrategy<InputDescriptor>{
+        private val logTag = Logger.getLogTag(this::class.simpleName!!)
 
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("InputDescriptor"){
             element<String>("id")
@@ -62,8 +64,9 @@ class InputDescriptor (
             }
 
             constraints.validate()
-        }catch (e: AuthorizationRequestExceptions.InvalidInput){
-            throw e
+        }catch (exception: AuthorizationRequestExceptions.InvalidInput){
+            Logger.error(logTag, exception)
+            throw exception
         }
     }
 }

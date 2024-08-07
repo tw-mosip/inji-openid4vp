@@ -5,18 +5,20 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.Descripto
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
 import io.mosip.openID4VP.common.UUIDGenerator
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.Response
 import java.io.IOException
 
 class AuthorizationResponse {
-
+    private val logTag = Logger.getLogTag(this::class.simpleName!!)
     private lateinit var vpTokenForSigning: VPTokenForSigning
     private lateinit var selectedVerifiableCredentials: Map<String, List<String>>
+
     fun constructVPTokenForSigning(selectedVerifiableCredentials: Map<String,List<String>>): String {
         this.selectedVerifiableCredentials = selectedVerifiableCredentials
         val verifiableCredential = mutableListOf<String>()
@@ -42,7 +44,6 @@ class AuthorizationResponse {
                     descriptorMap.add(DescriptorMap(inputDescriptorId,"ldp_vp","$.verifiableCredential[${pathIndex++}]"))
                 }
             }
-
             val presentationSubmission = PresentationSubmission(UUIDGenerator.generateUUID(), openId4VP.presentationDefinitionId, descriptorMap)
             val vpToken =  VPToken.constructVpToken(this.vpTokenForSigning, proof)
 
@@ -56,11 +57,14 @@ class AuthorizationResponse {
         try {
             val encodedVPToken = Json.encodeToString(vpToken)
             val encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
-
             val queryParams = mapOf("vp_token" to encodedVPToken, "presentation_submission" to encodedPresentationSubmission)
 
             return sendHttpPostRequest(responseUri, queryParams, sharingTimeoutInMilliseconds)
-        }catch (exception: IOException){
+        }catch (exception: SerializationException){
+            Logger.error(logTag, exception)
+            throw exception
+        }
+        catch (exception: IOException){
             throw exception
         }
     }

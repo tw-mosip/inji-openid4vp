@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import kotlinx.serialization.json.Json
 
 fun validatePresentationDefinition(presentationDefinitionJson: String): PresentationDefinition{
@@ -11,7 +10,7 @@ fun validatePresentationDefinition(presentationDefinitionJson: String): Presenta
         presentationDefinition.validate()
 
         return presentationDefinition
-    }catch (e: Exception){
-        throw e
+    }catch (exception: Exception){
+        throw exception
     }
 }

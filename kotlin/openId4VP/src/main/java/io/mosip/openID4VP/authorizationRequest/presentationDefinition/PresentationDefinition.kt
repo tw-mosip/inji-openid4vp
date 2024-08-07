@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -18,6 +19,8 @@ class PresentationDefinition (
 ) {
 
     companion object Serializer : DeserializationStrategy<PresentationDefinition> {
+        private val logTag = Logger.getLogTag(this::class.simpleName!!)
+
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("PresentationDefinition") {
             element<String>("id")
             element<ArrayList<InputDescriptor>>("input_descriptors")
@@ -64,8 +67,9 @@ class PresentationDefinition (
             require(inputDescriptors.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("presentation_definition : input_descriptors")}
 
             inputDescriptors.forEachIndexed{index, inputDescriptor -> inputDescriptor.validate(index)}
-        }catch (e: AuthorizationRequestExceptions.InvalidInput){
-            throw e
+        }catch (exception: AuthorizationRequestExceptions.InvalidInput){
+            Logger.error(logTag, exception)
+            throw exception
         }
     }
 }

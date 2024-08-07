@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -12,6 +13,8 @@ import kotlinx.serialization.encoding.Decoder
 @Serializable
 class Filter(val type: String,val pattern: String) {
     companion object Serializer : DeserializationStrategy<Filter> {
+        private val logTag = Logger.getLogTag(this::class.simpleName!!)
+
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Filter") {
             element<String>("type")
             element<String>("pattern")
@@ -40,7 +43,12 @@ class Filter(val type: String,val pattern: String) {
     }
 
     fun validate(){
-        require(type.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("filter : type")}
-        require(pattern.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("filter : pattern")}
+        try {
+            require(type.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("filter : type") }
+            require(pattern.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("filter : pattern") }
+        }catch (exception: Exception){
+            Logger.error(logTag, exception)
+            throw exception
+        }
     }
 }

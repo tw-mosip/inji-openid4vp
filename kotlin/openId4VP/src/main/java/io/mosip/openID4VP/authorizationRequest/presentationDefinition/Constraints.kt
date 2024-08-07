@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,6 +18,8 @@ class Constraints(
     @SerialName("limit_disclosure") val limitDisclosure: String? = null
 ) {
     companion object Serializer : DeserializationStrategy<Constraints> {
+        private val logTag = Logger.getLogTag(this::class.simpleName!!)
+
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Constraints") {
             element<List<Fields>>("fields", isOptional = true)
             element<String>("limit_disclosure", isOptional = true)
@@ -54,15 +57,10 @@ class Constraints(
                 LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
                     ?: throw AuthorizationRequestExceptions.InvalidLimitDisclosure()
             }
-        }catch (e: AuthorizationRequestExceptions.InvalidInput){
-            throw e
+        }catch (exception: AuthorizationRequestExceptions.InvalidInput){
+            Logger.error(logTag, exception)
+            throw exception
         }
     }
-}
-
-@Serializable
-enum class LimitDisclosure(val value: String) {
-    REQUIRED("required"),
-    PREFERRED("preferred");
 }
 

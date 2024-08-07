@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.networkManager
 
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -12,6 +13,8 @@ import java.util.concurrent.TimeUnit
 
 class NetworkManagerClient {
     companion object{
+        private val logTag = Logger.getLogTag(this::class.simpleName!!)
+
         fun sendHttpPostRequest(
             baseUrl: String,
             queryParams: Map<String, String>,
@@ -39,16 +42,19 @@ class NetworkManagerClient {
                     throw NetworkManagerClientExceptions.NetworkRequestFailed(response.message)
                 }
             }catch (exception: InterruptedIOException){
-                throw NetworkManagerClientExceptions.NetworkRequestFailedDueToConnectionTimeout()
-            } catch (exception: IOException) {
-                when (exception) {
-                    is UnknownHostException -> {
-                        throw NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
-                    }
-                    else -> {
-                        throw NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
-                    }
-                }
+                val specificException = NetworkManagerClientExceptions.NetworkRequestFailedDueToConnectionTimeout()
+                Logger.error(logTag, specificException)
+                throw specificException
+            } catch (exception: UnknownHostException) {
+                val specificException =
+                    NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
+                Logger.error(logTag, specificException)
+                throw specificException
+            }catch (exception: IOException) {
+                val specificException =
+                    NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
+                Logger.error(logTag, specificException)
+                throw specificException
             }
         }
     }
