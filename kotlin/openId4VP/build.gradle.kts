@@ -2,6 +2,12 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    jacoco
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+    reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
 }
 
 android {
@@ -52,4 +58,35 @@ dependencies {
     testImplementation(libs.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+tasks {
+    register<JacocoReport>("jacocoTestReport") {
+        dependsOn(
+            listOf(
+                "testDebugUnitTest",
+                "compileReleaseUnitTestKotlin",
+                "testReleaseUnitTest"
+            )
+        )
+
+        reports {
+            html.required = true
+        }
+        sourceDirectories.setFrom(layout.projectDirectory.dir("src/main/java"))
+        classDirectories.setFrom(
+            files(
+                fileTree(layout.buildDirectory.dir("intermediates/javac/debug")),
+                fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug"))
+            )
+        )
+        executionData.setFrom(files(
+            fileTree(layout.buildDirectory) { include(listOf("**/testDebug**.exec")) }
+        ))
+
+    }
+}
+
+tasks.build {
+    finalizedBy("jacocoTestReport")
 }
