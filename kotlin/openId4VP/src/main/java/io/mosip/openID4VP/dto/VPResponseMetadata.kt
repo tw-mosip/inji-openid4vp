@@ -2,14 +2,14 @@ package io.mosip.openID4VP.dto
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 
-data class VPResponseMetadata (
+data class VPResponseMetadata(
     val jws: String,
     val signatureAlgorithm: String,
     val publicKey: String,
     val domain: String,
     val sharingTimeoutInMilliseconds: Int,
-){
-    fun validate(){
+) {
+    fun validate() {
         val requiredParams = mapOf(
             "jws" to this.jws,
             "signatureAlgorithm" to this.signatureAlgorithm,
@@ -19,7 +19,9 @@ data class VPResponseMetadata (
         )
 
         requiredParams.forEach { (key, value) ->
-            if(value == "" || value == "null") { throw AuthorizationRequestExceptions.InvalidInput(key) }
+            if (value == "" || value == "null") {
+                throw AuthorizationRequestExceptions.InvalidInput(key)
+            }
         }
     }
 }

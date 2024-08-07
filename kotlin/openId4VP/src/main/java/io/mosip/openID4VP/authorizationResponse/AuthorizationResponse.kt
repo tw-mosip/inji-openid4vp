@@ -6,9 +6,9 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.Presentat
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
-import io.mosip.openID4VP.common.UUIDGenerator
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,15 +19,19 @@ class AuthorizationResponse {
     private lateinit var vpTokenForSigning: VPTokenForSigning
     private lateinit var selectedVerifiableCredentials: Map<String, List<String>>
 
-    fun constructVPTokenForSigning(selectedVerifiableCredentials: Map<String,List<String>>): String {
+    fun constructVPTokenForSigning(selectedVerifiableCredentials: Map<String, List<String>>): String {
         this.selectedVerifiableCredentials = selectedVerifiableCredentials
         val verifiableCredential = mutableListOf<String>()
-        selectedVerifiableCredentials.forEach { (_,vcs) ->
+        selectedVerifiableCredentials.forEach { (_, vcs) ->
             vcs.forEach { vcJson ->
                 verifiableCredential.add(vcJson)
             }
         }
-        this.vpTokenForSigning = VPTokenForSigning(verifiableCredential = verifiableCredential, id = UUIDGenerator.generateUUID(), holder = "")
+        this.vpTokenForSigning = VPTokenForSigning(
+            verifiableCredential = verifiableCredential,
+            id = UUIDGenerator.generateUUID(),
+            holder = ""
+        )
 
         return Json.encodeToString(this.vpTokenForSigning)
     }
@@ -36,35 +40,55 @@ class AuthorizationResponse {
         try {
             vpResponseMetadata.validate()
             var pathIndex = 0
-            val proof = Proof.constructProof( vpResponseMetadata, challenge = openId4VP.authorizationRequest.nonce)
+            val proof = Proof.constructProof(
+                vpResponseMetadata, challenge = openId4VP.authorizationRequest.nonce
+            )
             val descriptorMap = mutableListOf<DescriptorMap>()
 
             selectedVerifiableCredentials.forEach { (inputDescriptorId, vcs) ->
                 vcs.forEach { _ ->
-                    descriptorMap.add(DescriptorMap(inputDescriptorId,"ldp_vp","$.verifiableCredential[${pathIndex++}]"))
+                    descriptorMap.add(
+                        DescriptorMap(
+                            inputDescriptorId, "ldp_vp", "$.verifiableCredential[${pathIndex++}]"
+                        )
+                    )
                 }
             }
-            val presentationSubmission = PresentationSubmission(UUIDGenerator.generateUUID(), openId4VP.presentationDefinitionId, descriptorMap)
-            val vpToken =  VPToken.constructVpToken(this.vpTokenForSigning, proof)
+            val presentationSubmission = PresentationSubmission(
+                UUIDGenerator.generateUUID(), openId4VP.presentationDefinitionId, descriptorMap
+            )
+            val vpToken = VPToken.constructVpToken(this.vpTokenForSigning, proof)
 
-            return constructHttpRequestBody(vpToken, presentationSubmission, openId4VP.authorizationRequest.responseUri, vpResponseMetadata.sharingTimeoutInMilliseconds)
-        }catch (exception: IOException){
+            return constructHttpRequestBody(
+                vpToken,
+                presentationSubmission,
+                openId4VP.authorizationRequest.responseUri,
+                vpResponseMetadata.sharingTimeoutInMilliseconds
+            )
+        } catch (exception: IOException) {
             throw exception
         }
     }
 
-    private fun constructHttpRequestBody(vpToken: VPToken, presentationSubmission: PresentationSubmission, responseUri: String, sharingTimeoutInMilliseconds: Number): String {
+    private fun constructHttpRequestBody(
+        vpToken: VPToken,
+        presentationSubmission: PresentationSubmission,
+        responseUri: String,
+        sharingTimeoutInMilliseconds: Number
+    ): String {
         try {
             val encodedVPToken = Json.encodeToString(vpToken)
             val encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
-            val queryParams = mapOf("vp_token" to encodedVPToken, "presentation_submission" to encodedPresentationSubmission)
+            val queryParams = mapOf(
+                "vp_token" to encodedVPToken,
+                "presentation_submission" to encodedPresentationSubmission
+            )
 
             return sendHttpPostRequest(responseUri, queryParams, sharingTimeoutInMilliseconds)
-        }catch (exception: SerializationException){
+        } catch (exception: SerializationException) {
             Logger.error(logTag, exception)
             throw exception
-        }
-        catch (exception: IOException){
+        } catch (exception: IOException) {
             throw exception
         }
     }

@@ -6,8 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PresentationSubmission(
     val id: String,
-    @SerialName("definition_id")
-    val definitionId: String,
-    @SerialName("descriptor_map")
-    val descriptorMap: List<DescriptorMap>
+    @SerialName("definition_id") val definitionId: String,
+    @SerialName("descriptor_map") val descriptorMap: List<DescriptorMap>
 )

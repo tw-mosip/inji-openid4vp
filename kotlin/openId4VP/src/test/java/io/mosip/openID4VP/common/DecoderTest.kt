@@ -12,11 +12,12 @@ class DecoderTest {
         val encodedData = ""
         val expectedValue = "Invalid Input: encoded data value cannot be empty or null"
 
-        val invalidInputException = assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-            Decoder.decodeBase64ToString(encodedData)
-        }
+        val invalidInputException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+                Decoder.decodeBase64ToString(encodedData)
+            }
 
-        assertEquals(expectedValue,invalidInputException.message)
+        assertEquals(expectedValue, invalidInputException.message)
     }
 
     @Test

@@ -11,7 +11,7 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 
 @Serializable
-class Filter(val type: String,val pattern: String) {
+class Filter(val type: String, val pattern: String) {
     companion object Serializer : DeserializationStrategy<Filter> {
         private val logTag = Logger.getLogTag(this::class.simpleName!!)
 
@@ -36,17 +36,17 @@ class Filter(val type: String,val pattern: String) {
             builtInDecoder.endStructure(descriptor)
 
             requireNotNull(type) { throw AuthorizationRequestExceptions.MissingInput("filter : type") }
-            requireNotNull(pattern) {  throw AuthorizationRequestExceptions.MissingInput("filter : pattern")}
+            requireNotNull(pattern) { throw AuthorizationRequestExceptions.MissingInput("filter : pattern") }
 
             return Filter(type = type, pattern = pattern)
         }
     }
 
-    fun validate(){
+    fun validate() {
         try {
             require(type.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("filter : type") }
             require(pattern.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("filter : pattern") }
-        }catch (exception: Exception){
+        } catch (exception: Exception) {
             Logger.error(logTag, exception)
             throw exception
         }

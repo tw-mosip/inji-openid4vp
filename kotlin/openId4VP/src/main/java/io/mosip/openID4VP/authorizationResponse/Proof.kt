@@ -15,8 +15,8 @@ class Proof(
     val jws: String,
     val proofPurpose: String = "authentication",
     val verificationMethod: String
-){
-    companion object{
+) {
+    companion object {
         fun constructProof(
             vpResponseMetadata: VPResponseMetadata,
             challenge: String,

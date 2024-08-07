@@ -21,11 +21,12 @@ class AuthorizationRequest(
     companion object {
         private val logTag = Logger.getLogTag(this::class.simpleName!!)
 
-        fun getAuthorizationRequest(encodedAuthorizationRequest: String):AuthorizationRequest{
+        fun getAuthorizationRequest(encodedAuthorizationRequest: String): AuthorizationRequest {
             try {
-                val decodedAuthorizationRequest = Decoder.decodeBase64ToString(encodedAuthorizationRequest)
+                val decodedAuthorizationRequest =
+                    Decoder.decodeBase64ToString(encodedAuthorizationRequest)
                 return parseAuthorizationRequest(decodedAuthorizationRequest)
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 throw e
             }
         }
@@ -43,7 +44,7 @@ class AuthorizationRequest(
                 val params = extractQueryParams(query)
                 validateRequiredParams(params)
                 return createAuthorizationRequest(params)
-            }catch (exception: Exception){
+            } catch (exception: Exception) {
                 Logger.error(logTag, exception)
                 throw exception
             }
@@ -51,10 +52,12 @@ class AuthorizationRequest(
 
         private fun extractQueryParams(query: String): Map<String, String> {
             try {
-                return query.split("&")
-                    .map { it.split("=") }
-                    .associateBy({ it[0] }, { if (it.size > 1) URLDecoder.decode(it[1], StandardCharsets.UTF_8.toString()) else "" })
-            }catch (exception: Exception){
+                return query.split("&").map { it.split("=") }.associateBy({ it[0] }, {
+                        if (it.size > 1) URLDecoder.decode(
+                            it[1], StandardCharsets.UTF_8.toString()
+                        ) else ""
+                    })
+            } catch (exception: Exception) {
                 throw Exception("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
             }
         }
@@ -80,18 +83,22 @@ class AuthorizationRequest(
                 else -> throw IllegalArgumentException("Either presentation_definition or scope request param must be present")
             }
             requiredRequestParams.forEach { param ->
-                val value = params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
-                if (value.isEmpty() or (value == "null")) throw AuthorizationRequestExceptions.InvalidInput(param)
+                val value =
+                    params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
+                if (value.isEmpty() or (value == "null")) throw AuthorizationRequestExceptions.InvalidInput(
+                    param
+                )
             }
 
         }
+
         private fun createAuthorizationRequest(params: Map<String, String>): AuthorizationRequest {
             return AuthorizationRequest(
                 clientId = params["client_id"]!!,
                 responseType = params["response_type"]!!,
                 responseMode = params["response_mode"]!!,
                 presentationDefinition = params["presentation_definition"],
-                scope= params["scope"],
+                scope = params["scope"],
                 responseUri = params["response_uri"]!!,
                 nonce = params["nonce"]!!,
                 state = params["state"]!!

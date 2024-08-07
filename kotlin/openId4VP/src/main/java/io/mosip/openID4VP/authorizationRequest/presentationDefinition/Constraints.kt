@@ -33,7 +33,10 @@ class Constraints(
             loop@ while (true) {
                 when (builtInDecoder.decodeElementIndex(descriptor)) {
                     CompositeDecoder.DECODE_DONE -> break@loop
-                    0 -> fields = builtInDecoder.decodeSerializableElement(descriptor, 0, ListSerializer(Fields.serializer()))
+                    0 -> fields = builtInDecoder.decodeSerializableElement(
+                        descriptor, 0, ListSerializer(Fields.serializer())
+                    )
+
                     1 -> limitDisclosure = builtInDecoder.decodeStringElement(descriptor, 1)
                 }
             }
@@ -41,12 +44,11 @@ class Constraints(
             builtInDecoder.endStructure(descriptor)
 
             return Constraints(
-                fields = fields,
-                limitDisclosure = limitDisclosure
+                fields = fields, limitDisclosure = limitDisclosure
             )
         }
     }
-    
+
     fun validate() {
         try {
             fields?.forEachIndexed { index, field ->
@@ -57,7 +59,7 @@ class Constraints(
                 LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
                     ?: throw AuthorizationRequestExceptions.InvalidLimitDisclosure()
             }
-        }catch (exception: AuthorizationRequestExceptions.InvalidInput){
+        } catch (exception: AuthorizationRequestExceptions.InvalidInput) {
             Logger.error(logTag, exception)
             throw exception
         }

@@ -6,16 +6,18 @@ import java.nio.charset.StandardCharsets
 
 object Decoder {
     private val logTag = Logger.getLogTag(this::class.simpleName!!)
-    
+
     fun decodeBase64ToString(encodedData: String): String {
         when {
             encodedData.isEmpty() -> throw AuthorizationRequestExceptions.InvalidInput("encoded data")
             else -> {
                 try {
-                    val decodedBytes: ByteArray = Base64.decodeBase64(encodedData.toByteArray(StandardCharsets.UTF_8))
+                    val decodedBytes: ByteArray =
+                        Base64.decodeBase64(encodedData.toByteArray(StandardCharsets.UTF_8))
                     return String(decodedBytes, StandardCharsets.UTF_8)
                 } catch (e: Exception) {
-                    val exception = AuthorizationRequestExceptions.DecodingException("Error occurred while decoding data: ${e.message}")
+                    val exception =
+                        AuthorizationRequestExceptions.DecodingException("Error occurred while decoding data: ${e.message}")
                     Logger.error(logTag, exception)
                     throw exception
                 }

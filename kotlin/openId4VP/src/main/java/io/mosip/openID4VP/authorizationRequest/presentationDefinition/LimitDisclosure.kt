@@ -4,6 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class LimitDisclosure(val value: String) {
-    REQUIRED("required"),
-    PREFERRED("preferred");
+    REQUIRED("required"), PREFERRED("preferred");
 }

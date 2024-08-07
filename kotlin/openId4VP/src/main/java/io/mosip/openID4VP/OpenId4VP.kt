@@ -8,20 +8,24 @@ import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import java.io.IOException
 
-class OpenId4VP(private val traceabilityId: String){
+class OpenId4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
     lateinit var presentationDefinitionId: String
     private lateinit var authorizationResponse: AuthorizationResponse
 
-    fun authenticateVerifier(encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>): Map<String,String>{
+    fun authenticateVerifier(
+        encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
+    ): Map<String, String> {
         try {
             Logger.setTraceability(traceabilityId)
-            this.authorizationRequest = AuthorizationRequest.getAuthorizationRequest(encodedAuthorizationRequest)
+            this.authorizationRequest =
+                AuthorizationRequest.getAuthorizationRequest(encodedAuthorizationRequest)
 
-            val authenticationResponse = AuthenticationResponse.getAuthenticationResponse(trustedVerifiers, this)
+            val authenticationResponse =
+                AuthenticationResponse.getAuthenticationResponse(trustedVerifiers, this)
 
             return authenticationResponse
-        }catch (e: Exception){
+        } catch (e: Exception) {
             throw e
         }
     }
@@ -31,10 +35,10 @@ class OpenId4VP(private val traceabilityId: String){
         return authorizationResponse.constructVPTokenForSigning(selectedVerifiableCredentials)
     }
 
-    fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata):String{
-        try{
+    fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
+        try {
             return authorizationResponse.shareVP(vpResponseMetadata, this)
-        }catch (exception: IOException){
+        } catch (exception: IOException) {
             throw exception
         }
     }
