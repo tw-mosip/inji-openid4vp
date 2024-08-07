@@ -48,6 +48,8 @@ class AuthorizationResponseTest {
     private lateinit var mockWebServer: MockWebServer
     private lateinit var expectedValue: String
     private lateinit var vpResponseMetadata: VPResponseMetadata
+    private lateinit var actualException: Exception
+    private lateinit var expectedExceptionMessage: String
 
     @Before
     fun setUp() {
@@ -114,14 +116,14 @@ class AuthorizationResponseTest {
         vpResponseMetadata = VPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, "", 3000
         )
-        expectedValue = "Invalid Input: domain value cannot be empty or null"
+        expectedExceptionMessage = "Invalid Input: domain value cannot be empty or null"
 
-        val invalidInputException =
+        actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
                 openId4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 
-        assertEquals(expectedValue, invalidInputException.message)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
@@ -135,14 +137,14 @@ class AuthorizationResponseTest {
             "https://123",
             1000
         )
-        expectedValue = "VP sharing failed due to this error - Server Error"
+        expectedExceptionMessage = "VP sharing failed due to this error - Server Error"
 
-        val networkRequestFailedException =
+        actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestFailed::class.java) {
                 openId4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 
-        assertEquals(expectedValue, networkRequestFailedException.message)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
@@ -154,14 +156,14 @@ class AuthorizationResponseTest {
             "https://123",
             1000
         )
-        expectedValue = "VP sharing failed due to connection timeout"
+        expectedExceptionMessage = "VP sharing failed due to connection timeout"
 
-        val networkRequestFailedException =
+        actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestFailedDueToConnectionTimeout::class.java) {
                 openId4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 
-        assertEquals(expectedValue, networkRequestFailedException.message)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test

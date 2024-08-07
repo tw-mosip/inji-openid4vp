@@ -20,6 +20,8 @@ class AuthorizationRequestTests {
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var presentationDefinition: String
     private lateinit var encodedAuthorizationRequestUrl: String
+    private lateinit var actualException: Exception
+    private lateinit var expectedExceptionMessage: String
 
     @Before
     fun setUp() {
@@ -57,17 +59,16 @@ class AuthorizationRequestTests {
     fun `should throw missing input exception if client_id is missing`() {
         encodedAuthorizationRequestUrl =
             createEncodedAuthorizationRequest(presentationDefinition = presentationDefinition)
-        val expectedValue = "Missing Input: client_id param is required"
+        expectedExceptionMessage = "Missing Input: client_id param is required"
 
-        val missingInputException =
+        actualException =
             assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
                 openId4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
-        val actualValue = missingInputException.message
 
-        assertEquals(expectedValue, actualValue)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
@@ -75,33 +76,32 @@ class AuthorizationRequestTests {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
             presentationDefinition = presentationDefinition, scope = "sunbird_health_insurance_vc"
         )
-        val expectedValue =
+        val expectedExceptionMessage =
             "Only one of presentation_definition or scope request param can be present"
 
-        val illegalArgumentException = assertThrows(IllegalArgumentException::class.java) {
+        actualException = assertThrows(IllegalArgumentException::class.java) {
             openId4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
         }
-        val actualValue = illegalArgumentException.message
 
-        assertEquals(expectedValue, actualValue)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
     fun `should throw exception if both presentation_definition and scope request params are not present in Authorization Request`() {
         encodedAuthorizationRequestUrl =
             createEncodedAuthorizationRequest(clientId = "https://injiverify.dev2.mosip.net")
-        val expectedValue = "Either presentation_definition or scope request param must be present"
+        val expectedExceptionMessage =
+            "Either presentation_definition or scope request param must be present"
 
-        val illegalArgumentException = assertThrows(IllegalArgumentException::class.java) {
+        actualException = assertThrows(IllegalArgumentException::class.java) {
             openId4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
         }
-        val actualValue = illegalArgumentException.message
 
-        assertEquals(expectedValue, actualValue)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
@@ -110,17 +110,17 @@ class AuthorizationRequestTests {
             clientId = "https://injiverify.dummy.mosip.net",
             presentationDefinition = presentationDefinition
         )
-        val expectedValue = "VP sharing is stopped as the verifier authentication is failed"
+        val expectedExceptionMessage =
+            "VP sharing is stopped as the verifier authentication is failed"
 
-        val invalidClientIdException =
+        actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientIDException::class.java) {
                 openId4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
-        val actualValue = invalidClientIdException.message
 
-        assertEquals(expectedValue, actualValue)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
@@ -131,18 +131,38 @@ class AuthorizationRequestTests {
             clientId = "https://injiverify.dev2.mosip.net",
             presentationDefinition = presentationDefinition
         )
-        val expectedValue =
+        val expectedExceptionMessage =
             "Invalid Input: limit_disclosure value should be either required or preferred"
 
-        val missingInputException =
+        actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java) {
                 openId4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
-        val actualValue = missingInputException.message
 
-        assertEquals(expectedValue, actualValue)
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
+    fun `should throw invalid input pattern exception for invalid path param prefix`() {
+        presentationDefinition =
+            "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$-type\"]}]}}]}"
+        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
+            clientId = "https://injiverify.dev2.mosip.net",
+            presentationDefinition = presentationDefinition
+        )
+        val expectedExceptionMessage =
+            "Invalid Input Pattern: field - 0 : path - 0 pattern is not matching with OpenId4VP specification"
+
+        actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInputPattern::class.java) {
+                openId4VP.authenticateVerifier(
+                    encodedAuthorizationRequestUrl, trustedVerifiers
+                )
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test

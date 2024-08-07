@@ -54,7 +54,11 @@ class PresentationDefinition(
             builtInDecoder.endStructure(descriptor)
 
             requireNotNull(id) { throw AuthorizationRequestExceptions.MissingInput("presentation_definition : id") }
-            requireNotNull(inputDescriptors) { throw AuthorizationRequestExceptions.MissingInput("presentation_definition : input_descriptors") }
+            requireNotNull(inputDescriptors) {
+                throw AuthorizationRequestExceptions.MissingInput(
+                    "presentation_definition : input_descriptors"
+                )
+            }
 
             return PresentationDefinition(
                 id = id,
