@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.credentialFormatTypes.Format
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ListSerializer
@@ -15,8 +14,8 @@ class PresentationDefinition (
     val id: String,
     @SerialName("input_descriptors") val inputDescriptors: List<InputDescriptor>,
     val name: String? = null,
-    val purpose: String? = null,
-    val format: Format? = null) {
+    val purpose: String? = null
+) {
 
     companion object Serializer : DeserializationStrategy<PresentationDefinition> {
         override val descriptor: SerialDescriptor = buildClassSerialDescriptor("PresentationDefinition") {
@@ -24,7 +23,6 @@ class PresentationDefinition (
             element<ArrayList<InputDescriptor>>("input_descriptors")
             element<String>("name", isOptional = true)
             element<String>("purpose", isOptional = true)
-            element<Format>("format", isOptional = true)
         }
 
         override fun deserialize(decoder: Decoder): PresentationDefinition {
@@ -33,7 +31,6 @@ class PresentationDefinition (
             var inputDescriptors: List<InputDescriptor>? = null
             var name: String? = null
             var purpose: String? = null
-            var format: Format? = null
 
             loop@ while (true) {
                 when (builtInDecoder.decodeElementIndex(descriptor)) {
@@ -42,7 +39,6 @@ class PresentationDefinition (
                     1 -> inputDescriptors = builtInDecoder.decodeSerializableElement(descriptor, 1, ListSerializer(InputDescriptor.serializer()))
                     2 -> name = builtInDecoder.decodeStringElement(descriptor, 2)
                     3 -> purpose = builtInDecoder.decodeStringElement(descriptor, 3)
-                    4 -> format = builtInDecoder.decodeSerializableElement(descriptor, 4, Format.serializer())
                 }
             }
 
@@ -56,7 +52,6 @@ class PresentationDefinition (
                 inputDescriptors = inputDescriptors,
                 name = name,
                 purpose = purpose,
-                format = format
             )
         }
     }
@@ -69,8 +64,6 @@ class PresentationDefinition (
             require(inputDescriptors.isNotEmpty()) { throw AuthorizationRequestExceptions.InvalidInput("presentation_definition : input_descriptors")}
 
             inputDescriptors.forEachIndexed{index, inputDescriptor -> inputDescriptor.validate(index)}
-
-            format?.validate()
         }catch (e: AuthorizationRequestExceptions.InvalidInput){
             throw e
         }

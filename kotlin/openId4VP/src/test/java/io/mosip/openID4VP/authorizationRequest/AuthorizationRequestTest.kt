@@ -22,7 +22,7 @@ class AuthorizationRequestTests {
         trustedVerifiers = listOf(Verifier("https://injiverify.dev2.mosip.net", listOf("https://injiverify.qa-inji.mosip.net/redirect", "https://injiverify.dev2.mosip.net/redirect")), Verifier("https://injiverify.dev1.mosip.net",
             listOf( "https://injiverify.qa-inji.mosip.net/redirect","https://injiverify.dev1.mosip.net/redirect")
         ))
-        presentationDefinition = "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"format\":{\"ldp_vc\":{\"proof_type\":[\"Ed25519Signature2018\"]}},\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
+        presentationDefinition = "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
     }
 
 
