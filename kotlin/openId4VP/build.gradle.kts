@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
+    id("maven-publish")
     jacoco
 }
 
@@ -89,4 +90,8 @@ tasks {
 
 tasks.build {
     finalizedBy("jacocoTestReport")
+}
+
+apply {
+    from("publish-artifact.gradle")
 }
