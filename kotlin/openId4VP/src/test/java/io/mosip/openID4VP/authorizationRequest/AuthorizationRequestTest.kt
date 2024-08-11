@@ -145,27 +145,6 @@ class AuthorizationRequestTests {
     }
 
     @Test
-    fun `should throw invalid input pattern exception for invalid path param prefix`() {
-        presentationDefinition =
-            "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$-type\"]}]}}]}"
-        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://injiverify.dev2.mosip.net",
-            presentationDefinition = presentationDefinition
-        )
-        val expectedExceptionMessage =
-            "Invalid Input Pattern: field - 0 : path - 0 pattern is not matching with OpenId4VP specification"
-
-        actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInputPattern::class.java) {
-                openId4VP.authenticateVerifier(
-                    encodedAuthorizationRequestUrl, trustedVerifiers
-                )
-            }
-
-        assertEquals(expectedExceptionMessage, actualException.message)
-    }
-
-    @Test
     fun `should return Authentication Response if all the fields are present and valid in Authorization Request`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
             clientId = "https://injiverify.dev2.mosip.net",

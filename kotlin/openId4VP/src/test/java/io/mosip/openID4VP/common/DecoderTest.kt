@@ -8,9 +8,9 @@ import org.junit.Test
 class DecoderTest {
 
     @Test
-    fun `should throw InvalidInputException for empty input`() {
+    fun `should throw invalid input exception for empty input`() {
         val encodedData = ""
-        val expectedValue = "Invalid Input: encoded data value cannot be empty or null"
+        val expectedValue = "Invalid Input: encoded data value cannot be empty"
 
         val invalidInputException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {

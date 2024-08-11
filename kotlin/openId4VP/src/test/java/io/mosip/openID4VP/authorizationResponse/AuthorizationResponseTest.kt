@@ -116,7 +116,7 @@ class AuthorizationResponseTest {
         vpResponseMetadata = VPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, "", 3000
         )
-        expectedExceptionMessage = "Invalid Input: domain value cannot be empty or null"
+        expectedExceptionMessage = "Invalid Input: domain value cannot be empty"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
