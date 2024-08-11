@@ -94,10 +94,8 @@ class PresentationDefinition(
 				Logger.handleException("InvalidInput", "presentation_definition", "input_descriptors", className)
 			}
 
-			inputDescriptors.forEachIndexed { index, inputDescriptor ->
-				inputDescriptor.validate(
-					index
-				)
+			inputDescriptors.forEach { inputDescriptor ->
+				inputDescriptor.validate()
 			}
 		} catch (exception: AuthorizationRequestExceptions.InvalidInput) {
 			throw exception

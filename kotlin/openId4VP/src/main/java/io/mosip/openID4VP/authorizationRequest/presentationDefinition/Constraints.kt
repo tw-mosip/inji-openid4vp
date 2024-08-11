@@ -66,8 +66,8 @@ class Constraints(
 ) {
 	fun validate() {
 		try {
-			fields?.forEachIndexed { index, field ->
-				field.validate(index)
+			fields?.forEach { field ->
+				field.validate()
 			}
 
 			limitDisclosure?.let {

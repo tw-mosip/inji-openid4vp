@@ -72,10 +72,10 @@ class InputDescriptor(
 	val purpose: String? = null,
 	val constraints: Constraints
 ) {
-	fun validate(index: Number) {
+	fun validate() {
 		try {
 			require(id.isNotEmpty()) {
-				Logger.handleException("InvalidInput", "input_descriptor - $index", "id", className)
+				Logger.handleException("InvalidInput", "input_descriptor", "id", className)
 			}
 
 			constraints.validate()

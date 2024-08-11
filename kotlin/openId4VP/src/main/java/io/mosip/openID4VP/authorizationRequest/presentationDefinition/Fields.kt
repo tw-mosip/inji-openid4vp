@@ -99,20 +99,18 @@ class Fields(
 	val filter: Filter? = null,
 	val optional: Boolean? = null
 ) {
-	fun validate(fieldIndex: Number) {
+	fun validate() {
 		try {
 			require(path.isNotEmpty()) {
-				Logger.handleException("InvalidInput", "fields - $fieldIndex", "path", className)
+				Logger.handleException("InvalidInput", "fields", "path", className)
 			}
 
 			val pathPrefixes = listOf("$.", "$[")
-			path.forEachIndexed { pathIndex, p ->
+			path.forEach { p ->
 				val isNotValidPrefix = !(pathPrefixes.any { p.startsWith(it) })
 				if (isNotValidPrefix) {
 					Logger.handleException(
-						"InvalidInputPattern",
-						"field - $fieldIndex",
-						"path - $pathIndex",
+						"InvalidInputPattern", "fields", "path",
 						className
 					)
 				}
