@@ -14,7 +14,7 @@ import org.junit.Test
 class PresentationDefinitionTest {
 
     private lateinit var presentationDefinition: String
-    private lateinit var expectedExceptionValue: String
+    private lateinit var expectedExceptionMessage: String
 
 
     @Before
@@ -37,43 +37,43 @@ class PresentationDefinitionTest {
     fun `should throw missing input exception if id param is missing`(){
         presentationDefinition =
             "{\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
-        expectedExceptionValue = "Missing Input: presentation_definition : id param is required"
+        expectedExceptionMessage = "Missing Input: presentation_definition : id param is required"
 
         val actualException = assertThrows(AuthorizationRequestExceptions.MissingInput::class.java){validatePresentationDefinition(presentationDefinition)}
 
-        assertEquals(expectedExceptionValue,actualException.message)
+        assertEquals(expectedExceptionMessage,actualException.message)
     }
 
     @Test
     fun `should throw missing input exception if input_descriptor param is missing`(){
         presentationDefinition =
             "{\"id\":\"pd_123\"}"
-        expectedExceptionValue = "Missing Input: presentation_definition : input_descriptors param is required"
+        expectedExceptionMessage = "Missing Input: presentation_definition : input_descriptors param is required"
 
         val actualException = assertThrows(AuthorizationRequestExceptions.MissingInput::class.java){validatePresentationDefinition(presentationDefinition)}
 
-        assertEquals(expectedExceptionValue,actualException.message)
+        assertEquals(expectedExceptionMessage,actualException.message)
     }
 
     @Test
     fun `should throw invalid input exception if id param value is empty`(){
         presentationDefinition =
             "{\"id\":\"\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"\$.type\"]}]}}]}"
-        expectedExceptionValue = "Invalid Input: presentation_definition : id value cannot be empty"
+        expectedExceptionMessage = "Invalid Input: presentation_definition : id value cannot be empty"
 
         val actualException = assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java){validatePresentationDefinition(presentationDefinition)}
 
-        assertEquals(expectedExceptionValue,actualException.message)
+        assertEquals(expectedExceptionMessage,actualException.message)
     }
 
     @Test
     fun `should throw missing input exception if input_descriptor param value is empty`(){
         presentationDefinition =
             "{\"id\":\"pd_123\",\"input_descriptors\":[]}"
-        expectedExceptionValue = "Invalid Input: presentation_definition : input_descriptors value cannot be empty"
+        expectedExceptionMessage = "Invalid Input: presentation_definition : input_descriptors value cannot be empty"
 
         val actualException = assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java){validatePresentationDefinition(presentationDefinition)}
 
-        assertEquals(expectedExceptionValue,actualException.message)
+        assertEquals(expectedExceptionMessage,actualException.message)
     }
 }
