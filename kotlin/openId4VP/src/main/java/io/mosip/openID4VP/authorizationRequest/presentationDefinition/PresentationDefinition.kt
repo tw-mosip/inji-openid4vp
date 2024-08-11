@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
+import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
@@ -62,6 +63,7 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 		)
 	}
 
+	@Generated
 	override fun serialize(encoder: Encoder, value: PresentationDefinition) {
 		val builtInEncoder = encoder.beginStructure(descriptor)
 		builtInEncoder.encodeStringElement(descriptor, 0, value.id)

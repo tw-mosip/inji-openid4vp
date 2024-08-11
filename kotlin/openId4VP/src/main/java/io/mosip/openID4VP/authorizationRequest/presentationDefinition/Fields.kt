@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
+import Generated
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -66,6 +67,7 @@ object FieldsSerializer : KSerializer<Fields> {
 		)
 	}
 
+	@Generated
 	override fun serialize(encoder: Encoder, value: Fields) {
 		val builtInEncoder = encoder.beginStructure(descriptor)
 		builtInEncoder.encodeSerializableElement(
