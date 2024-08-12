@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.OpenId4VP
+import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
@@ -18,12 +19,12 @@ class AuthorizationResponse {
     companion object {
         private val logTag = Logger.getLogTag(this::class.simpleName!!)
         private lateinit var vpTokenForSigning: VPTokenForSigning
-        private lateinit var selectedVerifiableCredentials: Map<String, List<String>>
+        private lateinit var verifiableCredentials: Map<String, List<String>>
 
-        fun constructVPTokenForSigning(selectedVerifiableCredentials: Map<String, List<String>>): String {
-            this.selectedVerifiableCredentials = selectedVerifiableCredentials
+        fun constructVPTokenForSigning(verifiableCredentials: Map<String, List<String>>): String {
+            this.verifiableCredentials = verifiableCredentials
             val verifiableCredential = mutableListOf<String>()
-            selectedVerifiableCredentials.forEach { (_, vcs) ->
+            verifiableCredentials.forEach { (_, vcs) ->
                 vcs.forEach { vcJson ->
                     verifiableCredential.add(vcJson)
                 }
@@ -34,7 +35,12 @@ class AuthorizationResponse {
                 holder = ""
             )
 
-            return Json.encodeToString(this.vpTokenForSigning)
+
+            return try {
+                Json.encodeToString(vpTokenForSigning)
+            } catch (exception: SerializationException) {
+                throw AuthorizationResponseExceptions.JsonEncodingException(exception.message!!)
+            }
         }
 
         fun shareVP(vpResponseMetadata: VPResponseMetadata, openId4VP: OpenId4VP): String {
@@ -45,7 +51,7 @@ class AuthorizationResponse {
                     vpResponseMetadata, challenge = openId4VP.authorizationRequest.nonce
                 )
                 val descriptorMap = mutableListOf<DescriptorMap>()
-                selectedVerifiableCredentials.forEach { (inputDescriptorId, vcs) ->
+                verifiableCredentials.forEach { (inputDescriptorId, vcs) ->
                     vcs.forEach { _ ->
                         descriptorMap.add(
                             DescriptorMap(
@@ -67,7 +73,7 @@ class AuthorizationResponse {
                     openId4VP.authorizationRequest.responseUri,
                     vpResponseMetadata.sharingTimeoutInMilliseconds
                 )
-            } catch (exception: IOException) {
+            } catch (exception: Exception) {
                 throw exception
             }
         }
@@ -88,9 +94,10 @@ class AuthorizationResponse {
 
                 return sendHttpPostRequest(responseUri, queryParams, sharingTimeoutInMilliseconds)
             } catch (exception: SerializationException) {
-                Logger.error(logTag, exception)
-                throw exception
-            } catch (exception: IOException) {
+                val e = AuthorizationResponseExceptions.JsonEncodingException(exception.message!!)
+                Logger.error(logTag, e)
+                throw e
+            } catch (exception: Exception) {
                 throw exception
             }
         }

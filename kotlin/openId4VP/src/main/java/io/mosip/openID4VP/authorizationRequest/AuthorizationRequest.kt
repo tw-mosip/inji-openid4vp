@@ -39,7 +39,7 @@ class AuthorizationRequest(
                 val uriString = "OPENID4VP://authorize?$encodedQuery"
                 val uri = URI(uriString)
                 val query = uri.query
-                    ?: throw IllegalArgumentException("Query parameters are missing in request")
+                    ?: throw AuthorizationRequestExceptions.InvalidQueryParams("Query parameters are missing in the Authorization request")
 
                 val params = extractQueryParams(query)
                 validateRequiredParams(params)
@@ -58,7 +58,7 @@ class AuthorizationRequest(
                         ) else ""
                     })
             } catch (exception: Exception) {
-                throw Exception("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
+                throw AuthorizationRequestExceptions.InvalidQueryParams("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
             }
         }
 
@@ -77,17 +77,19 @@ class AuthorizationRequest(
             val hasScope = params.containsKey("scope")
 
             when {
-                hasPresentationDefinition && hasScope -> throw IllegalArgumentException("Only one of presentation_definition or scope request param can be present")
+                hasPresentationDefinition && hasScope -> throw AuthorizationRequestExceptions.InvalidQueryParams(
+                    "Only one of presentation_definition or scope request param can be present"
+                )
                 hasPresentationDefinition -> requiredRequestParams.add("presentation_definition")
                 hasScope -> requiredRequestParams.add("scope")
-                else -> throw IllegalArgumentException("Either presentation_definition or scope request param must be present")
+                else -> throw AuthorizationRequestExceptions.InvalidQueryParams("Either presentation_definition or scope request param must be present")
             }
             requiredRequestParams.forEach { param ->
                 val value =
                     params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
-                if (value.isEmpty() or (value == "null")) throw AuthorizationRequestExceptions.InvalidInput(
-                    param
-                )
+                require(value.isNotEmpty()) {
+                    AuthorizationRequestExceptions.InvalidInput(param)
+                }
             }
 
         }

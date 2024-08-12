@@ -79,7 +79,7 @@ class AuthorizationRequestTests {
         val expectedExceptionMessage =
             "Only one of presentation_definition or scope request param can be present"
 
-        actualException = assertThrows(IllegalArgumentException::class.java) {
+        actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
             openId4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
@@ -95,7 +95,7 @@ class AuthorizationRequestTests {
         val expectedExceptionMessage =
             "Either presentation_definition or scope request param must be present"
 
-        actualException = assertThrows(IllegalArgumentException::class.java) {
+        actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
             openId4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )

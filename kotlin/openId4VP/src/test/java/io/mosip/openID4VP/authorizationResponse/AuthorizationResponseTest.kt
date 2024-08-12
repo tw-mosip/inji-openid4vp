@@ -83,7 +83,7 @@ class AuthorizationResponseTest {
             responseUri = mockWebServer.url("/https://injiverify.dev2.mosip.net/redirect")
                 .toString()
         )
-        openId4VP.constructVPToken(selectedCredentialsList)
+        openId4VP.constructVerifiablePresentationToken(selectedCredentialsList)
         mockkStatic(Log::class)
         every { Log.e(any(), any()) } answers {
             val tag = arg<String>(0)
@@ -106,7 +106,7 @@ class AuthorizationResponseTest {
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
-        val actualValue = openId4VP.constructVPToken(selectedCredentialsList)
+        val actualValue = openId4VP.constructVerifiablePresentationToken(selectedCredentialsList)
 
         assertEquals(expectedValue, actualValue)
     }

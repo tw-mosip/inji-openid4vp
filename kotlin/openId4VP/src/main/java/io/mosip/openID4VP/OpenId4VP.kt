@@ -24,19 +24,23 @@ class OpenId4VP(private val traceabilityId: String) {
                 AuthenticationResponse.getAuthenticationResponse(trustedVerifiers, this)
 
             return authenticationResponse
-        } catch (e: Exception) {
-            throw e
+        } catch (exception: Exception) {
+            throw exception
         }
     }
 
-    fun constructVPToken(selectedVerifiableCredentials: Map<String, List<String>>): String {
-        return AuthorizationResponse.constructVPTokenForSigning(selectedVerifiableCredentials)
+    fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, List<String>>): String {
+        try {
+            return AuthorizationResponse.constructVPTokenForSigning(verifiableCredentials)
+        }catch (exception: Exception) {
+            throw exception
+        }
     }
 
     fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
         try {
             return AuthorizationResponse.shareVP(vpResponseMetadata, this)
-        } catch (exception: IOException) {
+        } catch (exception: Exception) {
             throw exception
         }
     }

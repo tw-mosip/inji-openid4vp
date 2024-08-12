@@ -18,4 +18,6 @@ sealed class AuthorizationRequestExceptions {
 
     class InvalidLimitDisclosure :
         Exception("Invalid Input: limit_disclosure value should be either required or preferred")
+
+    class InvalidQueryParams(message: String) : Exception(message)
 }
