@@ -35,10 +35,10 @@ object FilterSerializer : KSerializer<Filter> {
 		builtInDecoder.endStructure(descriptor)
 
 		requireNotNull(type) {
-			Logger.handleException("MissingInput", "filter", "type", className)
+			throw Logger.handleException("MissingInput", "filter", "type", className)
 		}
 		requireNotNull(pattern) {
-			Logger.handleException("MissingInput", "filter", "pattern", className)
+			throw Logger.handleException("MissingInput", "filter", "pattern", className)
 		}
 
 		return Filter(type = type, pattern = pattern)
@@ -58,10 +58,10 @@ class Filter(val type: String, val pattern: String) {
 	fun validate() {
 		try {
 			require(type.isNotEmpty()) {
-				Logger.handleException("InvalidInput", "filter", "type", className)
+				throw Logger.handleException("InvalidInput", "filter", "type", className)
 			}
 			require(pattern.isNotEmpty()) {
-				Logger.handleException("InvalidInput", "filter", "pattern", className)
+				throw Logger.handleException("InvalidInput", "filter", "pattern", className)
 			}
 		} catch (exception: Exception) {
 			throw exception

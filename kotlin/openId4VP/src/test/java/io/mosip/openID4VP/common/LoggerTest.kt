@@ -4,10 +4,8 @@ import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -42,25 +40,31 @@ class LoggerTest {
 	}
 
 	@Test
-	fun `should throw missing input exception if exception type input value is MissingInput`(){
+	fun `should return missing input exception if exception type input value is MissingInput`() {
 		expectedExceptionMessage = "Missing Input: parent field name : current field name param is required"
-		actualException = assertThrows(AuthorizationRequestExceptions.MissingInput::class.java){ Logger.handleException("MissingInput", "parent field name", "current field name",javaClass.simpleName)}
+		actualException = Logger.handleException(
+			"MissingInput", "parent field name", "current field name", javaClass.simpleName
+		)
 
 		assertEquals(expectedExceptionMessage,actualException.message)
 	}
 
 	@Test
-	fun `should throw invalid input exception if exception type input value is InvalidInput`(){
+	fun `should return invalid input exception if exception type input value is InvalidInput`() {
 		expectedExceptionMessage = "Invalid Input: parent field name : current field name value cannot be empty"
-		actualException = assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java){ Logger.handleException("InvalidInput", "parent field name", "current field name",javaClass.simpleName)}
+		actualException = Logger.handleException(
+			"InvalidInput", "parent field name", "current field name", javaClass.simpleName
+		)
 
 		assertEquals(expectedExceptionMessage,actualException.message)
 	}
 
 	@Test
-	fun `should throw invalid input pattern exception if exception type input value is MissingInput`(){
+	fun `should return invalid input pattern exception if exception type input value is InvalidInputPattern`() {
 		expectedExceptionMessage = "Invalid Input Pattern: parent field name : current field name pattern is not matching with OpenId4VP specification"
-		actualException = assertThrows(AuthorizationRequestExceptions.InvalidInputPattern::class.java){ Logger.handleException("InvalidInputPattern", "parent field name", "current field name",javaClass.simpleName)}
+		actualException = Logger.handleException(
+			"InvalidInputPattern", "parent field name", "current field name", javaClass.simpleName
+		)
 
 		assertEquals(expectedExceptionMessage,actualException.message)
 	}

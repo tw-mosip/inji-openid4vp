@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -54,7 +55,7 @@ object FieldsSerializer : KSerializer<Fields> {
 		builtInDecoder.endStructure(descriptor)
 
 		requireNotNull(path) {
-			Logger.handleException("MissingInput", "fields", "path", className)
+			throw Logger.handleException("MissingInput", "fields", "path", className)
 		}
 
 		return Fields(
@@ -104,14 +105,14 @@ class Fields(
 	fun validate() {
 		try {
 			require(path.isNotEmpty()) {
-				Logger.handleException("InvalidInput", "fields", "path", className)
+				throw Logger.handleException("InvalidInput", "fields", "path", className)
 			}
 
 			val pathPrefixes = listOf("$.", "$[")
 			path.forEach { p ->
 				val isNotValidPrefix = !(pathPrefixes.any { p.startsWith(it) })
 				if (isNotValidPrefix) {
-					Logger.handleException(
+					throw Logger.handleException(
 						"InvalidInputPattern", "fields", "path",
 						className
 					)

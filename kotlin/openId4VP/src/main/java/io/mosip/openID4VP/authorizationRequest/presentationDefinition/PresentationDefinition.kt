@@ -14,7 +14,6 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-
 private val className = PresentationDefinition::class.simpleName!!
 
 object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
@@ -49,10 +48,10 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 		builtInDecoder.endStructure(descriptor)
 
 		requireNotNull(id) {
-			Logger.handleException("MissingInput", "presentation_definition", "id", className)
+			throw Logger.handleException("MissingInput", "presentation_definition", "id", className)
 		}
 		requireNotNull(inputDescriptors) {
-			Logger.handleException("MissingInput", "presentation_definition", "input_descriptors", className)
+			throw Logger.handleException("MissingInput", "presentation_definition", "input_descriptors", className)
 		}
 
 		return PresentationDefinition(
@@ -90,10 +89,10 @@ class PresentationDefinition(
 	fun validate() {
 		try {
 			require(id.isNotEmpty()) {
-				Logger.handleException("InvalidInput", "presentation_definition", "id", className)
+				throw Logger.handleException("InvalidInput", "presentation_definition", "id", className)
 			}
 			require(inputDescriptors.isNotEmpty()) {
-				Logger.handleException("InvalidInput", "presentation_definition", "input_descriptors", className)
+				throw Logger.handleException("InvalidInput", "presentation_definition", "input_descriptors", className)
 			}
 
 			inputDescriptors.forEach { inputDescriptor ->

@@ -18,7 +18,9 @@ object Logger {
         Log.e(logTag, exception.message!!)
     }
 
-    fun handleException(exceptionType: String, parentField: String, currentField: String, className: String){
+    fun handleException(
+        exceptionType: String, parentField: String, currentField: String, className: String
+    ): Exception {
         val fieldPath = "$parentField : $currentField"
         var exception = Exception()
         when(exceptionType){
@@ -27,6 +29,6 @@ object Logger {
             "InvalidInputPattern" -> exception = AuthorizationRequestExceptions.InvalidInputPattern(fieldPath)
         }
         this.error(getLogTag(className), exception)
-        throw exception
+        return exception
     }
 }
