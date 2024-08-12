@@ -28,14 +28,14 @@ class AuthorizationRequestTests {
         openId4VP = OpenId4VP("test-OpenId4VP")
         trustedVerifiers = listOf(
             Verifier(
-                "https://injiverify.dev2.mosip.net", listOf(
-                    "https://injiverify.qa-inji.mosip.net/redirect",
-                    "https://injiverify.dev2.mosip.net/redirect"
+                "https://verify.env1.net", listOf(
+                    "https://verify.env1.net/responseUri",
+                    "https://verify.env2.net/responseUri"
                 )
             ), Verifier(
-                "https://injiverify.dev1.mosip.net", listOf(
-                    "https://injiverify.qa-inji.mosip.net/redirect",
-                    "https://injiverify.dev1.mosip.net/redirect"
+                "https://verify.env2.net", listOf(
+                    "https://verify.env3.net/responseUri",
+                    "https://verify.env2.net/responseUri"
                 )
             )
         )
@@ -107,7 +107,7 @@ class AuthorizationRequestTests {
     @Test
     fun `should throw exception if received client_id is not matching with predefined Verifiers list client_id`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://injiverify.dummy.mosip.net",
+            clientId = "https://verify.env4.net",
             presentationDefinition = presentationDefinition
         )
         val expectedExceptionMessage =
@@ -128,7 +128,7 @@ class AuthorizationRequestTests {
         presentationDefinition =
             "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}], \"limit_disclosure\": \"not preferred\"}}]}"
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://injiverify.dev2.mosip.net",
+            clientId = "https://verify.env1.net",
             presentationDefinition = presentationDefinition
         )
         val expectedExceptionMessage =
@@ -147,7 +147,7 @@ class AuthorizationRequestTests {
     @Test
     fun `should return Authentication Response if all the fields are present and valid in Authorization Request`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://injiverify.dev2.mosip.net",
+            clientId = "https://verify.env1.net",
             presentationDefinition = presentationDefinition
         )
         val expectedValue = mutableMapOf("presentation_definition" to presentationDefinition)
@@ -162,7 +162,7 @@ fun createEncodedAuthorizationRequest(
     clientId: String? = null,
     presentationDefinition: String? = null,
     scope: String? = null,
-    responseUri: String = "https://injiverify.dev2.mosip.net/redirect"
+    responseUri: String = "https://verify.env2.net/responseUri"
 ): String {
     val state = "fsnC8ixCs6mWyV+00k23Qg=="
     val nonce = "bMHvX1HGhbh8zqlSWf/fuQ=="
