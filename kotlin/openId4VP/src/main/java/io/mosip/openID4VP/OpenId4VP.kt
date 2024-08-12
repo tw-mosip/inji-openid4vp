@@ -11,7 +11,6 @@ import java.io.IOException
 class OpenId4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
     lateinit var presentationDefinitionId: String
-    private lateinit var authorizationResponse: AuthorizationResponse
 
     fun authenticateVerifier(
         encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
@@ -31,13 +30,12 @@ class OpenId4VP(private val traceabilityId: String) {
     }
 
     fun constructVPToken(selectedVerifiableCredentials: Map<String, List<String>>): String {
-        authorizationResponse = AuthorizationResponse()
-        return authorizationResponse.constructVPTokenForSigning(selectedVerifiableCredentials)
+        return AuthorizationResponse.constructVPTokenForSigning(selectedVerifiableCredentials)
     }
 
     fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
         try {
-            return authorizationResponse.shareVP(vpResponseMetadata, this)
+            return AuthorizationResponse.shareVP(vpResponseMetadata, this)
         } catch (exception: IOException) {
             throw exception
         }
