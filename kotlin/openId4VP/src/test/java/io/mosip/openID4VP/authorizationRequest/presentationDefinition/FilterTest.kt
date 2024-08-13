@@ -62,7 +62,7 @@ class FilterTest {
 	fun `should throw invalid input pattern exception if type param is empty`() {
 		presentationDefinition =
 			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"], \"filter\":{\"type\":\"\",\"pattern\":\"MosipCredential\"}}]}}]}"
-		expectedExceptionMessage = "Invalid Input: filter : type value cannot be empty"
+		expectedExceptionMessage = "Invalid Input: filter : type value cannot be empty or null"
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -76,7 +76,7 @@ class FilterTest {
 	fun `should throw missing input exception if pattern param is empty`() {
 		presentationDefinition =
 			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"], \"filter\":{\"type\":\"string\",\"pattern\":\"\"}}]}}]}"
-		expectedExceptionMessage = "Invalid Input: filter : pattern value cannot be empty"
+		expectedExceptionMessage = "Invalid Input: filter : pattern value cannot be empty or null"
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {

@@ -63,7 +63,7 @@ class FieldsTest {
 	fun `should throw invalid input exception if path param is empty`() {
 		presentationDefinition =
 			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[]}]}}]}"
-		expectedExceptionMessage = "Invalid Input: fields : path value cannot be empty"
+		expectedExceptionMessage = "Invalid Input: fields : path value cannot be empty or null"
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
