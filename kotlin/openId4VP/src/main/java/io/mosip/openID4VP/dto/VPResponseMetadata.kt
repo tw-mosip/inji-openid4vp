@@ -7,7 +7,6 @@ data class VPResponseMetadata(
     val signatureAlgorithm: String,
     val publicKey: String,
     val domain: String,
-    val sharingTimeoutInMilliseconds: Int,
 ) {
     fun validate() {
         val requiredParams = mapOf(
@@ -15,7 +14,6 @@ data class VPResponseMetadata(
             "signatureAlgorithm" to this.signatureAlgorithm,
             "publicKey" to this.publicKey,
             "domain" to this.domain,
-            "sharingTimeoutInMilliseconds" to this.sharingTimeoutInMilliseconds
         )
 
         requiredParams.forEach { (key, value) ->

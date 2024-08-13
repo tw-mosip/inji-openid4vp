@@ -17,7 +17,7 @@ class NetworkManagerClient {
         private val logTag = Logger.getLogTag(this::class.simpleName!!)
 
         fun sendHttpPostRequest(
-            baseUrl: String, queryParams: Map<String, String>, timeout: Number
+            baseUrl: String, queryParams: Map<String, String>
         ): String {
             try {
                 val urlBuilder: HttpUrl.Builder = baseUrl.toHttpUrlOrNull()!!.newBuilder()
@@ -25,7 +25,7 @@ class NetworkManagerClient {
                     urlBuilder.addQueryParameter(key, value)
                 }
                 val url = urlBuilder.build().toString()
-                val client = OkHttpClient.Builder().callTimeout(1000, TimeUnit.MILLISECONDS).build()
+                val client = OkHttpClient.Builder().build()
                 val request = Request.Builder().url(url).get().build()
 
                 val response: Response = client.newCall(request).execute()

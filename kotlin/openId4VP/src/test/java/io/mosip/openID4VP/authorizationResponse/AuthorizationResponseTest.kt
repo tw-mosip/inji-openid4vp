@@ -114,9 +114,9 @@ class AuthorizationResponseTest {
     @Test
     fun `should throw invalid input exception if any input param of VPResponseMetadata class is empty`() {
         vpResponseMetadata = VPResponseMetadata(
-            "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, "", 3000
+            "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
-        expectedExceptionMessage = "Invalid Input: domain value cannot be empty"
+        expectedExceptionMessage = "Invalid Input: domain value cannot be empty or null"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -134,8 +134,7 @@ class AuthorizationResponseTest {
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
             "RsaSignature2018",
             publicKey,
-            "https://123",
-            1000
+            "https://123"
         )
         expectedExceptionMessage = "VP sharing failed due to this error - Server Error"
 
@@ -153,8 +152,7 @@ class AuthorizationResponseTest {
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
             "RsaSignature2018",
             publicKey,
-            "https://123",
-            1000
+            "https://123"
         )
         expectedExceptionMessage = "VP sharing failed due to connection timeout"
 
@@ -175,7 +173,6 @@ class AuthorizationResponseTest {
             "RsaSignature2018",
             publicKey,
             "https://123",
-            3000
         )
         val expectedValue = "OK"
 

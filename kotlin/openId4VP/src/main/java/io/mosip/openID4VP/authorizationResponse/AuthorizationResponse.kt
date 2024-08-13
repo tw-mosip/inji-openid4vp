@@ -71,7 +71,6 @@ class AuthorizationResponse {
                     vpToken,
                     presentationSubmission,
                     openId4VP.authorizationRequest.responseUri,
-                    vpResponseMetadata.sharingTimeoutInMilliseconds
                 )
             } catch (exception: Exception) {
                 throw exception
@@ -82,7 +81,6 @@ class AuthorizationResponse {
             vpToken: VPToken,
             presentationSubmission: PresentationSubmission,
             responseUri: String,
-            sharingTimeoutInMilliseconds: Number
         ): String {
             try {
                 val encodedVPToken = Json.encodeToString(vpToken)
@@ -92,7 +90,7 @@ class AuthorizationResponse {
                     "presentation_submission" to encodedPresentationSubmission
                 )
 
-                return sendHttpPostRequest(responseUri, queryParams, sharingTimeoutInMilliseconds)
+                return sendHttpPostRequest(responseUri, queryParams)
             } catch (exception: SerializationException) {
                 val e = AuthorizationResponseExceptions.JsonEncodingException(exception.message!!)
                 Logger.error(logTag, e)
