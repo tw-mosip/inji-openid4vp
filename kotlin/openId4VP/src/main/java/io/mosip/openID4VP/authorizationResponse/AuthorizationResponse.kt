@@ -13,11 +13,11 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttp
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.IOException
+
+private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
 
 class AuthorizationResponse {
     companion object {
-        private val logTag = Logger.getLogTag(this::class.simpleName!!)
         private lateinit var vpTokenForSigning: VPTokenForSigning
         private lateinit var verifiableCredentials: Map<String, List<String>>
 
