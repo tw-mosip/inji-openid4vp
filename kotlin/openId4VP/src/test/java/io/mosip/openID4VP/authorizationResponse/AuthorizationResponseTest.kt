@@ -12,6 +12,7 @@ import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
+import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -70,7 +71,7 @@ class AuthorizationResponseTest {
             )
         )
         mockWebServer = MockWebServer()
-        mockWebServer.start()
+        mockWebServer.start(8080)
         openId4VP.presentationDefinitionId = "6498781c-f291-4969-9cd5-2c273858f38f"
         openId4VP.authorizationRequest = AuthorizationRequest(
             clientId = "https://injiverify.dev2.mosip.net",
@@ -80,8 +81,7 @@ class AuthorizationResponseTest {
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
             scope = null,
-            responseUri = mockWebServer.url("/https://injiverify.dev2.mosip.net/redirect")
-                .toString()
+            responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString()
         )
         openId4VP.constructVerifiablePresentationToken(selectedCredentialsList)
         mockkStatic(Log::class)
@@ -136,7 +136,8 @@ class AuthorizationResponseTest {
             publicKey,
             "https://123"
         )
-        expectedExceptionMessage = "VP sharing failed due to this error - Server Error"
+        expectedExceptionMessage =
+            "Network request failed with error response - Response{protocol=http/1.1, code=500, message=Server Error, url=http://localhost:8080/injiverify.dev2.mosip.net/redirect}"
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestFailed::class.java) {

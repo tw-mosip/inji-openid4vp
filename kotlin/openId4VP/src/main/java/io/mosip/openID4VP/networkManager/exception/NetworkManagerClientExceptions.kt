@@ -5,5 +5,5 @@ sealed class NetworkManagerClientExceptions {
         Exception("VP sharing failed due to connection timeout")
 
     class NetworkRequestFailed(error: String) :
-        Exception("VP sharing failed due to this error - $error")
+        Exception("Network request failed with error response - $error")
 }

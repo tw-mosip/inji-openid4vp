@@ -2,6 +2,7 @@ package io.mosip.openID4VP.networkManager
 
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
+import okhttp3.FormBody
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -16,41 +17,32 @@ private val logTag = Logger.getLogTag(NetworkManagerClient::class.simpleName!!)
 class NetworkManagerClient {
 	companion object {
 		fun sendHttpPostRequest(
-			baseUrl: String, queryParams: Map<String, String>
+			baseUrl: String, bodyParams: Map<String, String>
 		): String {
 			try {
-				val urlBuilder: HttpUrl.Builder = baseUrl.toHttpUrlOrNull()!!.newBuilder()
-				queryParams.forEach { (key, value) ->
-					urlBuilder.addQueryParameter(key, value)
+				val requestBodyBuilder = FormBody.Builder()
+				bodyParams.forEach { (key, value) ->
+					requestBodyBuilder.add(key, value)
 				}
-				val url = urlBuilder.build().toString()
-				println("url::" + url)
+				val requestBody = requestBodyBuilder.build()
 				val client = OkHttpClient.Builder().build()
-				println("client::" + client)
-				val request = Request.Builder().url(url).get().build()
-
+				val request = Request.Builder().url(baseUrl).post(requestBody)
+					.header("Content-Type", "application/x-www-form-urlencoded").build()
 				val response: Response = client.newCall(request).execute()
 
 				if (response.code == 200) {
 					return response.message
 				} else {
-					throw NetworkManagerClientExceptions.NetworkRequestFailed(response.message)
+					throw NetworkManagerClientExceptions.NetworkRequestFailed(response.toString())
 				}
 			} catch (exception: InterruptedIOException) {
 				val specificException =
 					NetworkManagerClientExceptions.NetworkRequestFailedDueToConnectionTimeout()
 				Logger.error(logTag, specificException)
 				throw specificException
-			} catch (exception: UnknownHostException) {
-				val specificException =
-					NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
-				Logger.error(logTag, specificException)
-				throw specificException
-			} catch (exception: IOException) {
-				val specificException =
-					NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
-				Logger.error(logTag, specificException)
-				throw specificException
+			} catch (exception: Exception) {
+				Logger.error(logTag, exception)
+				throw exception
 			}
 		}
 	}

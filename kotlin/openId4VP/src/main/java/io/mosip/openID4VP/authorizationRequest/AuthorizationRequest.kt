@@ -47,7 +47,7 @@ class AuthorizationRequest(
                     ?: throw AuthorizationRequestExceptions.InvalidQueryParams("Query parameters are missing in the Authorization request")
 
                 val params = extractQueryParams(query)
-                validateRequiredParams(params, openId4VP)
+                validateQueryParams(params, openId4VP)
                 return createAuthorizationRequest(params)
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
@@ -67,7 +67,7 @@ class AuthorizationRequest(
             }
         }
 
-        private fun validateRequiredParams(params: Map<String, String>, openId4VP: OpenId4VP) {
+        private fun validateQueryParams(params: Map<String, String>, openId4VP: OpenId4VP) {
             val requiredRequestParams = mutableListOf(
                 "response_uri",
                 "client_id",
@@ -76,27 +76,34 @@ class AuthorizationRequest(
                 "nonce",
                 "state",
             )
-
+            var exception: Exception
 
             val hasPresentationDefinition = params.containsKey("presentation_definition")
             val hasScope = params.containsKey("scope")
-
             when {
-                hasPresentationDefinition && hasScope -> throw AuthorizationRequestExceptions.InvalidQueryParams(
-                    "Only one of presentation_definition or scope request param can be present"
-                )
+                hasPresentationDefinition && hasScope -> {
+                    exception = AuthorizationRequestExceptions.InvalidQueryParams(
+                        "Only one of presentation_definition or scope request param can be present"
+                    )
+                    Logger.error(logTag, exception)
+                    throw exception
+                }
                 hasPresentationDefinition -> requiredRequestParams.add("presentation_definition")
                 hasScope -> requiredRequestParams.add("scope")
-                else -> throw AuthorizationRequestExceptions.InvalidQueryParams("Either presentation_definition or scope request param must be present")
+                else -> {
+                    exception =
+                        AuthorizationRequestExceptions.InvalidQueryParams("Either presentation_definition or scope request param must be present")
+                    Logger.error(logTag, exception)
+                    throw exception
+                }
             }
             requiredRequestParams.forEach { param ->
-                val value =
-                    params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
+                val value = params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
                 if (param == "response_uri") {
                     openId4VP.responseUri = value
                 }
                 require(value.isNotEmpty()) {
-                    AuthorizationRequestExceptions.InvalidInput(param)
+                    throw AuthorizationRequestExceptions.InvalidInput(param)
                 }
             }
         }

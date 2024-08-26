@@ -7,30 +7,26 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 class OpenId4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
     lateinit var presentationDefinitionId: String
     var responseUri: String? = null
-    private val logTag = Logger.getLogTag(this::class.simpleName!!)
-
+    private lateinit var logTag: String
 
     fun authenticateVerifier(
         encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
     ): Map<String, String> {
         try {
             Logger.setTraceability(traceabilityId)
-            this.authorizationRequest =
-                AuthorizationRequest.getAuthorizationRequest(encodedAuthorizationRequest, this)
-
-            val authenticationResponse =
-                AuthenticationResponse.getAuthenticationResponse(trustedVerifiers, this)
-
-            return authenticationResponse
+            logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
+            authorizationRequest = AuthorizationRequest.getAuthorizationRequest(
+                encodedAuthorizationRequest, this
+            )
+            return AuthenticationResponse.getAuthenticationResponse(
+                trustedVerifiers, this
+            )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
             throw exception
@@ -39,9 +35,10 @@ class OpenId4VP(private val traceabilityId: String) {
 
     fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, List<String>>): String {
         try {
-            return AuthorizationResponse.constructVPTokenForSigning(verifiableCredentials)
-        }catch (exception: Exception) {
-            sendErrorToVerifier(exception)
+            return AuthorizationResponse.constructVPTokenForSigning(
+                verifiableCredentials
+            )
+        } catch (exception: Exception) {
             throw exception
         }
     }
@@ -56,15 +53,18 @@ class OpenId4VP(private val traceabilityId: String) {
     }
 
     private fun sendErrorToVerifier(exception: Exception) {
-        CoroutineScope(Dispatchers.IO).launch {
+        responseUri?.let {
             try {
-                responseUri?.let {
-                    sendHttpPostRequest(
-                        it, mapOf("error" to exception.message!!)
-                    )
-                }
+                val response = sendHttpPostRequest(
+                    it, mapOf("error" to exception.message!!)
+                )
+
+                println("verifier call response::${response.toResponseBody()}")
             } catch (exception: Exception) {
-                println("Error: logTag: INJI-OpenID4VP : class name - Companion | traceID - test-OpenId4VP | Message: ${exception.message}")
+                Logger.error(
+                    logTag,
+                    Exception("Unexpected error occurred while sending the error to verifier.")
+                )
             }
         }
     }

@@ -6,7 +6,7 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 object Logger {
     private var traceabilityId: String? = null
 
-    fun setTraceability(traceabilityId: String?) {
+    fun setTraceability(traceabilityId: String) {
         this.traceabilityId = traceabilityId
     }
 

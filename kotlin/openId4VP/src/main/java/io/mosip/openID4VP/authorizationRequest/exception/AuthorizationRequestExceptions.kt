@@ -4,7 +4,7 @@ package io.mosip.openID4VP.authorizationRequest.exception
 sealed class AuthorizationRequestExceptions {
 
     class InvalidVerifierClientIDException :
-        Exception("VP sharing is stopped as the verifier authentication is failed")
+        Exception("VP sharing failed: Verifier authentication was unsuccessful")
 
     class DecodingException(message: String) : Exception(message)
 

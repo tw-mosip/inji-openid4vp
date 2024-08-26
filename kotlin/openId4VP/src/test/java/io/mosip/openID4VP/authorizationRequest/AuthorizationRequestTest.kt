@@ -111,7 +111,7 @@ class AuthorizationRequestTests {
             presentationDefinition = presentationDefinition
         )
         val expectedExceptionMessage =
-            "VP sharing is stopped as the verifier authentication is failed"
+            "VP sharing failed: Verifier authentication was unsuccessful"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientIDException::class.java) {

@@ -22,24 +22,26 @@ class AuthorizationResponse {
         private lateinit var verifiableCredentials: Map<String, List<String>>
 
         fun constructVPTokenForSigning(verifiableCredentials: Map<String, List<String>>): String {
-            this.verifiableCredentials = verifiableCredentials
-            val verifiableCredential = mutableListOf<String>()
-            verifiableCredentials.forEach { (_, vcs) ->
-                vcs.forEach { vcJson ->
-                    verifiableCredential.add(vcJson)
+            try {
+                this.verifiableCredentials = verifiableCredentials
+                val verifiableCredential = mutableListOf<String>()
+                verifiableCredentials.forEach { (_, vcs) ->
+                    vcs.forEach { vcJson ->
+                        verifiableCredential.add(vcJson)
+                    }
                 }
-            }
-            this.vpTokenForSigning = VPTokenForSigning(
-                verifiableCredential = verifiableCredential,
-                id = UUIDGenerator.generateUUID(),
-                holder = ""
-            )
-
-
-            return try {
-                Json.encodeToString(vpTokenForSigning)
+                this.vpTokenForSigning = VPTokenForSigning(
+                    verifiableCredential = verifiableCredential,
+                    id = UUIDGenerator.generateUUID(),
+                    holder = ""
+                )
+                return Json.encodeToString(vpTokenForSigning)
             } catch (exception: SerializationException) {
-                throw AuthorizationResponseExceptions.JsonEncodingException(exception.message!!)
+                Logger.error(logTag, exception)
+                throw AuthorizationResponseExceptions.JsonEncodingException("vpTokenForSigning")
+            } catch (exception: Exception) {
+                Logger.error(logTag, exception)
+                throw exception
             }
         }
 
@@ -73,6 +75,7 @@ class AuthorizationResponse {
                     openId4VP.authorizationRequest.responseUri,
                 )
             } catch (exception: Exception) {
+                Logger.error(logTag, exception)
                 throw exception
             }
         }
@@ -82,19 +85,28 @@ class AuthorizationResponse {
             presentationSubmission: PresentationSubmission,
             responseUri: String,
         ): String {
+            val encodedVPToken: String
+            val encodedPresentationSubmission: String
             try {
-                val encodedVPToken = Json.encodeToString(vpToken)
-                val encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
-                val queryParams = mapOf(
+                encodedVPToken = Json.encodeToString(vpToken)
+            } catch (exception: Exception) {
+                Logger.error(logTag, exception)
+                throw AuthorizationResponseExceptions.JsonEncodingException("vpToken")
+            }
+            try {
+                encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
+            } catch (exception: Exception) {
+                Logger.error(logTag, exception)
+                throw AuthorizationResponseExceptions.JsonEncodingException("presentationSubmission")
+            }
+
+            try {
+                val bodyParams = mapOf(
                     "vp_token" to encodedVPToken,
                     "presentation_submission" to encodedPresentationSubmission
                 )
 
-                return sendHttpPostRequest(responseUri, queryParams)
-            } catch (exception: SerializationException) {
-                val e = AuthorizationResponseExceptions.JsonEncodingException(exception.message!!)
-                Logger.error(logTag, e)
-                throw e
+                return sendHttpPostRequest(responseUri, bodyParams)
             } catch (exception: Exception) {
                 throw exception
             }
