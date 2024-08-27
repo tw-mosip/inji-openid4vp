@@ -15,11 +15,11 @@ Description: Implementation of OpenID4VP protocols in Kotlin
 Snapshot builds are available - 
 
 ```
-implementation "io.mosip:inji-openId4VP:0.1.0-SNAPSHOT"
+implementation "io.mosip:inji-openId4VP:1.0-SNAPSHOT"
 ```
 
 ## Create instance of OpenId4VP library to invoke it's methods
-val openId4VP = OpenId4VP() ###create instance of OpenId4VP class
+val openId4VP = OpenId4VP()
 
 ## APIs
 
@@ -43,13 +43,15 @@ val openId4VP = OpenId4VP() ###create instance of OpenId4VP class
 ###### Exceptions
 
 1. DecodingException is thrown when there is and issue while decoding the Authorization Request
-2. InvalidQueryParams is thrown if 
+2. InvalidQueryParams exception is thrown if 
    * query params are not present in the Request
    * there is a issue while extracting the params
    * both presentation_definition & scope are present in Request
    * neither presentation_definition nor scope present in Request
-3. InvalidInput is thrown if any of required params value is empty
-4. InvalidVerifierClientIDException is thrown if the received request client_iD & response_uri are not matching with any of the trusted verifiers
+3. InvalidInput exception is thrown if any of required params value is empty
+4. InvalidVerifierClientID exception is thrown if the received request client_iD & response_uri are not matching with any of the trusted verifiers
+
+This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it. 
    
 
 
@@ -70,7 +72,7 @@ val openId4VP = OpenId4VP() ###create instance of OpenId4VP class
 
 ###### Exceptions
 
-1. JsonEncodingException is thrown when there is any issue while serializing the Verifiable Presentation token without proof.
+1. JsonEncodingException is thrown if there is any issue while serializing the Verifiable Presentation token without proof.
 
 ### shareVerifiablePresentation
 - This function constructs a verifiable presentation token with proof using received VPResponseMetadata, then sends it and the presentation submission to the Verifier via a POST request.
@@ -89,7 +91,8 @@ val openId4VP = OpenId4VP() ###create instance of OpenId4VP class
 
 ###### Exceptions
 
-1. JsonEncodingException is thrown when there is any issue while serializing the Verifiable Presentation token & Presentation Submission class instances.
-2. InterruptedIOException is thrown when response is not received within the given time.
-3. UnknownHostException is thrown when the response uri endpoint is invalid or the host is not resolved.
-4. IOException is thrown when there is any other exception occurred when sending the response over http post request.
+1. JsonEncodingException is thrown if there is any issue while serializing the Verifiable Presentation token or Presentation Submission class instances.
+2. InterruptedIOException is thrown if the connection is timed out when network call is made.
+3. NetworkRequestFailed exception is thrown when there is any other exception occurred when sending the response over http post request.
+
+This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.

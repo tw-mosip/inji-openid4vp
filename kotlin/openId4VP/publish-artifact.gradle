@@ -79,7 +79,7 @@ publishing {
             }
             groupId = "io.mosip"
             artifactId = "inji-openId4VP"
-            version = "1.2-SNAPSHOT"
+            version = "1.0-SNAPSHOT"
             archivesBaseName = "${artifactId}-${version}"
             if (project.gradle.startParameter.taskNames.any { it.contains('assembleRelease') }) {
                 artifacts {
