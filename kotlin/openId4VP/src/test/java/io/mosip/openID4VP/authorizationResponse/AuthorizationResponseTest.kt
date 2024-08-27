@@ -158,7 +158,7 @@ class AuthorizationResponseTest {
         expectedExceptionMessage = "VP sharing failed due to connection timeout"
 
         actualException =
-            assertThrows(NetworkManagerClientExceptions.NetworkRequestFailedDueToConnectionTimeout::class.java) {
+            assertThrows(NetworkManagerClientExceptions.NetworkRequestTimeout::class.java) {
                 openId4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 

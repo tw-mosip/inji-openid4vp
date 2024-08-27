@@ -35,7 +35,7 @@ class AuthenticationResponse {
                 } catch (e: Exception) {
                     throw e
                 }
-            } ?: run { throw AuthorizationRequestExceptions.InvalidVerifierClientIDException() }
+            } ?: run { throw AuthorizationRequestExceptions.InvalidVerifierClientID() }
         }
 
         private fun validateVerifierClientID(

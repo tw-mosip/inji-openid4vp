@@ -3,14 +3,10 @@ package io.mosip.openID4VP.networkManager
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import okhttp3.FormBody
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.IOException
 import java.io.InterruptedIOException
-import java.net.UnknownHostException
 
 private val logTag = Logger.getLogTag(NetworkManagerClient::class.simpleName!!)
 
@@ -37,7 +33,7 @@ class NetworkManagerClient {
 				}
 			} catch (exception: InterruptedIOException) {
 				val specificException =
-					NetworkManagerClientExceptions.NetworkRequestFailedDueToConnectionTimeout()
+					NetworkManagerClientExceptions.NetworkRequestTimeout()
 				Logger.error(logTag, specificException)
 				throw specificException
 			} catch (exception: Exception) {

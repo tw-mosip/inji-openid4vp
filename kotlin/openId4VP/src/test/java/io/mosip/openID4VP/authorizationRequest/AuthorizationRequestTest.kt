@@ -74,7 +74,7 @@ class AuthorizationRequestTests {
     @Test
     fun `should throw exception if both presentation_definition and scope request params are present in Authorization Request`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            presentationDefinition = presentationDefinition, scope = "sunbird_health_insurance_vc"
+            presentationDefinition = presentationDefinition, scope = "health_insurance_vc"
         )
         val expectedExceptionMessage =
             "Only one of presentation_definition or scope request param can be present"
@@ -114,7 +114,7 @@ class AuthorizationRequestTests {
             "VP sharing failed: Verifier authentication was unsuccessful"
 
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientIDException::class.java) {
+            assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientID::class.java) {
                 openId4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
