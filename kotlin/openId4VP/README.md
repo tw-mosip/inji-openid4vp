@@ -15,7 +15,7 @@ Description: Implementation of OpenID4VP protocols in Kotlin
 Snapshot builds are available - 
 
 ```
-implementation "io.mosip:inji-openId4VP:1.0-SNAPSHOT"
+implementation "io.mosip:inji-openId4VP:0.1.0-SNAPSHOT"
 ```
 
 ## Create instance of OpenId4VP library to invoke it's methods
