@@ -11,9 +11,20 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 
 class OpenId4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
-    lateinit var presentationDefinitionId: String
-    var responseUri: String? = null
     private lateinit var logTag: String
+
+    companion object {
+        private lateinit var presentationDefinitionId: String
+        private var responseUri: String? = null
+
+        fun setResponseUri(responseUri: String) {
+            this.responseUri = responseUri
+        }
+
+        fun setPresentationDefinitionId(id: String) {
+            this.presentationDefinitionId = id
+        }
+    }
 
     fun authenticateVerifier(
         encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
@@ -21,11 +32,10 @@ class OpenId4VP(private val traceabilityId: String) {
         try {
             Logger.setTraceability(traceabilityId)
             logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
-            authorizationRequest = AuthorizationRequest.getAuthorizationRequest(
-                encodedAuthorizationRequest, this
-            )
+            authorizationRequest =
+                AuthorizationRequest.getAuthorizationRequest(encodedAuthorizationRequest)
             return AuthenticationResponse.getAuthenticationResponse(
-                trustedVerifiers, this
+                authorizationRequest, trustedVerifiers
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
@@ -45,7 +55,12 @@ class OpenId4VP(private val traceabilityId: String) {
 
     fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
         try {
-            return AuthorizationResponse.shareVP(vpResponseMetadata, this)
+            return AuthorizationResponse.shareVP(
+                vpResponseMetadata,
+                authorizationRequest.nonce,
+                authorizationRequest.responseUri,
+                presentationDefinitionId
+            )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
             throw exception

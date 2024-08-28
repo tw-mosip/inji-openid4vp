@@ -56,7 +56,7 @@ class AuthorizationResponseTest {
     fun setUp() {
         openId4VP = OpenId4VP("123")
         presentationDefinition =
-            "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
+            "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
         trustedVerifiers = listOf(
             Verifier(
                 "https://injiverify.dev2.mosip.net", listOf(
@@ -72,7 +72,7 @@ class AuthorizationResponseTest {
         )
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
-        openId4VP.presentationDefinitionId = "6498781c-f291-4969-9cd5-2c273858f38f"
+        OpenId4VP.setPresentationDefinitionId("6498781c-f291-4969-9cd5-2c273858f38f")
         openId4VP.authorizationRequest = AuthorizationRequest(
             clientId = "https://injiverify.dev2.mosip.net",
             responseType = "vp_token",

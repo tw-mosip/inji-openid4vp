@@ -45,12 +45,12 @@ class AuthorizationResponse {
             }
         }
 
-        fun shareVP(vpResponseMetadata: VPResponseMetadata, openId4VP: OpenId4VP): String {
+        fun shareVP(vpResponseMetadata: VPResponseMetadata, nonce: String, responseUri: String, presentationDefinitionId: String): String {
             try {
                 vpResponseMetadata.validate()
                 var pathIndex = 0
                 val proof = Proof.constructProof(
-                    vpResponseMetadata, challenge = openId4VP.authorizationRequest.nonce
+                    vpResponseMetadata, challenge = nonce
                 )
                 val descriptorMap = mutableListOf<DescriptorMap>()
                 verifiableCredentials.forEach { (inputDescriptorId, vcs) ->
@@ -65,14 +65,14 @@ class AuthorizationResponse {
                     }
                 }
                 val presentationSubmission = PresentationSubmission(
-                    UUIDGenerator.generateUUID(), openId4VP.presentationDefinitionId, descriptorMap
+                    UUIDGenerator.generateUUID(), presentationDefinitionId, descriptorMap
                 )
                 val vpToken = VPToken.constructVpToken(this.vpTokenForSigning, proof)
 
                 return constructHttpRequestBody(
                     vpToken,
                     presentationSubmission,
-                    openId4VP.authorizationRequest.responseUri,
+                    responseUri,
                 )
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
