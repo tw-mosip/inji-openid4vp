@@ -9,21 +9,18 @@ import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
 import okhttp3.ResponseBody.Companion.toResponseBody
 
+private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
 class OpenId4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
-    private lateinit var logTag: String
+    private lateinit var presentationDefinitionId: String
+    private var responseUri: String? = null
 
-    companion object {
-        private lateinit var presentationDefinitionId: String
-        private var responseUri: String? = null
+    fun setResponseUri(responseUri: String) {
+        this.responseUri = responseUri
+    }
 
-        fun setResponseUri(responseUri: String) {
-            this.responseUri = responseUri
-        }
-
-        fun setPresentationDefinitionId(id: String) {
-            this.presentationDefinitionId = id
-        }
+    fun setPresentationDefinitionId(id: String) {
+        this.presentationDefinitionId = id
     }
 
     fun authenticateVerifier(
@@ -31,11 +28,11 @@ class OpenId4VP(private val traceabilityId: String) {
     ): Map<String, String> {
         try {
             Logger.setTraceability(traceabilityId)
-            logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
-            authorizationRequest =
-                AuthorizationRequest.getAuthorizationRequest(encodedAuthorizationRequest)
+            authorizationRequest = AuthorizationRequest.getAuthorizationRequest(
+                encodedAuthorizationRequest, ::setResponseUri
+            )
             return AuthenticationResponse.getAuthenticationResponse(
-                authorizationRequest, trustedVerifiers
+                authorizationRequest, trustedVerifiers, ::setPresentationDefinitionId
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
