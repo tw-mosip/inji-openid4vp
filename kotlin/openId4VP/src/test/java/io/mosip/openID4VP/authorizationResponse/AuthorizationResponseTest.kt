@@ -12,7 +12,6 @@ import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
-import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -72,7 +71,7 @@ class AuthorizationResponseTest {
         )
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
-        OpenId4VP.setPresentationDefinitionId("6498781c-f291-4969-9cd5-2c273858f38f")
+        openId4VP.setPresentationDefinitionId("6498781c-f291-4969-9cd5-2c273858f38f")
         openId4VP.authorizationRequest = AuthorizationRequest(
             clientId = "https://injiverify.dev2.mosip.net",
             responseType = "vp_token",

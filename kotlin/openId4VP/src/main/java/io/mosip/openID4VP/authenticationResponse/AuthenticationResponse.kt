@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authenticationResponse
 
-import io.mosip.openID4VP.OpenId4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
@@ -12,6 +11,7 @@ class AuthenticationResponse {
         fun getAuthenticationResponse(
             authorizationRequest: AuthorizationRequest,
             trustedVerifiers: List<Verifier>,
+            setPresentationDefinitionId: (String) -> Unit
         ): Map<String, String> {
             val response = mutableMapOf<String, String>()
             validateVerifierClientID(
@@ -25,7 +25,7 @@ class AuthenticationResponse {
                     presentationDefinitionJson?.let {
                         val presentationDefinition: PresentationDefinition =
                             validatePresentationDefinition(presentationDefinitionJson)
-                        OpenId4VP.setPresentationDefinitionId(presentationDefinition.id)
+                        setPresentationDefinitionId(presentationDefinition.id)
                         response.put("presentation_definition", presentationDefinitionJson)
                     }
                     val scope = authorizationRequest.scope

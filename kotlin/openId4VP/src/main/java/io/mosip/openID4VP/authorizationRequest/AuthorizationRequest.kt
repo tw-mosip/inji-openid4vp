@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import io.mosip.openID4VP.OpenId4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
@@ -8,7 +7,6 @@ import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import io.mosip.openID4VP.OpenId4VP.Companion
 
 private val logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
 
@@ -23,17 +21,21 @@ class AuthorizationRequest(
     val state: String
 ) {
     companion object {
-        fun getAuthorizationRequest(encodedAuthorizationRequest: String): AuthorizationRequest {
+        fun getAuthorizationRequest(
+            encodedAuthorizationRequest: String, setResponseUri: (String) -> Unit
+        ): AuthorizationRequest {
             try {
                 val decodedAuthorizationRequest =
                     Decoder.decodeBase64ToString(encodedAuthorizationRequest)
-                return parseAuthorizationRequest(decodedAuthorizationRequest)
+                return parseAuthorizationRequest(decodedAuthorizationRequest, setResponseUri)
             } catch (e: Exception) {
                 throw e
             }
         }
 
-        private fun parseAuthorizationRequest(decodedAuthorizationRequest: String): AuthorizationRequest {
+        private fun parseAuthorizationRequest(
+            decodedAuthorizationRequest: String, setResponseUri: (String) -> Unit
+        ): AuthorizationRequest {
             try {
                 val queryStart = decodedAuthorizationRequest.indexOf('?') + 1
                 val queryString = decodedAuthorizationRequest.substring(queryStart)
@@ -44,7 +46,7 @@ class AuthorizationRequest(
                     ?: throw AuthorizationRequestExceptions.InvalidQueryParams("Query parameters are missing in the Authorization request")
 
                 val params = extractQueryParams(query)
-                validateQueryParams(params)
+                validateQueryParams(params, setResponseUri)
                 return createAuthorizationRequest(params)
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
@@ -64,7 +66,9 @@ class AuthorizationRequest(
             }
         }
 
-        private fun validateQueryParams(params: Map<String, String>) {
+        private fun validateQueryParams(
+            params: Map<String, String>, setResponseUri: (String) -> Unit
+        ) {
             val requiredRequestParams = mutableListOf(
                 "response_uri",
                 "client_id",
@@ -97,7 +101,7 @@ class AuthorizationRequest(
             requiredRequestParams.forEach { param ->
                 val value = params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
                 if (param == "response_uri") {
-                    OpenId4VP.setResponseUri(value)
+                    setResponseUri(value)
                 }
                 require(value.isNotEmpty()) {
                     throw AuthorizationRequestExceptions.InvalidInput(param)
