@@ -87,6 +87,11 @@ tasks {
         ))
 
     }
+
+    register<Wrapper>("wrapper") {
+        gradleVersion = "8.6"
+        setProperty("validateDistributionUrl", true)
+    }
 }
 
 tasks.build {
