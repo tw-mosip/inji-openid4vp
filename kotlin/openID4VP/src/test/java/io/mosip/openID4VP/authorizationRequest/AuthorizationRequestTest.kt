@@ -4,7 +4,7 @@ import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.OpenId4VP
+import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.dto.Verifier
 import org.apache.commons.codec.binary.Base64
@@ -16,7 +16,7 @@ import org.junit.Test
 import java.nio.charset.StandardCharsets
 
 class AuthorizationRequestTests {
-    private lateinit var openId4VP: OpenId4VP
+    private lateinit var openID4VP: OpenID4VP
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var presentationDefinition: String
     private lateinit var encodedAuthorizationRequestUrl: String
@@ -25,7 +25,7 @@ class AuthorizationRequestTests {
 
     @Before
     fun setUp() {
-        openId4VP = OpenId4VP("test-OpenId4VP")
+        openID4VP = OpenID4VP("test-OpenID4VP")
         trustedVerifiers = listOf(
             Verifier(
                 "https://verify.env1.net", listOf(
@@ -63,7 +63,7 @@ class AuthorizationRequestTests {
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
-                openId4VP.authenticateVerifier(
+                openID4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
@@ -80,7 +80,7 @@ class AuthorizationRequestTests {
             "Only one of presentation_definition or scope request param can be present"
 
         actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
-            openId4VP.authenticateVerifier(
+            openID4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
         }
@@ -96,7 +96,7 @@ class AuthorizationRequestTests {
             "Either presentation_definition or scope request param must be present"
 
         actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
-            openId4VP.authenticateVerifier(
+            openID4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
         }
@@ -115,7 +115,7 @@ class AuthorizationRequestTests {
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientID::class.java) {
-                openId4VP.authenticateVerifier(
+                openID4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
@@ -136,7 +136,7 @@ class AuthorizationRequestTests {
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java) {
-                openId4VP.authenticateVerifier(
+                openID4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
@@ -153,7 +153,7 @@ class AuthorizationRequestTests {
         val expectedValue = mutableMapOf("presentation_definition" to presentationDefinition)
 
         val actualValue =
-            openId4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers)
+            openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers)
         assertEquals(expectedValue, actualValue)
     }
 }

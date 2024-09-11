@@ -13,9 +13,9 @@ publishing {
         aar(MavenPublication) {
             pom {
                 withXml {
-                    asNode().appendNode('name', "Inji OpenId4VP")
+                    asNode().appendNode('name', "Inji OpenID4VP")
                     asNode().appendNode('url', "https://github.com/mosip/inji-openid4vp")
-                    asNode().appendNode('description', "Kotlin Library to implement OpenId4VP specification")
+                    asNode().appendNode('description', "Kotlin Library to implement OpenID4VP specification")
 
 
                     asNode().appendNode('licenses').appendNode('license').with {
@@ -82,7 +82,7 @@ publishing {
                 }
             }
             groupId = "io.mosip"
-            artifactId = "inji-openId4VP"
+            artifactId = "inji-openID4VP"
             version = "0.1.0-SNAPSHOT"
             if (project.gradle.startParameter.taskNames.any { it.contains('assembleRelease') }) {
                 artifacts {

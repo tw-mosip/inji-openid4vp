@@ -57,10 +57,10 @@ class AuthorizationRequest(
         private fun extractQueryParams(query: String): Map<String, String> {
             try {
                 return query.split("&").map { it.split("=") }.associateBy({ it[0] }, {
-                        if (it.size > 1) URLDecoder.decode(
-                            it[1], StandardCharsets.UTF_8.toString()
-                        ) else ""
-                    })
+                    if (it.size > 1) URLDecoder.decode(
+                        it[1], StandardCharsets.UTF_8.toString()
+                    ) else ""
+                })
             } catch (exception: Exception) {
                 throw AuthorizationRequestExceptions.InvalidQueryParams("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
             }

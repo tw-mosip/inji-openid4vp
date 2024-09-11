@@ -10,7 +10,7 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttp
 import okhttp3.ResponseBody.Companion.toResponseBody
 
 private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
-class OpenId4VP(private val traceabilityId: String) {
+class OpenID4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
     private lateinit var presentationDefinitionId: String
     private var responseUri: String? = null
