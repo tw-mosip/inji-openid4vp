@@ -25,8 +25,12 @@ class AuthorizationRequest(
             encodedAuthorizationRequest: String, setResponseUri: (String) -> Unit
         ): AuthorizationRequest {
             try {
+                val queryStart = encodedAuthorizationRequest.indexOf('?') + 1
+                val encodedString = encodedAuthorizationRequest.substring(queryStart)
+                val decodedString =
+                    Decoder.decodeBase64ToString(encodedString)
                 val decodedAuthorizationRequest =
-                    Decoder.decodeBase64ToString(encodedAuthorizationRequest)
+                    encodedAuthorizationRequest.substring(0, queryStart) + decodedString
                 return parseAuthorizationRequest(decodedAuthorizationRequest, setResponseUri)
             } catch (e: Exception) {
                 throw e
@@ -40,7 +44,7 @@ class AuthorizationRequest(
                 val queryStart = decodedAuthorizationRequest.indexOf('?') + 1
                 val queryString = decodedAuthorizationRequest.substring(queryStart)
                 val encodedQuery = URLEncoder.encode(queryString, StandardCharsets.UTF_8.toString())
-                val uriString = "OPENID4VP://authorize?$encodedQuery"
+                val uriString = "?$encodedQuery"
                 val uri = URI(uriString)
                 val query = uri.query
                     ?: throw AuthorizationRequestExceptions.InvalidQueryParams("Query parameters are missing in the Authorization request")

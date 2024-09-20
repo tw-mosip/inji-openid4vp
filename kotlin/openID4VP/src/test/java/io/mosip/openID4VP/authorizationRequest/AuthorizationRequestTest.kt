@@ -48,6 +48,12 @@ class AuthorizationRequestTests {
             println("Error: logTag: $tag | Message: $msg")
             0
         }
+        every { Log.d(any(), any()) } answers {
+            val tag = arg<String>(0)
+            val msg = arg<String>(1)
+            println("Error: logTag: $tag | Message: $msg")
+            0
+        }
     }
 
     @After
@@ -166,7 +172,7 @@ fun createEncodedAuthorizationRequest(
 ): String {
     val state = "fsnC8ixCs6mWyV+00k23Qg=="
     val nonce = "bMHvX1HGhbh8zqlSWf/fuQ=="
-    val authorizationRequestUrl = StringBuilder("OPENID4VP://authorize?")
+    val authorizationRequestUrl = StringBuilder("")
 
     if (clientId != null) authorizationRequestUrl.append("client_id=$clientId&")
     if (presentationDefinition != null) authorizationRequestUrl.append("presentation_definition=$presentationDefinition&")
@@ -177,5 +183,5 @@ fun createEncodedAuthorizationRequest(
             StandardCharsets.UTF_8
         )
     )
-    return String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
+    return "INJI_OVP://authorize?"+String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
 }
