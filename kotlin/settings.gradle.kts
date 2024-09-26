@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "kotlin"
-include(":openId4VP")
+include(":openID4VP")

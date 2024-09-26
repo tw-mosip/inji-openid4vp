@@ -5,7 +5,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.OpenId4VP
+import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.UUIDGenerator
@@ -21,7 +21,7 @@ import org.junit.Before
 import org.junit.Test
 
 class AuthorizationResponseTest {
-    private lateinit var openId4VP: OpenId4VP
+    private lateinit var openID4VP: OpenID4VP
     private val selectedCredentialsList = mapOf(
         "456" to listOf(
             "{\"credential\":{\"issuanceDate\":\"2024-08-02T16:04:35.304Z\",\"credentialSubject\":{\"face\":\"data:image/jpeg;base64,/9j/goKCyuig\",\"dateOfBirth\":\"2000/01/01\",\"id\":\"did:jwk:eyJr80435=\",\"UIN\":\"9012378996\",\"email\":\"mockuser@gmail.com\"},\"id\":\"https://domain.net/credentials/12345-87435\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-04-14T16:04:35Z\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"https://domain.net/.well-known/public-key.json\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\"},\"type\":[\"VerifiableCredential\"],\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://domain.net/.well-known/context.json\",{\"sec\":\"https://w3id.org/security#\"}],\"issuer\":\"https://domain.net/.well-known/issuer.json\"}}",
@@ -53,7 +53,7 @@ class AuthorizationResponseTest {
 
     @Before
     fun setUp() {
-        openId4VP = OpenId4VP("123")
+        openID4VP = OpenID4VP("test-OpenID4VP")
         presentationDefinition =
             "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
         trustedVerifiers = listOf(
@@ -71,8 +71,8 @@ class AuthorizationResponseTest {
         )
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
-        openId4VP.setPresentationDefinitionId("6498781c-f291-4969-9cd5-2c273858f38f")
-        openId4VP.authorizationRequest = AuthorizationRequest(
+        openID4VP.setPresentationDefinitionId("6498781c-f291-4969-9cd5-2c273858f38f")
+        openID4VP.authorizationRequest = AuthorizationRequest(
             clientId = "https://injiverify.dev2.mosip.net",
             responseType = "vp_token",
             responseMode = "direct_post",
@@ -82,7 +82,7 @@ class AuthorizationResponseTest {
             scope = null,
             responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString()
         )
-        openId4VP.constructVerifiablePresentationToken(selectedCredentialsList)
+        openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
         mockkStatic(Log::class)
         every { Log.e(any(), any()) } answers {
             val tag = arg<String>(0)
@@ -105,7 +105,7 @@ class AuthorizationResponseTest {
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
-        val actualValue = openId4VP.constructVerifiablePresentationToken(selectedCredentialsList)
+        val actualValue = openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
 
         assertEquals(expectedValue, actualValue)
     }
@@ -119,7 +119,7 @@ class AuthorizationResponseTest {
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-                openId4VP.shareVerifiablePresentation(vpResponseMetadata)
+                openID4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -140,7 +140,7 @@ class AuthorizationResponseTest {
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestFailed::class.java) {
-                openId4VP.shareVerifiablePresentation(vpResponseMetadata)
+                openID4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -158,7 +158,7 @@ class AuthorizationResponseTest {
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestTimeout::class.java) {
-                openId4VP.shareVerifiablePresentation(vpResponseMetadata)
+                openID4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -176,7 +176,7 @@ class AuthorizationResponseTest {
         )
         val expectedValue = "OK"
 
-        val actualResponse = openId4VP.shareVerifiablePresentation(vpResponseMetadata)
+        val actualResponse = openID4VP.shareVerifiablePresentation(vpResponseMetadata)
 
         assertEquals(expectedValue, actualResponse)
     }

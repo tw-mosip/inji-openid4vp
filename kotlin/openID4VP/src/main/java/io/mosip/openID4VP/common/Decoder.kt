@@ -12,8 +12,7 @@ object Decoder {
             encodedData.isEmpty() -> throw AuthorizationRequestExceptions.InvalidInput("encoded data")
             else -> {
                 try {
-                    val decodedBytes: ByteArray =
-                        Base64.decodeBase64(encodedData.toByteArray(StandardCharsets.UTF_8))
+                    val decodedBytes: ByteArray = Base64.decodeBase64(encodedData)
                     return String(decodedBytes, StandardCharsets.UTF_8)
                 } catch (e: Exception) {
                     val exception =

@@ -4,7 +4,7 @@ import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.OpenId4VP
+import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.dto.Verifier
 import org.apache.commons.codec.binary.Base64
@@ -16,7 +16,7 @@ import org.junit.Test
 import java.nio.charset.StandardCharsets
 
 class AuthorizationRequestTests {
-    private lateinit var openId4VP: OpenId4VP
+    private lateinit var openID4VP: OpenID4VP
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var presentationDefinition: String
     private lateinit var encodedAuthorizationRequestUrl: String
@@ -25,7 +25,7 @@ class AuthorizationRequestTests {
 
     @Before
     fun setUp() {
-        openId4VP = OpenId4VP("test-OpenId4VP")
+        openID4VP = OpenID4VP("test-OpenID4VP")
         trustedVerifiers = listOf(
             Verifier(
                 "https://verify.env1.net", listOf(
@@ -48,6 +48,12 @@ class AuthorizationRequestTests {
             println("Error: logTag: $tag | Message: $msg")
             0
         }
+        every { Log.d(any(), any()) } answers {
+            val tag = arg<String>(0)
+            val msg = arg<String>(1)
+            println("Error: logTag: $tag | Message: $msg")
+            0
+        }
     }
 
     @After
@@ -63,7 +69,7 @@ class AuthorizationRequestTests {
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
-                openId4VP.authenticateVerifier(
+                openID4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
@@ -80,7 +86,7 @@ class AuthorizationRequestTests {
             "Only one of presentation_definition or scope request param can be present"
 
         actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
-            openId4VP.authenticateVerifier(
+            openID4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
         }
@@ -96,7 +102,7 @@ class AuthorizationRequestTests {
             "Either presentation_definition or scope request param must be present"
 
         actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
-            openId4VP.authenticateVerifier(
+            openID4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
         }
@@ -115,7 +121,7 @@ class AuthorizationRequestTests {
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientID::class.java) {
-                openId4VP.authenticateVerifier(
+                openID4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
@@ -136,7 +142,7 @@ class AuthorizationRequestTests {
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java) {
-                openId4VP.authenticateVerifier(
+                openID4VP.authenticateVerifier(
                     encodedAuthorizationRequestUrl, trustedVerifiers
                 )
             }
@@ -153,7 +159,7 @@ class AuthorizationRequestTests {
         val expectedValue = mutableMapOf("presentation_definition" to presentationDefinition)
 
         val actualValue =
-            openId4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers)
+            openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers)
         assertEquals(expectedValue, actualValue)
     }
 }
@@ -166,7 +172,7 @@ fun createEncodedAuthorizationRequest(
 ): String {
     val state = "fsnC8ixCs6mWyV+00k23Qg=="
     val nonce = "bMHvX1HGhbh8zqlSWf/fuQ=="
-    val authorizationRequestUrl = StringBuilder("OPENID4VP://authorize?")
+    val authorizationRequestUrl = StringBuilder("")
 
     if (clientId != null) authorizationRequestUrl.append("client_id=$clientId&")
     if (presentationDefinition != null) authorizationRequestUrl.append("presentation_definition=$presentationDefinition&")
@@ -177,5 +183,5 @@ fun createEncodedAuthorizationRequest(
             StandardCharsets.UTF_8
         )
     )
-    return String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
+    return "INJI_OVP://authorize?"+String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
 }

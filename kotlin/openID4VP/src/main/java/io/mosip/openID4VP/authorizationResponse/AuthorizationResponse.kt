@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationResponse
 
-import io.mosip.openID4VP.OpenId4VP
 import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
