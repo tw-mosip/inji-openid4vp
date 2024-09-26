@@ -1,4 +1,4 @@
-name: Push trigger for inji-openId4VP
+name: Push trigger for inji-openID4VP
 
 on:
   push:
