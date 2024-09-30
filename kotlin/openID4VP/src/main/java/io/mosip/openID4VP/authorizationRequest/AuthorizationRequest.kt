@@ -15,7 +15,6 @@ class AuthorizationRequest(
     val responseType: String,
     val responseMode: String,
     val presentationDefinition: String?,
-    val scope: String?,
     val responseUri: String,
     val nonce: String,
     val state: String
@@ -75,33 +74,14 @@ class AuthorizationRequest(
         ) {
             val requiredRequestParams = mutableListOf(
                 "response_uri",
+                "presentation_definition",
                 "client_id",
                 "response_type",
                 "response_mode",
                 "nonce",
                 "state",
             )
-            val exception: Exception
 
-            val hasPresentationDefinition = params.containsKey("presentation_definition")
-            val hasScope = params.containsKey("scope")
-            when {
-                hasPresentationDefinition && hasScope -> {
-                    exception = AuthorizationRequestExceptions.InvalidQueryParams(
-                        "Only one of presentation_definition or scope request param can be present"
-                    )
-                    Logger.error(logTag, exception)
-                    throw exception
-                }
-                hasPresentationDefinition -> requiredRequestParams.add("presentation_definition")
-                hasScope -> requiredRequestParams.add("scope")
-                else -> {
-                    exception =
-                        AuthorizationRequestExceptions.InvalidQueryParams("Either presentation_definition or scope request param must be present")
-                    Logger.error(logTag, exception)
-                    throw exception
-                }
-            }
             requiredRequestParams.forEach { param ->
                 val value = params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
                 if (param == "response_uri") {
@@ -119,7 +99,6 @@ class AuthorizationRequest(
                 responseType = params["response_type"]!!,
                 responseMode = params["response_mode"]!!,
                 presentationDefinition = params["presentation_definition"],
-                scope = params["scope"],
                 responseUri = params["response_uri"]!!,
                 nonce = params["nonce"]!!,
                 state = params["state"]!!

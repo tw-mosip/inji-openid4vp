@@ -62,7 +62,7 @@ class AuthorizationRequestTests {
     }
 
     @Test
-    fun `should throw missing input exception if client_id is missing`() {
+    fun `should throw missing input exception if client_id param is missing in Authorization Request`() {
         encodedAuthorizationRequestUrl =
             createEncodedAuthorizationRequest(presentationDefinition = presentationDefinition)
         expectedExceptionMessage = "Missing Input: client_id param is required"
@@ -78,30 +78,13 @@ class AuthorizationRequestTests {
     }
 
     @Test
-    fun `should throw exception if both presentation_definition and scope request params are present in Authorization Request`() {
-        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            presentationDefinition = presentationDefinition, scope = "health_insurance_vc"
-        )
-        val expectedExceptionMessage =
-            "Only one of presentation_definition or scope request param can be present"
-
-        actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequestUrl, trustedVerifiers
-            )
-        }
-
-        assertEquals(expectedExceptionMessage, actualException.message)
-    }
-
-    @Test
-    fun `should throw exception if both presentation_definition and scope request params are not present in Authorization Request`() {
+    fun `should throw exception if presentation_definition param is not present in Authorization Request`() {
         encodedAuthorizationRequestUrl =
             createEncodedAuthorizationRequest(clientId = "https://injiverify.dev2.mosip.net")
         val expectedExceptionMessage =
-            "Either presentation_definition or scope request param must be present"
+            "Missing Input: presentation_definition param is required"
 
-        actualException = assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
+        actualException = assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequestUrl, trustedVerifiers
             )
@@ -167,7 +150,6 @@ class AuthorizationRequestTests {
 fun createEncodedAuthorizationRequest(
     clientId: String? = null,
     presentationDefinition: String? = null,
-    scope: String? = null,
     responseUri: String = "https://verify.env2.net/responseUri"
 ): String {
     val state = "fsnC8ixCs6mWyV+00k23Qg=="
@@ -176,12 +158,11 @@ fun createEncodedAuthorizationRequest(
 
     if (clientId != null) authorizationRequestUrl.append("client_id=$clientId&")
     if (presentationDefinition != null) authorizationRequestUrl.append("presentation_definition=$presentationDefinition&")
-    if (scope != null) authorizationRequestUrl.append("scope=$scope&")
     authorizationRequestUrl.append("response_type=vp_token&response_mode=direct_post&nonce=$nonce&state=$state&response_uri=$responseUri")
     val encodedAuthorizationRequestInBytes = Base64.encodeBase64(
         authorizationRequestUrl.toString().toByteArray(
             StandardCharsets.UTF_8
         )
     )
-    return "INJI_OVP://authorize?"+String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
+    return "openid4vp://authorize?"+String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
 }
