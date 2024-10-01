@@ -79,7 +79,6 @@ class AuthorizationResponseTest {
             presentationDefinition = presentationDefinition,
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
-            scope = null,
             responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString()
         )
         openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)

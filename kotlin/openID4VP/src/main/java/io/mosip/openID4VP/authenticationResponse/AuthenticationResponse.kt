@@ -28,10 +28,6 @@ class AuthenticationResponse {
                         setPresentationDefinitionId(presentationDefinition.id)
                         response.put("presentation_definition", presentationDefinitionJson)
                     }
-                    val scope = authorizationRequest.scope
-                    scope?.let {
-                        response.put("scope", scope)
-                    }
                     return response
                 } catch (e: Exception) {
                     throw e
@@ -44,7 +40,7 @@ class AuthenticationResponse {
             responseUri: String,
             trustedVerifiers: List<Verifier>
         ): Verifier? {
-            return trustedVerifiers.find { it.clientId == receivedClientId && responseUri in it.responseUri }
+            return trustedVerifiers.find { it.clientId == receivedClientId && responseUri in it.responseUris }
         }
     }
 }
