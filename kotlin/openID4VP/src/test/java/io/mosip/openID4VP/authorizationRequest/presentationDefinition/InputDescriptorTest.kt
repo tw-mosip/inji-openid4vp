@@ -33,7 +33,7 @@ class InputDescriptorTest {
     @Test
     fun `should throw missing input exception if id param is missing`(){
         presentationDefinition =
-            "{\"id\":\"id_123\",\"input_descriptors\":[{\"constraints\":{\"fields\":[{\"path\":[\"\$.type\"]}]}}]}"
+            """{"id":"id_123","input_descriptors":[{"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         expectedExceptionMessage = "Missing Input: input_descriptor : id param is required"
 
         val actualException =
@@ -47,7 +47,7 @@ class InputDescriptorTest {
     @Test
     fun `should throw missing input exception if constraints param is missing`(){
         presentationDefinition =
-            "{\"input_descriptors\":[{\"id\":\"id_123\"}]}"
+            """{"input_descriptors":[{"id":"id_123"}]}"""
         expectedExceptionMessage = "Missing Input: input_descriptor : constraints param is required"
 
         val actualException =
@@ -61,7 +61,7 @@ class InputDescriptorTest {
     @Test
     fun `should throw invalid input exception if id param value is empty`(){
         presentationDefinition =
-            "{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"\",\"constraints\":{\"fields\":[{\"path\":[\"\$.type\"]}]}}]}"
+            """{"id":"pd_123","input_descriptors":[{"id":"","constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         expectedExceptionMessage = "Invalid Input: input_descriptor : id value cannot be empty or null"
 
         val actualException =

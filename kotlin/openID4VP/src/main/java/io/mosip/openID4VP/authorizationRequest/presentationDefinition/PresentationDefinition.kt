@@ -3,6 +3,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.credentialFormatTypes.Format
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,6 +24,7 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 			element<ArrayList<InputDescriptor>>("input_descriptors")
 			element<String>("name", isOptional = true)
 			element<String>("purpose", isOptional = true)
+			element<Format>("format", isOptional = true)
 		}
 
 	override fun deserialize(decoder: Decoder): PresentationDefinition {
@@ -31,6 +33,7 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 		var inputDescriptors: List<InputDescriptor>? = null
 		var name: String? = null
 		var purpose: String? = null
+		var format: Format? = null
 
 		loop@ while (true) {
 			when (builtInDecoder.decodeElementIndex(descriptor)) {
@@ -42,6 +45,8 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 
 				2 -> name = builtInDecoder.decodeStringElement(descriptor, 2)
 				3 -> purpose = builtInDecoder.decodeStringElement(descriptor, 3)
+				4 -> format =
+					builtInDecoder.decodeSerializableElement(descriptor, 4, Format.serializer())
 			}
 		}
 
@@ -58,7 +63,7 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 			id = id,
 			inputDescriptors = inputDescriptors,
 			name = name,
-			purpose = purpose,
+			purpose = purpose, format = format
 		)
 	}
 
@@ -82,8 +87,7 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 class PresentationDefinition(
 	val id: String,
 	@SerialName("input_descriptors") val inputDescriptors: List<InputDescriptor>,
-	val name: String? = null,
-	val purpose: String? = null
+	val name: String? = null, val purpose: String? = null, val format: Format? = null
 ) {
 
 	fun validate() {
@@ -98,6 +102,7 @@ class PresentationDefinition(
 			inputDescriptors.forEach { inputDescriptor ->
 				inputDescriptor.validate()
 			}
+			format?.validate()
 		} catch (exception: AuthorizationRequestExceptions.InvalidInput) {
 			throw exception
 		}

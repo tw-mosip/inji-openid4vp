@@ -31,7 +31,7 @@ class ConstraintsTest {
 	@Test
 	fun `should throw invalid limit disclosure exception if limit disclosure is present and not matching with predefined values`() {
 		val presentationDefinition =
-			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"\$.type\"]}],\"limit_disclosure\": \"not preferred\"}}]}"
+			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","format":{"ldp_vc":{"proof_type":["RsaSignature2018"]}},"constraints":{"fields":[{"path":["$.type"]}],"limit_disclosure": "not preferred"}}]}"""
 
 		val expectedExceptionMessage =
 			"Invalid Input: limit_disclosure value should be either required or preferred"

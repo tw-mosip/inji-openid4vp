@@ -39,8 +39,7 @@ class AuthorizationRequestTests {
                 )
             )
         )
-        presentationDefinition =
-            "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
+        presentationDefinition = """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"idcardcredential","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         mockkStatic(android.util.Log::class)
         every { Log.e(any(), any()) } answers {
             val tag = arg<String>(0)
@@ -115,7 +114,7 @@ class AuthorizationRequestTests {
     @Test
     fun `should throw invalid limit disclosure exception if limit disclosure is present and not matching with predefined values`() {
         presentationDefinition =
-            "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"idcardcredential\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}], \"limit_disclosure\": \"not preferred\"}}]}"
+            """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"idcardcredential","constraints":{"fields":[{"path":["$.type"]}], "limit_disclosure": "not preferred"}}]}"""
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
             clientId = "https://verify.env1.net",
             presentationDefinition = presentationDefinition

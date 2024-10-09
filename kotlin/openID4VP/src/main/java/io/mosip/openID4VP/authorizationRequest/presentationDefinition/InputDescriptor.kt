@@ -3,6 +3,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.credentialFormatTypes.Format
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -18,6 +19,7 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		element<String>("id")
 		element<String>("name", isOptional = true)
 		element<String>("purpose", isOptional = true)
+		element<Format>("format", isOptional = true)
 		element<Constraints>("constraints")
 	}
 
@@ -26,6 +28,7 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		var id: String? = null
 		var name: String? = null
 		var purpose: String? = null
+		var format: Format? = null
 		var constraints: Constraints? = null
 
 		loop@ while (true) {
@@ -34,8 +37,9 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 				0 -> id = builtInDecoder.decodeStringElement(descriptor, 0)
 				1 -> name = builtInDecoder.decodeStringElement(descriptor, 1)
 				2 -> purpose = builtInDecoder.decodeStringElement(descriptor, 2)
-				3 -> constraints = builtInDecoder.decodeSerializableElement(
-					descriptor, 3, Constraints.serializer()
+				3 -> format = builtInDecoder.decodeSerializableElement(descriptor, 3, Format.serializer())
+				4 -> constraints = builtInDecoder.decodeSerializableElement(
+					descriptor, 4, Constraints.serializer()
 				)
 			}
 		}
@@ -50,7 +54,7 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		}
 
 		return InputDescriptor(
-			id = id, name = name, purpose = purpose, constraints = constraints
+			id = id, name = name, purpose = purpose, format = format, constraints = constraints
 		)
 	}
 
@@ -63,6 +67,9 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		builtInEncoder.encodeSerializableElement(
 			descriptor, 3, Constraints.serializer(), value.constraints
 		)
+		builtInEncoder.encodeSerializableElement(
+			descriptor, 4, Constraints.serializer(), value.constraints
+		)
 		builtInEncoder.endStructure(descriptor)
 	}
 }
@@ -72,6 +79,7 @@ class InputDescriptor(
 	val id: String,
 	val name: String? = null,
 	val purpose: String? = null,
+	val format: Format? = null,
 	val constraints: Constraints
 ) {
 	fun validate() {
@@ -79,7 +87,7 @@ class InputDescriptor(
 			require(id.isNotEmpty()) {
 				throw Logger.handleException("InvalidInput", "input_descriptor", "id", className)
 			}
-
+			format?.validate()
 			constraints.validate()
 		} catch (exception: AuthorizationRequestExceptions.InvalidInput) {
 			throw exception

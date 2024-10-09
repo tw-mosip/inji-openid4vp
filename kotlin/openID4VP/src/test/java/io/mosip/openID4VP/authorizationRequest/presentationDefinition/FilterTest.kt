@@ -33,7 +33,7 @@ class FilterTest {
 	@Test
 	fun `should throw missing input pattern exception if type param is missing`() {
 		presentationDefinition =
-			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"], \"filter\":{}}]}}]}"
+			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{}}]}}]}"""
 		expectedExceptionMessage = "Missing Input: filter : type param is required"
 
 		val actualException =
@@ -47,7 +47,7 @@ class FilterTest {
 	@Test
 	fun `should throw missing input exception if pattern param is missing`() {
 		presentationDefinition =
-			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"], \"filter\":{\"type\":\"string\"}}]}}]}"
+			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{"type":"string"}}]}}]}"""
 		expectedExceptionMessage = "Missing Input: filter : pattern param is required"
 
 		val actualException =
@@ -61,7 +61,7 @@ class FilterTest {
 	@Test
 	fun `should throw invalid input pattern exception if type param is empty`() {
 		presentationDefinition =
-			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"], \"filter\":{\"type\":\"\",\"pattern\":\"MosipCredential\"}}]}}]}"
+			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{"type":"","pattern":"MosipCredential"}}]}}]}"""
 		expectedExceptionMessage = "Invalid Input: filter : type value cannot be empty or null"
 
 		val actualException =
@@ -75,7 +75,7 @@ class FilterTest {
 	@Test
 	fun `should throw missing input exception if pattern param is empty`() {
 		presentationDefinition =
-			"{\"id\":\"pd_123\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"], \"filter\":{\"type\":\"string\",\"pattern\":\"\"}}]}}]}"
+			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{"type":"string","pattern":""}}]}}]}"""
 		expectedExceptionMessage = "Invalid Input: filter : pattern value cannot be empty or null"
 
 		val actualException =
