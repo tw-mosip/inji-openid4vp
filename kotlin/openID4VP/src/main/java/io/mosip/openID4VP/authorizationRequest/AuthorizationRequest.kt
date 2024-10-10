@@ -14,7 +14,7 @@ class AuthorizationRequest(
     val clientId: String,
     val responseType: String,
     val responseMode: String,
-    val presentationDefinition: String?,
+    val presentationDefinition: String,
     val responseUri: String,
     val nonce: String,
     val state: String
@@ -98,7 +98,7 @@ class AuthorizationRequest(
                 clientId = params["client_id"]!!,
                 responseType = params["response_type"]!!,
                 responseMode = params["response_mode"]!!,
-                presentationDefinition = params["presentation_definition"],
+                presentationDefinition = params["presentation_definition"]!!,
                 responseUri = params["response_uri"]!!,
                 nonce = params["nonce"]!!,
                 state = params["state"]!!

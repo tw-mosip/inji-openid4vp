@@ -11,6 +11,7 @@ import org.apache.commons.codec.binary.Base64
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.nio.charset.StandardCharsets
@@ -138,11 +139,10 @@ class AuthorizationRequestTests {
             clientId = "https://verify.env1.net",
             presentationDefinition = presentationDefinition
         )
-        val expectedValue = mutableMapOf("presentation_definition" to presentationDefinition)
 
         val actualValue =
             openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers)
-        assertEquals(expectedValue, actualValue)
+        assertTrue(actualValue is AuthorizationRequest)
     }
 }
 

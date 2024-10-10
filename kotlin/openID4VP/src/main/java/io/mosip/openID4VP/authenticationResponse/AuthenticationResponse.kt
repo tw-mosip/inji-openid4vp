@@ -11,9 +11,8 @@ class AuthenticationResponse {
         fun getAuthenticationResponse(
             authorizationRequest: AuthorizationRequest,
             trustedVerifiers: List<Verifier>,
-            setPresentationDefinitionId: (String) -> Unit
-        ): Map<String, String> {
-            val response = mutableMapOf<String, String>()
+            setPresentationDefinitionId: (String) -> Unit,
+        ): AuthorizationRequest {
             validateVerifierClientID(
                 authorizationRequest.clientId,
                 authorizationRequest.responseUri,
@@ -26,9 +25,8 @@ class AuthenticationResponse {
                         val presentationDefinition: PresentationDefinition =
                             validatePresentationDefinition(presentationDefinitionJson)
                         setPresentationDefinitionId(presentationDefinition.id)
-                        response.put("presentation_definition", presentationDefinitionJson)
                     }
-                    return response
+                    return authorizationRequest
                 } catch (e: Exception) {
                     throw e
                 }

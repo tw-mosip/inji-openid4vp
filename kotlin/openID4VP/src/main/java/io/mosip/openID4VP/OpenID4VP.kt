@@ -25,7 +25,7 @@ class OpenID4VP(private val traceabilityId: String) {
 
     fun authenticateVerifier(
         encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
-    ): Map<String, String> {
+    ): AuthorizationRequest {
         try {
             Logger.setTraceability(traceabilityId)
             authorizationRequest = AuthorizationRequest.getAuthorizationRequest(
