@@ -32,10 +32,10 @@ class AuthenticationResponse {
 
         private fun validateVerifier(
             receivedClientId: String,
-            responseUri: String,
+            receivedResponseUri: String,
             trustedVerifiers: List<Verifier>
         ): Verifier? {
-            return trustedVerifiers.find { it.clientId == receivedClientId && responseUri in it.responseUris }
+            return trustedVerifiers.find { it.clientId == receivedClientId && receivedResponseUri in it.responseUris }
         }
     }
 }
