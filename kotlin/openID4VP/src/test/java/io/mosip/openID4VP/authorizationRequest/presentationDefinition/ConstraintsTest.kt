@@ -4,6 +4,7 @@ import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import org.junit.After
 import org.junit.Assert
@@ -38,7 +39,7 @@ class ConstraintsTest {
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java) {
-				validatePresentationDefinition(presentationDefinition)
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)

@@ -1,9 +1,10 @@
 package io.mosip.openID4VP.authenticationResponse
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.validatePresentationDefinition
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.dto.Verifier
 
 class AuthenticationResponse {
@@ -22,7 +23,10 @@ class AuthenticationResponse {
                     val presentationDefinitionJson =
                         authorizationRequest.presentationDefinition
                     val presentationDefinition: PresentationDefinition =
-                        validatePresentationDefinition(presentationDefinitionJson.toString())
+                        deserializeAndValidate(
+                            presentationDefinitionJson.toString(),
+                            PresentationDefinitionSerializer
+                        )
                     updatePresentationDefinition(presentationDefinition)
                 } catch (e: Exception) {
                     throw e

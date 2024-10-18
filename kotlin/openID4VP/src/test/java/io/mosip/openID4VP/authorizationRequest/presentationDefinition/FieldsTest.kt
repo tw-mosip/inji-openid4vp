@@ -4,6 +4,7 @@ import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import org.junit.After
 import org.junit.Assert
@@ -39,7 +40,7 @@ class FieldsTest {
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInputPattern::class.java) {
-				validatePresentationDefinition(presentationDefinition)
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -53,7 +54,7 @@ class FieldsTest {
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
-				validatePresentationDefinition(presentationDefinition)
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -67,7 +68,7 @@ class FieldsTest {
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-				validatePresentationDefinition(presentationDefinition)
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)

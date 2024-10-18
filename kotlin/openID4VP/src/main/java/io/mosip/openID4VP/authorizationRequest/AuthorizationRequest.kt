@@ -18,7 +18,8 @@ data class AuthorizationRequest(
     var presentationDefinition: Any,
     val responseUri: String,
     val nonce: String,
-    val state: String
+    val state: String,
+    val clientMetadata: ClientMetadata
 ) {
 
     init {
@@ -88,6 +89,7 @@ data class AuthorizationRequest(
                 "response_mode",
                 "nonce",
                 "state",
+                "client_metadata"
             )
 
             requiredRequestParams.forEach { param ->
@@ -109,7 +111,11 @@ data class AuthorizationRequest(
                 presentationDefinition = params["presentation_definition"]!!,
                 responseUri = params["response_uri"]!!,
                 nonce = params["nonce"]!!,
-                state = params["state"]!!
+                state = params["state"]!!,
+                clientMetadata = deserializeAndValidate(
+                    params["client_metadata"]!!,
+                    ClientMetadataSerializer
+                )
             )
         }
     }

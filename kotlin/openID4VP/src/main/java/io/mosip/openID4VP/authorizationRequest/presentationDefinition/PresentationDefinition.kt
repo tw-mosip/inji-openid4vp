@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.Validatable
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.credentialFormatTypes.Format
 import kotlinx.serialization.KSerializer
@@ -88,9 +89,9 @@ class PresentationDefinition(
 	val id: String,
 	@SerialName("input_descriptors") val inputDescriptors: List<InputDescriptor>,
 	val name: String? = null, val purpose: String? = null, val format: Format? = null
-) {
+) : Validatable {
 
-	fun validate() {
+	override fun validate() {
 		try {
 			require(id.isNotEmpty()) {
 				throw Logger.handleException("InvalidInput", "presentation_definition", "id", className)

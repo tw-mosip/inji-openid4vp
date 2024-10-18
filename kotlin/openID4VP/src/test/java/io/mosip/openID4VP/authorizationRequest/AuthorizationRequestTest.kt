@@ -16,7 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import java.nio.charset.StandardCharsets
 
-class AuthorizationRequestTests {
+class AuthorizationRequestTest {
     private lateinit var openID4VP: OpenID4VP
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var presentationDefinition: String
@@ -134,7 +134,7 @@ class AuthorizationRequestTests {
     }
 
     @Test
-    fun `should return Authentication Response if all the fields are present and valid in Authorization Request`() {
+    fun `should return Authorization Request as Authentication Response if all the fields are present and valid in Authorization Request`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
             clientId = "https://verify.env1.net",
             presentationDefinition = presentationDefinition
@@ -154,10 +154,11 @@ fun createEncodedAuthorizationRequest(
     val state = "fsnC8ixCs6mWyV+00k23Qg=="
     val nonce = "bMHvX1HGhbh8zqlSWf/fuQ=="
     val authorizationRequestUrl = StringBuilder("")
+    val clientMetadata = """{"name":"verifier"}"""
 
     if (clientId != null) authorizationRequestUrl.append("client_id=$clientId&")
     if (presentationDefinition != null) authorizationRequestUrl.append("presentation_definition=$presentationDefinition&")
-    authorizationRequestUrl.append("response_type=vp_token&response_mode=direct_post&nonce=$nonce&state=$state&response_uri=$responseUri")
+    authorizationRequestUrl.append("response_type=vp_token&response_mode=direct_post&nonce=$nonce&state=$state&response_uri=$responseUri&client_metadata=$clientMetadata")
     val encodedAuthorizationRequestInBytes = Base64.encodeBase64(
         authorizationRequestUrl.toString().toByteArray(
             StandardCharsets.UTF_8

@@ -7,8 +7,10 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.validatePresentationDefinition
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
@@ -45,6 +47,7 @@ class AuthorizationResponseTest {
         IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==
         -----END RSA PUBLIC KEY-----"""
     private lateinit var presentationDefinition: String
+    private lateinit var clientMetadata: String
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var mockWebServer: MockWebServer
     private lateinit var expectedValue: String
@@ -57,6 +60,7 @@ class AuthorizationResponseTest {
         openID4VP = OpenID4VP("test-OpenID4VP")
         presentationDefinition =
             """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"id_123","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
+        clientMetadata = """{"name": "verifier"}"""
         trustedVerifiers = listOf(
             Verifier(
                 "https://injiverify.dev2.mosip.net", listOf(
@@ -76,10 +80,14 @@ class AuthorizationResponseTest {
             clientId = "https://injiverify.dev2.mosip.net",
             responseType = "vp_token",
             responseMode = "direct_post",
-            presentationDefinition = validatePresentationDefinition(presentationDefinition),
+            presentationDefinition = deserializeAndValidate(
+                presentationDefinition,
+                PresentationDefinitionSerializer
+            ),
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
-            responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString()
+            responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString(),
+            clientMetadata = deserializeAndValidate(clientMetadata, ClientMetadataSerializer)
         )
         openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
         mockkStatic(Log::class)
