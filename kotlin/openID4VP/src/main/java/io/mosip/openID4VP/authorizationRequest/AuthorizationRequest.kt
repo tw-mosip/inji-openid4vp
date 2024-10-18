@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest
 
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
 import java.net.URI
@@ -10,17 +11,24 @@ import java.nio.charset.StandardCharsets
 
 private val logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
 
-class AuthorizationRequest(
+data class AuthorizationRequest(
     val clientId: String,
     val responseType: String,
     val responseMode: String,
-    val presentationDefinition: String,
+    var presentationDefinition: Any,
     val responseUri: String,
     val nonce: String,
     val state: String
 ) {
+
+    init {
+        require(presentationDefinition is PresentationDefinition || presentationDefinition is String) {
+            "presentationDefinition must be of type String or PresentationDefinition"
+        }
+    }
+
     companion object {
-        fun getAuthorizationRequest(
+        fun validateAndGetAuthorizationRequest(
             encodedAuthorizationRequest: String, setResponseUri: (String) -> Unit
         ): AuthorizationRequest {
             try {

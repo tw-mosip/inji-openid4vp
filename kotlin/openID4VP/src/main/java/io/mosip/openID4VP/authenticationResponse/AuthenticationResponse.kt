@@ -8,12 +8,12 @@ import io.mosip.openID4VP.dto.Verifier
 
 class AuthenticationResponse {
     companion object {
-        fun getAuthenticationResponse(
+        fun validateVerifierAndPresentationDefinition(
             authorizationRequest: AuthorizationRequest,
             trustedVerifiers: List<Verifier>,
-            setPresentationDefinitionId: (String) -> Unit,
-        ): AuthorizationRequest {
-            validateVerifierClientID(
+            updatePresentationDefinition: (PresentationDefinition) -> Unit
+        ) {
+            validateVerifier(
                 authorizationRequest.clientId,
                 authorizationRequest.responseUri,
                 trustedVerifiers
@@ -21,19 +21,16 @@ class AuthenticationResponse {
                 try {
                     val presentationDefinitionJson =
                         authorizationRequest.presentationDefinition
-                    presentationDefinitionJson?.let {
-                        val presentationDefinition: PresentationDefinition =
-                            validatePresentationDefinition(presentationDefinitionJson)
-                        setPresentationDefinitionId(presentationDefinition.id)
-                    }
-                    return authorizationRequest
+                    val presentationDefinition: PresentationDefinition =
+                        validatePresentationDefinition(presentationDefinitionJson.toString())
+                    updatePresentationDefinition(presentationDefinition)
                 } catch (e: Exception) {
                     throw e
                 }
             } ?: run { throw AuthorizationRequestExceptions.InvalidVerifierClientID() }
         }
 
-        private fun validateVerifierClientID(
+        private fun validateVerifier(
             receivedClientId: String,
             responseUri: String,
             trustedVerifiers: List<Verifier>

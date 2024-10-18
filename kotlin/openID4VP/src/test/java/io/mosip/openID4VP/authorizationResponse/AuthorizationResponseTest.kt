@@ -8,6 +8,7 @@ import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.validatePresentationDefinition
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
@@ -71,12 +72,11 @@ class AuthorizationResponseTest {
         )
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
-        openID4VP.setPresentationDefinitionId("6498781c-f291-4969-9cd5-2c273858f38f")
         openID4VP.authorizationRequest = AuthorizationRequest(
             clientId = "https://injiverify.dev2.mosip.net",
             responseType = "vp_token",
             responseMode = "direct_post",
-            presentationDefinition = presentationDefinition,
+            presentationDefinition = validatePresentationDefinition(presentationDefinition),
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
             responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString()

@@ -2,6 +2,7 @@ package io.mosip.openID4VP
 
 import io.mosip.openID4VP.authenticationResponse.AuthenticationResponse
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.VPResponseMetadata
@@ -12,28 +13,31 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
 class OpenID4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
-    private lateinit var presentationDefinitionId: String
     private var responseUri: String? = null
 
-    fun setResponseUri(responseUri: String) {
+    private fun setResponseUri(responseUri: String) {
         this.responseUri = responseUri
     }
 
-    fun setPresentationDefinitionId(id: String) {
-        this.presentationDefinitionId = id
+    private fun updatePresentationDefinition(presentationDefinition: PresentationDefinition) {
+        this.authorizationRequest.presentationDefinition = presentationDefinition
     }
+
 
     fun authenticateVerifier(
         encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
     ): AuthorizationRequest {
         try {
             Logger.setTraceability(traceabilityId)
-            authorizationRequest = AuthorizationRequest.getAuthorizationRequest(
+            authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
                 encodedAuthorizationRequest, ::setResponseUri
             )
-            return AuthenticationResponse.getAuthenticationResponse(
-                authorizationRequest, trustedVerifiers, ::setPresentationDefinitionId
+            AuthenticationResponse.validateVerifierAndPresentationDefinition(
+                authorizationRequest,
+                trustedVerifiers,
+                ::updatePresentationDefinition
             )
+            return this.authorizationRequest
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
             throw exception
@@ -56,7 +60,7 @@ class OpenID4VP(private val traceabilityId: String) {
                 vpResponseMetadata,
                 authorizationRequest.nonce,
                 authorizationRequest.responseUri,
-                presentationDefinitionId
+                (this.authorizationRequest.presentationDefinition as PresentationDefinition).id
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
