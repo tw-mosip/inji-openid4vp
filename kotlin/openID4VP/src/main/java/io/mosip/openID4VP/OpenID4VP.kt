@@ -50,6 +50,7 @@ class OpenID4VP(private val traceabilityId: String) {
                 verifiableCredentials
             )
         } catch (exception: Exception) {
+            sendErrorToVerifier(exception)
             throw exception
         }
     }
