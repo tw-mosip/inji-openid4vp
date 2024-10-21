@@ -19,12 +19,18 @@ data class AuthorizationRequest(
     val responseUri: String,
     val nonce: String,
     val state: String,
-    val clientMetadata: ClientMetadata
+    var clientMetadata: Any? = null
 ) {
 
     init {
         require(presentationDefinition is PresentationDefinition || presentationDefinition is String) {
             "presentationDefinition must be of type String or PresentationDefinition"
+        }
+
+        clientMetadata?.let {
+            require(clientMetadata is ClientMetadata || clientMetadata is String) {
+                "clientMetadata must be of type String or ClientMetadata"
+            }
         }
     }
 
@@ -89,9 +95,7 @@ data class AuthorizationRequest(
                 "response_mode",
                 "nonce",
                 "state",
-                "client_metadata"
             )
-
             requiredRequestParams.forEach { param ->
                 val value = params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
                 if (param == "response_uri") {
@@ -99,6 +103,15 @@ data class AuthorizationRequest(
                 }
                 require(value.isNotEmpty()) {
                     throw AuthorizationRequestExceptions.InvalidInput(param)
+                }
+            }
+
+            val optionalRequestParams = mutableListOf("client_metadata")
+            optionalRequestParams.forEach { param ->
+                params[param]?.let { value ->
+                    require(value.isNotEmpty()) {
+                        throw AuthorizationRequestExceptions.InvalidInput(param)
+                    }
                 }
             }
         }
@@ -112,10 +125,7 @@ data class AuthorizationRequest(
                 responseUri = params["response_uri"]!!,
                 nonce = params["nonce"]!!,
                 state = params["state"]!!,
-                clientMetadata = deserializeAndValidate(
-                    params["client_metadata"]!!,
-                    ClientMetadataSerializer
-                )
+                clientMetadata = params["client_metadata"],
             )
         }
     }

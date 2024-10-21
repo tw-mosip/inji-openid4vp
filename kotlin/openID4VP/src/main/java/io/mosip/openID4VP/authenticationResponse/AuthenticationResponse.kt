@@ -1,6 +1,8 @@
 package io.mosip.openID4VP.authenticationResponse
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.ClientMetadata
+import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
@@ -12,7 +14,8 @@ class AuthenticationResponse {
         fun validateVerifierAndPresentationDefinition(
             authorizationRequest: AuthorizationRequest,
             trustedVerifiers: List<Verifier>,
-            updatePresentationDefinition: (PresentationDefinition) -> Unit
+            updatePresentationDefinition: (PresentationDefinition) -> Unit,
+            updateClientMetadata: (ClientMetadata) -> Unit
         ) {
             validateVerifier(
                 authorizationRequest.clientId,
@@ -20,11 +23,17 @@ class AuthenticationResponse {
                 trustedVerifiers
             )?.let {
                 try {
-                    val presentationDefinitionJson =
-                        authorizationRequest.presentationDefinition
+                    authorizationRequest.clientMetadata?.let {
+                        val clientMetadata: ClientMetadata =
+                            deserializeAndValidate(
+                                (authorizationRequest.clientMetadata).toString(),
+                                ClientMetadataSerializer
+                            )
+                        updateClientMetadata(clientMetadata)
+                    }
                     val presentationDefinition: PresentationDefinition =
                         deserializeAndValidate(
-                            presentationDefinitionJson.toString(),
+                            (authorizationRequest.presentationDefinition).toString(),
                             PresentationDefinitionSerializer
                         )
                     updatePresentationDefinition(presentationDefinition)
