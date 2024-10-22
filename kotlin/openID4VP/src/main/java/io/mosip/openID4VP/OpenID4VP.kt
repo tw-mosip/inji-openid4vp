@@ -75,7 +75,7 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    private fun sendErrorToVerifier(exception: Exception) {
+    fun sendErrorToVerifier(exception: Exception) {
         responseUri?.let {
             try {
                 val response = sendHttpPostRequest(
