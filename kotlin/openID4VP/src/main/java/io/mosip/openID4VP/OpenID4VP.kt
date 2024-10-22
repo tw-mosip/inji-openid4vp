@@ -1,6 +1,5 @@
 package io.mosip.openID4VP
 
-import android.util.Log
 import io.mosip.openID4VP.authenticationResponse.AuthenticationResponse
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.ClientMetadata
@@ -10,7 +9,6 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
-import okhttp3.ResponseBody.Companion.toResponseBody
 
 private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
 class OpenID4VP(private val traceabilityId: String) {
@@ -78,11 +76,9 @@ class OpenID4VP(private val traceabilityId: String) {
     fun sendErrorToVerifier(exception: Exception) {
         responseUri?.let {
             try {
-                val response = sendHttpPostRequest(
+                sendHttpPostRequest(
                     it, mapOf("error" to exception.message!!)
                 )
-
-                println("verifier call response::${response.toResponseBody()}")
             } catch (exception: Exception) {
                 Logger.error(
                     logTag,
