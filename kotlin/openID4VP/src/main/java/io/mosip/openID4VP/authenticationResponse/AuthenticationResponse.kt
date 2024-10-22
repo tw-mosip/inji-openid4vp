@@ -11,11 +11,10 @@ import io.mosip.openID4VP.dto.Verifier
 
 class AuthenticationResponse {
     companion object {
-        fun validateVerifierAndPresentationDefinition(
+        fun validateAuthorizationRequestPartially(
             authorizationRequest: AuthorizationRequest,
             trustedVerifiers: List<Verifier>,
-            updatePresentationDefinition: (PresentationDefinition) -> Unit,
-            updateClientMetadata: (ClientMetadata) -> Unit
+            updateAuthorizationRequest: (PresentationDefinition, ClientMetadata?) -> Unit,
         ) {
             validateVerifier(
                 authorizationRequest.clientId,
@@ -23,20 +22,20 @@ class AuthenticationResponse {
                 trustedVerifiers
             )?.let {
                 try {
+                    var clientMetadata: ClientMetadata? = null
                     authorizationRequest.clientMetadata?.let {
-                        val clientMetadata: ClientMetadata =
+                        clientMetadata =
                             deserializeAndValidate(
                                 (authorizationRequest.clientMetadata).toString(),
                                 ClientMetadataSerializer
                             )
-                        updateClientMetadata(clientMetadata)
                     }
                     val presentationDefinition: PresentationDefinition =
                         deserializeAndValidate(
                             (authorizationRequest.presentationDefinition).toString(),
                             PresentationDefinitionSerializer
                         )
-                    updatePresentationDefinition(presentationDefinition)
+                    updateAuthorizationRequest(presentationDefinition, clientMetadata)
                 } catch (e: Exception) {
                     throw e
                 }

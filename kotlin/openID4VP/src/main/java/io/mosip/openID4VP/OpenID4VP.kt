@@ -19,11 +19,11 @@ class OpenID4VP(private val traceabilityId: String) {
         this.responseUri = responseUri
     }
 
-    private fun updatePresentationDefinition(presentationDefinition: PresentationDefinition) {
+    private fun updateAuthorizationRequest(
+        presentationDefinition: PresentationDefinition,
+        clientMetadata: ClientMetadata?
+    ) {
         this.authorizationRequest.presentationDefinition = presentationDefinition
-    }
-
-    private fun updateClientMetadata(clientMetadata: ClientMetadata) {
         this.authorizationRequest.clientMetadata = clientMetadata
     }
 
@@ -35,11 +35,10 @@ class OpenID4VP(private val traceabilityId: String) {
             authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
                 encodedAuthorizationRequest, ::setResponseUri
             )
-            AuthenticationResponse.validateVerifierAndPresentationDefinition(
+            AuthenticationResponse.validateAuthorizationRequestPartially(
                 authorizationRequest,
                 trustedVerifiers,
-                ::updatePresentationDefinition,
-                ::updateClientMetadata
+                ::updateAuthorizationRequest,
             )
             return this.authorizationRequest
         } catch (exception: Exception) {
