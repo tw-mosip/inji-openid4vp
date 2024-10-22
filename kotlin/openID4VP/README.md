@@ -76,7 +76,7 @@ This method will also notify the Verifier about the error by sending it to the r
 1. JsonEncodingException is thrown if there is any issue while serializing the Verifiable Presentation token without proof.
 
 ### shareVerifiablePresentation
-- This function constructs a verifiable presentation token with proof using received VPResponseMetadata, then sends it and the presentation submission to the Verifier via a POST request.
+- This function constructs a verifiable presentation token with proof using received VPResponseMetadata, then sends it and the presentation submission to the Verifier via a HTTP POST request.
 - Returns the response with a success or error message back to the wallet.
 
 ```
@@ -97,3 +97,15 @@ This method will also notify the Verifier about the error by sending it to the r
 3. NetworkRequestFailed exception is thrown when there is any other exception occurred when sending the response over http post request.
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
+
+### sendErrorToVerifier
+- Receives an exception and sends it's message to the Verifier via a HTTP POST request.
+
+```
+ openID4VP.sendErrorToVerifier(exception: Exception)
+```
+
+###### Exceptions
+
+1. InterruptedIOException is thrown if the connection is timed out when network call is made.
+2. NetworkRequestFailed exception is thrown when there is any other exception occurred when sending the response over http post request.
