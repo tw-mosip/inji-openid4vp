@@ -105,6 +105,13 @@ This method will also notify the Verifier about the error by sending it to the r
  openID4VP.sendErrorToVerifier(exception: Exception)
 ```
 
+###### Parameters
+
+| Name      | Type      | Description                        | Sample                           |
+|-----------|-----------|------------------------------------|----------------------------------|
+| exception | Exception | This contains the exception object | `new Exception("exception message")` |
+
+
 ###### Exceptions
 
 1. InterruptedIOException is thrown if the connection is timed out when network call is made.
