@@ -87,6 +87,7 @@ data class AuthorizationRequest(
         private fun validateQueryParams(
             params: Map<String, String>, setResponseUri: (String) -> Unit
         ) {
+            //Keep response_uri as first param in this list because if any other required param is not present then we need this response_uri to send error to the verifier
             val requiredRequestParams = mutableListOf(
                 "response_uri",
                 "presentation_definition",
