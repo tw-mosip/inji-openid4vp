@@ -7,7 +7,10 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
@@ -24,10 +27,10 @@ class AuthorizationResponseTest {
     private lateinit var openID4VP: OpenID4VP
     private val selectedCredentialsList = mapOf(
         "456" to listOf(
-            "{\"credential\":{\"issuanceDate\":\"2024-08-02T16:04:35.304Z\",\"credentialSubject\":{\"face\":\"data:image/jpeg;base64,/9j/goKCyuig\",\"dateOfBirth\":\"2000/01/01\",\"id\":\"did:jwk:eyJr80435=\",\"UIN\":\"9012378996\",\"email\":\"mockuser@gmail.com\"},\"id\":\"https://domain.net/credentials/12345-87435\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-04-14T16:04:35Z\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"https://domain.net/.well-known/public-key.json\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\"},\"type\":[\"VerifiableCredential\"],\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://domain.net/.well-known/context.json\",{\"sec\":\"https://w3id.org/security#\"}],\"issuer\":\"https://domain.net/.well-known/issuer.json\"}}",
-            "{\"credential\":{\"issuanceDate\":\"2024-08-12T18:03:35.304Z\",\"credentialSubject\":{\"face\":\"data:image/jpeg;base64,/9j/goKCyuig\",\"dateOfBirth\":\"2000/01/01\",\"id\":\"did:jwk:eyJr80435=\",\"UIN\":\"9012378996\",\"email\":\"mockuser@gmail.com\"},\"id\":\"https://domain.net/credentials/12345-87435\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-04-14T16:04:35Z\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"https://domain.net/.well-known/public-key.json\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\"},\"type\":[\"VerifiableCredential\"],\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://domain.net/.well-known/context.json\",{\"sec\":\"https://w3id.org/security#\"}],\"issuer\":\"https://domain.net/.well-known/issuer.json\"}}"
+            """{"format":"ldp_vc","verifiableCredential":{"credential":{"issuanceDate":"2024-08-02T16:04:35.304Z","credentialSubject":{"face":"data:image/jpeg;base64,/9j/goKCyuig","dateOfBirth":"2000/01/01","id":"did:jwk:eyJr80435=","UIN":"9012378996","email":"mockuser@gmail.com"},"id":"https://domain.net/credentials/12345-87435","proof":{"type":"RsaSignature2018","created":"2024-04-14T16:04:35Z","proofPurpose":"assertionMethod","verificationMethod":"https://domain.net/.well-known/public-key.json","jws":"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"},"type":["VerifiableCredential"],"@context":["https://www.w3.org/2018/credentials/v1","https://domain.net/.well-known/context.json",{"sec":"https://w3id.org/security#"}],"issuer":"https://domain.net/.well-known/issuer.json"}}}""",
+            """{"verifiableCredential":{"credential":{"issuanceDate":"2024-08-12T18:03:35.304Z","credentialSubject":{"face":"data:image/jpeg;base64,/9j/goKCyuig","dateOfBirth":"2000/01/01","id":"did:jwk:eyJr80435=","UIN":"9012378996","email":"mockuser@gmail.com"},"id":"https://domain.net/credentials/12345-87435","proof":{"type":"RsaSignature2018","created":"2024-04-14T16:04:35Z","proofPurpose":"assertionMethod","verificationMethod":"https://domain.net/.well-known/public-key.json","jws":"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"},"type":["VerifiableCredential"],"@context":["https://www.w3.org/2018/credentials/v1","https://domain.net/.well-known/context.json",{"sec":"https://w3id.org/security#"}],"issuer":"https://domain.net/.well-known/issuer.json"}}}"""
         ), "789" to listOf(
-            "{\"credential\":{\"issuanceDate\":\"2024-08-18T13:02:35.304Z\",\"credentialSubject\":{\"face\":\"data:image/jpeg;base64,/9j/goKCyuig\",\"dateOfBirth\":\"2000/01/01\",\"id\":\"did:jwk:eyJr80435=\",\"UIN\":\"9012378996\",\"email\":\"mockuser@gmail.com\"},\"id\":\"https://domain.net/credentials/12345-87435\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-04-14T16:04:35Z\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"https://domain.net/.well-known/public-key.json\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\"},\"type\":[\"VerifiableCredential\"],\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://domain.net/.well-known/context.json\",{\"sec\":\"https://w3id.org/security#\"}],\"issuer\":\"https://domain.net/.well-known/issuer.json\"}}"
+            """{"format":"ldp_vc","verifiableCredential":{"credential":{"issuanceDate":"2024-08-18T13:02:35.304Z","credentialSubject":{"face":"data:image/jpeg;base64,/9j/goKCyuig","dateOfBirth":"2000/01/01","id":"did:jwk:eyJr80435=","UIN":"9012378996","email":"mockuser@gmail.com"},"id":"https://domain.net/credentials/12345-87435","proof":{"type":"RsaSignature2018","created":"2024-04-14T16:04:35Z","proofPurpose":"assertionMethod","verificationMethod":"https://domain.net/.well-known/public-key.json","jws":"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"},"type":["VerifiableCredential"],"@context":["https://www.w3.org/2018/credentials/v1","https://domain.net/.well-known/context.json",{"sec":"https://w3id.org/security#"}],"issuer":"https://domain.net/.well-known/issuer.json"}}}"""
         )
     )
     private val publicKey = """-----BEGIN RSA PUBLIC KEY-----
@@ -44,6 +47,7 @@ class AuthorizationResponseTest {
         IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==
         -----END RSA PUBLIC KEY-----"""
     private lateinit var presentationDefinition: String
+    private lateinit var clientMetadata: String
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var mockWebServer: MockWebServer
     private lateinit var expectedValue: String
@@ -55,7 +59,8 @@ class AuthorizationResponseTest {
     fun setUp() {
         openID4VP = OpenID4VP("test-OpenID4VP")
         presentationDefinition =
-            "{\"id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"input_descriptors\":[{\"id\":\"id_123\",\"constraints\":{\"fields\":[{\"path\":[\"$.type\"]}]}}]}"
+            """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"id_123","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
+        clientMetadata = """{"name": "verifier"}"""
         trustedVerifiers = listOf(
             Verifier(
                 "https://injiverify.dev2.mosip.net", listOf(
@@ -71,15 +76,18 @@ class AuthorizationResponseTest {
         )
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
-        openID4VP.setPresentationDefinitionId("6498781c-f291-4969-9cd5-2c273858f38f")
         openID4VP.authorizationRequest = AuthorizationRequest(
             clientId = "https://injiverify.dev2.mosip.net",
             responseType = "vp_token",
             responseMode = "direct_post",
-            presentationDefinition = presentationDefinition,
+            presentationDefinition = deserializeAndValidate(
+                presentationDefinition,
+                PresentationDefinitionSerializer
+            ),
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
-            responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString()
+            responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString(),
+            clientMetadata = deserializeAndValidate(clientMetadata, ClientMetadataSerializer)
         )
         openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
         mockkStatic(Log::class)
@@ -100,7 +108,7 @@ class AuthorizationResponseTest {
     @Test
     fun `should construct VPToken in JsonString format using received selected verifiable credentials`() {
         expectedValue =
-            "{\"verifiableCredential\":[\"{\\\"credential\\\":{\\\"issuanceDate\\\":\\\"2024-08-02T16:04:35.304Z\\\",\\\"credentialSubject\\\":{\\\"face\\\":\\\"data:image/jpeg;base64,/9j/goKCyuig\\\",\\\"dateOfBirth\\\":\\\"2000/01/01\\\",\\\"id\\\":\\\"did:jwk:eyJr80435=\\\",\\\"UIN\\\":\\\"9012378996\\\",\\\"email\\\":\\\"mockuser@gmail.com\\\"},\\\"id\\\":\\\"https://domain.net/credentials/12345-87435\\\",\\\"proof\\\":{\\\"type\\\":\\\"RsaSignature2018\\\",\\\"created\\\":\\\"2024-04-14T16:04:35Z\\\",\\\"proofPurpose\\\":\\\"assertionMethod\\\",\\\"verificationMethod\\\":\\\"https://domain.net/.well-known/public-key.json\\\",\\\"jws\\\":\\\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\\\"},\\\"type\\\":[\\\"VerifiableCredential\\\"],\\\"@context\\\":[\\\"https://www.w3.org/2018/credentials/v1\\\",\\\"https://domain.net/.well-known/context.json\\\",{\\\"sec\\\":\\\"https://w3id.org/security#\\\"}],\\\"issuer\\\":\\\"https://domain.net/.well-known/issuer.json\\\"}}\",\"{\\\"credential\\\":{\\\"issuanceDate\\\":\\\"2024-08-12T18:03:35.304Z\\\",\\\"credentialSubject\\\":{\\\"face\\\":\\\"data:image/jpeg;base64,/9j/goKCyuig\\\",\\\"dateOfBirth\\\":\\\"2000/01/01\\\",\\\"id\\\":\\\"did:jwk:eyJr80435=\\\",\\\"UIN\\\":\\\"9012378996\\\",\\\"email\\\":\\\"mockuser@gmail.com\\\"},\\\"id\\\":\\\"https://domain.net/credentials/12345-87435\\\",\\\"proof\\\":{\\\"type\\\":\\\"RsaSignature2018\\\",\\\"created\\\":\\\"2024-04-14T16:04:35Z\\\",\\\"proofPurpose\\\":\\\"assertionMethod\\\",\\\"verificationMethod\\\":\\\"https://domain.net/.well-known/public-key.json\\\",\\\"jws\\\":\\\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\\\"},\\\"type\\\":[\\\"VerifiableCredential\\\"],\\\"@context\\\":[\\\"https://www.w3.org/2018/credentials/v1\\\",\\\"https://domain.net/.well-known/context.json\\\",{\\\"sec\\\":\\\"https://w3id.org/security#\\\"}],\\\"issuer\\\":\\\"https://domain.net/.well-known/issuer.json\\\"}}\",\"{\\\"credential\\\":{\\\"issuanceDate\\\":\\\"2024-08-18T13:02:35.304Z\\\",\\\"credentialSubject\\\":{\\\"face\\\":\\\"data:image/jpeg;base64,/9j/goKCyuig\\\",\\\"dateOfBirth\\\":\\\"2000/01/01\\\",\\\"id\\\":\\\"did:jwk:eyJr80435=\\\",\\\"UIN\\\":\\\"9012378996\\\",\\\"email\\\":\\\"mockuser@gmail.com\\\"},\\\"id\\\":\\\"https://domain.net/credentials/12345-87435\\\",\\\"proof\\\":{\\\"type\\\":\\\"RsaSignature2018\\\",\\\"created\\\":\\\"2024-04-14T16:04:35Z\\\",\\\"proofPurpose\\\":\\\"assertionMethod\\\",\\\"verificationMethod\\\":\\\"https://domain.net/.well-known/public-key.json\\\",\\\"jws\\\":\\\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\\\"},\\\"type\\\":[\\\"VerifiableCredential\\\"],\\\"@context\\\":[\\\"https://www.w3.org/2018/credentials/v1\\\",\\\"https://domain.net/.well-known/context.json\\\",{\\\"sec\\\":\\\"https://w3id.org/security#\\\"}],\\\"issuer\\\":\\\"https://domain.net/.well-known/issuer.json\\\"}}\"],\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"holder\":\"\"}"
+            """{"verifiableCredential":["{\"format\":\"ldp_vc\",\"verifiableCredential\":{\"credential\":{\"issuanceDate\":\"2024-08-02T16:04:35.304Z\",\"credentialSubject\":{\"face\":\"data:image/jpeg;base64,/9j/goKCyuig\",\"dateOfBirth\":\"2000/01/01\",\"id\":\"did:jwk:eyJr80435=\",\"UIN\":\"9012378996\",\"email\":\"mockuser@gmail.com\"},\"id\":\"https://domain.net/credentials/12345-87435\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-04-14T16:04:35Z\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"https://domain.net/.well-known/public-key.json\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\"},\"type\":[\"VerifiableCredential\"],\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://domain.net/.well-known/context.json\",{\"sec\":\"https://w3id.org/security#\"}],\"issuer\":\"https://domain.net/.well-known/issuer.json\"}}}","{\"verifiableCredential\":{\"credential\":{\"issuanceDate\":\"2024-08-12T18:03:35.304Z\",\"credentialSubject\":{\"face\":\"data:image/jpeg;base64,/9j/goKCyuig\",\"dateOfBirth\":\"2000/01/01\",\"id\":\"did:jwk:eyJr80435=\",\"UIN\":\"9012378996\",\"email\":\"mockuser@gmail.com\"},\"id\":\"https://domain.net/credentials/12345-87435\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-04-14T16:04:35Z\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"https://domain.net/.well-known/public-key.json\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\"},\"type\":[\"VerifiableCredential\"],\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://domain.net/.well-known/context.json\",{\"sec\":\"https://w3id.org/security#\"}],\"issuer\":\"https://domain.net/.well-known/issuer.json\"}}}","{\"format\":\"ldp_vc\",\"verifiableCredential\":{\"credential\":{\"issuanceDate\":\"2024-08-18T13:02:35.304Z\",\"credentialSubject\":{\"face\":\"data:image/jpeg;base64,/9j/goKCyuig\",\"dateOfBirth\":\"2000/01/01\",\"id\":\"did:jwk:eyJr80435=\",\"UIN\":\"9012378996\",\"email\":\"mockuser@gmail.com\"},\"id\":\"https://domain.net/credentials/12345-87435\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-04-14T16:04:35Z\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"https://domain.net/.well-known/public-key.json\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\"},\"type\":[\"VerifiableCredential\"],\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://domain.net/.well-known/context.json\",{\"sec\":\"https://w3id.org/security#\"}],\"issuer\":\"https://domain.net/.well-known/issuer.json\"}}}"],"id":"649d581c-f291-4969-9cd5-2c27385a348f","holder":""}"""
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
