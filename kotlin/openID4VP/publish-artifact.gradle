@@ -89,7 +89,7 @@ publishing {
                 }
             }
             groupId = "io.mosip"
-            artifactId = "inji-openID4VP"
+            artifactId = "inji-openid4vp"
             version = "0.1.0-SNAPSHOT"
             if (project.gradle.startParameter.taskNames.any { it.contains('assembleRelease') }) {
                 artifacts {
