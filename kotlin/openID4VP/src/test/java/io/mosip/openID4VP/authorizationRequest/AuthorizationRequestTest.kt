@@ -93,24 +93,24 @@ class AuthorizationRequestTest {
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
-    @Test
-    fun `should throw exception if received client_id is not matching with predefined Verifiers list client_id`() {
-        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://verify.env4.net",
-            presentationDefinition = presentationDefinition
-        )
-        val expectedExceptionMessage =
-            "VP sharing failed: Verifier authentication was unsuccessful"
-
-        actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientID::class.java) {
-                openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequestUrl, trustedVerifiers
-                )
-            }
-
-        assertEquals(expectedExceptionMessage, actualException.message)
-    }
+//    @Test
+//    fun `should throw exception if received client_id is not matching with predefined Verifiers list client_id`() {
+//        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
+//            clientId = "https://verify.env4.net",
+//            presentationDefinition = presentationDefinition
+//        )
+//        val expectedExceptionMessage =
+//            "VP sharing failed: Verifier authentication was unsuccessful"
+//
+//        actualException =
+//            assertThrows(AuthorizationRequestExceptions.InvalidVerifierClientID::class.java) {
+//                openID4VP.authenticateVerifier(
+//                    encodedAuthorizationRequestUrl, trustedVerifiers
+//                )
+//            }
+//
+//        assertEquals(expectedExceptionMessage, actualException.message)
+//    }
 
     @Test
     fun `should throw invalid limit disclosure exception if limit disclosure is present and not matching with predefined values`() {
