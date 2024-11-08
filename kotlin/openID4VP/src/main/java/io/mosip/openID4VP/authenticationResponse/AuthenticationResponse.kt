@@ -16,11 +16,11 @@ class AuthenticationResponse {
             trustedVerifiers: List<Verifier>,
             updateAuthorizationRequest: (PresentationDefinition, ClientMetadata?) -> Unit,
         ) {
-            validateVerifier(
-                authorizationRequest.clientId,
-                authorizationRequest.responseUri,
-                trustedVerifiers
-            )?.let {
+//            validateVerifier(
+//                authorizationRequest.clientId,
+//                authorizationRequest.responseUri,
+//                trustedVerifiers
+//            )?.let {
                 try {
                     var clientMetadata: ClientMetadata? = null
                     authorizationRequest.clientMetadata?.let {
@@ -39,7 +39,7 @@ class AuthenticationResponse {
                 } catch (e: Exception) {
                     throw e
                 }
-            } ?: run { throw AuthorizationRequestExceptions.InvalidVerifierClientID() }
+//            } ?: run { throw AuthorizationRequestExceptions.InvalidVerifierClientID() }
         }
 
         private fun validateVerifier(
