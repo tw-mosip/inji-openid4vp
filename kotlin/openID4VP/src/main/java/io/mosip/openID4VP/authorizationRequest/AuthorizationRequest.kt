@@ -4,6 +4,7 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpGetRequest
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -64,6 +65,7 @@ data class AuthorizationRequest(
                     ?: throw AuthorizationRequestExceptions.InvalidQueryParams("Query parameters are missing in the Authorization request")
 
                 val params = extractQueryParams(query)
+                params["presentation_definition"] = fetchPresentationDefinition(params)
                 validateQueryParams(params, setResponseUri)
                 return createAuthorizationRequest(params)
             } catch (exception: Exception) {
@@ -72,9 +74,10 @@ data class AuthorizationRequest(
             }
         }
 
-        private fun extractQueryParams(query: String): Map<String, String> {
+        private fun extractQueryParams(query: String): MutableMap<String, String> {
             try {
-                return query.split("&").map { it.split("=") }.associateBy({ it[0] }, {
+                return query.split("&").map { it.split("=") }
+                    .associateByTo(mutableMapOf(), { it[0] }, {
                     if (it.size > 1) URLDecoder.decode(
                         it[1], StandardCharsets.UTF_8.toString()
                     ) else ""
@@ -82,6 +85,43 @@ data class AuthorizationRequest(
             } catch (exception: Exception) {
                 throw AuthorizationRequestExceptions.InvalidQueryParams("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
             }
+        }
+
+        private fun fetchPresentationDefinition(params: Map<String, String>): String {
+            val exception: Exception
+            val hasPresentationDefinition = params.containsKey("presentation_definition")
+            val hasPresentationDefinitionUri = params.containsKey("presentation_definition_uri")
+            var presentationDefinition = ""
+
+            when {
+                hasPresentationDefinition && hasPresentationDefinitionUri -> {
+                    exception = AuthorizationRequestExceptions.InvalidQueryParams(
+                        "Either presentation_definition or presentation_definition_uri request param can be provided but not both"
+                    )
+                    Logger.error(logTag, exception)
+                    throw exception
+                }
+
+                hasPresentationDefinition -> presentationDefinition =
+                    params["presentation_definition"]!!
+
+                hasPresentationDefinitionUri -> {
+                    try {
+                        presentationDefinition =
+                            sendHttpGetRequest(params["presentation_definition_uri"]!!)
+                    } catch (exception: Exception) {
+                        throw exception
+                    }
+                }
+
+                !hasPresentationDefinitionUri -> {
+                    exception =
+                        AuthorizationRequestExceptions.InvalidQueryParams("Either presentation_definition or presentation_definition_uri request param must be present")
+                    Logger.error(logTag, exception)
+                    throw exception
+                }
+            }
+            return presentationDefinition
         }
 
         private fun validateQueryParams(

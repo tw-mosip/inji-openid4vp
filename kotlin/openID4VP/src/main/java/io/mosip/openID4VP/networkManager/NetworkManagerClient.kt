@@ -41,5 +41,30 @@ class NetworkManagerClient {
 				throw exception
 			}
 		}
+
+		fun sendHttpGetRequest(
+			baseUrl: String
+		): String {
+			try {
+				val client = OkHttpClient.Builder().build()
+				val request =
+					Request.Builder().url(baseUrl).get().build()
+				val response: Response = client.newCall(request).execute()
+				if (response.isSuccessful) {
+					return response.body?.byteStream()?.bufferedReader().use { it?.readText() }
+						?: ""
+				} else {
+					throw NetworkManagerClientExceptions.NetworkRequestFailed(response.toString())
+				}
+			} catch (exception: InterruptedIOException) {
+				val specificException =
+					NetworkManagerClientExceptions.NetworkRequestTimeout()
+				Logger.error(logTag, specificException)
+				throw specificException
+			} catch (exception: Exception) {
+				Logger.error(logTag, exception)
+				throw exception
+			}
+		}
 	}
 }
