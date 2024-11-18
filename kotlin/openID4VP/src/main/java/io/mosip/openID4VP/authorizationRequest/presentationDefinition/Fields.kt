@@ -1,7 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

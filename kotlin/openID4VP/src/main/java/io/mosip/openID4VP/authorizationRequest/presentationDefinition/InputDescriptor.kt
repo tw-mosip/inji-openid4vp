@@ -4,6 +4,7 @@ import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.credentialFormatTypes.Format
+import isNeitherNullNorEmpty
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -84,7 +85,7 @@ class InputDescriptor(
 ) {
 	fun validate() {
 		try {
-			require(id.isNotEmpty()) {
+			require(isNeitherNullNorEmpty(id)) {
 				throw Logger.handleException("InvalidInput", "input_descriptor", "id", className)
 			}
 			format?.validate()

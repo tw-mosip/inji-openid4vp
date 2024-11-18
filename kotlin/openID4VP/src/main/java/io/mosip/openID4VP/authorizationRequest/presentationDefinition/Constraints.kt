@@ -3,6 +3,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
+import isNeitherNullNorEmpty
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,7 +16,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 private val logTag = Logger.getLogTag(Constraints::class.simpleName!!)
-
+private val className = Constraints::class.simpleName!!
 object ConstraintsSerializer : KSerializer<Constraints> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Constraints") {
 		element<List<Fields>>("fields", isOptional = true)
@@ -73,10 +74,17 @@ class Constraints(
 			}
 
 			limitDisclosure?.let {
+				require(isNeitherNullNorEmpty(limitDisclosure)) {
+					throw Logger.handleException(
+						"InvalidInput", "constraints", "limit_disclosure",
+						className
+					)
+				}
+
 				LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
 					?: throw AuthorizationRequestExceptions.InvalidLimitDisclosure()
 			}
-		} catch (exception: AuthorizationRequestExceptions.InvalidInput) {
+		} catch (exception: Exception) {
 			Logger.error(logTag, exception)
 			throw exception
 		}

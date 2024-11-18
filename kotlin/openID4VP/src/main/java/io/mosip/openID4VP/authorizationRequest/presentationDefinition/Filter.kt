@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
 import io.mosip.openID4VP.common.Logger
+import isNeitherNullNorEmpty
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -57,10 +58,10 @@ object FilterSerializer : KSerializer<Filter> {
 class Filter(val type: String, val pattern: String) {
 	fun validate() {
 		try {
-			require(type.isNotEmpty()) {
+			require(isNeitherNullNorEmpty(type)) {
 				throw Logger.handleException("InvalidInput", "filter", "type", className)
 			}
-			require(pattern.isNotEmpty()) {
+			require(isNeitherNullNorEmpty(pattern)) {
 				throw Logger.handleException("InvalidInput", "filter", "pattern", className)
 			}
 		} catch (exception: Exception) {

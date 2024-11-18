@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationRequest
 
 import Generated
 import io.mosip.openID4VP.common.Logger
+import isNeitherNullNorEmpty
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -54,11 +55,11 @@ class ClientMetadata(val name: String, @SerialName("logo_url") val logoUrl: Stri
 	Validatable {
 	override fun validate() {
 		try {
-			require(name.isNotEmpty()) {
+			require(isNeitherNullNorEmpty(name)) {
 				throw Logger.handleException("InvalidInput", "client_metadata", "name", className)
 			}
 			logoUrl?.let {
-				require(logoUrl.isNotEmpty()) {
+				require(isNeitherNullNorEmpty(logoUrl)) {
 					throw Logger.handleException(
 						"InvalidInput",
 						"client_metadata",
