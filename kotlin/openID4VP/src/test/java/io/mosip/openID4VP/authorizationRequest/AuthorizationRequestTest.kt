@@ -187,12 +187,12 @@ fun createEncodedAuthorizationRequest(
     clientId: String? = null,
     presentationDefinition: String? = null,
     presentationDefinitionUri: String? = null,
-    responseUri: String = "https://verifier.env2.net/responseUri"
+    responseUri: String = "https://verifier.env2.net/responseUri",
+    clientMetadata: String = """{"name":"verifier"}"""
 ): String {
     val state = "fsnC8ixCs6mWyV+00k23Qg=="
     val nonce = "bMHvX1HGhbh8zqlSWf/fuQ=="
     val authorizationRequestUrl = StringBuilder("")
-    val clientMetadata = """{"name":"verifier"}"""
 
     if (clientId != null) authorizationRequestUrl.append("client_id=$clientId&")
     if (presentationDefinition != null) authorizationRequestUrl.append("presentation_definition=$presentationDefinition&")

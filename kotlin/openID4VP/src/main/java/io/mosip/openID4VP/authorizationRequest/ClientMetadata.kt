@@ -3,6 +3,7 @@ package io.mosip.openID4VP.authorizationRequest
 import Generated
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
@@ -16,16 +17,19 @@ private val className = ClientMetadata::class.simpleName!!
 object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ClientMetadata") {
 		element<String>("name")
+		element<String>("logo_url", isOptional = true)
 	}
 
 	override fun deserialize(decoder: Decoder): ClientMetadata {
 		val builtInDecoder = decoder.beginStructure(descriptor)
 		var name: String? = null
+		var logoUrl: String? = null
 
 		loop@ while (true) {
 			when (builtInDecoder.decodeElementIndex(descriptor)) {
 				CompositeDecoder.DECODE_DONE -> break@loop
 				0 -> name = builtInDecoder.decodeStringElement(descriptor, 0)
+				1 -> logoUrl = builtInDecoder.decodeStringElement(descriptor, 1)
 			}
 		}
 
@@ -34,7 +38,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 		requireNotNull(name) {
 			throw Logger.handleException("MissingInput", "client_metadata", "name", className)
 		}
-		return ClientMetadata(name = name)
+		return ClientMetadata(name = name, logoUrl = logoUrl)
 	}
 
 	@Generated
@@ -46,11 +50,22 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 }
 
 @Serializable(with = ClientMetadataSerializer::class)
-class ClientMetadata(val name: String) : Validatable {
+class ClientMetadata(val name: String, @SerialName("logo_url") val logoUrl: String?) :
+	Validatable {
 	override fun validate() {
 		try {
 			require(name.isNotEmpty()) {
 				throw Logger.handleException("InvalidInput", "client_metadata", "name", className)
+			}
+			logoUrl?.let {
+				require(logoUrl.isNotEmpty()) {
+					throw Logger.handleException(
+						"InvalidInput",
+						"client_metadata",
+						"logo_url",
+						className
+					)
+				}
 			}
 		} catch (exception: Exception) {
 			throw exception
