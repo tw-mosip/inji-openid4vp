@@ -1,7 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
 import isNeitherNullNorEmpty
 import kotlinx.serialization.KSerializer
@@ -76,13 +75,17 @@ class Constraints(
 			limitDisclosure?.let {
 				require(isNeitherNullNorEmpty(limitDisclosure)) {
 					throw Logger.handleException(
-						"InvalidInput", "constraints", "limit_disclosure",
-						className
+						exceptionType = "InvalidInput",
+						fieldPath = listOf("constraints", "limit_disclosure"),
+						className = className
 					)
 				}
 
 				LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
-					?: throw AuthorizationRequestExceptions.InvalidLimitDisclosure()
+					?: throw Logger.handleException(
+						exceptionType = "InvalidLimitDisclosure",
+						className = className
+					)
 			}
 		} catch (exception: Exception) {
 			Logger.error(logTag, exception)

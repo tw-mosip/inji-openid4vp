@@ -29,7 +29,7 @@ class NetworkManagerClient {
 				if (response.code == 200) {
 					return response.message
 				} else {
-					throw NetworkManagerClientExceptions.NetworkRequestFailed(response.toString())
+					throw Exception(response.toString())
 				}
 			} catch (exception: InterruptedIOException) {
 				val specificException =
@@ -37,8 +37,10 @@ class NetworkManagerClient {
 				Logger.error(logTag, specificException)
 				throw specificException
 			} catch (exception: Exception) {
-				Logger.error(logTag, exception)
-				throw exception
+				val specificException =
+					NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
+				Logger.error(logTag, specificException)
+				throw specificException
 			}
 		}
 

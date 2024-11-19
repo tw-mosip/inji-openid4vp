@@ -141,7 +141,7 @@ class AuthorizationRequestTest {
             presentationDefinition = presentationDefinition
         )
         val expectedExceptionMessage =
-            "Invalid Input: limit_disclosure value should be either required or preferred"
+            "Invalid Input: constraints->limit_disclosure value should be either required or preferred"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java) {

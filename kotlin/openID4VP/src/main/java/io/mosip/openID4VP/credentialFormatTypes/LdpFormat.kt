@@ -1,7 +1,9 @@
 package io.mosip.openID4VP.credentialFormatTypes
 
 import Generated
+import io.mosip.openID4VP.authorizationRequest.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,6 +17,7 @@ import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+private val className = LdpFormat::class.simpleName!!
 object LdpFormatSerializer : KSerializer<LdpFormat> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("LdpFormat") {
 		element<List<String>>("proof_type")
@@ -37,8 +40,13 @@ object LdpFormatSerializer : KSerializer<LdpFormat> {
 
 		builtInDecoder.endStructure(descriptor)
 
-		requireNotNull(proofType) { throw AuthorizationRequestExceptions.MissingInput("LdpFormat : proofType") }
-
+		requireNotNull(proofType) {
+			throw Logger.handleException(
+				exceptionType = "MissingInput",
+				fieldPath = listOf("ldpFormat", "proof_type"),
+				className = className
+			)
+		}
 		return LdpFormat(proofType = proofType)
 	}
 

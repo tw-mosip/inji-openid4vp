@@ -4,11 +4,12 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.Verifier
 
+private val className = AuthenticationResponse::class.simpleName!!
 class AuthenticationResponse {
     companion object {
         fun validateAuthorizationRequestPartially(
@@ -39,7 +40,11 @@ class AuthenticationResponse {
                 } catch (e: Exception) {
                     throw e
                 }
-            } ?: run { throw AuthorizationRequestExceptions.InvalidVerifierClientID() }
+            } ?: run {
+                throw Logger.handleException(
+                    exceptionType = "InvalidVerifierClientID", className = className
+                )
+            }
         }
 
         private fun validateVerifier(

@@ -37,7 +37,11 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 		builtInDecoder.endStructure(descriptor)
 
 		requireNotNull(name) {
-			throw Logger.handleException("MissingInput", "client_metadata", "name", className)
+			throw Logger.handleException(
+				exceptionType = "MissingInput",
+				fieldPath = listOf("client_metadata", "name"),
+				className = className
+			)
 		}
 		return ClientMetadata(name = name, logoUrl = logoUrl)
 	}
@@ -56,15 +60,18 @@ class ClientMetadata(val name: String, @SerialName("logo_url") val logoUrl: Stri
 	override fun validate() {
 		try {
 			require(isNeitherNullNorEmpty(name)) {
-				throw Logger.handleException("InvalidInput", "client_metadata", "name", className)
+				throw Logger.handleException(
+					exceptionType = "InvalidInput",
+					fieldPath = listOf("client_metadata", "name"),
+					className = className
+				)
 			}
 			logoUrl?.let {
 				require(isNeitherNullNorEmpty(logoUrl)) {
 					throw Logger.handleException(
-						"InvalidInput",
-						"client_metadata",
-						"logo_url",
-						className
+						exceptionType = "InvalidInput",
+						fieldPath = listOf("client_metadata", "logo_url"),
+						className = className
 					)
 				}
 			}

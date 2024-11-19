@@ -6,7 +6,7 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 object Logger {
     private var traceabilityId: String? = null
 
-    fun setTraceability(traceabilityId: String) {
+    fun setTraceabilityId(traceabilityId: String) {
         this.traceabilityId = traceabilityId
     }
 
@@ -19,14 +19,41 @@ object Logger {
     }
 
     fun handleException(
-        exceptionType: String, parentField: String, currentField: String, className: String
+        exceptionType: String,
+        message: String? = null,
+        fieldPath: List<String>? = null,
+        className: String
     ): Exception {
-        val fieldPath = "$parentField : $currentField"
+        var fieldPathAsString: String = ""
+        fieldPath?.let {
+            fieldPathAsString = fieldPath.joinToString("->")
+        }
         var exception = Exception()
-        when(exceptionType){
-            "MissingInput" -> exception = AuthorizationRequestExceptions.MissingInput(fieldPath)
-            "InvalidInput" -> exception = AuthorizationRequestExceptions.InvalidInput(fieldPath)
-            "InvalidInputPattern" -> exception = AuthorizationRequestExceptions.InvalidInputPattern(fieldPath)
+        when (exceptionType) {
+            "MissingInput" -> exception =
+                AuthorizationRequestExceptions.MissingInput(fieldPath = fieldPathAsString)
+
+            "InvalidInput" -> exception =
+                AuthorizationRequestExceptions.InvalidInput(fieldPath = fieldPathAsString)
+
+            "InvalidInputPattern" -> exception =
+                AuthorizationRequestExceptions.InvalidInputPattern(fieldPath = fieldPathAsString)
+
+            "InvalidQueryParams" -> exception =
+                AuthorizationRequestExceptions.InvalidQueryParams(message = message ?: "")
+
+            "JsonEncodingFailed" -> exception = AuthorizationRequestExceptions.JsonEncodingFailed(
+                fieldPath = fieldPathAsString, message = message ?: ""
+            )
+
+            "InvalidVerifierClientID" -> exception =
+                AuthorizationRequestExceptions.InvalidVerifierClientID()
+
+            "InvalidLimitDisclosure" -> exception =
+                AuthorizationRequestExceptions.InvalidLimitDisclosure()
+
+            "" -> exception =
+                Exception("An unexpected exception occurred: exception type: $exceptionType")
         }
         this.error(getLogTag(className), exception)
         return exception

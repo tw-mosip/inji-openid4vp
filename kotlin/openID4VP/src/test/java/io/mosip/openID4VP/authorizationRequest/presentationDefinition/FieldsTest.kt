@@ -36,7 +36,7 @@ class FieldsTest {
 		presentationDefinition =
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$-type"]}]}}]}"""
 		expectedExceptionMessage =
-			"Invalid Input Pattern: fields : path pattern is not matching with OpenId4VP specification"
+			"Invalid Input Pattern: fields->path pattern is not matching with OpenId4VP specification"
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInputPattern::class.java) {
@@ -50,7 +50,7 @@ class FieldsTest {
 	fun `should throw missing input exception if path param is missing`() {
 		presentationDefinition =
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{}]}}]}"""
-		expectedExceptionMessage = "Missing Input: fields : path param is required"
+		expectedExceptionMessage = "Missing Input: fields->path param is required"
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
@@ -64,7 +64,7 @@ class FieldsTest {
 	fun `should throw invalid input exception if path param is empty`() {
 		presentationDefinition =
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":[]}]}}]}"""
-		expectedExceptionMessage = "Invalid Input: fields : path value cannot be empty or null"
+		expectedExceptionMessage = "Invalid Input: fields->path value cannot be empty or null"
 
 		val actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {

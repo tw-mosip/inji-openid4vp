@@ -54,7 +54,11 @@ object FieldsSerializer : KSerializer<Fields> {
 		builtInDecoder.endStructure(descriptor)
 
 		requireNotNull(path) {
-			throw Logger.handleException("MissingInput", "fields", "path", className)
+			throw Logger.handleException(
+				exceptionType = "MissingInput",
+				fieldPath = listOf("fields", "path"),
+				className = className
+			)
 		}
 
 		return Fields(
@@ -104,7 +108,11 @@ class Fields(
 	fun validate() {
 		try {
 			require(path.isNotEmpty()) {
-				throw Logger.handleException("InvalidInput", "fields", "path", className)
+				throw Logger.handleException(
+					exceptionType = "InvalidInput",
+					fieldPath = listOf("fields", "path"),
+					className = className
+				)
 			}
 
 			val pathPrefixes = listOf("$.", "$[")
@@ -112,8 +120,9 @@ class Fields(
 				val isNotValidPrefix = !(pathPrefixes.any { p.startsWith(it) })
 				if (isNotValidPrefix) {
 					throw Logger.handleException(
-						"InvalidInputPattern", "fields", "path",
-						className
+						exceptionType = "InvalidInputPattern",
+						fieldPath = listOf("fields", "path"),
+						className = className
 					)
 				}
 			}

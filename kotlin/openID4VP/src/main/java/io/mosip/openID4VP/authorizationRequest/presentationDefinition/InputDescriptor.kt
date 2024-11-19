@@ -48,10 +48,18 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		builtInDecoder.endStructure(descriptor)
 
 		requireNotNull(id) {
-			throw Logger.handleException("MissingInput", "input_descriptor", "id", className)
+			throw Logger.handleException(
+				exceptionType = "MissingInput",
+				fieldPath = listOf("input_descriptor", "id"),
+				className = className
+			)
 		}
 		requireNotNull(constraints) {
-			throw Logger.handleException("MissingInput", "input_descriptor", "constraints", className)
+			throw Logger.handleException(
+				exceptionType = "MissingInput",
+				fieldPath = listOf("input_descriptor", "constraints"),
+				className = className
+			)
 		}
 
 		return InputDescriptor(
@@ -86,7 +94,11 @@ class InputDescriptor(
 	fun validate() {
 		try {
 			require(isNeitherNullNorEmpty(id)) {
-				throw Logger.handleException("InvalidInput", "input_descriptor", "id", className)
+				throw Logger.handleException(
+					exceptionType = "InvalidInput",
+					fieldPath = listOf("input_descriptor", "id"),
+					className = className
+				)
 			}
 			format?.validate()
 			constraints.validate()

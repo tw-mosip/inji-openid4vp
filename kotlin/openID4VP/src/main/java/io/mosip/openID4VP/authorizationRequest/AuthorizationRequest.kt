@@ -11,6 +11,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 private val logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
+private val className = AuthorizationRequest::class.simpleName!!
 
 data class AuthorizationRequest(
     val clientId: String,
@@ -62,8 +63,11 @@ data class AuthorizationRequest(
                 val uriString = "?$encodedQuery"
                 val uri = URI(uriString)
                 val query = uri.query
-                    ?: throw AuthorizationRequestExceptions.InvalidQueryParams("Query parameters are missing in the Authorization request")
-
+                    ?: throw Logger.handleException(
+                        exceptionType = "InvalidQueryParams",
+                        message = "Query parameters are missing in the Authorization request",
+                        className = className
+                    )
                 val params = extractQueryParams(query)
                 params["presentation_definition"] = fetchPresentationDefinition(params)
                 validateQueryParams(params, setResponseUri)
@@ -83,7 +87,11 @@ data class AuthorizationRequest(
                     ) else ""
                 })
             } catch (exception: Exception) {
-                throw AuthorizationRequestExceptions.InvalidQueryParams("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
+                throw Logger.handleException(
+                    exceptionType = "InvalidQueryParams",
+                    message = "Exception occurred when extracting the query params from Authorization Request : ${exception.message}",
+                    className = className
+                )
             }
         }
 
@@ -95,11 +103,11 @@ data class AuthorizationRequest(
 
             when {
                 hasPresentationDefinition && hasPresentationDefinitionUri -> {
-                    exception = AuthorizationRequestExceptions.InvalidQueryParams(
-                        "Either presentation_definition or presentation_definition_uri request param can be provided but not both"
+                    throw Logger.handleException(
+                        exceptionType = "InvalidQueryParams",
+                        message = "Either presentation_definition or presentation_definition_uri request param can be provided but not both",
+                        className = className
                     )
-                    Logger.error(logTag, exception)
-                    throw exception
                 }
 
                 hasPresentationDefinition -> presentationDefinition =
@@ -115,10 +123,11 @@ data class AuthorizationRequest(
                 }
 
                 !hasPresentationDefinitionUri -> {
-                    exception =
-                        AuthorizationRequestExceptions.InvalidQueryParams("Either presentation_definition or presentation_definition_uri request param must be present")
-                    Logger.error(logTag, exception)
-                    throw exception
+                    throw Logger.handleException(
+                        exceptionType = "InvalidQueryParams",
+                        message = "Either presentation_definition or presentation_definition_uri request param must be present",
+                        className = className
+                    )
                 }
             }
             return presentationDefinition
@@ -138,12 +147,20 @@ data class AuthorizationRequest(
                 "state",
             )
             requiredRequestParams.forEach { param ->
-                val value = params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
+                val value = params[param] ?: throw Logger.handleException(
+                    exceptionType = "MissingInput",
+                    fieldPath = listOf(param),
+                    className = className
+                )
                 if (param == "response_uri") {
                     setResponseUri(value)
                 }
                 require(value.isNotEmpty()) {
-                    throw AuthorizationRequestExceptions.InvalidInput(param)
+                    throw Logger.handleException(
+                        exceptionType = "InvalidInput",
+                        fieldPath = listOf(param),
+                        className = className
+                    )
                 }
             }
 

@@ -31,7 +31,7 @@ class OpenID4VP(private val traceabilityId: String) {
         encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
     ): AuthorizationRequest {
         try {
-            Logger.setTraceability(traceabilityId)
+            Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
                 encodedAuthorizationRequest, ::setResponseUri
             )
@@ -82,7 +82,7 @@ class OpenID4VP(private val traceabilityId: String) {
             } catch (exception: Exception) {
                 Logger.error(
                     logTag,
-                    Exception("Unexpected error occurred while sending the error to verifier.")
+                    Exception("Unexpected error occurred while sending the error to verifier: ${exception.message}")
                 )
             }
         }

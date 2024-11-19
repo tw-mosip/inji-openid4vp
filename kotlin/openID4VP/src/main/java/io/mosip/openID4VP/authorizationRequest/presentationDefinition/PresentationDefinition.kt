@@ -55,10 +55,18 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 		builtInDecoder.endStructure(descriptor)
 
 		requireNotNull(id) {
-			throw Logger.handleException("MissingInput", "presentation_definition", "id", className)
+			throw Logger.handleException(
+				exceptionType = "MissingInput",
+				fieldPath = listOf("presentation_definition", "id"),
+				className = className
+			)
 		}
 		requireNotNull(inputDescriptors) {
-			throw Logger.handleException("MissingInput", "presentation_definition", "input_descriptors", className)
+			throw Logger.handleException(
+				exceptionType = "MissingInput",
+				fieldPath = listOf("presentation_definition", "input_descriptors"),
+				className = className
+			)
 		}
 
 		return PresentationDefinition(
@@ -95,10 +103,18 @@ class PresentationDefinition(
 	override fun validate() {
 		try {
 			require(isNeitherNullNorEmpty(id)) {
-				throw Logger.handleException("InvalidInput", "presentation_definition", "id", className)
+				throw Logger.handleException(
+					exceptionType = "InvalidInput",
+					fieldPath = listOf("presentation_definition", "id"),
+					className = className
+				)
 			}
 			require(inputDescriptors.isNotEmpty()) {
-				throw Logger.handleException("InvalidInput", "presentation_definition", "input_descriptors", className)
+				throw Logger.handleException(
+					exceptionType = "InvalidInput",
+					fieldPath = listOf("presentation_definition", "input_descriptors"),
+					className = className
+				)
 			}
 
 			inputDescriptors.forEach { inputDescriptor ->
