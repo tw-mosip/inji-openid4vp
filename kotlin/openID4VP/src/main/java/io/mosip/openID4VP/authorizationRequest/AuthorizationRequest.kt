@@ -6,6 +6,7 @@ import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import isNeitherNullNorEmpty
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -70,7 +71,6 @@ data class AuthorizationRequest(
                         className = className
                     )
                 val params = extractQueryParams(query)
-                params["presentation_definition"] = fetchPresentationDefinition(params)
                 validateQueryParams(params, setResponseUri)
                 return createAuthorizationRequest(params)
             } catch (exception: Exception) {
@@ -110,11 +110,38 @@ data class AuthorizationRequest(
                     )
                 }
 
-                hasPresentationDefinition -> presentationDefinition =
-                    params["presentation_definition"]!!
+                hasPresentationDefinition -> {
+                    val value = params["presentation_definition"] ?: throw Logger.handleException(
+                        exceptionType = "MissingInput",
+                        fieldPath = listOf("presentation_definition"),
+                        className = className
+                    )
+                    require(isNeitherNullNorEmpty(value)) {
+                        throw Logger.handleException(
+                            exceptionType = "InvalidInput",
+                            fieldPath = listOf("presentation_definition"),
+                            className = className
+                        )
+                    }
+                    presentationDefinition =
+                        params["presentation_definition"]!!
+                }
 
                 hasPresentationDefinitionUri -> {
                     try {
+                        val value =
+                            params["presentation_definition_uri"] ?: throw Logger.handleException(
+                                exceptionType = "MissingInput",
+                                fieldPath = listOf("presentation_definition_uri"),
+                                className = className
+                            )
+                        require(isNeitherNullNorEmpty(value)) {
+                            throw Logger.handleException(
+                                exceptionType = "InvalidInput",
+                                fieldPath = listOf("presentation_definition_uri"),
+                                className = className
+                            )
+                        }
                         presentationDefinition =
                             sendHTTPRequest(
                                 url = params["presentation_definition_uri"]!!,
@@ -137,11 +164,26 @@ data class AuthorizationRequest(
         }
 
         private fun validateQueryParams(
-            params: Map<String, String>, setResponseUri: (String) -> Unit
+            params: MutableMap<String, String>, setResponseUri: (String) -> Unit
         ) {
-            //Keep response_uri as first param in this list because if any other required param is not present then we need this response_uri to send error to the verifier
+            val responseUri = params["response_uri"]
+            if (responseUri == null) {
+                throw Logger.handleException(
+                    exceptionType = "MissingInput",
+                    fieldPath = listOf("response_uri"),
+                    className = className
+                )
+            } else if (!isNeitherNullNorEmpty(responseUri)) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidInput",
+                    fieldPath = listOf("response_uri"),
+                    className = className
+                )
+            } else {
+                setResponseUri(responseUri)
+            }
+
             val requiredRequestParams = mutableListOf(
-                "response_uri",
                 "presentation_definition",
                 "client_id",
                 "response_type",
@@ -150,15 +192,19 @@ data class AuthorizationRequest(
                 "state",
             )
             requiredRequestParams.forEach { param ->
+                if (param == "presentation_definition") {
+                    try {
+                        params["presentation_definition"] = fetchPresentationDefinition(params)
+                    } catch (exception: Exception) {
+                        throw exception
+                    }
+                }
                 val value = params[param] ?: throw Logger.handleException(
                     exceptionType = "MissingInput",
                     fieldPath = listOf(param),
                     className = className
                 )
-                if (param == "response_uri") {
-                    setResponseUri(value)
-                }
-                require(value.isNotEmpty()) {
+                require(isNeitherNullNorEmpty(value)) {
                     throw Logger.handleException(
                         exceptionType = "InvalidInput",
                         fieldPath = listOf(param),
