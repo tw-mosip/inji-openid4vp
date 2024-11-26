@@ -12,22 +12,36 @@ private val logTag = Logger.getLogTag(NetworkManagerClient::class.simpleName!!)
 
 class NetworkManagerClient {
 	companion object {
-		fun sendHttpPostRequest(
-			baseUrl: String, bodyParams: Map<String, String>
+		fun sendHTTPRequest(
+			url: String,
+			method: HTTP_METHOD,
+			bodyParams: Map<String, String>? = null,
+			headers: Map<String, String>? = null
 		): String {
 			try {
-				val requestBodyBuilder = FormBody.Builder()
-				bodyParams.forEach { (key, value) ->
-					requestBodyBuilder.add(key, value)
-				}
-				val requestBody = requestBodyBuilder.build()
 				val client = OkHttpClient.Builder().build()
-				val request = Request.Builder().url(baseUrl).post(requestBody)
-					.header("Content-Type", "application/x-www-form-urlencoded").build()
+				val request: Request
+				when (method) {
+					HTTP_METHOD.POST -> {
+						val requestBodyBuilder = FormBody.Builder()
+						bodyParams?.forEach { (key, value) ->
+							requestBodyBuilder.add(key, value)
+						}
+						val requestBody = requestBodyBuilder.build()
+						val requestBuilder = Request.Builder().url(url).post(requestBody)
+						headers?.forEach { (key, value) ->
+							requestBuilder.addHeader(key, value)
+						}
+						request = requestBuilder.build()
+					}
+
+					HTTP_METHOD.GET -> request = Request.Builder().url(url).get().build()
+				}
 				val response: Response = client.newCall(request).execute()
 
-				if (response.code == 200) {
-					return response.message
+				if (response.isSuccessful) {
+					return response.body?.byteStream()?.bufferedReader().use { it?.readText() }
+						?: ""
 				} else {
 					throw Exception(response.toString())
 				}
@@ -43,30 +57,9 @@ class NetworkManagerClient {
 				throw specificException
 			}
 		}
-
-		fun sendHttpGetRequest(
-			baseUrl: String
-		): String {
-			try {
-				val client = OkHttpClient.Builder().build()
-				val request =
-					Request.Builder().url(baseUrl).get().build()
-				val response: Response = client.newCall(request).execute()
-				if (response.isSuccessful) {
-					return response.body?.byteStream()?.bufferedReader().use { it?.readText() }
-						?: ""
-				} else {
-					throw NetworkManagerClientExceptions.NetworkRequestFailed(response.toString())
-				}
-			} catch (exception: InterruptedIOException) {
-				val specificException =
-					NetworkManagerClientExceptions.NetworkRequestTimeout()
-				Logger.error(logTag, specificException)
-				throw specificException
-			} catch (exception: Exception) {
-				Logger.error(logTag, exception)
-				throw exception
-			}
-		}
 	}
+}
+
+enum class HTTP_METHOD {
+	POST, GET
 }

@@ -4,7 +4,8 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpGetRequest
+import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -96,7 +97,6 @@ data class AuthorizationRequest(
         }
 
         private fun fetchPresentationDefinition(params: Map<String, String>): String {
-            val exception: Exception
             val hasPresentationDefinition = params.containsKey("presentation_definition")
             val hasPresentationDefinitionUri = params.containsKey("presentation_definition_uri")
             var presentationDefinition = ""
@@ -116,7 +116,10 @@ data class AuthorizationRequest(
                 hasPresentationDefinitionUri -> {
                     try {
                         presentationDefinition =
-                            sendHttpGetRequest(params["presentation_definition_uri"]!!)
+                            sendHTTPRequest(
+                                url = params["presentation_definition_uri"]!!,
+                                method = HTTP_METHOD.GET
+                            )
                     } catch (exception: Exception) {
                         throw exception
                     }

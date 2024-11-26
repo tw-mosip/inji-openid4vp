@@ -172,8 +172,8 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    fun `should return ok message if Authorization Response request call is made successfully and returned response with http status 200`() {
-        val mockResponse: MockResponse = MockResponse().setResponseCode(200)
+    fun `should get response if Verifiable Presentation is shared successfully to the Verifier`() {
+        val mockResponse: MockResponse = MockResponse().setResponseCode(200).setBody("Verifiable Presentation is shared successfully")
         mockWebServer.enqueue(mockResponse)
         vpResponseMetadata = VPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
@@ -181,7 +181,7 @@ class AuthorizationResponseTest {
             publicKey,
             "https://123",
         )
-        val expectedValue = "OK"
+        val expectedValue = "Verifiable Presentation is shared successfully"
 
         val actualResponse = openID4VP.shareVerifiablePresentation(vpResponseMetadata)
 
