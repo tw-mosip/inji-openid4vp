@@ -50,6 +50,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 	override fun serialize(encoder: Encoder, value: ClientMetadata) {
 		val builtInEncoder = encoder.beginStructure(descriptor)
 		builtInEncoder.encodeStringElement(descriptor, 0, value.name)
+		value.logoUrl?.let { builtInEncoder.encodeStringElement(descriptor, 1, it) }
 		builtInEncoder.endStructure(descriptor)
 	}
 }
