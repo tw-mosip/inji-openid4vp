@@ -79,7 +79,7 @@ class ClientMetadataTest {
 			clientMetadata = """{"name":""}"""
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->name value cannot be empty or null"
+			"Invalid Input: client_metadata->name value cannot be empty string, null or null string"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -99,7 +99,7 @@ class ClientMetadataTest {
 			clientMetadata = """{"name":"verifier","logo_url":""}"""
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->logo_url value cannot be empty or null"
+			"Invalid Input: client_metadata->logo_url value cannot be empty string, null or null string"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {

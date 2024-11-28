@@ -51,7 +51,7 @@ class LoggerTest {
 
 	@Test
 	fun `should return invalid input exception if exception type input value is InvalidInput`() {
-		expectedExceptionMessage = "Invalid Input: parent field name->current field name value cannot be empty or null"
+		expectedExceptionMessage = "Invalid Input: parent field name->current field name value cannot be empty string, null or null string"
 		actualException = Logger.handleException(
 			exceptionType = "InvalidInput", fieldPath = listOf("parent field name", "current field name"), className = javaClass.simpleName
 		)

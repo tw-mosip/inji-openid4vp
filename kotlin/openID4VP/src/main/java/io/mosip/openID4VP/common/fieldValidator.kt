@@ -1,3 +1,3 @@
-fun isNeitherNullNorEmpty(field: String): Boolean {
-	return field != "null" && field.isNotEmpty()
+fun isNeitherNullNorEmpty(field: String?): Boolean {
+	return field != "null" && !field.isNullOrEmpty()
 }

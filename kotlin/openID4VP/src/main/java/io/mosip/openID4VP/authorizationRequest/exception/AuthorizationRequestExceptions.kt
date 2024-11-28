@@ -11,7 +11,7 @@ sealed class AuthorizationRequestExceptions {
     class MissingInput(fieldPath: String) : Exception("Missing Input: $fieldPath param is required")
 
     class InvalidInput(fieldPath: String) :
-        Exception("Invalid Input: $fieldPath value cannot be empty or null")
+        Exception("Invalid Input: $fieldPath value cannot be empty string, null or null string")
 
     class InvalidInputPattern(fieldPath: String) :
         Exception("Invalid Input Pattern: $fieldPath pattern is not matching with OpenId4VP specification")
