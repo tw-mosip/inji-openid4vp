@@ -10,14 +10,25 @@ sealed class AuthorizationRequestExceptions {
 
     class MissingInput(fieldPath: String) : Exception("Missing Input: $fieldPath param is required")
 
-    class InvalidInput(fieldPath: String) :
-        Exception("Invalid Input: $fieldPath value cannot be empty string, null or null string")
+    class InvalidInput(fieldPath: String, fieldType: Any?) :
+        Exception(
+            "Invalid Input: ${
+                when (fieldType) {
+                    "String" -> "$fieldPath value cannot be empty string, null or null string"
+                    "Boolean" -> "$fieldPath value must be either true or false"
+                    else -> "$fieldPath value cannot be empty or null"
+                }
+            }"
+        )
 
     class InvalidInputPattern(fieldPath: String) :
         Exception("Invalid Input Pattern: $fieldPath pattern is not matching with OpenId4VP specification")
 
     class JsonEncodingFailed(fieldPath: String, message: String) :
         Exception("Json encoding failed for $fieldPath due to this error: $message")
+
+    class DeserializationFailure(fieldPath: String, message: String) :
+        Exception("Deserializing for $fieldPath failed due to this error: $message")
 
     class InvalidLimitDisclosure :
         Exception("Invalid Input: constraints->limit_disclosure value should be either required or preferred")

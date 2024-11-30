@@ -1,12 +1,11 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
-import isNeitherNullNorEmpty
+import validateField
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -116,11 +115,12 @@ data class AuthorizationRequest(
                         fieldPath = listOf("presentation_definition"),
                         className = className
                     )
-                    require(isNeitherNullNorEmpty(value)) {
+                    require(validateField(value, value::class.simpleName)) {
                         throw Logger.handleException(
                             exceptionType = "InvalidInput",
                             fieldPath = listOf("presentation_definition"),
-                            className = className
+                            className = className,
+                            fieldType = value::class.simpleName
                         )
                     }
                     presentationDefinition =
@@ -135,11 +135,12 @@ data class AuthorizationRequest(
                                 fieldPath = listOf("presentation_definition_uri"),
                                 className = className
                             )
-                        require(isNeitherNullNorEmpty(value)) {
+                        require(validateField(value, value::class.simpleName)) {
                             throw Logger.handleException(
                                 exceptionType = "InvalidInput",
                                 fieldPath = listOf("presentation_definition_uri"),
-                                className = className
+                                className = className,
+                                fieldType = value::class.simpleName
                             )
                         }
                         presentationDefinition =
@@ -152,7 +153,7 @@ data class AuthorizationRequest(
                     }
                 }
 
-                !hasPresentationDefinitionUri -> {
+                else -> {
                     throw Logger.handleException(
                         exceptionType = "InvalidQueryParams",
                         message = "Either presentation_definition or presentation_definition_uri request param must be present",
@@ -173,11 +174,12 @@ data class AuthorizationRequest(
                     fieldPath = listOf("response_uri"),
                     className = className
                 )
-            } else if (!isNeitherNullNorEmpty(responseUri)) {
+            } else if (!validateField(responseUri,responseUri::class.simpleName)) {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
                     fieldPath = listOf("response_uri"),
-                    className = className
+                    className = className,
+                    fieldType = responseUri::class.simpleName
                 )
             } else {
                 setResponseUri(responseUri)
@@ -204,11 +206,12 @@ data class AuthorizationRequest(
                     fieldPath = listOf(param),
                     className = className
                 )
-                require(isNeitherNullNorEmpty(value)) {
+                require(validateField(value,value::class.simpleName)) {
                     throw Logger.handleException(
                         exceptionType = "InvalidInput",
                         fieldPath = listOf(param),
-                        className = className
+                        className = className,
+                        fieldType = value::class.simpleName
                     )
                 }
             }
@@ -217,7 +220,12 @@ data class AuthorizationRequest(
             optionalRequestParams.forEach { param ->
                 params[param]?.let { value ->
                     require(value.isNotEmpty()) {
-                        throw AuthorizationRequestExceptions.InvalidInput(param)
+                        throw Logger.handleException(
+                            exceptionType = "InvalidInput",
+                            fieldPath = listOf("client_metadata"),
+                            className = className,
+                            fieldType = value::class.simpleName
+                        )
                     }
                 }
             }

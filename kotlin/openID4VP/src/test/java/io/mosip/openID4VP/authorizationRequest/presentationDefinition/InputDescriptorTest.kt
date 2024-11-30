@@ -48,7 +48,7 @@ class InputDescriptorTest {
     @Test
     fun `should throw missing input exception if constraints param is missing`(){
         presentationDefinition =
-            """{"input_descriptors":[{"id":"id_123"}]}"""
+            """{"id":"pd_123","input_descriptors":[{"id":"id_123"}]}"""
         expectedExceptionMessage = "Missing Input: input_descriptor->constraints param is required"
 
         val actualException =

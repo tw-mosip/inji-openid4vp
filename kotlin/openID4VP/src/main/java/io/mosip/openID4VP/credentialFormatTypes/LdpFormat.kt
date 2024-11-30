@@ -1,21 +1,20 @@
 package io.mosip.openID4VP.credentialFormatTypes
 
+import FieldDeserializer
 import Generated
-import io.mosip.openID4VP.authorizationRequest.ClientMetadata
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 private val className = LdpFormat::class.simpleName!!
 object LdpFormatSerializer : KSerializer<LdpFormat> {
@@ -24,30 +23,28 @@ object LdpFormatSerializer : KSerializer<LdpFormat> {
 	}
 
 	override fun deserialize(decoder: Decoder): LdpFormat {
-		val builtInDecoder = decoder.beginStructure(descriptor)
-		var proofType: List<String>? = null
-
-		loop@ while (true) {
-			when (builtInDecoder.decodeElementIndex(descriptor)) {
-				CompositeDecoder.DECODE_DONE -> break@loop
-				0 -> proofType = builtInDecoder.decodeSerializableElement(
-					descriptor, 0, ListSerializer(String.serializer())
-				)
-
-				else -> throw SerializationException("Unknown index")
-			}
-		}
-
-		builtInDecoder.endStructure(descriptor)
-
-		requireNotNull(proofType) {
+		val jsonDecoder = try {
+			decoder as JsonDecoder
+		} catch (e: ClassCastException) {
 			throw Logger.handleException(
-				exceptionType = "MissingInput",
-				fieldPath = listOf("ldpFormat", "proof_type"),
+				exceptionType = "DeserializationFailure",
+				fieldPath = listOf("ldpFormat"),
+				message = e.message!!,
 				className = className
 			)
 		}
-		return LdpFormat(proofType = proofType)
+		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
+		val deserializer = FieldDeserializer(
+			jsonObject = jsonObject, className = className, parentField = "ldpFormat"
+		)
+
+		val proofType: List<String>? = deserializer.deserializeField(
+			key = "proof_type",
+			fieldType = "List<*>",
+			deserializer = ListSerializer(String.serializer()),
+			isMandatory = true
+		)
+		return LdpFormat(proofType = proofType!!)
 	}
 
 	@Generated
@@ -65,8 +62,4 @@ object LdpFormatSerializer : KSerializer<LdpFormat> {
 @Serializable(with = LdpFormatSerializer::class)
 data class LdpFormat(
 	@SerialName("proof_type") val proofType: List<String>
-) {
-	fun validate() {
-		proofType.ifEmpty { throw AuthorizationRequestExceptions.InvalidInput("LdpFormat : proofType") }
-	}
-}
+)

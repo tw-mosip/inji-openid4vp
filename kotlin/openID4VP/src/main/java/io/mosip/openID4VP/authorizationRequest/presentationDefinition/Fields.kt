@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
+import FieldDeserializer
 import Generated
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
@@ -9,9 +10,10 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 private val className = Fields::class.simpleName!!
 
@@ -26,43 +28,42 @@ object FieldsSerializer : KSerializer<Fields> {
 	}
 
 	override fun deserialize(decoder: Decoder): Fields {
-		val builtInDecoder = decoder.beginStructure(descriptor)
-		var path: List<String>? = null
-		var id: String? = null
-		var purpose: String? = null
-		var name: String? = null
-		var filter: Filter? = null
-		var optional: Boolean? = null
-
-		loop@ while (true) {
-			when (builtInDecoder.decodeElementIndex(descriptor)) {
-				CompositeDecoder.DECODE_DONE -> break@loop
-				0 -> path = builtInDecoder.decodeSerializableElement(
-					descriptor, 0, ListSerializer(String.serializer())
-				)
-
-				1 -> id = builtInDecoder.decodeStringElement(descriptor, 1)
-				2 -> purpose = builtInDecoder.decodeStringElement(descriptor, 2)
-				3 -> name = builtInDecoder.decodeStringElement(descriptor, 3)
-				4 -> filter =
-					builtInDecoder.decodeSerializableElement(descriptor, 4, Filter.serializer())
-
-				5 -> optional = builtInDecoder.decodeBooleanElement(descriptor, 5)
-			}
-		}
-
-		builtInDecoder.endStructure(descriptor)
-
-		requireNotNull(path) {
+		val jsonDecoder = try {
+			decoder as JsonDecoder
+		} catch (e: ClassCastException) {
 			throw Logger.handleException(
-				exceptionType = "MissingInput",
-				fieldPath = listOf("fields", "path"),
+				exceptionType = "DeserializationFailure",
+				fieldPath = listOf("fields"),
+				message = e.message!!,
 				className = className
 			)
 		}
+		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
+		val deserializer = FieldDeserializer(
+			jsonObject = jsonObject,
+			className = className,
+			parentField = "fields"
+		)
+
+		val path: List<String>? =
+			deserializer.deserializeField(
+				key = "path",
+				fieldType = "List<String>",
+				isMandatory = true
+			)
+		val id: String? = deserializer.deserializeField(key = "id", fieldType = "String")
+		val purpose: String? = deserializer.deserializeField(key = "purpose", fieldType = "String")
+		val name: String? = deserializer.deserializeField(key = "name", fieldType = "String")
+		val filter: Filter? = deserializer.deserializeField(
+			key = "filter",
+			fieldType = "Filter",
+			deserializer = Filter.serializer()
+		)
+		val optional: Boolean? =
+			deserializer.deserializeField(key = "optional", fieldType = "Boolean")
 
 		return Fields(
-			path = path,
+			path = path!!,
 			id = id,
 			purpose = purpose,
 			name = name,
@@ -107,14 +108,6 @@ class Fields(
 ) {
 	fun validate() {
 		try {
-			require(path.isNotEmpty()) {
-				throw Logger.handleException(
-					exceptionType = "InvalidInput",
-					fieldPath = listOf("fields", "path"),
-					className = className
-				)
-			}
-
 			val pathPrefixes = listOf("$.", "$[")
 			path.forEach { p ->
 				val isNotValidPrefix = !(pathPrefixes.any { p.startsWith(it) })
@@ -122,12 +115,10 @@ class Fields(
 					throw Logger.handleException(
 						exceptionType = "InvalidInputPattern",
 						fieldPath = listOf("fields", "path"),
-						className = className
+						className = className,
 					)
 				}
 			}
-
-			filter?.validate()
 		} catch (exception: Exception) {
 			throw exception
 		}

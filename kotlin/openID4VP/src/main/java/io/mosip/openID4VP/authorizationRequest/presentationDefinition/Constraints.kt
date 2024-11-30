@@ -1,8 +1,8 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
+import FieldDeserializer
 import Generated
 import io.mosip.openID4VP.common.Logger
-import isNeitherNullNorEmpty
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,9 +10,10 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 private val logTag = Logger.getLogTag(Constraints::class.simpleName!!)
 private val className = Constraints::class.simpleName!!
@@ -23,22 +24,31 @@ object ConstraintsSerializer : KSerializer<Constraints> {
 	}
 
 	override fun deserialize(decoder: Decoder): Constraints {
-		val builtInDecoder = decoder.beginStructure(descriptor)
-		var fields: List<Fields>? = null
-		var limitDisclosure: String? = null
-
-		loop@ while (true) {
-			when (builtInDecoder.decodeElementIndex(descriptor)) {
-				CompositeDecoder.DECODE_DONE -> break@loop
-				0 -> fields = builtInDecoder.decodeSerializableElement(
-					descriptor, 0, ListSerializer(Fields.serializer())
-				)
-
-				1 -> limitDisclosure = builtInDecoder.decodeStringElement(descriptor, 1)
-			}
+		val jsonDecoder = try {
+			decoder as JsonDecoder
+		} catch (e: ClassCastException) {
+			throw Logger.handleException(
+				exceptionType = "DeserializationFailure",
+				fieldPath = listOf("constraints"),
+				message = e.message!!,
+				className = className
+			)
 		}
 
-		builtInDecoder.endStructure(descriptor)
+		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
+		val deserializer = FieldDeserializer(
+			jsonObject = jsonObject, className = className, parentField = "constraints"
+		)
+
+		val fields: List<Fields>? = deserializer.deserializeField(
+			key = "fields",
+			fieldType = "List<*>",
+			deserializer = ListSerializer(Fields.serializer()),
+		)
+		val limitDisclosure: String? = deserializer.deserializeField(
+			key = "limit_disclosure",
+			fieldType = "String",
+		)
 
 		return Constraints(
 			fields = fields, limitDisclosure = limitDisclosure
@@ -73,14 +83,6 @@ class Constraints(
 			}
 
 			limitDisclosure?.let {
-				require(isNeitherNullNorEmpty(limitDisclosure)) {
-					throw Logger.handleException(
-						exceptionType = "InvalidInput",
-						fieldPath = listOf("constraints", "limit_disclosure"),
-						className = className
-					)
-				}
-
 				LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
 					?: throw Logger.handleException(
 						exceptionType = "InvalidLimitDisclosure",
@@ -88,7 +90,6 @@ class Constraints(
 					)
 			}
 		} catch (exception: Exception) {
-			Logger.error(logTag, exception)
 			throw exception
 		}
 	}

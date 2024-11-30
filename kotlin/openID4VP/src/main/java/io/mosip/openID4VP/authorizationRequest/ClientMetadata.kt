@@ -1,17 +1,18 @@
 package io.mosip.openID4VP.authorizationRequest
 
+import FieldDeserializer
 import Generated
 import io.mosip.openID4VP.common.Logger
-import isNeitherNullNorEmpty
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 private val className = ClientMetadata::class.simpleName!!
 
@@ -22,28 +23,29 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 	}
 
 	override fun deserialize(decoder: Decoder): ClientMetadata {
-		val builtInDecoder = decoder.beginStructure(descriptor)
-		var name: String? = null
-		var logoUrl: String? = null
-
-		loop@ while (true) {
-			when (builtInDecoder.decodeElementIndex(descriptor)) {
-				CompositeDecoder.DECODE_DONE -> break@loop
-				0 -> name = builtInDecoder.decodeStringElement(descriptor, 0)
-				1 -> logoUrl = builtInDecoder.decodeStringElement(descriptor, 1)
-			}
-		}
-
-		builtInDecoder.endStructure(descriptor)
-
-		requireNotNull(name) {
+		val jsonDecoder = try {
+			decoder as JsonDecoder
+		} catch (e: ClassCastException) {
 			throw Logger.handleException(
-				exceptionType = "MissingInput",
-				fieldPath = listOf("client_metadata", "name"),
+				exceptionType = "DeserializationFailure",
+				fieldPath = listOf("client_metadata"),
+				message = e.message!!,
 				className = className
 			)
 		}
-		return ClientMetadata(name = name, logoUrl = logoUrl)
+		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
+		val deserializer = FieldDeserializer(
+			jsonObject = jsonObject,
+			className = className,
+			parentField = "client_metadata"
+		)
+
+		val name: String? =
+			deserializer.deserializeField(key = "name", fieldType = "String", isMandatory = true)
+		val logoUrl: String? =
+			deserializer.deserializeField(key = "logo_url", fieldType = "String")
+
+		return ClientMetadata(name = name!!, logoUrl = logoUrl)
 	}
 
 	@Generated
@@ -59,25 +61,5 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 class ClientMetadata(val name: String, @SerialName("logo_url") val logoUrl: String?) :
 	Validatable {
 	override fun validate() {
-		try {
-			require(isNeitherNullNorEmpty(name)) {
-				throw Logger.handleException(
-					exceptionType = "InvalidInput",
-					fieldPath = listOf("client_metadata", "name"),
-					className = className
-				)
-			}
-			logoUrl?.let {
-				require(isNeitherNullNorEmpty(logoUrl)) {
-					throw Logger.handleException(
-						exceptionType = "InvalidInput",
-						fieldPath = listOf("client_metadata", "logo_url"),
-						className = className
-					)
-				}
-			}
-		} catch (exception: Exception) {
-			throw exception
-		}
 	}
 }

@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.dto
 
 import io.mosip.openID4VP.common.Logger
-import isNeitherNullNorEmpty
+import validateField
 
 private val className = VPResponseMetadata::class.simpleName!!
 data class VPResponseMetadata(
@@ -19,11 +19,12 @@ data class VPResponseMetadata(
         )
 
         requiredParams.forEach { (key, value) ->
-            require(isNeitherNullNorEmpty(value)) {
+            require(validateField(value, value::class.simpleName)) {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
                     fieldPath = listOf("vp response metadata",key),
-                    className = className
+                    className = className,
+                    fieldType = key::class.simpleName
                 )
             }
         }

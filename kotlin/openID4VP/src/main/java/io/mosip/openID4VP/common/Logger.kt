@@ -22,7 +22,8 @@ object Logger {
         exceptionType: String,
         message: String? = null,
         fieldPath: List<String>? = null,
-        className: String
+        className: String,
+        fieldType: Any? = null
     ): Exception {
         var fieldPathAsString: String = ""
         fieldPath?.let {
@@ -34,7 +35,10 @@ object Logger {
                 AuthorizationRequestExceptions.MissingInput(fieldPath = fieldPathAsString)
 
             "InvalidInput" -> exception =
-                AuthorizationRequestExceptions.InvalidInput(fieldPath = fieldPathAsString)
+                AuthorizationRequestExceptions.InvalidInput(
+                    fieldPath = fieldPathAsString,
+                    fieldType = fieldType
+                )
 
             "InvalidInputPattern" -> exception =
                 AuthorizationRequestExceptions.InvalidInputPattern(fieldPath = fieldPathAsString)
@@ -52,6 +56,12 @@ object Logger {
             "InvalidLimitDisclosure" -> exception =
                 AuthorizationRequestExceptions.InvalidLimitDisclosure()
 
+            "DeserializationFailure" -> exception =
+                AuthorizationRequestExceptions.DeserializationFailure(
+                    fieldPath = fieldPathAsString,
+                    message = message ?: ""
+                )
+                
             "" -> exception =
                 Exception("An unexpected exception occurred: exception type: $exceptionType")
         }
