@@ -18,8 +18,8 @@ private val className = ClientMetadata::class.simpleName!!
 
 object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ClientMetadata") {
-		element<String>("name")
-		element<String>("logo_url", isOptional = true)
+		element<String>("client_name", isOptional = true)
+		element<String>("logo_uri", isOptional = true)
 	}
 
 	override fun deserialize(decoder: Decoder): ClientMetadata {
@@ -40,25 +40,34 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 			parentField = "client_metadata"
 		)
 
-		val name: String? =
-			deserializer.deserializeField(key = "name", fieldType = "String", isMandatory = true)
-		val logoUrl: String? =
-			deserializer.deserializeField(key = "logo_url", fieldType = "String")
+		val clientName: String? =
+			deserializer.deserializeField(key = "client_name", fieldType = "String")
+		val logoUri: String? =
+			deserializer.deserializeField(key = "logo_uri", fieldType = "String")
 
-		return ClientMetadata(name = name!!, logoUrl = logoUrl)
+		return ClientMetadata(clientName = clientName, logoUri = logoUri)
 	}
 
 	@Generated
 	override fun serialize(encoder: Encoder, value: ClientMetadata) {
 		val builtInEncoder = encoder.beginStructure(descriptor)
-		builtInEncoder.encodeStringElement(descriptor, 0, value.name)
-		value.logoUrl?.let { builtInEncoder.encodeStringElement(descriptor, 1, it) }
+		value.clientName?.let {
+			builtInEncoder.encodeStringElement(
+				descriptor,
+				0,
+				value.clientName
+			)
+		}
+		value.logoUri?.let { builtInEncoder.encodeStringElement(descriptor, 1, it) }
 		builtInEncoder.endStructure(descriptor)
 	}
 }
 
 @Serializable(with = ClientMetadataSerializer::class)
-class ClientMetadata(val name: String, @SerialName("logo_url") val logoUrl: String?) :
+class ClientMetadata(
+	@SerialName("client_name") val clientName: String?,
+	@SerialName("logo_uri") val logoUri: String?
+) :
 	Validatable {
 	override fun validate() {
 	}

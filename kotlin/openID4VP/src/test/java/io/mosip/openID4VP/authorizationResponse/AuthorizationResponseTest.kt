@@ -60,7 +60,7 @@ class AuthorizationResponseTest {
         openID4VP = OpenID4VP("test-OpenID4VP")
         presentationDefinition =
             """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"id_123","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
-        clientMetadata = """{"name": "verifier"}"""
+        clientMetadata = """{"client_name": "verifier"}"""
         trustedVerifiers = listOf(
             Verifier(
                 "https://injiverify.dev2.mosip.net", listOf(

@@ -252,7 +252,7 @@ fun createEncodedAuthorizationRequest(
     val clientMetadata: String? = if (params.containsKey("client_metadata")) {
         params["client_metadata"]
     } else {
-        """{"name":"verifier"}"""
+        """{"client_name":"verifier"}"""
     }
 
     authorizationRequestUrl.append("response_type=vp_token&response_mode=direct_post&nonce=$nonce&state=$state&response_uri=$responseUri&client_metadata=$clientMetadata")

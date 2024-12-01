@@ -51,39 +51,16 @@ class ClientMetadataTest {
 	}
 
 	@Test
-	fun `should throw missing input exception if client_metadata is available in request but doesn't contain name field`() {
-		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			mapOf(
-				"client_id" to "https://verifier.env1.net",
-				"presentation_definition" to presentationDefinition,
-				"client_metadata" to """{}"""
-			)
-		)
-		expectedExceptionMessage =
-			"Missing Input: client_metadata->name param is required"
-
-		actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
-				openID4VP.authenticateVerifier(
-					encodedAuthorizationRequestUrl, trustedVerifiers
-				)
-			}
-
-
-		Assert.assertEquals(expectedExceptionMessage, actualException.message)
-	}
-
-	@Test
 	fun `should throw invalid input exception if name field is available in client_metadata but the value is empty`() {
 		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
 			mapOf(
 				"client_id" to "https://verifier.env1.net",
 				"presentation_definition" to presentationDefinition,
-				"client_metadata" to """{"name":""}"""
+				"client_metadata" to """{"client_name":""}"""
 			)
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->name value cannot be empty string or null"
+			"Invalid Input: client_metadata->client_name value cannot be empty string or null"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -101,11 +78,11 @@ class ClientMetadataTest {
 			mapOf(
 				"client_id" to "https://verifier.env1.net",
 				"presentation_definition" to presentationDefinition,
-				"client_metadata" to """{"name":null}"""
+				"client_metadata" to """{"client_name":null}"""
 			)
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->name value cannot be empty string or null"
+			"Invalid Input: client_metadata->client_name value cannot be empty string or null"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -123,11 +100,11 @@ class ClientMetadataTest {
 			mapOf(
 				"client_id" to "https://verifier.env1.net",
 				"presentation_definition" to presentationDefinition,
-				"client_metadata" to """{"name":"verifier","logo_url":""}"""
+				"client_metadata" to """{"client_name":"verifier","logo_uri":""}"""
 			)
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->logo_url value cannot be empty string or null"
+			"Invalid Input: client_metadata->logo_uri value cannot be empty string or null"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
