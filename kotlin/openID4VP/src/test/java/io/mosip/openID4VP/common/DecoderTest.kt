@@ -32,7 +32,7 @@ class DecoderTest {
     @Test
     fun `should throw invalid input exception for empty input`() {
         val encodedData = ""
-        val expectedExceptionMessage = "Invalid Input: encoded data value cannot be empty string, null or null string"
+        val expectedExceptionMessage = "Invalid Input: encoded data value cannot be empty string or null"
 
         val actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {

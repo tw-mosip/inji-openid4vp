@@ -63,7 +63,7 @@ class InputDescriptorTest {
     fun `should throw invalid input exception if id param value is empty`(){
         presentationDefinition =
             """{"id":"pd_123","input_descriptors":[{"id":"","constraints":{"fields":[{"path":["$.type"]}]}}]}"""
-        expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be empty string, null or null string"
+        expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be empty string or null"
 
         val actualException =
             Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -77,7 +77,7 @@ class InputDescriptorTest {
     fun `should throw invalid input exception if id param value is present but it's value is null`(){
         presentationDefinition =
             """{"id":"pd_123","input_descriptors":[{"id":null,"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
-        expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be empty string, null or null string"
+        expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be empty string or null"
 
         val actualException =
             Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
