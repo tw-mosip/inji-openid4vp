@@ -19,7 +19,7 @@ data class VPResponseMetadata(
         )
 
         requiredParams.forEach { (key, value) ->
-            require(validateField(value, value::class.simpleName)) {
+            require(value != "null" && validateField(value, "String")) {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
                     fieldPath = listOf("vp response metadata",key),

@@ -110,17 +110,13 @@ data class AuthorizationRequest(
                 }
 
                 hasPresentationDefinition -> {
-                    val value = params["presentation_definition"] ?: throw Logger.handleException(
-                        exceptionType = "MissingInput",
-                        fieldPath = listOf("presentation_definition"),
-                        className = className
-                    )
-                    require(validateField(value, value::class.simpleName)) {
+                    val value = params["presentation_definition"]
+
+                    require(value != "null" && validateField(value, "String")) {
                         throw Logger.handleException(
                             exceptionType = "InvalidInput",
                             fieldPath = listOf("presentation_definition"),
                             className = className,
-                            fieldType = value::class.simpleName
                         )
                     }
                     presentationDefinition =
@@ -129,18 +125,12 @@ data class AuthorizationRequest(
 
                 hasPresentationDefinitionUri -> {
                     try {
-                        val value =
-                            params["presentation_definition_uri"] ?: throw Logger.handleException(
-                                exceptionType = "MissingInput",
-                                fieldPath = listOf("presentation_definition_uri"),
-                                className = className
-                            )
-                        require(validateField(value, value::class.simpleName)) {
+                        val value = params["presentation_definition_uri"]
+                        require(value != "null" && validateField(value, "String")) {
                             throw Logger.handleException(
                                 exceptionType = "InvalidInput",
                                 fieldPath = listOf("presentation_definition_uri"),
                                 className = className,
-                                fieldType = value::class.simpleName
                             )
                         }
                         presentationDefinition =
@@ -167,23 +157,29 @@ data class AuthorizationRequest(
         private fun validateQueryParams(
             params: MutableMap<String, String>, setResponseUri: (String) -> Unit
         ) {
-            val responseUri = params["response_uri"]
-            if (responseUri == null) {
+            val hasResponseUri = params.containsKey("response_uri")
+            if (!hasResponseUri) {
                 throw Logger.handleException(
                     exceptionType = "MissingInput",
                     fieldPath = listOf("response_uri"),
                     className = className
                 )
-            } else if (!validateField(responseUri,responseUri::class.simpleName)) {
+            }
+            val responseUri = params["response_uri"]
+            require(
+                responseUri != null && validateField(
+                    responseUri,
+                    "String"
+                )
+            ) {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
                     fieldPath = listOf("response_uri"),
                     className = className,
-                    fieldType = responseUri::class.simpleName
+                    fieldType = "String"
                 )
-            } else {
-                setResponseUri(responseUri)
             }
+            setResponseUri(responseUri)
 
             val requiredRequestParams = mutableListOf(
                 "presentation_definition",
@@ -201,17 +197,21 @@ data class AuthorizationRequest(
                         throw exception
                     }
                 }
-                val value = params[param] ?: throw Logger.handleException(
-                    exceptionType = "MissingInput",
-                    fieldPath = listOf(param),
-                    className = className
-                )
-                require(validateField(value,value::class.simpleName)) {
+                val hasParam = params.containsKey(param)
+                if (!hasParam) {
+                    throw Logger.handleException(
+                        exceptionType = "MissingInput",
+                        fieldPath = listOf(param),
+                        className = className
+                    )
+                }
+                val value = params[param]
+                require(value != "null" && validateField(value, "String")) {
                     throw Logger.handleException(
                         exceptionType = "InvalidInput",
                         fieldPath = listOf(param),
                         className = className,
-                        fieldType = value::class.simpleName
+                        fieldType = "String"
                     )
                 }
             }

@@ -66,7 +66,9 @@ class AuthorizationRequestTest {
     @Test
     fun `should throw missing input exception if client_id param is missing in Authorization Request`() {
         encodedAuthorizationRequestUrl =
-            createEncodedAuthorizationRequest(presentationDefinition = presentationDefinition)
+            createEncodedAuthorizationRequest(
+                mapOf("presentation_definition" to presentationDefinition)
+            )
         expectedExceptionMessage = "Missing Input: client_id param is required"
 
         actualException =
@@ -80,9 +82,45 @@ class AuthorizationRequestTest {
     }
 
     @Test
+    fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is empty string`() {
+        encodedAuthorizationRequestUrl =
+            createEncodedAuthorizationRequest(
+                mapOf("presentation_definition" to presentationDefinition, "client_id" to "")
+            )
+        expectedExceptionMessage = "Invalid Input: client_id value cannot be empty string or null"
+
+        actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+                openID4VP.authenticateVerifier(
+                    encodedAuthorizationRequestUrl, trustedVerifiers
+                )
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
+    fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is null`() {
+        encodedAuthorizationRequestUrl =
+            createEncodedAuthorizationRequest(
+                mapOf("presentation_definition" to presentationDefinition, "client_id" to null)
+            )
+        expectedExceptionMessage = "Invalid Input: client_id value cannot be empty string or null"
+
+        actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+                openID4VP.authenticateVerifier(
+                    encodedAuthorizationRequestUrl, trustedVerifiers
+                )
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
     fun `should throw exception if neither presentation_definition nor presentation_definition_uri param present in Authorization Request`() {
         encodedAuthorizationRequestUrl =
-            createEncodedAuthorizationRequest(clientId = "https://verifier.env1.net")
+            createEncodedAuthorizationRequest(mapOf("client_id" to "https://verifier.env1.net"))
         val expectedExceptionMessage =
             "Either presentation_definition or presentation_definition_uri request param must be present"
 
@@ -99,8 +137,10 @@ class AuthorizationRequestTest {
     @Test
     fun `should throw exception if both presentation_definition and presentation_definition_uri request params are present in Authorization Request`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            presentationDefinition = presentationDefinition,
-            presentationDefinitionUri = presentationDefinitionUri
+            mapOf(
+                "presentation_definition" to presentationDefinition,
+                "presentation_definition_uri" to presentationDefinitionUri
+            )
         )
         val expectedExceptionMessage =
             "Either presentation_definition or presentation_definition_uri request param can be provided but not both"
@@ -116,8 +156,10 @@ class AuthorizationRequestTest {
     @Test
     fun `should throw exception if received client_id is not matching with predefined Verifiers list client_id`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://verifier.env4.net",
-            presentationDefinition = presentationDefinition
+            mapOf(
+                "client_id" to "https://verifier.env4.net",
+                "presentation_definition" to presentationDefinition
+            )
         )
         val expectedExceptionMessage =
             "VP sharing failed: Verifier authentication was unsuccessful"
@@ -137,8 +179,10 @@ class AuthorizationRequestTest {
         presentationDefinition =
             """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"idcardcredential","constraints":{"fields":[{"path":["$.type"]}], "limit_disclosure": "not preferred"}}]}"""
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://verifier.env1.net",
-            presentationDefinition = presentationDefinition
+            mapOf(
+                "client_id" to "https://verifier.env1.net",
+                "presentation_definition" to presentationDefinition
+            )
         )
         val expectedExceptionMessage =
             "Invalid Input: constraints->limit_disclosure value should be either required or preferred"
@@ -156,10 +200,11 @@ class AuthorizationRequestTest {
     @Test
     fun `should return Authorization Request as Authentication Response if presentation_definition & all the other fields are present and valid in Authorization Request`() {
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://verifier.env1.net",
-            presentationDefinition = presentationDefinition
+            mapOf(
+                "client_id" to "https://verifier.env1.net",
+                "presentation_definition" to presentationDefinition
+            )
         )
-
         val actualValue =
             openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers)
         assertTrue(actualValue is AuthorizationRequest)
@@ -171,9 +216,13 @@ class AuthorizationRequestTest {
         mockWebServer.start(8080)
         val mockResponse = MockResponse().setResponseCode(200).setBody(presentationDefinition)
         mockWebServer.enqueue(mockResponse)
+
         encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-            clientId = "https://verifier.env1.net",
-            presentationDefinitionUri = mockWebServer.url(presentationDefinitionUri).toString()
+            mapOf(
+                "client_id" to "https://verifier.env1.net",
+                "presentation_definition_uri" to mockWebServer.url(presentationDefinitionUri)
+                    .toString()
+            )
         )
 
         val actualValue =
@@ -184,19 +233,28 @@ class AuthorizationRequestTest {
 }
 
 fun createEncodedAuthorizationRequest(
-    clientId: String? = null,
-    presentationDefinition: String? = null,
-    presentationDefinitionUri: String? = null,
-    responseUri: String = "https://verifier.env2.net/responseUri",
-    clientMetadata: String = """{"name":"verifier"}"""
+    params: Map<String, String?>
 ): String {
     val state = "fsnC8ixCs6mWyV+00k23Qg=="
     val nonce = "bMHvX1HGhbh8zqlSWf/fuQ=="
     val authorizationRequestUrl = StringBuilder("")
 
-    if (clientId != null) authorizationRequestUrl.append("client_id=$clientId&")
-    if (presentationDefinition != null) authorizationRequestUrl.append("presentation_definition=$presentationDefinition&")
-    if (presentationDefinitionUri != null) authorizationRequestUrl.append("presentation_definition_uri=$presentationDefinitionUri&")
+    println("client_id::"+params["client_id"])
+    if (params.containsKey("client_id")) authorizationRequestUrl.append("client_id=${params["client_id"]}&")
+    println("url::"+authorizationRequestUrl)
+    if (params.containsKey("presentation_definition")) authorizationRequestUrl.append("presentation_definition=${params["presentation_definition"]}&")
+    if (params.containsKey("presentation_definition_uri")) authorizationRequestUrl.append("presentation_definition_uri=${params["presentation_definition_uri"]}&")
+    val responseUri: String? = if (params.containsKey("response_uri")) {
+        params["response_uri"]
+    } else {
+        "https://verifier.env2.net/responseUri"
+    }
+    val clientMetadata: String? = if (params.containsKey("client_metadata")) {
+        params["client_metadata"]
+    } else {
+        """{"name":"verifier"}"""
+    }
+
     authorizationRequestUrl.append("response_type=vp_token&response_mode=direct_post&nonce=$nonce&state=$state&response_uri=$responseUri&client_metadata=$clientMetadata")
     val encodedAuthorizationRequestInBytes = Base64.encodeBase64(
         authorizationRequestUrl.toString().toByteArray(

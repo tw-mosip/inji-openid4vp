@@ -53,9 +53,11 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw missing input exception if client_metadata is available in request but doesn't contain name field`() {
 		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			clientId = "https://verifier.env1.net",
-			presentationDefinition,
-			clientMetadata = """{}"""
+			mapOf(
+				"client_id" to "https://verifier.env1.net",
+				"presentation_definition" to presentationDefinition,
+				"client_metadata" to """{}"""
+			)
 		)
 		expectedExceptionMessage =
 			"Missing Input: client_metadata->name param is required"
@@ -74,9 +76,11 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw invalid input exception if name field is available in client_metadata but the value is empty`() {
 		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			clientId = "https://verifier.env1.net",
-			presentationDefinition,
-			clientMetadata = """{"name":""}"""
+			mapOf(
+				"client_id" to "https://verifier.env1.net",
+				"presentation_definition" to presentationDefinition,
+				"client_metadata" to """{"name":""}"""
+			)
 		)
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->name value cannot be empty string or null"
@@ -94,9 +98,11 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw invalid input exception if name field is available in client_metadata but the value is null`() {
 		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			clientId = "https://verifier.env1.net",
-			presentationDefinition,
-			clientMetadata = """{"name":null}"""
+			mapOf(
+				"client_id" to "https://verifier.env1.net",
+				"presentation_definition" to presentationDefinition,
+				"client_metadata" to """{"name":null}"""
+			)
 		)
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->name value cannot be empty string or null"
@@ -114,9 +120,11 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw invalid input exception if log_url field is available in client_metadata but the value is empty`() {
 		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			clientId = "https://verifier.env1.net",
-			presentationDefinition,
-			clientMetadata = """{"name":"verifier","logo_url":""}"""
+			mapOf(
+				"client_id" to "https://verifier.env1.net",
+				"presentation_definition" to presentationDefinition,
+				"client_metadata" to """{"name":"verifier","logo_url":""}"""
+			)
 		)
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->logo_url value cannot be empty string or null"
