@@ -117,6 +117,7 @@ data class AuthorizationRequest(
                             exceptionType = "InvalidInput",
                             fieldPath = listOf("presentation_definition"),
                             className = className,
+                            fieldType = "String"
                         )
                     }
                     presentationDefinition =
@@ -125,14 +126,10 @@ data class AuthorizationRequest(
 
                 hasPresentationDefinitionUri -> {
                     try {
-                        val value = params["presentation_definition_uri"]
-                        require(value != "null" && validateField(value, "String")) {
-                            throw Logger.handleException(
-                                exceptionType = "InvalidInput",
-                                fieldPath = listOf("presentation_definition_uri"),
-                                className = className,
-                            )
-                        }
+                        validateRootFieldInvalidScenario(
+                            "presentation_definition_uri",
+                            params["presentation_definition_uri"]
+                        )
                         presentationDefinition =
                             sendHTTPRequest(
                                 url = params["presentation_definition_uri"]!!,
@@ -157,29 +154,9 @@ data class AuthorizationRequest(
         private fun validateQueryParams(
             params: MutableMap<String, String>, setResponseUri: (String) -> Unit
         ) {
-            val hasResponseUri = params.containsKey("response_uri")
-            if (!hasResponseUri) {
-                throw Logger.handleException(
-                    exceptionType = "MissingInput",
-                    fieldPath = listOf("response_uri"),
-                    className = className
-                )
-            }
-            val responseUri = params["response_uri"]
-            require(
-                responseUri != null && validateField(
-                    responseUri,
-                    "String"
-                )
-            ) {
-                throw Logger.handleException(
-                    exceptionType = "InvalidInput",
-                    fieldPath = listOf("response_uri"),
-                    className = className,
-                    fieldType = "String"
-                )
-            }
-            setResponseUri(responseUri)
+            validateRootFieldMissingScenario(params, "response_uri")
+            validateRootFieldInvalidScenario("response_uri", params["response_uri"])
+            setResponseUri(params["response_uri"]!!)
 
             val requiredRequestParams = mutableListOf(
                 "presentation_definition",
@@ -197,23 +174,8 @@ data class AuthorizationRequest(
                         throw exception
                     }
                 }
-                val hasParam = params.containsKey(param)
-                if (!hasParam) {
-                    throw Logger.handleException(
-                        exceptionType = "MissingInput",
-                        fieldPath = listOf(param),
-                        className = className
-                    )
-                }
-                val value = params[param]
-                require(value != "null" && validateField(value, "String")) {
-                    throw Logger.handleException(
-                        exceptionType = "InvalidInput",
-                        fieldPath = listOf(param),
-                        className = className,
-                        fieldType = "String"
-                    )
-                }
+                validateRootFieldMissingScenario(params, param)
+                validateRootFieldInvalidScenario(param, params[param])
             }
 
             val optionalRequestParams = mutableListOf("client_metadata")
@@ -242,6 +204,31 @@ data class AuthorizationRequest(
                 state = params["state"]!!,
                 clientMetadata = params["client_metadata"],
             )
+        }
+
+        private fun validateRootFieldMissingScenario(
+            params: MutableMap<String, String>,
+            param: String
+        ) {
+            val hasParam = params.containsKey(param)
+            if (!hasParam) {
+                throw Logger.handleException(
+                    exceptionType = "MissingInput",
+                    fieldPath = listOf(param),
+                    className = className
+                )
+            }
+        }
+
+        private fun validateRootFieldInvalidScenario(param: String, value: String?) {
+            require(value != "null" && validateField(value, "String")) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidInput",
+                    fieldPath = listOf(param),
+                    className = className,
+                    fieldType = "String"
+                )
+            }
         }
     }
 }
