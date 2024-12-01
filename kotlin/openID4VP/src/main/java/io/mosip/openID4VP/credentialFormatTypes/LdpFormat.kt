@@ -40,7 +40,7 @@ object LdpFormatSerializer : KSerializer<LdpFormat> {
 
 		val proofType: List<String>? = deserializer.deserializeField(
 			key = "proof_type",
-			fieldType = "List<*>",
+			fieldType = "List<String>",
 			deserializer = ListSerializer(String.serializer()),
 			isMandatory = true
 		)

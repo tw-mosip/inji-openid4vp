@@ -13,6 +13,5 @@ fun validateField(field: Any?, fieldType: String?): Boolean {
 		fieldType == "Boolean" -> res = field != JsonNull && (field == true || field == false)
 		else -> res
 	}
-	println("validation result: " + res)
 	return res
 }

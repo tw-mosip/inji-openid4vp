@@ -42,7 +42,7 @@ object ConstraintsSerializer : KSerializer<Constraints> {
 
 		val fields: List<Fields>? = deserializer.deserializeField(
 			key = "fields",
-			fieldType = "List<*>",
+			fieldType = "List<Fields>",
 			deserializer = ListSerializer(Fields.serializer()),
 		)
 		val limitDisclosure: String? = deserializer.deserializeField(

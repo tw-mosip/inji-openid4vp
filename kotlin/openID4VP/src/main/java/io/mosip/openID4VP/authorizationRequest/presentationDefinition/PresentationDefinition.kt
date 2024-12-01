@@ -50,7 +50,7 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 			deserializer.deserializeField(key = "id", fieldType = "String", isMandatory = true)
 		val inputDescriptors: List<InputDescriptor>? = deserializer.deserializeField(
 			key = "input_descriptors",
-			fieldType = "List<*>",
+			fieldType = "List<InputDescriptor>",
 			deserializer = ListSerializer(InputDescriptor.serializer()),
 			isMandatory = true
 		)
@@ -59,8 +59,6 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 		val format: Format? = deserializer.deserializeField(
 			key = "format", fieldType = "Format", deserializer = Format.serializer()
 		)
-		println("id::"+id)
-		println("desc::"+inputDescriptors)
 		return PresentationDefinition(
 			id = id!!, inputDescriptors = inputDescriptors!!,
 			name = name, purpose = purpose, format = format
