@@ -92,6 +92,26 @@ class ClientMetadataTest {
 	}
 
 	@Test
+	fun `should throw invalid input exception if name field is available in client_metadata but the value is null`() {
+		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
+			clientId = "https://verifier.env1.net",
+			presentationDefinition,
+			clientMetadata = """{"name":null}"""
+		)
+		val expectedExceptionMessage =
+			"Invalid Input: client_metadata->name value cannot be empty string, null or null string"
+
+		actualException =
+			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+				openID4VP.authenticateVerifier(
+					encodedAuthorizationRequestUrl, trustedVerifiers
+				)
+			}
+
+		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+	}
+
+	@Test
 	fun `should throw invalid input exception if log_url field is available in client_metadata but the value is empty`() {
 		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
 			clientId = "https://verifier.env1.net",

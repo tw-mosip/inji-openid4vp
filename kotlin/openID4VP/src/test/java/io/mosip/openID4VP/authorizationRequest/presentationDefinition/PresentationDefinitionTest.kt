@@ -90,4 +90,17 @@ class PresentationDefinitionTest {
 
         assertEquals(expectedExceptionMessage,actualException.message)
     }
+
+    @Test
+    fun `should throw invalid input exception if input_descriptor param value is present but it's value is null`(){
+        presentationDefinition = """{"id":"pd_123","input_descriptors":null}"""
+        expectedExceptionMessage = "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
+
+        val actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+            }
+
+        assertEquals(expectedExceptionMessage,actualException.message)
+    }
 }
