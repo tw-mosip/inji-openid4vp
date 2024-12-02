@@ -26,7 +26,7 @@ val openID4VP = OpenID4VP()
 ## APIs
 
 ### authenticateVerifier
-- Receives a list of trusted verifiers & Verifier's encoded Authorization request from Wallet.
+- Receives a list of trusted verifiers & Verifier's encoded Authorization request from consumer app(mobile wallet).
 - Decodes and parse the request, extracts the clientId and verifies it against trusted verifier's list clientId.
 - Returns the Authentication response which contains validated Presentation Definition of the Authorization request.
 
@@ -44,24 +44,26 @@ val openID4VP = OpenID4VP()
 
 ###### Exceptions
 
-1. DecodingException is thrown when there is and issue while decoding the Authorization Request
-2. InvalidQueryParams exception is thrown if 
+**Exceptions**
+
+1. DecodingException is thrown when there is an issue while decoding the Authorization Request
+2. InvalidQueryParams exception is thrown if
    * query params are not present in the Request
-   * there is an issue while extracting the params 
-   * presentation_definition is not present in Request
-3. InvalidInput exception is thrown if any of required params value is empty
-4. InvalidVerifierClientID exception is thrown if the received request client_iD & response_uri are not matching with any of the trusted verifiers
+   * there is an issue while extracting the params
+   * both presentation_definition and presentation_definition_uri are present in Request
+   * both presentation_definition and presentation_definition_uri are not present in Request
+3. MissingInput exception is thrown if any of required params are not present in Request
+4. InvalidInput exception is thrown if any of required params value is empty or null
+5. InvalidVerifierClientID exception is thrown if the received request client_iD & response_uri are not matching with any of the trusted verifiers
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it. 
-   
-
 
 ### constructVerifiablePresentation
-- Receives a map of input_descriptor id & list of verifiable credentials for each input_descriptor.
-- Creates a Verifiable Presentation token without proof from received input_descriptor IDs and verifiable credentials, then returns it's string representation to Wallet for signing it.
+- Receives a map of input_descriptor id & list of verifiable credentials for each input_descriptor that are selected by the end-user.
+- Creates a vp_token without proof using received input_descriptor IDs and verifiable credentials, then returns its string representation to consumer app(mobile wallet) for signing it.
 
 ```
-    let vpTokenWithoutProof = openID4VP.constructVerifiablePresentation(verifiableCredentials: Map<String, List<String>>)
+    val vpTokenWithoutProof = openID4VP.constructVerifiablePresentation(verifiableCredentials: Map<String, List<String>>)
 ```
 
 ###### Parameters
@@ -73,14 +75,16 @@ This method will also notify the Verifier about the error by sending it to the r
 
 ###### Exceptions
 
-1. JsonEncodingException is thrown if there is any issue while serializing the Verifiable Presentation token without proof.
+1. JsonEncodingFailed exception is thrown if there is any issue while serializing the vp_token without proof.
+
+This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
 ### shareVerifiablePresentation
-- This function constructs a verifiable presentation token with proof using received VPResponseMetadata, then sends it and the presentation submission to the Verifier via a HTTP POST request.
-- Returns the response with a success or error message back to the wallet.
+- This function constructs a vp_token with proof using received VPResponseMetadata, then sends it and the presentation_submission to the Verifier via a HTTP POST request.
+- Returns the response back to the consumer app(mobile app) saying whether it has received the shared Verifiable Credentials or not.
 
 ```
-    let response = openID4VP.shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata)
+    val response = openID4VP.shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata)
 ```
 
 ###### Parameters
@@ -92,14 +96,14 @@ This method will also notify the Verifier about the error by sending it to the r
 
 ###### Exceptions
 
-1. JsonEncodingException is thrown if there is any issue while serializing the Verifiable Presentation token or Presentation Submission class instances.
+1. JsonEncodingFailed exception is thrown if there is any issue while serializing the generating vp_token or presentation_submission class instances.
 2. InterruptedIOException is thrown if the connection is timed out when network call is made.
 3. NetworkRequestFailed exception is thrown when there is any other exception occurred when sending the response over http post request.
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
 ### sendErrorToVerifier
-- Receives an exception and sends it's message to the Verifier via a HTTP POST request.
+- Receives an exception and sends it's message to the Verifier via an HTTP POST request.
 
 ```
  openID4VP.sendErrorToVerifier(exception: Exception)
