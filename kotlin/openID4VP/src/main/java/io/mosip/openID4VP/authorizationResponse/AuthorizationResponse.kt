@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationResponse
 
-import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
@@ -8,12 +7,14 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenFo
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
+import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
+private val className = AuthorizationResponse::class.simpleName!!
 
 class AuthorizationResponse {
     companion object {
@@ -36,8 +37,12 @@ class AuthorizationResponse {
                 )
                 return Json.encodeToString(vpTokenForSigning)
             } catch (exception: SerializationException) {
-                Logger.error(logTag, exception)
-                throw AuthorizationResponseExceptions.JsonEncodingException("vpTokenForSigning")
+                throw Logger.handleException(
+                    exceptionType = "JsonEncodingFailed",
+                    message = exception.message,
+                    fieldPath = listOf("vp_token_for_signing"),
+                    className = className
+                )
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
                 throw exception
@@ -95,14 +100,22 @@ class AuthorizationResponse {
             try {
                 encodedVPToken = Json.encodeToString(vpToken)
             } catch (exception: Exception) {
-                Logger.error(logTag, exception)
-                throw AuthorizationResponseExceptions.JsonEncodingException("vpToken")
+                throw Logger.handleException(
+                    exceptionType = "JsonEncodingFailed",
+                    message = exception.message,
+                    fieldPath = listOf("vp_token"),
+                    className = className
+                )
             }
             try {
                 encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
             } catch (exception: Exception) {
-                Logger.error(logTag, exception)
-                throw AuthorizationResponseExceptions.JsonEncodingException("presentationSubmission")
+                throw Logger.handleException(
+                    exceptionType = "JsonEncodingFailed",
+                    message = exception.message,
+                    fieldPath = listOf("presentation_submission"),
+                    className = className
+                )
             }
 
             try {
@@ -112,7 +125,12 @@ class AuthorizationResponse {
                     "state" to state
                 )
 
-                return sendHttpPostRequest(responseUri, bodyParams)
+                return sendHTTPRequest(
+                    url = responseUri,
+                    method = HTTP_METHOD.POST,
+                    bodyParams = bodyParams,
+                    headers = mapOf("Content-Type" to "application/x-www-form-urlencoded")
+                )
             } catch (exception: Exception) {
                 throw exception
             }

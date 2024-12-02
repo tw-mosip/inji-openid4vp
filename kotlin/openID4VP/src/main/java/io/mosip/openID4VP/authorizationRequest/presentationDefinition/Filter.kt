@@ -1,15 +1,17 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
+import io.mosip.openID4VP.common.FieldDeserializer
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 private val className = Filter::class.simpleName!!
 
@@ -20,28 +22,32 @@ object FilterSerializer : KSerializer<Filter> {
 	}
 
 	override fun deserialize(decoder: Decoder): Filter {
-		val builtInDecoder = decoder.beginStructure(descriptor)
-		var type: String? = null
-		var pattern: String? = null
-
-		loop@ while (true) {
-			when (builtInDecoder.decodeElementIndex(descriptor)) {
-				CompositeDecoder.DECODE_DONE -> break@loop
-				0 -> type = builtInDecoder.decodeStringElement(descriptor, 0)
-				1 -> pattern = builtInDecoder.decodeStringElement(descriptor, 1)
-			}
+		val jsonDecoder = try {
+			decoder as JsonDecoder
+		} catch (e: ClassCastException) {
+			throw Logger.handleException(
+				exceptionType = "DeserializationFailure",
+				fieldPath = listOf("filter"),
+				message = e.message!!,
+				className = className
+			)
 		}
+		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
+		val deserializer = FieldDeserializer(
+			jsonObject = jsonObject,
+			className = className,
+			parentField = "filter"
+		)
 
-		builtInDecoder.endStructure(descriptor)
+		val type: String? =
+			deserializer.deserializeField(key = "type", fieldType = "String", isMandatory = true)
+		val pattern: String? =
+			deserializer.deserializeField(key = "pattern", fieldType = "String", isMandatory = true)
 
-		requireNotNull(type) {
-			throw Logger.handleException("MissingInput", "filter", "type", className)
-		}
-		requireNotNull(pattern) {
-			throw Logger.handleException("MissingInput", "filter", "pattern", className)
-		}
-
-		return Filter(type = type, pattern = pattern)
+		return Filter(
+			type = type!!,
+			pattern = pattern!!
+		)
 	}
 
 	@Generated
@@ -54,17 +60,4 @@ object FilterSerializer : KSerializer<Filter> {
 }
 
 @Serializable(with = FilterSerializer::class)
-class Filter(val type: String, val pattern: String) {
-	fun validate() {
-		try {
-			require(type.isNotEmpty()) {
-				throw Logger.handleException("InvalidInput", "filter", "type", className)
-			}
-			require(pattern.isNotEmpty()) {
-				throw Logger.handleException("InvalidInput", "filter", "pattern", className)
-			}
-		} catch (exception: Exception) {
-			throw exception
-		}
-	}
-}
+class Filter(val type: String, val pattern: String)

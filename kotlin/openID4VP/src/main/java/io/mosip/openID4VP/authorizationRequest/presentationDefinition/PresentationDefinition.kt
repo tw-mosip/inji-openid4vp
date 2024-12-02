@@ -1,8 +1,9 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.Validatable
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.FieldDeserializer
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.credentialFormatTypes.Format
 import kotlinx.serialization.KSerializer
@@ -12,9 +13,10 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 private val className = PresentationDefinition::class.simpleName!!
 
@@ -29,42 +31,37 @@ object PresentationDefinitionSerializer : KSerializer<PresentationDefinition> {
 		}
 
 	override fun deserialize(decoder: Decoder): PresentationDefinition {
-		val builtInDecoder = decoder.beginStructure(descriptor)
-		var id: String? = null
-		var inputDescriptors: List<InputDescriptor>? = null
-		var name: String? = null
-		var purpose: String? = null
-		var format: Format? = null
-
-		loop@ while (true) {
-			when (builtInDecoder.decodeElementIndex(descriptor)) {
-				CompositeDecoder.DECODE_DONE -> break@loop
-				0 -> id = builtInDecoder.decodeStringElement(descriptor, 0)
-				1 -> inputDescriptors = builtInDecoder.decodeSerializableElement(
-					descriptor, 1, ListSerializer(InputDescriptor.serializer())
-				)
-
-				2 -> name = builtInDecoder.decodeStringElement(descriptor, 2)
-				3 -> purpose = builtInDecoder.decodeStringElement(descriptor, 3)
-				4 -> format =
-					builtInDecoder.decodeSerializableElement(descriptor, 4, Format.serializer())
-			}
+		val jsonDecoder = try {
+			decoder as JsonDecoder
+		} catch (e: ClassCastException) {
+			throw Logger.handleException(
+				exceptionType = "DeserializationFailure",
+				fieldPath = listOf("presentation_definition"),
+				message = e.message!!,
+				className = className
+			)
 		}
+		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
+		val deserializer = FieldDeserializer(
+			jsonObject = jsonObject, className = className, parentField = "presentation_definition"
+		)
 
-		builtInDecoder.endStructure(descriptor)
-
-		requireNotNull(id) {
-			throw Logger.handleException("MissingInput", "presentation_definition", "id", className)
-		}
-		requireNotNull(inputDescriptors) {
-			throw Logger.handleException("MissingInput", "presentation_definition", "input_descriptors", className)
-		}
-
+		val id: String? =
+			deserializer.deserializeField(key = "id", fieldType = "String", isMandatory = true)
+		val inputDescriptors: List<InputDescriptor>? = deserializer.deserializeField(
+			key = "input_descriptors",
+			fieldType = "List<InputDescriptor>",
+			deserializer = ListSerializer(InputDescriptor.serializer()),
+			isMandatory = true
+		)
+		val name: String? = deserializer.deserializeField(key = "name", fieldType = "String")
+		val purpose: String? = deserializer.deserializeField(key = "purpose", fieldType = "String")
+		val format: Format? = deserializer.deserializeField(
+			key = "format", fieldType = "Format", deserializer = Format.serializer()
+		)
 		return PresentationDefinition(
-			id = id,
-			inputDescriptors = inputDescriptors,
-			name = name,
-			purpose = purpose, format = format
+			id = id!!, inputDescriptors = inputDescriptors!!,
+			name = name, purpose = purpose, format = format
 		)
 	}
 
@@ -93,17 +90,9 @@ class PresentationDefinition(
 
 	override fun validate() {
 		try {
-			require(id.isNotEmpty()) {
-				throw Logger.handleException("InvalidInput", "presentation_definition", "id", className)
-			}
-			require(inputDescriptors.isNotEmpty()) {
-				throw Logger.handleException("InvalidInput", "presentation_definition", "input_descriptors", className)
-			}
-
 			inputDescriptors.forEach { inputDescriptor ->
 				inputDescriptor.validate()
 			}
-			format?.validate()
 		} catch (exception: AuthorizationRequestExceptions.InvalidInput) {
 			throw exception
 		}

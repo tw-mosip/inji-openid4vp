@@ -1,7 +1,9 @@
 package io.mosip.openID4VP.dto
 
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.validateField
 
+private val className = VPResponseMetadata::class.simpleName!!
 data class VPResponseMetadata(
     val jws: String,
     val signatureAlgorithm: String,
@@ -17,8 +19,13 @@ data class VPResponseMetadata(
         )
 
         requiredParams.forEach { (key, value) ->
-            if (value == "" || value == "null") {
-                throw AuthorizationRequestExceptions.InvalidInput(key)
+            require(value != "null" && validateField(value, "String")) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidInput",
+                    fieldPath = listOf("vp response metadata",key),
+                    className = className,
+                    fieldType = key::class.simpleName
+                )
             }
         }
     }

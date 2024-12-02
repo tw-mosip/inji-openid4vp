@@ -1,7 +1,6 @@
 package io.mosip.openID4VP.credentialFormatTypes
 
 import Generated
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -51,13 +50,4 @@ object FormatSerializer : KSerializer<Format> {
 @Serializable(with = FormatSerializer::class)
 class Format(
 	@SerialName("ldp_vc") val ldpVc: LdpFormat?,
-) {
-	fun validate() {
-		try {
-			ldpVc?.validate()
-		} catch (e: AuthorizationRequestExceptions.InvalidInput) {
-			throw e
-		}
-	}
-
-}
+)

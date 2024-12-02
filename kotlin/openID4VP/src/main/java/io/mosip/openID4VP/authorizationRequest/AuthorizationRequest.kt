@@ -1,15 +1,18 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.validateField
+import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-private val logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
+private val className = AuthorizationRequest::class.simpleName!!
+private val logTag = Logger.getLogTag(className)
 
 data class AuthorizationRequest(
     val clientId: String,
@@ -61,8 +64,11 @@ data class AuthorizationRequest(
                 val uriString = "?$encodedQuery"
                 val uri = URI(uriString)
                 val query = uri.query
-                    ?: throw AuthorizationRequestExceptions.InvalidQueryParams("Query parameters are missing in the Authorization request")
-
+                    ?: throw Logger.handleException(
+                        exceptionType = "InvalidQueryParams",
+                        message = "Query parameters are missing in the Authorization request",
+                        className = className
+                    )
                 val params = extractQueryParams(query)
                 validateQueryParams(params, setResponseUri)
                 return createAuthorizationRequest(params)
@@ -72,24 +78,87 @@ data class AuthorizationRequest(
             }
         }
 
-        private fun extractQueryParams(query: String): Map<String, String> {
+        private fun extractQueryParams(query: String): MutableMap<String, String> {
             try {
-                return query.split("&").map { it.split("=") }.associateBy({ it[0] }, {
+                return query.split("&").map { it.split("=") }
+                    .associateByTo(mutableMapOf(), { it[0] }, {
                     if (it.size > 1) URLDecoder.decode(
                         it[1], StandardCharsets.UTF_8.toString()
                     ) else ""
                 })
             } catch (exception: Exception) {
-                throw AuthorizationRequestExceptions.InvalidQueryParams("Exception occurred when extracting the query params from Authorization Request : ${exception.message}")
+                throw Logger.handleException(
+                    exceptionType = "InvalidQueryParams",
+                    message = "Exception occurred when extracting the query params from Authorization Request : ${exception.message}",
+                    className = className
+                )
             }
         }
 
+        private fun fetchPresentationDefinition(params: Map<String, String>): String {
+            val hasPresentationDefinition = params.containsKey("presentation_definition")
+            val hasPresentationDefinitionUri = params.containsKey("presentation_definition_uri")
+            var presentationDefinition = ""
+
+            when {
+                hasPresentationDefinition && hasPresentationDefinitionUri -> {
+                    throw Logger.handleException(
+                        exceptionType = "InvalidQueryParams",
+                        message = "Either presentation_definition or presentation_definition_uri request param can be provided but not both",
+                        className = className
+                    )
+                }
+
+                hasPresentationDefinition -> {
+                    val value = params["presentation_definition"]
+
+                    require(value != "null" && validateField(value, "String")) {
+                        throw Logger.handleException(
+                            exceptionType = "InvalidInput",
+                            fieldPath = listOf("presentation_definition"),
+                            className = className,
+                            fieldType = "String"
+                        )
+                    }
+                    presentationDefinition =
+                        params["presentation_definition"]!!
+                }
+
+                hasPresentationDefinitionUri -> {
+                    try {
+                        validateRootFieldInvalidScenario(
+                            "presentation_definition_uri",
+                            params["presentation_definition_uri"]
+                        )
+                        presentationDefinition =
+                            sendHTTPRequest(
+                                url = params["presentation_definition_uri"]!!,
+                                method = HTTP_METHOD.GET
+                            )
+                    } catch (exception: Exception) {
+                        throw exception
+                    }
+                }
+
+                else -> {
+                    throw Logger.handleException(
+                        exceptionType = "InvalidQueryParams",
+                        message = "Either presentation_definition or presentation_definition_uri request param must be present",
+                        className = className
+                    )
+                }
+            }
+            return presentationDefinition
+        }
+
         private fun validateQueryParams(
-            params: Map<String, String>, setResponseUri: (String) -> Unit
+            params: MutableMap<String, String>, setResponseUri: (String) -> Unit
         ) {
-            //Keep response_uri as first param in this list because if any other required param is not present then we need this response_uri to send error to the verifier
+            validateRootFieldMissingScenario(params, "response_uri")
+            validateRootFieldInvalidScenario("response_uri", params["response_uri"])
+            setResponseUri(params["response_uri"]!!)
+
             val requiredRequestParams = mutableListOf(
-                "response_uri",
                 "presentation_definition",
                 "client_id",
                 "response_type",
@@ -98,20 +167,27 @@ data class AuthorizationRequest(
                 "state",
             )
             requiredRequestParams.forEach { param ->
-                val value = params[param] ?: throw AuthorizationRequestExceptions.MissingInput(param)
-                if (param == "response_uri") {
-                    setResponseUri(value)
+                if (param == "presentation_definition") {
+                    try {
+                        params["presentation_definition"] = fetchPresentationDefinition(params)
+                    } catch (exception: Exception) {
+                        throw exception
+                    }
                 }
-                require(value.isNotEmpty()) {
-                    throw AuthorizationRequestExceptions.InvalidInput(param)
-                }
+                validateRootFieldMissingScenario(params, param)
+                validateRootFieldInvalidScenario(param, params[param])
             }
 
             val optionalRequestParams = mutableListOf("client_metadata")
             optionalRequestParams.forEach { param ->
                 params[param]?.let { value ->
                     require(value.isNotEmpty()) {
-                        throw AuthorizationRequestExceptions.InvalidInput(param)
+                        throw Logger.handleException(
+                            exceptionType = "InvalidInput",
+                            fieldPath = listOf("client_metadata"),
+                            className = className,
+                            fieldType = value::class.simpleName
+                        )
                     }
                 }
             }
@@ -128,6 +204,31 @@ data class AuthorizationRequest(
                 state = params["state"]!!,
                 clientMetadata = params["client_metadata"],
             )
+        }
+
+        private fun validateRootFieldMissingScenario(
+            params: MutableMap<String, String>,
+            param: String
+        ) {
+            val hasParam = params.containsKey(param)
+            if (!hasParam) {
+                throw Logger.handleException(
+                    exceptionType = "MissingInput",
+                    fieldPath = listOf(param),
+                    className = className
+                )
+            }
+        }
+
+        private fun validateRootFieldInvalidScenario(param: String, value: String?) {
+            require(value != "null" && validateField(value, "String")) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidInput",
+                    fieldPath = listOf(param),
+                    className = className,
+                    fieldType = "String"
+                )
+            }
         }
     }
 }
