@@ -1,3 +1,5 @@
+package io.mosip.openID4VP.common
+
 fun validateField(field: Any?, fieldType: String?): Boolean {
 	var res = true
 	when {

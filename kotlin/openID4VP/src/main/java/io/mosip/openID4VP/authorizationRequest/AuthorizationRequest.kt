@@ -3,16 +3,16 @@ package io.mosip.openID4VP.authorizationRequest
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.validateField
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
-import validateField
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-private val logTag = Logger.getLogTag(AuthorizationRequest::class.simpleName!!)
 private val className = AuthorizationRequest::class.simpleName!!
+private val logTag = Logger.getLogTag(className)
 
 data class AuthorizationRequest(
     val clientId: String,

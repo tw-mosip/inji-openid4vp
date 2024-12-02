@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-import FieldDeserializer
 import Generated
+import io.mosip.openID4VP.common.FieldDeserializer
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -15,7 +15,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.jsonObject
 
-private val logTag = Logger.getLogTag(Constraints::class.simpleName!!)
 private val className = Constraints::class.simpleName!!
 object ConstraintsSerializer : KSerializer<Constraints> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Constraints") {

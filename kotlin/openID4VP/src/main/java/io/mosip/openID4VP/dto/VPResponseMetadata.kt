@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.dto
 
 import io.mosip.openID4VP.common.Logger
-import validateField
+import io.mosip.openID4VP.common.validateField
 
 private val className = VPResponseMetadata::class.simpleName!!
 data class VPResponseMetadata(

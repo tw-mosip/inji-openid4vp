@@ -1,4 +1,5 @@
-import io.mosip.openID4VP.common.Logger
+package io.mosip.openID4VP.common
+
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
