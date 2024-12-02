@@ -8,7 +8,8 @@ import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHttpPostRequest
+import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
 class OpenID4VP(private val traceabilityId: String) {
@@ -31,7 +32,7 @@ class OpenID4VP(private val traceabilityId: String) {
         encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>
     ): AuthorizationRequest {
         try {
-            Logger.setTraceability(traceabilityId)
+            Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
                 encodedAuthorizationRequest, ::setResponseUri
             )
@@ -76,13 +77,13 @@ class OpenID4VP(private val traceabilityId: String) {
     fun sendErrorToVerifier(exception: Exception) {
         responseUri?.let {
             try {
-                sendHttpPostRequest(
-                    it, mapOf("error" to exception.message!!)
+                sendHTTPRequest(
+                    url = it, method = HTTP_METHOD.POST,mapOf("error" to exception.message!!)
                 )
             } catch (exception: Exception) {
                 Logger.error(
                     logTag,
-                    Exception("Unexpected error occurred while sending the error to verifier.")
+                    Exception("Unexpected error occurred while sending the error to verifier: ${exception.message}")
                 )
             }
         }

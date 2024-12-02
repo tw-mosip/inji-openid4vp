@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.FieldDeserializer
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.credentialFormatTypes.Format
 import kotlinx.serialization.KSerializer
@@ -9,11 +10,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.jsonObject
 
 private val className = InputDescriptor::class.simpleName!!
-
 object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("InputDescriptor") {
 		element<String>("id")
@@ -23,38 +25,50 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		element<Constraints>("constraints")
 	}
 
-	override fun deserialize(decoder: kotlinx.serialization.encoding.Decoder): InputDescriptor {
-		val builtInDecoder = decoder.beginStructure(descriptor)
-		var id: String? = null
-		var name: String? = null
-		var purpose: String? = null
-		var format: Format? = null
-		var constraints: Constraints? = null
-
-		loop@ while (true) {
-			when (builtInDecoder.decodeElementIndex(descriptor)) {
-				CompositeDecoder.DECODE_DONE -> break@loop
-				0 -> id = builtInDecoder.decodeStringElement(descriptor, 0)
-				1 -> name = builtInDecoder.decodeStringElement(descriptor, 1)
-				2 -> purpose = builtInDecoder.decodeStringElement(descriptor, 2)
-				3 -> format = builtInDecoder.decodeSerializableElement(descriptor, 3, Format.serializer())
-				4 -> constraints = builtInDecoder.decodeSerializableElement(
-					descriptor, 4, Constraints.serializer()
-				)
-			}
+	override fun deserialize(decoder: Decoder): InputDescriptor {
+		val jsonDecoder = try {
+			decoder as JsonDecoder
+		} catch (e: ClassCastException) {
+			throw Logger.handleException(
+				exceptionType = "DeserializationFailure",
+				fieldPath = listOf("input_descriptor"),
+				message = e.message!!,
+				className = className
+			)
 		}
+		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
+		val deserializer = FieldDeserializer(
+			jsonObject = jsonObject,
+			className = className,
+			parentField = "input_descriptor"
+		)
 
-		builtInDecoder.endStructure(descriptor)
-
-		requireNotNull(id) {
-			throw Logger.handleException("MissingInput", "input_descriptor", "id", className)
-		}
-		requireNotNull(constraints) {
-			throw Logger.handleException("MissingInput", "input_descriptor", "constraints", className)
-		}
+		val id: String? =
+			deserializer.deserializeField(key = "id", fieldType = "String", isMandatory = true)
+		val name: String? =
+			deserializer.deserializeField(key = "name", fieldType = "String")
+		val purpose: String? =
+			deserializer.deserializeField(key = "purpose", fieldType = "String")
+		val format: Format? =
+			deserializer.deserializeField(
+				key = "format",
+				fieldType = "Format",
+				deserializer = Format.serializer()
+			)
+		val constraints: Constraints? =
+			deserializer.deserializeField(
+				key = "constraints",
+				fieldType = "Constraints",
+				deserializer = Constraints.serializer(),
+				isMandatory = true
+			)
 
 		return InputDescriptor(
-			id = id, name = name, purpose = purpose, format = format, constraints = constraints
+			id = id!!,
+			name = name,
+			purpose = purpose,
+			format = format,
+			constraints = constraints!!
 		)
 	}
 
@@ -84,10 +98,6 @@ class InputDescriptor(
 ) {
 	fun validate() {
 		try {
-			require(id.isNotEmpty()) {
-				throw Logger.handleException("InvalidInput", "input_descriptor", "id", className)
-			}
-			format?.validate()
 			constraints.validate()
 		} catch (exception: AuthorizationRequestExceptions.InvalidInput) {
 			throw exception

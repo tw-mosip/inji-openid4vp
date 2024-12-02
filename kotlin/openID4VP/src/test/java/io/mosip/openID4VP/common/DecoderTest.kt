@@ -1,16 +1,38 @@
 package io.mosip.openID4VP.common
 
+import android.util.Log
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Before
 import org.junit.Test
 
 class DecoderTest {
 
+    @Before
+    fun setUp() {
+        mockkStatic(Log::class)
+        every { Log.e(any(), any()) } answers {
+            val tag = arg<String>(0)
+            val msg = arg<String>(1)
+            println("Error: logTag: $tag | Message: $msg")
+            0
+        }
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
+    }
+
     @Test
     fun `should throw invalid input exception for empty input`() {
         val encodedData = ""
-        val expectedExceptionMessage = "Invalid Input: encoded data value cannot be empty or null"
+        val expectedExceptionMessage = "Invalid Input: encoded data value cannot be empty string or null"
 
         val actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {

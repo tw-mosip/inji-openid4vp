@@ -12,24 +12,38 @@ private val logTag = Logger.getLogTag(NetworkManagerClient::class.simpleName!!)
 
 class NetworkManagerClient {
 	companion object {
-		fun sendHttpPostRequest(
-			baseUrl: String, bodyParams: Map<String, String>
+		fun sendHTTPRequest(
+			url: String,
+			method: HTTP_METHOD,
+			bodyParams: Map<String, String>? = null,
+			headers: Map<String, String>? = null
 		): String {
 			try {
-				val requestBodyBuilder = FormBody.Builder()
-				bodyParams.forEach { (key, value) ->
-					requestBodyBuilder.add(key, value)
-				}
-				val requestBody = requestBodyBuilder.build()
 				val client = OkHttpClient.Builder().build()
-				val request = Request.Builder().url(baseUrl).post(requestBody)
-					.header("Content-Type", "application/x-www-form-urlencoded").build()
+				val request: Request
+				when (method) {
+					HTTP_METHOD.POST -> {
+						val requestBodyBuilder = FormBody.Builder()
+						bodyParams?.forEach { (key, value) ->
+							requestBodyBuilder.add(key, value)
+						}
+						val requestBody = requestBodyBuilder.build()
+						val requestBuilder = Request.Builder().url(url).post(requestBody)
+						headers?.forEach { (key, value) ->
+							requestBuilder.addHeader(key, value)
+						}
+						request = requestBuilder.build()
+					}
+
+					HTTP_METHOD.GET -> request = Request.Builder().url(url).get().build()
+				}
 				val response: Response = client.newCall(request).execute()
 
-				if (response.code == 200) {
-					return response.message
+				if (response.isSuccessful) {
+					return response.body?.byteStream()?.bufferedReader().use { it?.readText() }
+						?: ""
 				} else {
-					throw NetworkManagerClientExceptions.NetworkRequestFailed(response.toString())
+					throw Exception(response.toString())
 				}
 			} catch (exception: InterruptedIOException) {
 				val specificException =
@@ -37,9 +51,15 @@ class NetworkManagerClient {
 				Logger.error(logTag, specificException)
 				throw specificException
 			} catch (exception: Exception) {
-				Logger.error(logTag, exception)
-				throw exception
+				val specificException =
+					NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
+				Logger.error(logTag, specificException)
+				throw specificException
 			}
 		}
 	}
+}
+
+enum class HTTP_METHOD {
+	POST, GET
 }

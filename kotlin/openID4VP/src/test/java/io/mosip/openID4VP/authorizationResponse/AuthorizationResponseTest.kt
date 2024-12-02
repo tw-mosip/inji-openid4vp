@@ -60,7 +60,7 @@ class AuthorizationResponseTest {
         openID4VP = OpenID4VP("test-OpenID4VP")
         presentationDefinition =
             """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"id_123","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
-        clientMetadata = """{"name": "verifier"}"""
+        clientMetadata = """{"client_name": "verifier"}"""
         trustedVerifiers = listOf(
             Verifier(
                 "https://injiverify.dev2.mosip.net", listOf(
@@ -122,7 +122,7 @@ class AuthorizationResponseTest {
         vpResponseMetadata = VPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
-        expectedExceptionMessage = "Invalid Input: domain value cannot be empty or null"
+        expectedExceptionMessage = "Invalid Input: vp response metadata->domain value cannot be empty string or null"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -172,8 +172,8 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    fun `should return ok message if Authorization Response request call is made successfully and returned response with http status 200`() {
-        val mockResponse: MockResponse = MockResponse().setResponseCode(200)
+    fun `should get response if Verifiable Presentation is shared successfully to the Verifier`() {
+        val mockResponse: MockResponse = MockResponse().setResponseCode(200).setBody("Verifiable Presentation is shared successfully")
         mockWebServer.enqueue(mockResponse)
         vpResponseMetadata = VPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
@@ -181,7 +181,7 @@ class AuthorizationResponseTest {
             publicKey,
             "https://123",
         )
-        val expectedValue = "OK"
+        val expectedValue = "Verifiable Presentation is shared successfully"
 
         val actualResponse = openID4VP.shareVerifiablePresentation(vpResponseMetadata)
 
