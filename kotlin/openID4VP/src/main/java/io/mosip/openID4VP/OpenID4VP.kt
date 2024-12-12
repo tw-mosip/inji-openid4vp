@@ -28,8 +28,11 @@ class OpenID4VP(private val traceabilityId: String) {
         this.authorizationRequest.clientMetadata = clientMetadata
     }
 
+    @JvmOverloads
     fun authenticateVerifier(
-        encodedAuthorizationRequest: String, trustedVerifiers: List<Verifier>, shouldValidateClient: Boolean
+        encodedAuthorizationRequest: String,
+        trustedVerifiers: List<Verifier>,
+        shouldValidateClient: Boolean = false
     ): AuthorizationRequest {
         try {
             Logger.setTraceabilityId(traceabilityId)
