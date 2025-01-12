@@ -61,7 +61,7 @@ class ClientMetadataTest {
 			)
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->client_name value cannot be empty string or null"
+			"Invalid Input: client_metadata->client_name value cannot be an empty string, null, or an integer"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -83,7 +83,7 @@ class ClientMetadataTest {
 			)
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->client_name value cannot be empty string or null"
+			"Invalid Input: client_metadata->client_name value cannot be an empty string, null, or an integer"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -105,7 +105,7 @@ class ClientMetadataTest {
 			)
 		)
 		val expectedExceptionMessage =
-			"Invalid Input: client_metadata->logo_uri value cannot be empty string or null"
+			"Invalid Input: client_metadata->logo_uri value cannot be an empty string, null, or an integer"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
