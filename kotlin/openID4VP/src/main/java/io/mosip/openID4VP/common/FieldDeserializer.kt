@@ -5,6 +5,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -45,8 +46,17 @@ class FieldDeserializer(
 					deserializer,
 					data
 				) // Custom fields
-				fieldType == "String" -> (data as JsonPrimitive).content as T
-				fieldType == "Boolean" -> (data as JsonPrimitive).boolean as T
+
+				fieldType == "String" -> {
+					validateFieldType(data, fieldType, parentField, key, className)
+					(data as JsonPrimitive).content as T
+				}
+
+				fieldType == "Boolean" -> {
+					validateFieldType(data, fieldType, parentField, key, className)
+					(data as JsonPrimitive).boolean as T
+				}
+
 				fieldType.startsWith("List") -> Json.decodeFromJsonElement(
 					ListSerializer(String.serializer()),
 					data
@@ -65,6 +75,28 @@ class FieldDeserializer(
 			return res
 		} else {
 			return null
+		}
+	}
+
+	private fun validateFieldType(
+		data: JsonElement,
+		fieldType: String,
+		parentField: String,
+		key: String,
+		className: String
+	) {
+		if (data !is JsonPrimitive || when (fieldType) {
+				"String" -> !data.isString
+				"Boolean" -> !data.boolean
+				else -> true
+			}
+		) {
+			throw Logger.handleException(
+				exceptionType = "InvalidInput",
+				fieldPath = listOf(parentField, key),
+				className = className,
+				fieldType = fieldType
+			)
 		}
 	}
 }

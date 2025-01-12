@@ -14,7 +14,7 @@ sealed class AuthorizationRequestExceptions {
         Exception(
             "Invalid Input: ${
                 when (fieldType) {
-                    "String" -> "$fieldPath value cannot be empty string or null"
+                    "String" -> "$fieldPath value cannot be an empty string, null, or an integer"
                     "Boolean" -> "$fieldPath value must be either true or false"
                     else -> "$fieldPath value cannot be empty or null"
                 }
