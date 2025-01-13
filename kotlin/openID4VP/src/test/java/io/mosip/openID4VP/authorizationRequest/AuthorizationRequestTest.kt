@@ -88,7 +88,7 @@ class AuthorizationRequestTest {
             createEncodedAuthorizationRequest(
                 mapOf("presentation_definition" to presentationDefinition, "client_id" to "")
             )
-        expectedExceptionMessage = "Invalid Input: client_id value cannot be empty string or null"
+        expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -106,7 +106,7 @@ class AuthorizationRequestTest {
             createEncodedAuthorizationRequest(
                 mapOf("presentation_definition" to presentationDefinition, "client_id" to null)
             )
-        expectedExceptionMessage = "Invalid Input: client_id value cannot be empty string or null"
+        expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
