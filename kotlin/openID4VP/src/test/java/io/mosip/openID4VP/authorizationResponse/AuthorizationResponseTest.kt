@@ -122,8 +122,7 @@ class AuthorizationResponseTest {
         vpResponseMetadata = VPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
-        expectedExceptionMessage = "Invalid Input: vp response metadata->domain value cannot be empty string or null"
-
+        expectedExceptionMessage = "Invalid Input: vp response metadata->domain value cannot be an empty string, null, or an integer"
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
                 openID4VP.shareVerifiablePresentation(vpResponseMetadata)
