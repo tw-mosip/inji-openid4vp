@@ -70,12 +70,39 @@ data class AuthorizationRequest(
                         className = className
                     )
                 val params = extractQueryParams(query)
-                validateQueryParams(params, setResponseUri)
-                return createAuthorizationRequest(params)
+                val authorizationRequestParams = fetchAuthRequestData(params)
+                validateQueryParams(authorizationRequestParams, setResponseUri)
+                return createAuthorizationRequest(authorizationRequestParams)
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
                 throw exception
             }
+        }
+
+        private fun fetchAuthRequestData(params: MutableMap<String, String>): MutableMap<String, String> {
+            return params["request_uri"]?.let { requestUri ->
+                try {
+                    val requestUriMethod = params["request_uri_method"] ?: "get HTTP/1.1"
+                    validateRootFieldInvalidScenario("request_uri", params["request_uri"])
+                    validateRootFieldInvalidScenario("request_uri_method", requestUriMethod)
+                    val httpMethod = determineHttpMethod(requestUriMethod)
+                    processJWTAndFetchAuthRequestParams(sendHTTPRequest(url = requestUri, method = httpMethod))
+                } catch (exception: Exception) {
+                    throw exception
+                }
+            } ?: params
+        }
+
+        private fun determineHttpMethod(method: String?): HTTP_METHOD {
+            return when {
+                method?.contains("get") == true -> HTTP_METHOD.GET
+                method?.contains("post") == true -> HTTP_METHOD.POST
+                else -> throw IllegalArgumentException("Unsupported HTTP method: $method")
+            }
+        }
+
+        private fun processJWTAndFetchAuthRequestParams(authorizationRequest: String): MutableMap<String, String> {
+            TODO("Not yet implemented")
         }
 
         private fun extractQueryParams(query: String): MutableMap<String, String> {
