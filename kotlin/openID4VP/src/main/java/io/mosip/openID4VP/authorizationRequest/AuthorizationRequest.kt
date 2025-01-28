@@ -86,7 +86,7 @@ data class AuthorizationRequest(
                     validateRootFieldInvalidScenario("request_uri", params["request_uri"])
                     validateRootFieldInvalidScenario("request_uri_method", requestUriMethod)
                     val httpMethod = determineHttpMethod(requestUriMethod)
-                    processJWTAndFetchAuthRequestParams(sendHTTPRequest(url = requestUri, method = httpMethod))
+                    processResponseAndFetchAuthRequestParams(sendHTTPRequest(url = requestUri, method = httpMethod))
                 } catch (exception: Exception) {
                     throw exception
                 }
@@ -101,8 +101,9 @@ data class AuthorizationRequest(
             }
         }
 
-        private fun processJWTAndFetchAuthRequestParams(authorizationRequest: String): MutableMap<String, String> {
+        private fun processResponseAndFetchAuthRequestParams(authorizationRequest: String): MutableMap<String, String> {
             TODO("Not yet implemented")
+          //TODO: check if the data is jwt or base64 encoded JSON. Extract the data accordingly. Return Map of authorization request which can be validated
         }
 
         private fun extractQueryParams(query: String): MutableMap<String, String> {
