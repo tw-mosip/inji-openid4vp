@@ -37,13 +37,11 @@ class OpenID4VP(private val traceabilityId: String) {
         try {
             Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
-                encodedAuthorizationRequest, ::setResponseUri
+                encodedAuthorizationRequest, ::setResponseUri, trustedVerifiers, shouldValidateClient
             )
             AuthenticationResponse.validateAuthorizationRequestPartially(
                 authorizationRequest,
-                trustedVerifiers,
-                ::updateAuthorizationRequest,
-                shouldValidateClient
+                ::updateAuthorizationRequest
             )
             return this.authorizationRequest
         } catch (exception: Exception) {
@@ -69,7 +67,7 @@ class OpenID4VP(private val traceabilityId: String) {
                 vpResponseMetadata,
                 authorizationRequest.nonce,
                 authorizationRequest.state,
-                authorizationRequest.responseUri,
+                authorizationRequest.responseUri!!,
                 (this.authorizationRequest.presentationDefinition as PresentationDefinition).id
             )
         } catch (exception: Exception) {

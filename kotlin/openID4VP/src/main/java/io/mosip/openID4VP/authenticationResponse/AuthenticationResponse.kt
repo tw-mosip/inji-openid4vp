@@ -14,21 +14,8 @@ class AuthenticationResponse {
     companion object {
         fun validateAuthorizationRequestPartially(
             authorizationRequest: AuthorizationRequest,
-            trustedVerifiers: List<Verifier>,
-            updateAuthorizationRequest: (PresentationDefinition, ClientMetadata?) -> Unit,
-            shouldValidateClient: Boolean
+            updateAuthorizationRequest: (PresentationDefinition, ClientMetadata?) -> Unit
         ) {
-            if (shouldValidateClient) {
-                validateVerifier(
-                    authorizationRequest.clientId,
-                    authorizationRequest.responseUri,
-                    trustedVerifiers
-                ) ?: throw Logger.handleException(
-                    exceptionType = "InvalidVerifierClientID",
-                    className = className
-                )
-            }
-
             try {
                 var clientMetadata: ClientMetadata? = null
                 authorizationRequest.clientMetadata?.let {
@@ -47,14 +34,6 @@ class AuthenticationResponse {
             } catch (e: Exception) {
                 throw e
             }
-        }
-
-        private fun validateVerifier(
-            receivedClientId: String,
-            receivedResponseUri: String,
-            trustedVerifiers: List<Verifier>
-        ): Verifier? {
-            return trustedVerifiers.find { it.clientId == receivedClientId && receivedResponseUri in it.responseUris }
         }
     }
 }

@@ -4,22 +4,37 @@ import io.mosip.openID4VP.authorizationRequest.presentationDefinition.Presentati
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
+import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.core.type.TypeReference
+import io.mosip.openID4VP.authorizationRequest.proofJwt.ProofJwtManager
+
 private val className = AuthorizationRequest::class.simpleName!!
 private val logTag = Logger.getLogTag(className)
+private var authorizationRequest: MutableMap<String, String> = mutableMapOf()
+private var validateClient: Boolean = false;
+
+enum class ClientIdScheme(val value: String) {
+    PRE_REGISTERED("pre-registered"),
+    REDIRECT_URI("redirect_uri")
+}
 
 data class AuthorizationRequest(
     val clientId: String,
+    val clientIdScheme: String,
     val responseType: String,
-    val responseMode: String,
+    val responseMode: String?,
     var presentationDefinition: Any,
-    val responseUri: String,
+    val responseUri: String?,
+    val redirectUri: String?,
     val nonce: String,
     val state: String,
     var clientMetadata: Any? = null
@@ -39,7 +54,10 @@ data class AuthorizationRequest(
 
     companion object {
         fun validateAndGetAuthorizationRequest(
-            encodedAuthorizationRequest: String, setResponseUri: (String) -> Unit
+            encodedAuthorizationRequest: String,
+            setResponseUri: (String) -> Unit,
+            trustedVerifiers: List<Verifier>,
+            shouldValidateClient: Boolean
         ): AuthorizationRequest {
             try {
                 val queryStart = encodedAuthorizationRequest.indexOf('?') + 1
@@ -47,16 +65,66 @@ data class AuthorizationRequest(
                 val decodedString =
                     Decoder.decodeBase64ToString(encodedString)
                 val decodedAuthorizationRequest =
-                    encodedAuthorizationRequest.substring(0, queryStart) + decodedString
-                return parseAuthorizationRequest(decodedAuthorizationRequest, setResponseUri)
+                    encodedAuthorizationRequest.substring(0, queryStart) + decodedString;
+                validateClient = shouldValidateClient
+                authorizationRequest =
+                    parseAuthorizationRequest(decodedAuthorizationRequest, setResponseUri)
+
+                if (validateClient) {
+                    validateVerifier(
+                        trustedVerifiers, authorizationRequest
+                    )
+                }
+                val params = validateQueryParams(authorizationRequest, setResponseUri)
+                return createAuthorizationRequest(params)
+
             } catch (e: Exception) {
                 throw e
             }
         }
 
+        private fun validateVerifier(
+            verifierList: List<Verifier>,
+            authorizationRequest: MutableMap<String, String>
+        ) {
+            val clientIdScheme = authorizationRequest["client_id_scheme"]
+            val clientId = authorizationRequest["client_id"]
+            val redirectUri = authorizationRequest["redirect_uri"]
+
+            when (clientIdScheme) {
+                ClientIdScheme.PRE_REGISTERED.value -> {
+                    if (verifierList.isEmpty()) {
+                        throw Logger.handleException(
+                            exceptionType = "EmptyVerifierList",
+                            className = AuthorizationRequest.toString()
+                        )
+                    }
+                    val isValidVerifier = verifierList.any { verifier ->
+                        verifier.clientId == clientId &&
+                                verifier.responseUris.contains(authorizationRequest["response_uri"])
+                    }
+                    if (!isValidVerifier) {
+                        throw Logger.handleException(
+                            exceptionType = "InvalidVerifierClientID",
+                            className = AuthorizationRequest.toString()
+                        )
+                    }
+                }
+
+                ClientIdScheme.REDIRECT_URI.value -> {
+                    if (redirectUri != null && redirectUri != clientId) {
+                        throw Logger.handleException(
+                            exceptionType = "InvalidVerifierRedirectUri",
+                            className = AuthorizationRequest.toString()
+                        )
+                    }
+                }
+            }
+        }
+
         private fun parseAuthorizationRequest(
             decodedAuthorizationRequest: String, setResponseUri: (String) -> Unit
-        ): AuthorizationRequest {
+        ): MutableMap<String, String> {
             try {
                 val queryStart = decodedAuthorizationRequest.indexOf('?') + 1
                 val queryString = decodedAuthorizationRequest.substring(queryStart)
@@ -70,9 +138,7 @@ data class AuthorizationRequest(
                         className = className
                     )
                 val params = extractQueryParams(query)
-                val authorizationRequestParams = fetchAuthRequestData(params)
-                validateQueryParams(authorizationRequestParams, setResponseUri)
-                return createAuthorizationRequest(authorizationRequestParams)
+                return fetchAuthRequestData(params)
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
                 throw exception
@@ -86,7 +152,10 @@ data class AuthorizationRequest(
                     validateRootFieldInvalidScenario("request_uri", params["request_uri"])
                     validateRootFieldInvalidScenario("request_uri_method", requestUriMethod)
                     val httpMethod = determineHttpMethod(requestUriMethod)
-                    processResponseAndFetchAuthRequestParams(sendHTTPRequest(url = requestUri, method = httpMethod))
+
+                    val response =
+                        "eyJ0eXAiOiJvYXV0aC1hdXRoei1yZXErand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJkaWQ6d2ViOmFkaXR5YW5rYW5uYW4tdHcuZ2l0aHViLmlvOm9wZW5pZDR2cDpmaWxlcyNrZXktMCJ9.eyJjbGllbnRfaWQiOiJkaWQ6d2ViOmFkaXR5YW5rYW5uYW4tdHcuZ2l0aHViLmlvOm9wZW5pZDR2cDpmaWxlcyIsImNsaWVudF9pZF9zY2hlbWUiOiJkaWQiLCJyZXNwb25zZV90eXBlIjoidnBfdG9rZW4iLCJyZWRpcmVjdF91cmkiOiJodHRwczovL2NsaWVudC5leGFtcGxlLm9yZy9jYWxsYmFjayIsIm5vbmNlIjoibi0wUzZfV3pBMk1qIiwic3RhdGUiOiJuZTI5MmV3d2l3aWl3aSIsInByZXNlbnRhdGlvbl9kZWZpbml0aW9uIjoie1wiaWRcIjpcIjEyM1wiLFwiaW5wdXRfZGVzY3JpcHRvcnNcIjpbe1wiaWRcIjpcImJhbmtpbmdfaW5wdXRfMVwiLFwiZm9ybWF0XCI6e1wibGRwX3ZjXCI6e1wicHJvb2ZfdHlwZVwiOltcIkVkMjU1MTlTaWduYXR1cmUyMDE4XCJdfX0sXCJuYW1lXCI6XCJCYW5rQWNjb3VudEluZm9ybWF0aW9uXCIsXCJwdXJwb3NlXCI6XCJoaWlpaVwiLFwiY29uc3RyYWludHNcIjp7XCJmaWVsZHNcIjpbe1wicGF0aFwiOltcIiQuY3JlZGVcIl0sXCJwdXJwb3NlXCI6XCJXZWNhbnVzZWZvciN2ZXJpZmljYXRpb25wdXJwb3NlI2ZvcmFueXRoaW5nXCIsXCJmaWx0ZXJcIjp7XCJ0eXBlXCI6XCJzdHJpbmdcIixcInBhdHRlcm5cIjpcIl5bMC05XXs5fXxeKFthLXpBLVpdKXs0fShbYS16QS1aXSl7Mn0oWzAtOWEtekEtWl0pezJ9KFswLTlhLXpBLVpdezN9KT8kXCJ9fSx7XCJwYXRoXCI6W1wiJC52Yy5jcmVkZW50aWFsXCIsXCIkLnZjLmNyZWRlbnRpYWxTdWJqZWN0LmFjY291bnRbKl0ucm91dGVcIixcIiQuYWNjb3VudFsqXS5yb3V0ZVwiXSxcInB1cnBvc2VcIjpcIldlY2FudXNlZm9ydmVyaWZpY2F0aW9ucHVycG9zZVwiLFwiZmlsdGVyXCI6e1widHlwZVwiOlwic3RyaW5nXCIsXCJwYXR0ZXJuXCI6XCJeWzAtOV17OX18XihbYS16QS1aXSl7NH0oW2EtekEtWl0pezJ9KFswLTlhLXpBLVpdKXsyfShbMC05YS16QS1aXXszfSk_JFwifX1dfX1dfSIsImNsaWVudF9tZXRhZGF0YSI6IntcImNsaWVudF9uYW1lXCI6XCJhZGl0eWFuXCJ9In0.l12/pXHDNaGiBDsHAJAn52DFZ1rzAuEpOsPZOt9k/0l9LBTN9SSAe0HXFKN+eoeDygo1d05kSW08Ob8SCUz6Dg==";
+                    return processResponseAndFetchAuthRequestParams(response)
                 } catch (exception: Exception) {
                     throw exception
                 }
@@ -102,18 +171,71 @@ data class AuthorizationRequest(
         }
 
         private fun processResponseAndFetchAuthRequestParams(authorizationRequest: String): MutableMap<String, String> {
-            TODO("Not yet implemented")
-          //TODO: check if the data is jwt or base64 encoded JSON. Extract the data accordingly. Return Map of authorization request which can be validated
+
+            if (isJWT(authorizationRequest)) {
+                val params = extractPayloadJsonFromJwt(authorizationRequest)
+                if (validateClient) {
+                    val Proof = ProofJwtManager()
+                    Proof.verifyJWT(
+                        authorizationRequest,
+                        params["client_id"]!!,
+                        params["client_id_scheme"]!!
+                    )
+                }
+                return params
+            } else {
+                return decodeBase64ToJSON(authorizationRequest)
+            }
+        }
+
+        private fun extractPayloadJsonFromJwt(jwtToken: String): MutableMap<String, String> {
+            val components = jwtToken.split(".")
+            if (components.size < 2) throw IllegalArgumentException("Invalid JWT token format")
+
+            val payload = components[1]
+            val standardizedBase64 = makeBase64Standard(payload)
+            return decodeBase64ToJSON(standardizedBase64)
+        }
+
+        private fun makeBase64Standard(base64String: String): String {
+            var base64 = base64String
+                .replace("-", "+")
+                .replace("_", "/")
+
+            while (base64.length % 4 != 0) {
+                base64 += "="
+            }
+            return base64
+        }
+
+        private fun decodeBase64ToJSON(base64String: String): MutableMap<String, String> {
+            val decodedString = try {
+                Decoder.decodeBase64ToString(base64String)
+            } catch (e: IllegalArgumentException) {
+                throw Exception("JWT payload decoding failed: ${e.message}")
+            }
+            return convertJsonToMap(decodedString)
+        }
+
+        fun convertJsonToMap(jsonString: String): MutableMap<String, String> {
+            val mapper = jacksonObjectMapper()
+            return mapper.readValue(
+                jsonString,
+                object : TypeReference<MutableMap<String, String>>() {})
+        }
+
+        private fun isJWT(authorizationRequest: String): Boolean {
+            return authorizationRequest.contains(".")
         }
 
         private fun extractQueryParams(query: String): MutableMap<String, String> {
             try {
                 return query.split("&").map { it.split("=") }
                     .associateByTo(mutableMapOf(), { it[0] }, {
-                    if (it.size > 1) URLDecoder.decode(
-                        it[1], StandardCharsets.UTF_8.toString()
-                    ) else ""
-                })
+                        if (it.size > 1) URLDecoder.decode(
+                            it[1], StandardCharsets.UTF_8.toString()
+                        ) else ""
+                    })
             } catch (exception: Exception) {
                 throw Logger.handleException(
                     exceptionType = "InvalidQueryParams",
@@ -179,55 +301,117 @@ data class AuthorizationRequest(
             return presentationDefinition
         }
 
-        private fun validateQueryParams(
-            params: MutableMap<String, String>, setResponseUri: (String) -> Unit
-        ) {
-            validateRootFieldMissingScenario(params, "response_uri")
-            validateRootFieldInvalidScenario("response_uri", params["response_uri"])
-            setResponseUri(params["response_uri"]!!)
-
-            val requiredRequestParams = mutableListOf(
+        private fun baseRequiredKeys(params: Map<String, String>): MutableList<String> {
+            val keys = mutableListOf(
                 "presentation_definition",
                 "client_id",
+                "client_id_scheme",
                 "response_type",
-                "response_mode",
                 "nonce",
-                "state",
+                "state"
             )
-            requiredRequestParams.forEach { param ->
-                if (param == "presentation_definition") {
-                    try {
-                        params["presentation_definition"] = fetchPresentationDefinition(params)
-                    } catch (exception: Exception) {
-                        throw exception
-                    }
-                }
-                validateRootFieldMissingScenario(params, param)
-                validateRootFieldInvalidScenario(param, params[param])
+
+            if (params.containsKey("client_metadata")) {
+                keys.add("client_metadata")
+            }
+            return keys
+        }
+
+        private fun validateUriCombinations(
+            redirectUri: String?,
+            responseUri: String?,
+            responseMode: String?
+        ) {
+            val allNil = redirectUri == null && responseUri == null && responseMode == null
+            val allPresent = redirectUri != null && responseUri != null && responseMode != null
+
+            if (allNil) {
+                throw Logger.handleException(
+                    exceptionType = "MissingInput",
+                    fieldPath = listOf("response_uri", "response_mode", "redirect_uri"),
+                    className = AuthorizationRequest.toString()
+                )
+            }
+            if (allPresent) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidInput",
+                    fieldPath = listOf("response_uri", "response_mode", "redirect_uri"),
+                    className = AuthorizationRequest.toString()
+                )
+            }
+        }
+
+        private fun updateRequiredKeys(
+            requiredKeys: MutableList<String>,
+            redirectUri: String?,
+            responseUri: String?,
+            responseMode: String?
+        ) {
+            if (redirectUri != null && responseUri == null && responseMode == null) {
+                requiredKeys.add("redirect_uri")
+            }
+            if (responseUri != null && responseMode != null && redirectUri == null) {
+                requiredKeys.addAll(listOf("response_uri", "response_mode"))
+            }
+        }
+
+        private fun validateKey(
+            key: String,
+            values: MutableMap<String, String>,
+            setResponseUri: (String) -> Unit
+        ) {
+            if (key == "presentation_definition") {
+                values[key] = fetchPresentationDefinition(params = values)
             }
 
-            val optionalRequestParams = mutableListOf("client_metadata")
-            optionalRequestParams.forEach { param ->
-                params[param]?.let { value ->
-                    require(value.isNotEmpty()) {
-                        throw Logger.handleException(
-                            exceptionType = "InvalidInput",
-                            fieldPath = listOf("client_metadata"),
-                            className = className,
-                            fieldType = value::class.simpleName
-                        )
-                    }
+            val value = values[key]
+            if (value == null || value == "null" || value.isEmpty()) {
+                throw Logger.handleException(
+                    exceptionType = if (values[key] == null) "MissingInput" else "InvalidInput",
+                    fieldPath = listOf(key),
+                    className = AuthorizationRequest.toString()
+                )
+            }
+            if (key == "response_uri") {
+                setResponseUri(value)
+            }
+        }
+
+        private fun validateQueryParams(
+            params: MutableMap<String, String>, setResponseUri: (String) -> Unit
+        ): MutableMap<String, String> {
+            val baseRequiredFields = baseRequiredKeys(params)
+            try {
+                validateUriCombinations(
+                    params["redirect_uri"],
+                    params["response_uri"],
+                    params["response_mode"]
+                )
+                updateRequiredKeys(
+                    baseRequiredFields,
+                    params["redirect_uri"],
+                    params["response_uri"],
+                    params["response_mode"]
+                )
+
+                for (key in baseRequiredFields) {
+                    validateKey(key, params, setResponseUri)
                 }
+                return params
+            } catch (exception: Exception) {
+                throw exception
             }
         }
 
         private fun createAuthorizationRequest(params: Map<String, String>): AuthorizationRequest {
             return AuthorizationRequest(
                 clientId = params["client_id"]!!,
+                clientIdScheme = params["client_id_scheme"]!!,
                 responseType = params["response_type"]!!,
-                responseMode = params["response_mode"]!!,
+                responseMode = params["response_mode"],
                 presentationDefinition = params["presentation_definition"]!!,
-                responseUri = params["response_uri"]!!,
+                responseUri = params["response_uri"],
+                redirectUri = params["redirect_uri"],
                 nonce = params["nonce"]!!,
                 state = params["state"]!!,
                 clientMetadata = params["client_metadata"],

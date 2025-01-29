@@ -246,6 +246,31 @@ class AuthorizationRequestTest {
             openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient)
         assertTrue(actualValue is AuthorizationRequest)
     }
+
+    @Test
+    fun `should return Authorization Request if it has request uri and it is a valid authorization request`() {
+        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequestForRequestUri()
+        shouldValidateClient = true
+
+        val actualValue =
+            openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient)
+        assertTrue(actualValue is AuthorizationRequest)
+    }
+}
+
+fun createEncodedAuthorizationRequestForRequestUri(
+): String {
+    val authorizationRequestUrl = StringBuilder("")
+
+    val baseUrl = "https://46b2-45-112-68-190.ngrok-free.app"
+    val requestUri = "${baseUrl}/verifier/get-auth-request-obj"
+    authorizationRequestUrl.append("client_id=did:web:adityankannan-tw.github.io:openid4vp:files&client_id_scheme=did&request_uri=${requestUri}&request_uri_method=get HTTP/1.1")
+    val encodedAuthorizationRequestInBytes = Base64.encodeBase64(
+        authorizationRequestUrl.toString().toByteArray(
+            StandardCharsets.UTF_8
+        )
+    )
+    return "openid4vp://authorize?"+String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
 }
 
 fun createEncodedAuthorizationRequest(

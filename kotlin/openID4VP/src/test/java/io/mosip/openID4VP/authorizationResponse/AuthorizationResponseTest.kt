@@ -87,7 +87,9 @@ class AuthorizationResponseTest {
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
             responseUri = mockWebServer.url("/injiverify.dev2.mosip.net/redirect").toString(),
-            clientMetadata = deserializeAndValidate(clientMetadata, ClientMetadataSerializer)
+            clientMetadata = deserializeAndValidate(clientMetadata, ClientMetadataSerializer),
+            clientIdScheme = "did",
+            redirectUri = "ji"
         )
         openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
         mockkStatic(Log::class)
