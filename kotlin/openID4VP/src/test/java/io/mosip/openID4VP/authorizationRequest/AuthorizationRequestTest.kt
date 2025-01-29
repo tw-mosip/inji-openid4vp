@@ -258,6 +258,7 @@ class AuthorizationRequestTest {
 
         val actualValue =
             openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient)
+
         assertTrue(actualValue is AuthorizationRequest)
     }
 }
