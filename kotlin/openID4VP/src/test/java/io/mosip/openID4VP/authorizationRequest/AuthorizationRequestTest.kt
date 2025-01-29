@@ -27,9 +27,13 @@ class AuthorizationRequestTest {
     private lateinit var actualException: Exception
     private lateinit var expectedExceptionMessage: String
     private var shouldValidateClient = true
+    private lateinit var mockWebServer: MockWebServer
 
     @Before
     fun setUp() {
+        mockWebServer = MockWebServer()
+        mockWebServer.start(8080)
+
         openID4VP = OpenID4VP("test-OpenID4VP")
         trustedVerifiers = listOf(
             Verifier(
@@ -42,7 +46,8 @@ class AuthorizationRequestTest {
                 )
             )
         )
-        presentationDefinition = """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"idcardcredential","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
+        presentationDefinition =
+            """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"idcardcredential","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         presentationDefinitionUri = "verifier/presentation_definition_uri"
         mockkStatic(android.util.Log::class)
         every { Log.e(any(), any()) } answers {
@@ -62,6 +67,7 @@ class AuthorizationRequestTest {
     @After
     fun tearDown() {
         clearAllMocks()
+        mockWebServer.shutdown()
     }
 
     @Test
@@ -213,8 +219,6 @@ class AuthorizationRequestTest {
 
     @Test
     fun `should return Authorization Request as Authentication Response if presentation_definition_uri & all the other fields are present and valid in Authorization Request`() {
-        val mockWebServer = MockWebServer()
-        mockWebServer.start(8080)
         val mockResponse = MockResponse().setResponseCode(200).setBody(presentationDefinition)
         mockWebServer.enqueue(mockResponse)
 
