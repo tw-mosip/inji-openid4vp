@@ -9,6 +9,7 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.dto.Verifier
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 import org.apache.commons.codec.binary.Base64
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -257,9 +258,116 @@ class AuthorizationRequestTest {
         shouldValidateClient = true
 
         val actualValue =
-            openID4VP.authenticateVerifier(encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient)
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequestUrl,
+                trustedVerifiers,
+                shouldValidateClient
+            )
 
         assertTrue(actualValue is AuthorizationRequest)
+    }
+
+    // TODO: Group request_uri related tests together
+    private val validEncodedAuthorizationRequestWithAuthorizationRequestObjectToBeObtainedByReference =
+        "openid4vp://authorize?Y2xpZW50X2lkPWRpZDp3ZWI6YWRpdHlhbmthbm5hbi10dy5naXRodWIuaW86b3BlbmlkNHZwOmZpbGVzJmNsaWVudF9pZF9zY2hlbWU9ZGlkJnJlcXVlc3RfdXJpPWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC92ZXJpZmllci9nZXQtYXV0aC1yZXF1ZXN0LW9iaiZyZXF1ZXN0X3VyaV9tZXRob2Q9Z2V0IEhUVFAvMS4x"
+    private val validAuthorizationRequestObject =
+        "eyJ0eXAiOiJvYXV0aC1hdXRoei1yZXErand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJkaWQ6d2ViOmFkaXR5YW5rYW5uYW4tdHcuZ2l0aHViLmlvOm9wZW5pZDR2cDpmaWxlcyNrZXktMCJ9.eyJwcmVzZW50YXRpb25fZGVmaW5pdGlvbl91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvdmVyaWZpZXIvcHJlc2VudGF0aW9uX2RlZmluaXRpb25fdXJpIiwiY2xpZW50X21ldGFkYXRhIjoie1wiYXV0aG9yaXphdGlvbl9lbmNyeXB0ZWRfcmVzcG9uc2VfYWxnXCI6XCJFQ0RILUVTXCIsXCJhdXRob3JpemF0aW9uX2VuY3J5cHRlZF9yZXNwb25zZV9lbmNcIjpcIkEyNTZHQ01cIixcInZwX2Zvcm1hdHNcIjp7XCJtc29fbWRvY1wiOntcImFsZ1wiOltcIkVTMjU2XCIsXCJFZERTQVwiXX0sXCJsZHBfdnBcIjp7XCJwcm9vZl90eXBlXCI6W1wiRWQyNTUxOVNpZ25hdHVyZTIwMThcIixcIkVkMjU1MTlTaWduYXR1cmUyMDIwXCIsXCJSc2FTaWduYXR1cmUyMDE4XCJdfX0sXCJyZXF1aXJlX3NpZ25lZF9yZXF1ZXN0X29iamVjdFwiOnRydWV9Iiwic3RhdGUiOiJXM1hMa0Z5aWNaUFh4UzhkaFpjNGRBPT0iLCJub25jZSI6Im1yT0toNU4rSWNZOXZXK0NpYTdGYVE9PSIsImNsaWVudF9pZCI6ImRpZDp3ZWI6YWRpdHlhbmthbm5hbi10dy5naXRodWIuaW86b3BlbmlkNHZwOmZpbGVzIiwiY2xpZW50X2lkX3NjaGVtZSI6ImRpZCIsInJlc3BvbnNlX21vZGUiOiJkaXJlY3RfcG9zdCIsInJlc3BvbnNlX3R5cGUiOiJ2cF90b2tlbiIsInJlc3BvbnNlX3VyaSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC92ZXJpZmllci92cC1yZXNwb25zZSJ9.sLrMvak07AfF7KBEhOQZEHkBXlRUiN26RUNZ1stTsuYlvQHnp3CKxpqIQ_V8HllEflt6JaLhZA2wa3uZAQneDQ"
+
+    @Test
+    fun `should validate and return authorization request successfully when the authorization request object is sent by reference by verifier with did client id scheme`() {
+        mockWebServer.enqueue(
+            MockResponse().setResponseCode(200).setBody(validAuthorizationRequestObject)
+        )
+
+        val authorizationRequestObject = openID4VP.authenticateVerifier(
+            validEncodedAuthorizationRequestWithAuthorizationRequestObjectToBeObtainedByReference,
+            trustedVerifiers,
+            shouldValidateClient
+        )
+
+        assertEquals("",authorizationRequestObject.toString())
+    }
+
+    @Test
+    fun `should make call to request_uri with the request_uri_method when the fields are available`() {
+        mockWebServer.enqueue(
+            MockResponse().setResponseCode(200).setBody(validAuthorizationRequestObject)
+        )
+
+        openID4VP.authenticateVerifier(
+            validEncodedAuthorizationRequestWithAuthorizationRequestObjectToBeObtainedByReference,
+            trustedVerifiers,
+            shouldValidateClient
+        )
+        val request: RecordedRequest = mockWebServer.takeRequest()
+
+        assertEquals(
+            "POST $ HTTP/1.1",
+            request.requestLine
+        )
+    }
+
+    @Test
+    fun `should make a call to request_uri in get http call if request_uri_method is not available`() {
+        val encodedAuthorizationRequestWithoutRequestUriMethodParameter =
+            "openid4vp://authorize?Y2xpZW50X2lkPWRpZDp3ZWI6YWRpdHlhbmthbm5hbi10dy5naXRodWIuaW86b3BlbmlkNHZwOmZpbGVzJmNsaWVudF9pZF9zY2hlbWU9ZGlkJnJlcXVlc3RfdXJpPWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC92ZXJpZmllci9nZXQtYXV0aC1yZXF1ZXN0LW9iag=="
+        mockWebServer.enqueue(
+            MockResponse().setResponseCode(200)
+                .setBody(encodedAuthorizationRequestWithoutRequestUriMethodParameter)
+        )
+
+        openID4VP.authenticateVerifier(
+            validEncodedAuthorizationRequestWithAuthorizationRequestObjectToBeObtainedByReference,
+            trustedVerifiers,
+            shouldValidateClient
+        )
+        val request: RecordedRequest = mockWebServer.takeRequest()
+
+        assertEquals(
+            "GET $ HTTP/1.1",
+            request.requestLine
+        )
+    }
+
+    @Test
+    fun `should throw exception when the client_id validation fails while obtaining Authorization request object by reference`() {
+        val authRequest =
+            "openid4vp://authorize?Y2xpZW50X2lkPWRpZDp3ZWI6YWRpdHlhbmthbm5hbi10dy5naXRodWIuaW86b3BlbmlkNHZwOmZpbGVzJmNsaWVudF9pZF9zY2hlbWU9ZGlkJnJlcXVlc3RfdXJpPWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC92ZXJpZmllci9nZXQtYXV0aC1yZXF1ZXN0LW9iaiZyZXF1ZXN0X3VyaV9tZXRob2Q9Z2V0IEhUVFAvMS4x\n"
+        val authorizationRequestObjectWithDifferentClientIdFormAuthorizationRequestObject =
+            "eyJ0eXAiOiJvYXV0aC1hdXRoei1yZXErand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJkaWQ6d2ViOmFkaXR5YW5rYW5uYW4tdHcuZ2l0aHViLmlvOm9wZW5pZDR2cDpmaWxlcyNrZXktMCJ9.eyJwcmVzZW50YXRpb25fZGVmaW5pdGlvbl91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvdmVyaWZpZXIvcHJlc2VudGF0aW9uX2RlZmluaXRpb25fdXJpIiwiY2xpZW50X21ldGFkYXRhIjoie1wiYXV0aG9yaXphdGlvbl9lbmNyeXB0ZWRfcmVzcG9uc2VfYWxnXCI6XCJFQ0RILUVTXCIsXCJhdXRob3JpemF0aW9uX2VuY3J5cHRlZF9yZXNwb25zZV9lbmNcIjpcIkEyNTZHQ01cIixcInZwX2Zvcm1hdHNcIjp7XCJtc29fbWRvY1wiOntcImFsZ1wiOltcIkVTMjU2XCIsXCJFZERTQVwiXX0sXCJsZHBfdnBcIjp7XCJwcm9vZl90eXBlXCI6W1wiRWQyNTUxOVNpZ25hdHVyZTIwMThcIixcIkVkMjU1MTlTaWduYXR1cmUyMDIwXCIsXCJSc2FTaWduYXR1cmUyMDE4XCJdfX0sXCJyZXF1aXJlX3NpZ25lZF9yZXF1ZXN0X29iamVjdFwiOnRydWV9Iiwic3RhdGUiOiJ4eHgzcTRlMzNITHBZN2FIVmlQRml3PT0iLCJub25jZSI6IkY1Sy95Z0lBOFcwbVhWQ3JjZExBQVE9PSIsImNsaWVudF9pZCI6ImNsaWVudC1tb2NrLTEyMyIsImNsaWVudF9pZF9zY2hlbWUiOiJkaWQiLCJyZXNwb25zZV9tb2RlIjoiZGlyZWN0X3Bvc3QiLCJyZXNwb25zZV90eXBlIjoidnBfdG9rZW4iLCJyZXNwb25zZV91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvdmVyaWZpZXIvdnAtcmVzcG9uc2UifQ.PCC4naTjQM6hiIqFgYWTN50lnxRPLy9OSLyswjssGrJ4v0RTu5y-C5bCMzzWUtjNRbXLVAcOfltGy1yEIpGqAw"
+        mockWebServer.enqueue(
+            MockResponse().setResponseCode(200).setBody(authorizationRequestObjectWithDifferentClientIdFormAuthorizationRequestObject)
+        )
+
+
+        val exception = assertThrows(AuthorizationRequestExceptions.InvalidData::class.java) {
+            openID4VP.authenticateVerifier(authRequest, trustedVerifiers, shouldValidateClient)
+        }
+
+        assertEquals(
+            "Client Id mismatch in Authorization Request parameter and the Request Object",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `should throw exception when the client_id_scheme validation fails while obtaining Authorization request object by reference`() {
+        val authRequest =
+            "openid4vp://authorize?Y2xpZW50X2lkPWRpZDp3ZWI6YWRpdHlhbmthbm5hbi10dy5naXRodWIuaW86b3BlbmlkNHZwOmZpbGVzJmNsaWVudF9pZF9zY2hlbWU9ZGlkJnJlcXVlc3RfdXJpPWh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC92ZXJpZmllci9nZXQtYXV0aC1yZXF1ZXN0LW9iaiZyZXF1ZXN0X3VyaV9tZXRob2Q9Z2V0IEhUVFAvMS4x\n"
+        val authorizationRequestObjectWithDifferentClientIdSchemeFormAuthorizationRequestObject =
+            "eyJ0eXAiOiJvYXV0aC1hdXRoei1yZXErand0IiwiYWxnIjoiRWREU0EiLCJraWQiOiJkaWQ6d2ViOmFkaXR5YW5rYW5uYW4tdHcuZ2l0aHViLmlvOm9wZW5pZDR2cDpmaWxlcyNrZXktMCJ9.eyJwcmVzZW50YXRpb25fZGVmaW5pdGlvbl91cmkiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAvdmVyaWZpZXIvcHJlc2VudGF0aW9uX2RlZmluaXRpb25fdXJpIiwiY2xpZW50X21ldGFkYXRhIjoie1wiYXV0aG9yaXphdGlvbl9lbmNyeXB0ZWRfcmVzcG9uc2VfYWxnXCI6XCJFQ0RILUVTXCIsXCJhdXRob3JpemF0aW9uX2VuY3J5cHRlZF9yZXNwb25zZV9lbmNcIjpcIkEyNTZHQ01cIixcInZwX2Zvcm1hdHNcIjp7XCJtc29fbWRvY1wiOntcImFsZ1wiOltcIkVTMjU2XCIsXCJFZERTQVwiXX0sXCJsZHBfdnBcIjp7XCJwcm9vZl90eXBlXCI6W1wiRWQyNTUxOVNpZ25hdHVyZTIwMThcIixcIkVkMjU1MTlTaWduYXR1cmUyMDIwXCIsXCJSc2FTaWduYXR1cmUyMDE4XCJdfX0sXCJyZXF1aXJlX3NpZ25lZF9yZXF1ZXN0X29iamVjdFwiOnRydWV9Iiwic3RhdGUiOiJkbFkrQU5jNVA0TEd0bldsaUdqa1dBPT0iLCJub25jZSI6Ii9CQW9JeWxFdERVeXRiUjBadDFML2c9PSIsImNsaWVudF9pZCI6ImRpZDp3ZWI6YWRpdHlhbmthbm5hbi10dy5naXRodWIuaW86b3BlbmlkNHZwOmZpbGVzIiwiY2xpZW50X2lkX3NjaGVtZSI6InJlZGlyZWN0X3VyaSIsInJlc3BvbnNlX21vZGUiOiJkaXJlY3RfcG9zdCIsInJlc3BvbnNlX3R5cGUiOiJ2cF90b2tlbiIsInJlc3BvbnNlX3VyaSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC92ZXJpZmllci92cC1yZXNwb25zZSJ9.a5SZmQO7o67V7dOJHzUMbIQg4AWO9ULF8p0bDJKE667apW01bGy0tN2zIar7MFoUIV5HLMeDGVCUyIo6vPJDBg"
+        mockWebServer.enqueue(
+            MockResponse().setResponseCode(200).setBody(authorizationRequestObjectWithDifferentClientIdSchemeFormAuthorizationRequestObject)
+        )
+
+        val exception = assertThrows(AuthorizationRequestExceptions.InvalidData::class.java) {
+            openID4VP.authenticateVerifier(authRequest, trustedVerifiers, shouldValidateClient)
+        }
+
+        assertEquals(
+            "Client Id scheme mismatch in Authorization Request parameter and the Request Object",
+            exception.message
+        )
     }
 }
 

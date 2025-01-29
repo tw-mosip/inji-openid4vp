@@ -34,4 +34,6 @@ sealed class AuthorizationRequestExceptions {
         Exception("Invalid Input: constraints->limit_disclosure value should be either required or preferred")
 
     class InvalidQueryParams(message: String) : Exception(message)
+
+    class InvalidData(message: String) : Exception(message)
 }
