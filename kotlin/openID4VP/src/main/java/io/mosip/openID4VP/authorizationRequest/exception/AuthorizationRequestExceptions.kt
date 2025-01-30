@@ -35,5 +35,7 @@ sealed class AuthorizationRequestExceptions {
 
     class InvalidQueryParams(message: String) : Exception(message)
 
+    class InvalidVerifierRedirectUri(message: String) : Exception(message)
+
     class InvalidData(message: String) : Exception(message)
 }

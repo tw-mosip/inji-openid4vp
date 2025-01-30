@@ -223,6 +223,30 @@ class AuthorizationRequestTest {
     }
 
     @Test
+    fun `should throw error when client_id_scheme is pre-registered and response_uri is present`() {
+        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
+            mapOf(
+                "client_id" to "https://verifier.env1.net",
+                "client_id_scheme" to "redirect_uri",
+                "response_uri" to "https://verifier.env1.net",
+                "presentation_definition" to presentationDefinition
+            )
+        )
+
+        val expectedExceptionMessage =
+            "Response Uri and Response mode should not be present, when client id scheme is Redirect Uri"
+
+        actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
+                openID4VP.authenticateVerifier(
+                    encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
+                )
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
     fun `should return Authorization Request as Authentication Response if presentation_definition_uri & all the other fields are present and valid in Authorization Request`() {
         val mockResponse = MockResponse().setResponseCode(200).setBody(presentationDefinition)
         mockWebServer.enqueue(mockResponse)

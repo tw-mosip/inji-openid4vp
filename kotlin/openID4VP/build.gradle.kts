@@ -64,7 +64,7 @@ dependencies {
     testImplementation(libs.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testImplementation(libs.jupiter.junit)
 }
 
 tasks {

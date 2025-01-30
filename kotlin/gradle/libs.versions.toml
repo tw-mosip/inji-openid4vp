@@ -7,6 +7,7 @@ kotlin = "2.0.0"
 coreKtx = "1.9.0"
 bouncyCastle = "1.70"
 junit = "4.13.2"
+jupiterJunit = "5.10.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 nimbusJoseJwt = "9.22"
@@ -34,6 +35,7 @@ okhttp3 = {group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 commons-codec = {group = "commons-codec", name ="commons-codec", version.ref = "commonsCodecVersion"}
 mockk = {group = "io.mockk", name = "mockk", version.ref = "mockk"}
 mockwebserver = {group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "mockwebserver"}
+jupiter-junit = {group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "jupiterJunit"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

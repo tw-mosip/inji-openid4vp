@@ -71,11 +71,10 @@ data class AuthorizationRequest(
                 authorizationRequest =
                     parseAuthorizationRequest(decodedAuthorizationRequest)
 
-                if (shouldValidateClient) {
-                    validateVerifier(
-                        trustedVerifiers, authorizationRequest
-                    )
-                }
+                validateVerifier(
+                    trustedVerifiers, authorizationRequest, shouldValidateClient
+                )
+
                 val params = validateQueryParams(authorizationRequest, setResponseUri)
                 return createAuthorizationRequest(params)
 
@@ -84,33 +83,49 @@ data class AuthorizationRequest(
             }
         }
 
-        /*
-         * Note: This method is not adhering to any spec.
-         * This is added so that wallet can work independently without the trusted verifier list
-         */
         private fun validateVerifier(
             verifierList: List<Verifier>,
-            authorizationRequest: MutableMap<String, String>
+            authorizationRequest: MutableMap<String, String>,
+            shouldValidateVerifier: Boolean
         ) {
             val clientIdScheme = authorizationRequest["client_id_scheme"]
             val clientId = authorizationRequest["client_id"]
+            val redirectUri = authorizationRequest["redirect_uri"]
 
             when (clientIdScheme) {
                 ClientIdScheme.PRE_REGISTERED.value -> {
-                    if (verifierList.isEmpty()) {
+                    if (shouldValidateVerifier) {
+                        if (verifierList.isEmpty()) {
+                            throw Logger.handleException(
+                                exceptionType = "EmptyVerifierList",
+                                className = AuthorizationRequest.toString()
+                            )
+                        }
+                        val isValidVerifier = verifierList.any { verifier ->
+                            verifier.clientId == clientId &&
+                                    verifier.responseUris.contains(authorizationRequest["response_uri"])
+                        }
+                        if (!isValidVerifier) {
+                            throw Logger.handleException(
+                                exceptionType = "InvalidVerifierClientID",
+                                className = AuthorizationRequest.toString()
+                            )
+                        }
+                    }
+                }
+                ClientIdScheme.REDIRECT_URI.value -> {
+                    if(authorizationRequest["response_uri"]!=null && authorizationRequest["response_mode"] != null){
                         throw Logger.handleException(
-                            exceptionType = "EmptyVerifierList",
-                            className = AuthorizationRequest.toString()
+                            exceptionType = "InvalidQueryParams",
+                            className = AuthorizationRequest.toString(),
+                            message = "Response Uri and Response mode should not be present, when client id scheme is Redirect Uri"
                         )
                     }
-                    val isValidVerifier = verifierList.any { verifier ->
-                        verifier.clientId == clientId &&
-                                verifier.responseUris.contains(authorizationRequest["response_uri"])
-                    }
-                    if (!isValidVerifier) {
+                    if (redirectUri != null && redirectUri != clientId) {
                         throw Logger.handleException(
-                            exceptionType = "InvalidVerifierClientID",
-                            className = AuthorizationRequest.toString()
+                            exceptionType = "InvalidVerifierRedirectUri",
+                            className = AuthorizationRequest.toString(),
+                            message = "Client id and redirect_uri value should be equal"
                         )
                     }
                 }
