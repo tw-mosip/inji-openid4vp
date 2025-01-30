@@ -231,8 +231,7 @@ class AuthorizationRequestTest {
             mapOf(
                 "client_id" to "https://verifier.env1.net",
                 "client_id_scheme" to "pre-registered",
-                "presentation_definition_uri" to mockWebServer.url(presentationDefinitionUri)
-                    .toString()
+                "presentation_definition_uri" to mockWebServer.url(presentationDefinitionUri).toString(),
             )
         )
 
@@ -248,6 +247,7 @@ class AuthorizationRequestTest {
                 "client_id" to "https://verifier.env1.net",
                 "client_id_scheme" to "pre-registered",
                 "presentation_definition" to presentationDefinition
+
             )
         )
         shouldValidateClient = false
@@ -298,7 +298,7 @@ fun createEncodedAuthorizationRequest(
     val clientMetadata: String? = if (params.containsKey("client_metadata")) {
         params["client_metadata"]
     } else {
-        """{"client_name":"verifier"}"""
+        "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}},\"require_signed_request_object\":true}"
     }
 
     authorizationRequestUrl.append("response_type=vp_token&response_mode=direct_post&nonce=$nonce&state=$state&response_uri=$responseUri&client_metadata=$clientMetadata")

@@ -24,11 +24,10 @@ object DidUtils {
         val rootJson = convertJsonToMap(response)
         val didDocument = rootJson["didDocument"] as Map<*, *>
         val verificationMethod = didDocument["verificationMethod"] as? List<Map<String, Any>>
-
         if (verificationMethod != null) {
             for (method in verificationMethod) {
                 val id = method["id"] as? String
-                val publicKeyMultibase = method["publicKeyMultibase"] as? String
+                val publicKeyMultibase = method["publicKey"] as? String
                 if (id == kid && !publicKeyMultibase.isNullOrEmpty()) {
                     return publicKeyMultibase
                 }

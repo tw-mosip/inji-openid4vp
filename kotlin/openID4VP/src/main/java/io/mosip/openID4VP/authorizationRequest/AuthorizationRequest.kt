@@ -21,11 +21,11 @@ import io.mosip.openID4VP.authorizationRequest.proofJwt.ProofJwtManager
 private val className = AuthorizationRequest::class.simpleName!!
 private val logTag = Logger.getLogTag(className)
 private var authorizationRequest: MutableMap<String, String> = mutableMapOf()
-private var validateClient: Boolean = false;
 
 enum class ClientIdScheme(val value: String) {
     PRE_REGISTERED("pre-registered"),
-    REDIRECT_URI("redirect_uri")
+    REDIRECT_URI("redirect_uri"),
+    DID("did")
 }
 
 data class AuthorizationRequest(
@@ -40,6 +40,7 @@ data class AuthorizationRequest(
     val state: String,
     var clientMetadata: Any? = null
 ) {
+
 
     init {
         require(presentationDefinition is PresentationDefinition || presentationDefinition is String) {
@@ -66,12 +67,11 @@ data class AuthorizationRequest(
                 val decodedString =
                     Decoder.decodeBase64ToString(encodedString)
                 val decodedAuthorizationRequest =
-                    encodedAuthorizationRequest.substring(0, queryStart) + decodedString;
-                validateClient = shouldValidateClient
+                    encodedAuthorizationRequest.substring(0, queryStart) + decodedString
                 authorizationRequest =
-                    parseAuthorizationRequest(decodedAuthorizationRequest, setResponseUri)
+                    parseAuthorizationRequest(decodedAuthorizationRequest)
 
-                if (validateClient) {
+                if (shouldValidateClient) {
                     validateVerifier(
                         trustedVerifiers, authorizationRequest
                     )
@@ -84,13 +84,16 @@ data class AuthorizationRequest(
             }
         }
 
+        /*
+         * Note: This method is not adhering to any spec.
+         * This is added so that wallet can work independently without the trusted verifier list
+         */
         private fun validateVerifier(
             verifierList: List<Verifier>,
             authorizationRequest: MutableMap<String, String>
         ) {
             val clientIdScheme = authorizationRequest["client_id_scheme"]
             val clientId = authorizationRequest["client_id"]
-            val redirectUri = authorizationRequest["redirect_uri"]
 
             when (clientIdScheme) {
                 ClientIdScheme.PRE_REGISTERED.value -> {
@@ -112,20 +115,12 @@ data class AuthorizationRequest(
                     }
                 }
 
-                ClientIdScheme.REDIRECT_URI.value -> {
-                    if (redirectUri != null && redirectUri != clientId) {
-                        throw Logger.handleException(
-                            exceptionType = "InvalidVerifierRedirectUri",
-                            className = AuthorizationRequest.toString()
-                        )
-                    }
-                }
 
             }
         }
 
         private fun parseAuthorizationRequest(
-            decodedAuthorizationRequest: String, setResponseUri: (String) -> Unit
+            decodedAuthorizationRequest: String
         ): MutableMap<String, String> {
             try {
                 val queryStart = decodedAuthorizationRequest.indexOf('?') + 1
@@ -140,60 +135,67 @@ data class AuthorizationRequest(
                         className = className
                     )
                 val params = extractQueryParams(query)
-                return fetchAuthRequestData(params)
+                return fetchAuthRequestDataMap(params)
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
                 throw exception
             }
         }
 
-        private fun fetchAuthRequestData(params: MutableMap<String, String>): MutableMap<String, String> {
-            val requestUri = params["request_uri"]
-            val fetchRequestObjectByReference = fun(
-                params: MutableMap<String, String>,
-                requestUri: String,
-            ): MutableMap<String, String> {
-                try {
-                    val requestUriMethod = params["request_uri_method"] ?: "get HTTP/1.1"
-                    validateRootFieldInvalidScenario("request_uri", requestUri)
-                    validateRootFieldInvalidScenario("request_uri_method", requestUriMethod)
-                    val httpMethod = determineHttpMethod(requestUriMethod)
-                    val requestUriResponse = sendHTTPRequest(requestUri, httpMethod)
-
-                    //Extract Authorization request params from request_uri response with signature validation
-                    val authorizationRequestObject: MutableMap<String, String>
-                    if (isJWT(requestUriResponse)) {
-                        val extractedPayload: MutableMap<String, String> =
-                            extractPayloadJsonFromJwt(requestUriResponse)
-                        validateMatchOfAuthRequestObjectAndParams(params, extractedPayload)
-                        if (validateClient) {
-                            val proof = ProofJwtManager()
-                            proof.verifyJWT(
-                                requestUriResponse,
-                                extractedPayload["client_id"]!!,
-                                extractedPayload["client_id_scheme"]!!
-                            )
-                        }
-                        authorizationRequestObject = extractedPayload
-                    } else {
-                        val decodedContent: MutableMap<String, String> =
-                            decodeBase64ToJSON(requestUriResponse)
-                        validateMatchOfAuthRequestObjectAndParams(params, decodedContent)
-                        authorizationRequestObject = decodedContent
-                    }
-
-                    return authorizationRequestObject
-                } catch (exception: Exception) {
-                    println("exception is $exception")
-                    throw exception
-                }
-            }
-            return requestUri?.let { requestUri ->
-                return fetchRequestObjectByReference(params, requestUri)
+        private fun fetchAuthRequestDataMap(params: MutableMap<String, String>): MutableMap<String, String> {
+            return params["request_uri"]?.let { requestUri ->
+                return fetchAuthRequestObjectByReference(params, requestUri)
             } ?: params
         }
 
-        //Validation of Authorization request object obtained via request_uri
+        /*
+        * fetch the auth request  by making an api call to params[request_uri]
+        */
+        private fun fetchAuthRequestObjectByReference(
+            params: MutableMap<String, String>,
+            requestUri: String,
+        ): MutableMap<String, String> {
+            try {
+                val requestUriMethod = params["request_uri_method"] ?: "get"
+                validateRootFieldInvalidScenario("request_uri", requestUri)
+                validateRootFieldInvalidScenario("request_uri_method", requestUriMethod)
+                val httpMethod = determineHttpMethod(requestUriMethod)
+                val response = sendHTTPRequest(requestUri, httpMethod)
+                val authorizationRequestObject = extractAuthRequestData(response, params)
+                return authorizationRequestObject
+            } catch (exception: Exception) {
+                println("Exception is $exception")
+                throw exception
+            }
+        }
+
+        /*
+         * extract the auth request from JWT or base64 encoded string
+         */
+        private fun extractAuthRequestData(
+            response: String,
+            params: MutableMap<String, String>
+        ): MutableMap<String, String> {
+            val authorizationRequestObject: MutableMap<String, String>
+            if (isJWT(response)) {
+                authorizationRequestObject = extractPayloadJsonFromJwt(response)
+                validateMatchOfAuthRequestObjectAndParams(params, authorizationRequestObject)
+                val proof = ProofJwtManager()
+                proof.verifyJWT(
+                    response,
+                    authorizationRequestObject["client_id"]!!,
+                    authorizationRequestObject["client_id_scheme"]!!
+                )
+            } else {
+                authorizationRequestObject = decodeBase64ToJSON(response)
+                validateMatchOfAuthRequestObjectAndParams(params, authorizationRequestObject)
+            }
+            return authorizationRequestObject
+        }
+
+       /*
+       * Validation of Authorization request object obtained via request_uri
+       */
         private fun validateMatchOfAuthRequestObjectAndParams(
             params: MutableMap<String, String>,
             authorizationRequestObject: MutableMap<String, String>,
@@ -206,10 +208,10 @@ data class AuthorizationRequest(
             }
         }
 
-        private fun determineHttpMethod(method: String?): HTTP_METHOD {
-            return when {
-                method?.contains("get") == true -> HTTP_METHOD.GET
-                method?.contains("post") == true -> HTTP_METHOD.POST
+        private fun determineHttpMethod(method: String): HTTP_METHOD {
+            return when (method) {
+                "get" -> HTTP_METHOD.GET
+                "post" -> HTTP_METHOD.POST
                 else -> throw IllegalArgumentException("Unsupported HTTP method: $method")
             }
         }
@@ -389,7 +391,8 @@ data class AuthorizationRequest(
                 throw Logger.handleException(
                     exceptionType = if (values[key] == null) "MissingInput" else "InvalidInput",
                     fieldPath = listOf(key),
-                    className = AuthorizationRequest.toString()
+                    className = AuthorizationRequest.toString(),
+                    fieldType = "String"
                 )
             }
             if (key == "response_uri") {
