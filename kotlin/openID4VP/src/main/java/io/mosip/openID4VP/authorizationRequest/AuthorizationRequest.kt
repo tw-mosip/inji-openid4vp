@@ -149,29 +149,61 @@ data class AuthorizationRequest(
 
         private fun fetchAuthRequestData(params: MutableMap<String, String>): MutableMap<String, String> {
             val requestUri = params["request_uri"]
-            return requestUri?.let { requestUri ->
+            val fetchRequestObjectByReference = fun(
+                params: MutableMap<String, String>,
+                requestUri: String,
+            ): MutableMap<String, String> {
                 try {
                     val requestUriMethod = params["request_uri_method"] ?: "get HTTP/1.1"
                     validateRootFieldInvalidScenario("request_uri", requestUri)
                     validateRootFieldInvalidScenario("request_uri_method", requestUriMethod)
                     val httpMethod = determineHttpMethod(requestUriMethod)
-
-                    //TODO: GET THE REPONSE BY MAKE ACTUAL CALL TO VERIFIER request_uri
-
                     val requestUriResponse = sendHTTPRequest(requestUri, httpMethod)
-                    val authorizationRequestObject = extractPayloadJsonFromJwt(requestUriResponse)
-                    //Validation of Authorization request object obtained via request_uri
-                    if (params["client_id"] != authorizationRequestObject["client_id"]) {
-                        throw AuthorizationRequestExceptions.InvalidData("Client Id mismatch in Authorization Request parameter and the Request Object")
+
+                    //Extract Authorization request params from request_uri response with signature validation
+                    val authorizationRequestObject: MutableMap<String, String>
+                    if (isJWT(requestUriResponse)) {
+                        val extractedPayload: MutableMap<String, String> =
+                            extractPayloadJsonFromJwt(requestUriResponse)
+                        validateMatchOfAuthRequestObjectAndParams(params, extractedPayload)
+                        if (validateClient) {
+                            val proof = ProofJwtManager()
+                            proof.verifyJWT(
+                                requestUriResponse,
+                                extractedPayload["client_id"]!!,
+                                extractedPayload["client_id_scheme"]!!
+                            )
+                        }
+                        authorizationRequestObject = extractedPayload
+                    } else {
+                        val decodedContent: MutableMap<String, String> =
+                            decodeBase64ToJSON(requestUriResponse)
+                        validateMatchOfAuthRequestObjectAndParams(params, decodedContent)
+                        authorizationRequestObject = decodedContent
                     }
-                    if (params["client_id_scheme"] != authorizationRequestObject["client_id_scheme"]) {
-                        throw AuthorizationRequestExceptions.InvalidData("Client Id scheme mismatch in Authorization Request parameter and the Request Object")
-                    }
-                    return processResponseAndFetchAuthRequestParams(requestUriResponse)
+
+                    return authorizationRequestObject
                 } catch (exception: Exception) {
+                    println("exception is $exception")
                     throw exception
                 }
+            }
+            return requestUri?.let { requestUri ->
+                return fetchRequestObjectByReference(params, requestUri)
             } ?: params
+        }
+
+        //Validation of Authorization request object obtained via request_uri
+        private fun validateMatchOfAuthRequestObjectAndParams(
+            params: MutableMap<String, String>,
+            authorizationRequestObject: MutableMap<String, String>,
+        ) {
+            if (params["client_id"] != authorizationRequestObject["client_id"]) {
+                throw AuthorizationRequestExceptions.InvalidData("Client Id mismatch in Authorization Request parameter and the Request Object")
+            }
+            if (params["client_id_scheme"] != null && params["client_id_scheme"] != authorizationRequestObject["client_id_scheme"]) {
+                throw AuthorizationRequestExceptions.InvalidData("Client Id scheme mismatch in Authorization Request parameter and the Request Object")
+            }
         }
 
         private fun determineHttpMethod(method: String?): HTTP_METHOD {
@@ -179,23 +211,6 @@ data class AuthorizationRequest(
                 method?.contains("get") == true -> HTTP_METHOD.GET
                 method?.contains("post") == true -> HTTP_METHOD.POST
                 else -> throw IllegalArgumentException("Unsupported HTTP method: $method")
-            }
-        }
-
-        private fun processResponseAndFetchAuthRequestParams(authorizationRequest: String): MutableMap<String, String> {
-            if (isJWT(authorizationRequest)) {
-                val params = extractPayloadJsonFromJwt(authorizationRequest)
-                if (validateClient) {
-                    val Proof = ProofJwtManager()
-                    Proof.verifyJWT(
-                        authorizationRequest,
-                        params["client_id"]!!,
-                        params["client_id_scheme"]!!
-                    )
-                }
-                return params
-            } else {
-                return decodeBase64ToJSON(authorizationRequest)
             }
         }
 
@@ -228,7 +243,7 @@ data class AuthorizationRequest(
             return convertJsonToMap(decodedString)
         }
 
-        fun convertJsonToMap(jsonString: String): MutableMap<String, String> {
+        private fun convertJsonToMap(jsonString: String): MutableMap<String, String> {
             val mapper = jacksonObjectMapper()
             return mapper.readValue(
                 jsonString,
@@ -271,18 +286,12 @@ data class AuthorizationRequest(
                 }
 
                 hasPresentationDefinition -> {
-                    val value = params["presentation_definition"]
-
-                    require(value != "null" && validateField(value, "String")) {
-                        throw Logger.handleException(
-                            exceptionType = "InvalidInput",
-                            fieldPath = listOf("presentation_definition"),
-                            className = className,
-                            fieldType = "String"
-                        )
-                    }
-                    presentationDefinition =
-                        params["presentation_definition"]!!
+                    val presentationDefinitionValue = params["presentation_definition"]
+                    validateRootFieldInvalidScenario(
+                        "presentation_definition",
+                        presentationDefinitionValue
+                    )
+                    presentationDefinition = presentationDefinitionValue!!
                 }
 
                 hasPresentationDefinitionUri -> {
@@ -429,6 +438,7 @@ data class AuthorizationRequest(
             )
         }
 
+        //        TODO: validateRootFieldInvalidScenario is validating only string field type, can method be named accordingly
         private fun validateRootFieldInvalidScenario(param: String, value: String?) {
             require(value != "null" && validateField(value, "String")) {
                 throw Logger.handleException(
