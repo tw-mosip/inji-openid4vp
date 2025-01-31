@@ -9,7 +9,6 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.dto.Verifier
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
 import org.apache.commons.codec.binary.Base64
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -18,7 +17,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.TimeUnit
 
 class AuthorizationRequestTest {
     private lateinit var openID4VP: OpenID4VP

@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.proofJwt
 
-import io.mosip.openID4VP.authorizationRequest.proofJwt.HandlerFactory.TypeHandlerFactory
+import io.mosip.openID4VP.authorizationRequest.proofJwt.handlerFactory.TypeHandlerFactory
 
 class ProofJwtManager(
 ) {

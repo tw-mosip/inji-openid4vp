@@ -1,6 +1,6 @@
-package io.mosip.openID4VP.authorizationRequest.proofJwt.HandlerFactory
+package io.mosip.openID4VP.authorizationRequest.proofJwt.handlerFactory
 
-import DidHandler
+import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidHandler
 
 enum class ClientIdScheme(val rawValue: String) {
     DID("did")

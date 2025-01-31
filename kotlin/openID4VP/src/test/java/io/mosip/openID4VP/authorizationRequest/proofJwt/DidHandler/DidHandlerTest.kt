@@ -1,12 +1,10 @@
-package io.mosip.openID4VP.authorizationRequest.proofJwt.DidHandler
+package io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler
 
-import DidHandler
 import io.mosip.openID4VP.exception.JWTVerificationException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-
 
 class DidHandlerTest {
     @Test

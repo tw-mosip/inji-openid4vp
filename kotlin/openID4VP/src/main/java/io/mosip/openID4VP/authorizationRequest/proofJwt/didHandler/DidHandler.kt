@@ -1,5 +1,11 @@
-import io.mosip.openID4VP.authorizationRequest.proofJwt.DidHandler.DidUtils
-import io.mosip.openID4VP.authorizationRequest.proofJwt.HandlerFactory.JwtProofTypeHandler
+package io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler
+
+import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils.JwtPart.HEADER
+import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils.JwtPart.PAYLOAD
+import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils.JwtPart.SIGNATURE
+import io.mosip.openID4VP.authorizationRequest.proofJwt.handlerFactory.JwtProofTypeHandler
+import io.mosip.openID4VP.common.isJWT
+import io.mosip.openID4VP.common.makeBase64Standard
 import io.mosip.openID4VP.exception.JWTVerificationException
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
@@ -16,8 +22,11 @@ class DidHandler : JwtProofTypeHandler {
 
     //TODO: clientId domain name may not be specific to DidHandler, should it be named as didUrl
     override fun verify(jwtToken: String, clientId: String) {
-        val url = "${RESOLVER_API}${clientId}"
+        val url = "$RESOLVER_API${clientId}"
         val didResponse = sendHTTPRequest(url, HTTP_METHOD.GET)
+        if (!isJWT(jwtToken)) {
+            throw throw JWTVerificationException.InvalidJWT()
+        }
         val kid = DidUtils.extractKid(jwtToken)
             ?: throw JWTVerificationException.KidExtractionFailed("KidExtractionFailed: KID extraction from DID document failed (className=$className)")
 
@@ -25,19 +34,14 @@ class DidHandler : JwtProofTypeHandler {
             ?: throw JWTVerificationException.PublicKeyExtractionFailed("PublicKeyExtractionFailed: Public key extraction failed (className=$className)")
 
         verifyJWT(jwtToken, publicKey)
+
     }
 
     private fun verifyJWT(jwt: String, publicKey: String) {
         val parts = jwt.split(".")
-        if (parts.size != 3) {
-            throw JWTVerificationException.InvalidJWT()
-        }
-        val header = parts[0]
-        val payload = parts[1]
-        val signature = Base64.decode(
-            parts[2].replace("-", "+").replace("_", "/")
-                .padEnd((parts[2].length + 3) / 4 * 4, '=')
-        )
+        val header = parts[HEADER.number]
+        val payload = parts[PAYLOAD.number]
+        val signature = Base64.decode(makeBase64Standard(parts[SIGNATURE.number]))
 
         val publicKeyBytes = Base64.decode(publicKey)
         val publicKeyParams = Ed25519PublicKeyParameters(publicKeyBytes, 0)
