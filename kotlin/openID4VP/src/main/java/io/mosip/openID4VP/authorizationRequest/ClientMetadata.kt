@@ -23,7 +23,6 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 		element<Map<String,String>>("vp_formats", isOptional = false)
 		element<String>("authorization_encrypted_response_alg", isOptional = true)
 		element<String>("authorization_encrypted_response_enc", isOptional = true)
-		element<Boolean>("require_signed_request_object", isOptional = true)
 	}
 
 	override fun deserialize(decoder: Decoder): ClientMetadata {
@@ -58,8 +57,6 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 				className = className,
 				fieldType = "map"
 			)
-		val requireSignedRequestObject: Boolean? =
-			deserializer.deserializeField(key = "require_signed_request_object", fieldType = "Boolean")
 		val authorizationEncryptedResponseAlg: String? =
 			deserializer.deserializeField(key = "authorizationEncryptedResponseAlg", fieldType = "String")
 		val authorizationEncryptedResponseEnc: String? =
@@ -71,8 +68,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
             logoUri = logoUri,
             vpFormats = vpFormats,
             authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg,
-            authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc,
-            requireSignedRequestObject = requireSignedRequestObject
+            authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc
         )
     }
 
@@ -98,7 +94,6 @@ class ClientMetadata(
 	@SerialName("vp_formats") val vpFormats: Map<String, String>,
 	@SerialName("authorization_encrypted_response_alg") val authorizationEncryptedResponseAlg: String?,
 	@SerialName("authorization_encrypted_response_enc") val authorizationEncryptedResponseEnc: String?,
-	@SerialName("require_signed_request_object") val requireSignedRequestObject: Boolean?
 ) : Validatable {
 
 	override fun validate() {

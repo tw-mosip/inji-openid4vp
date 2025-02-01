@@ -1,8 +1,6 @@
 package io.mosip.openID4VP
 
-import io.mosip.openID4VP.authenticationResponse.AuthenticationResponse
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.common.Logger
@@ -20,14 +18,6 @@ class OpenID4VP(private val traceabilityId: String) {
         this.responseUri = responseUri
     }
 
-    private fun updateAuthorizationRequest(
-        presentationDefinition: PresentationDefinition,
-        clientMetadata: ClientMetadata?
-    ) {
-        this.authorizationRequest.presentationDefinition = presentationDefinition
-        this.authorizationRequest.clientMetadata = clientMetadata
-    }
-
     @JvmOverloads
     fun authenticateVerifier(
         encodedAuthorizationRequest: String,
@@ -38,10 +28,6 @@ class OpenID4VP(private val traceabilityId: String) {
             Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
                 encodedAuthorizationRequest, ::setResponseUri, trustedVerifiers, shouldValidateClient
-            )
-            AuthenticationResponse.validateAuthorizationRequestPartially(
-                authorizationRequest,
-                ::updateAuthorizationRequest
             )
             return this.authorizationRequest
         } catch (exception: Exception) {

@@ -2,7 +2,6 @@ package io.mosip.openID4VP.common
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils
 import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils.JwtPart
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 
@@ -25,7 +24,7 @@ fun determineHttpMethod(method: String): HTTP_METHOD {
     }
 }
 
-fun extractDataJsonFromJwt(jwtToken: String, part: JwtPart): MutableMap<String, String> {
+fun extractDataJsonFromJwt(jwtToken: String, part: JwtPart): MutableMap<String, Any> {
     if (!isJWT(jwtToken)) throw IllegalArgumentException("Invalid JWT token format")
 
     val components = jwtToken.split(".")
@@ -45,12 +44,12 @@ fun makeBase64Standard(base64String: String): String {
     return base64
 }
 
-fun decodeBase64ToJSON(base64String: String): MutableMap<String, String> {
+fun decodeBase64ToJSON(base64String: String): MutableMap<String, Any> {
     val decodedString = try {
         Decoder.decodeBase64ToString(base64String)
     } catch (e: IllegalArgumentException) {
         throw Exception("JWT payload decoding failed: ${e.message}")
     }
-    return convertJsonToMap(decodedString) as MutableMap<String, String>
+    return convertJsonToMap(decodedString)
 }
 

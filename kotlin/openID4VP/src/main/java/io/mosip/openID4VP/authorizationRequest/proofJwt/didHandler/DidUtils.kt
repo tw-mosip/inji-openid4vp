@@ -13,7 +13,7 @@ object DidUtils {
     }
     fun extractKid(jwtToken: String): String? {
         val jwtHeader = extractDataJsonFromJwt(jwtToken, HEADER)
-        return jwtHeader["kid"]
+        return jwtHeader["kid"]?.toString()
     }
 
     fun extractPublicKeyMultibase(kid: String, response: String): String? {

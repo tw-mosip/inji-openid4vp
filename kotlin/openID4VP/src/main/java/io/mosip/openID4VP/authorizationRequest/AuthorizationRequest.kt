@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.proofJwt.ProofJwtManager
 import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils.JwtPart.PAYLOAD
@@ -59,27 +58,22 @@ data class AuthorizationRequest(
             shouldValidateClient: Boolean
         ): AuthorizationRequest {
             try {
-
                 val queryStart = encodedAuthorizationRequest.indexOf('?') + 1
                 val encodedString = encodedAuthorizationRequest.substring(queryStart)
-                val decodedString = Decoder.decodeBase64ToString(encodedString)
-                val decodedAuthorizationRequest = encodedAuthorizationRequest.substring(0, queryStart) + decodedString
-                val authorizationRequest = parseAuthorizationRequest(decodedAuthorizationRequest)
-                validateVerifier(trustedVerifiers, authorizationRequest, shouldValidateClient)
-                val params = validateQueryParams(authorizationRequest, setResponseUri)
-                return createAuthorizationRequest(params)
-
+                val decodedQueryString = Decoder.decodeBase64ToString(encodedString)
+                val authorizationRequestParams = parseAuthorizationRequest(decodedQueryString)
+                validateVerifier(trustedVerifiers, authorizationRequestParams, shouldValidateClient)
+                validateAuthorizationRequestParams(authorizationRequestParams, setResponseUri)
+                return createAuthorizationRequest(authorizationRequestParams)
             } catch (e: Exception) {
                 throw e
             }
         }
 
         private fun parseAuthorizationRequest(
-            decodedAuthorizationRequest: String
-        ): MutableMap<String, String> {
+            queryString: String
+        ): MutableMap<String, Any> {
             try {
-                val queryStart = decodedAuthorizationRequest.indexOf('?') + 1
-                val queryString = decodedAuthorizationRequest.substring(queryStart)
                 val encodedQuery = URLEncoder.encode(queryString, StandardCharsets.UTF_8.toString())
                 val uriString = "?$encodedQuery"
                 val uri = URI(uriString)
@@ -90,30 +84,36 @@ data class AuthorizationRequest(
                         className = className
                     )
                 val params = extractQueryParams(query)
-                return fetchAuthRequestDataMap(params)
+                return fetchAuthorizationRequestMap(params)
             } catch (exception: Exception) {
                 Logger.error(logTag, exception)
                 throw exception
             }
         }
 
-        private fun fetchAuthRequestDataMap(params: MutableMap<String, String>): MutableMap<String, String> {
-            return params["request_uri"]?.let { requestUri ->
-                return fetchAuthRequestObjectByReference(params, requestUri)
+        private fun fetchAuthorizationRequestMap(
+            params: MutableMap<String, Any>
+        ): MutableMap<String, Any> {
+            var authorizationRequestMap =  getValue(params,"request_uri")?.let { requestUri ->
+                 fetchAuthRequestObjectByReference(params, requestUri)
             } ?: params
+
+            authorizationRequestMap = parseAndValidateClientMetadataInAuthorizationRequest(authorizationRequestMap)
+            authorizationRequestMap = parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRequestMap)
+            return authorizationRequestMap
         }
 
         private fun fetchAuthRequestObjectByReference(
-            params: MutableMap<String, String>,
+            params: MutableMap<String, Any>,
             requestUri: String,
-        ): MutableMap<String, String> {
+        ): MutableMap<String, Any> {
             try {
-                val requestUriMethod = params["request_uri_method"] ?: "get"
+                val requestUriMethod = getValue(params, "request_uri_method") ?: "get"
                 validateRootFieldInvalidScenario("request_uri", requestUri)
                 validateRootFieldInvalidScenario("request_uri_method", requestUriMethod)
                 val httpMethod = determineHttpMethod(requestUriMethod)
                 val response = sendHTTPRequest(requestUri, httpMethod)
-                val authorizationRequestObject = extractAuthRequestData(response, params)
+                val authorizationRequestObject = extractAuthorizationRequestData(response, params)
                 return authorizationRequestObject
             } catch (exception: Exception) {
                 println("Exception is $exception")
@@ -121,19 +121,19 @@ data class AuthorizationRequest(
             }
         }
 
-        private fun extractAuthRequestData(
+        private fun extractAuthorizationRequestData(
             response: String,
-            params: MutableMap<String, String>
-        ): MutableMap<String, String> {
-            val authorizationRequestObject: MutableMap<String, String>
+            params: MutableMap<String, Any>
+        ): MutableMap<String, Any> {
+            val authorizationRequestObject: MutableMap<String, Any>
             if (isJWT(response)) {
                 authorizationRequestObject = extractDataJsonFromJwt(response, PAYLOAD)
                 validateMatchOfAuthRequestObjectAndParams(params, authorizationRequestObject)
                 val proof = ProofJwtManager()
                 proof.verifyJWT(
                     response,
-                    authorizationRequestObject["client_id"]!!,
-                    authorizationRequestObject["client_id_scheme"]!!
+                    getValue(authorizationRequestObject,"client_id")!!,
+                    getValue(authorizationRequestObject,"client_id_scheme")!!,
                 )
             } else {
                 authorizationRequestObject = decodeBase64ToJSON(response)
@@ -142,30 +142,20 @@ data class AuthorizationRequest(
             return authorizationRequestObject
         }
 
-        private fun validateMatchOfAuthRequestObjectAndParams(
-            params: MutableMap<String, String>,
-            authorizationRequestObject: MutableMap<String, String>,
-        ) {
-            if (params["client_id"] != authorizationRequestObject["client_id"]) {
-                throw AuthorizationRequestExceptions.InvalidData("Client Id mismatch in Authorization Request parameter and the Request Object")
-            }
-            if (params["client_id_scheme"] != null && params["client_id_scheme"] != authorizationRequestObject["client_id_scheme"]) {
-                throw AuthorizationRequestExceptions.InvalidData("Client Id scheme mismatch in Authorization Request parameter and the Request Object")
-            }
-        }
-
-        private fun createAuthorizationRequest(params: Map<String, String>): AuthorizationRequest {
+        private fun createAuthorizationRequest(
+            params: Map<String, Any>
+        ): AuthorizationRequest {
             return AuthorizationRequest(
-                clientId = params["client_id"]!!,
-                clientIdScheme = params["client_id_scheme"]!!,
-                responseType = params["response_type"]!!,
-                responseMode = params["response_mode"],
+                clientId = getValue(params, "client_id")!!,
+                clientIdScheme = getValue(params, "client_id_scheme")!!,
+                responseType = getValue(params, "response_type")!!,
+                responseMode = getValue(params, "response_mode"),
                 presentationDefinition = params["presentation_definition"]!!,
-                responseUri = params["response_uri"],
-                redirectUri = params["redirect_uri"],
-                nonce = params["nonce"]!!,
-                state = params["state"]!!,
-                clientMetadata = params["client_metadata"],
+                responseUri = getValue(params,"response_uri"),
+                redirectUri = getValue(params,"redirect_uri"),
+                nonce = getValue(params,"nonce")!!,
+                state = getValue(params, "state")!!,
+                clientMetadata = getValue(params, "client_metadata"),
             )
         }
 

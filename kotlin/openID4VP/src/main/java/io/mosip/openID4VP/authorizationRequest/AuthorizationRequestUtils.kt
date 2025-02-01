@@ -1,5 +1,8 @@
 package io.mosip.openID4VP.authorizationRequest
 
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
 import io.mosip.openID4VP.dto.Verifier
@@ -12,12 +15,12 @@ private val className = AuthorizationRequest::class.simpleName!!
 
 fun validateVerifier(
     verifierList: List<Verifier>,
-    authorizationRequest: MutableMap<String, String>,
+    params: MutableMap<String, Any>,
     shouldValidateVerifier: Boolean
 ) {
-    val clientIdScheme = authorizationRequest["client_id_scheme"]
-    val clientId = authorizationRequest["client_id"]
-    val redirectUri = authorizationRequest["redirect_uri"]
+    val clientIdScheme = params["client_id_scheme"]
+    val clientId = params["client_id"]
+    val redirectUri = params["redirect_uri"]
 
     when (clientIdScheme) {
         ClientIdScheme.PRE_REGISTERED.value -> {
@@ -30,7 +33,7 @@ fun validateVerifier(
                 }
                 val isValidVerifier = verifierList.any { verifier ->
                     verifier.clientId == clientId &&
-                            verifier.responseUris.contains(authorizationRequest["response_uri"])
+                            verifier.responseUris.contains(params["response_uri"])
                 }
                 if (!isValidVerifier) {
                     throw Logger.handleException(
@@ -41,7 +44,7 @@ fun validateVerifier(
             }
         }
         ClientIdScheme.REDIRECT_URI.value -> {
-            if(authorizationRequest["response_uri"]!=null && authorizationRequest["response_mode"] != null){
+            if(params["response_uri"]!=null && params["response_mode"] != null){
                 throw Logger.handleException(
                     exceptionType = "InvalidQueryParams",
                     className = AuthorizationRequest.toString(),
@@ -60,6 +63,26 @@ fun validateVerifier(
 
     }
 }
+
+fun validateKey(
+    key: String,
+    params: MutableMap<String, Any>,
+    setResponseUri: (String) -> Unit
+) {
+    val value = getValue(params, key)
+    if (value == null || value == "null" || value.isEmpty()) {
+        throw Logger.handleException(
+            exceptionType = if (params[key] == null) "MissingInput" else "InvalidInput",
+            fieldPath = listOf(key),
+            className = AuthorizationRequest.toString(),
+            fieldType = "String"
+        )
+    }
+    if (key == "response_uri") {
+        setResponseUri(value)
+    }
+}
+
 fun validateUriCombinations(
     redirectUri: String?,
     responseUri: String?,
@@ -98,44 +121,37 @@ fun updateRequiredKeys(
     }
 }
 
-fun validateKey(
-    key: String,
-    values: MutableMap<String, String>,
-    setResponseUri: (String) -> Unit
-) {
-    if (key == "presentation_definition") {
-        values[key] = fetchPresentationDefinition(params = values)
-    }
+fun commonRequiredKeys(params: Map<String, Any>): MutableList<String> {
+    val keys = mutableListOf(
+        "presentation_definition",
+        "client_id",
+        "client_id_scheme",
+        "response_type",
+        "nonce",
+        "state"
+    )
 
-    val value = values[key]
-    if (value == null || value == "null" || value.isEmpty()) {
-        throw Logger.handleException(
-            exceptionType = if (values[key] == null) "MissingInput" else "InvalidInput",
-            fieldPath = listOf(key),
-            className = AuthorizationRequest.toString(),
-            fieldType = "String"
-        )
+    if (params.containsKey("client_metadata")) {
+        keys.add("client_metadata")
     }
-    if (key == "response_uri") {
-        setResponseUri(value)
-    }
+    return keys
 }
 
-fun validateQueryParams(
-    params: MutableMap<String, String>, setResponseUri: (String) -> Unit
-): MutableMap<String, String> {
-    val baseRequiredFields = baseRequiredKeys(params)
+fun validateAuthorizationRequestParams(
+    params: MutableMap<String, Any>, setResponseUri: (String) -> Unit
+): MutableMap<String, Any> {
+    val baseRequiredFields = commonRequiredKeys(params)
     try {
         validateUriCombinations(
-            params["redirect_uri"],
-            params["response_uri"],
-            params["response_mode"]
+            getValue(params, "redirect_uri"),
+            getValue(params, "response_uri"),
+            getValue(params, "response_mode"),
         )
         updateRequiredKeys(
             baseRequiredFields,
-            params["redirect_uri"],
-            params["response_uri"],
-            params["response_mode"]
+            getValue(params, "redirect_uri"),
+            getValue(params, "response_uri"),
+            getValue(params, "response_mode")
         )
 
         for (key in baseRequiredFields) {
@@ -147,7 +163,7 @@ fun validateQueryParams(
     }
 }
 
-fun extractQueryParams(query: String): MutableMap<String, String> {
+fun extractQueryParams(query: String): MutableMap<String, Any> {
     try {
         return query.split("&").map { it.split("=") }
             .associateByTo(mutableMapOf(), { it[0] }, {
@@ -164,10 +180,10 @@ fun extractQueryParams(query: String): MutableMap<String, String> {
     }
 }
 
-fun fetchPresentationDefinition(params: Map<String, String>): String {
+fun parseAndValidatePresentationDefinitionInAuthorizationRequest(params: MutableMap<String, Any>): MutableMap<String, Any> {
     val hasPresentationDefinition = params.containsKey("presentation_definition")
     val hasPresentationDefinitionUri = params.containsKey("presentation_definition_uri")
-    var presentationDefinition = ""
+    var presentationDefinitionString = ""
 
     when {
         hasPresentationDefinition && hasPresentationDefinitionUri -> {
@@ -182,20 +198,20 @@ fun fetchPresentationDefinition(params: Map<String, String>): String {
             val presentationDefinitionValue = params["presentation_definition"]
             validateRootFieldInvalidScenario(
                 "presentation_definition",
-                presentationDefinitionValue
+                presentationDefinitionValue.toString()
             )
-            presentationDefinition = presentationDefinitionValue!!
+            presentationDefinitionString = presentationDefinitionValue.toString()
         }
 
         hasPresentationDefinitionUri -> {
             try {
                 validateRootFieldInvalidScenario(
                     "presentation_definition_uri",
-                    params["presentation_definition_uri"]
+                    params["presentation_definition_uri"].toString()
                 )
-                presentationDefinition =
+                presentationDefinitionString =
                     sendHTTPRequest(
-                        url = params["presentation_definition_uri"]!!,
+                        url = params["presentation_definition_uri"].toString(),
                         method = HTTP_METHOD.GET
                     )
             } catch (exception: Exception) {
@@ -211,23 +227,25 @@ fun fetchPresentationDefinition(params: Map<String, String>): String {
             )
         }
     }
-    return presentationDefinition
+
+    val presentationDefinition: PresentationDefinition =
+        deserializeAndValidate((presentationDefinitionString), PresentationDefinitionSerializer)
+    params["presentation_definition"] = presentationDefinition
+
+    return params
 }
 
-fun baseRequiredKeys(params: Map<String, String>): MutableList<String> {
-    val keys = mutableListOf(
-        "presentation_definition",
-        "client_id",
-        "client_id_scheme",
-        "response_type",
-        "nonce",
-        "state"
-    )
-
-    if (params.containsKey("client_metadata")) {
-        keys.add("client_metadata")
+fun parseAndValidateClientMetadataInAuthorizationRequest(params: MutableMap<String, Any>): MutableMap<String, Any> {
+    var clientMetadata: ClientMetadata?
+    params["client_metadata"]?.let {
+        clientMetadata =
+            deserializeAndValidate(
+                (params["client_metadata"]).toString(),
+                ClientMetadataSerializer
+            )
+        params["client_metadata"] = clientMetadata!!
     }
-    return keys
+    return params
 }
 
 // TODO: validateRootFieldInvalidScenario is validating only string field type, can method be named accordingly
@@ -240,5 +258,21 @@ fun validateRootFieldInvalidScenario(param: String, value: String?) {
             fieldType = "String"
         )
     }
+}
+
+fun validateMatchOfAuthRequestObjectAndParams(
+    params: MutableMap<String, Any>,
+    authorizationRequestObject: MutableMap<String, Any>,
+) {
+    if (params["client_id"] != authorizationRequestObject["client_id"]) {
+        throw AuthorizationRequestExceptions.InvalidData("Client Id mismatch in Authorization Request parameter and the Request Object")
+    }
+    if (params["client_id_scheme"] != null && params["client_id_scheme"] != authorizationRequestObject["client_id_scheme"]) {
+        throw AuthorizationRequestExceptions.InvalidData("Client Id scheme mismatch in Authorization Request parameter and the Request Object")
+    }
+}
+
+fun getValue(params: Map<String, Any>, key: String): String? {
+    return params[key]?.toString()
 }
 
