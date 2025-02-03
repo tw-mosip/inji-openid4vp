@@ -64,12 +64,10 @@ class ClientMetadataTest {
 		)
 
 		assertDoesNotThrow {
-			 val auth = openID4VP.authenticateVerifier(
+			 openID4VP.authenticateVerifier(
 				encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
 			)
-			println(auth)
 		}
-
 
 	}
 
