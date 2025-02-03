@@ -1,7 +1,44 @@
 # INJI-openId4VP
 
-Description: Implementation of OpenID4VP protocols in Kotlin
+Description: Implementation of OpenID for Verifiable Presentations - draft 21 specifications in Kotlin
 
+
+## Specifications supported
+- The implementation follows OpenID for Verifiable Presentations - draft 21. [Specification](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html).
+- Below are the fields we expect in the authorization request based on the client id scheme,
+    - Client_id_scheme is **_pre-registered_**
+        * client_id
+        * client_id_scheme
+        * presentation_definition/presentation_definition_uri
+        * response_type
+        * response_mode
+        * nonce
+        * state
+        * response_uri
+        * client_metadata (Optional)
+
+    - Client_id_scheme is **_redirect_uri_**
+        * client_id
+        * client_id_scheme
+        * presentation_definition/presentation_definition_uri
+        * response_type
+        * nonce
+        * state
+        * redirect_uri
+        * client_metadata (Optional)
+
+    - **_Request Uri_** is also supported as part of this version.
+    - When request_uri is passed as part of the authorization request, below are the fields we expect in the authorization request,
+        * client_id
+        * client_id_scheme
+        * request_uri
+        * request_uri_method
+
+    - The request uri can return either a jwt token/encoded if it is a jwt the signature is verified as mentioned in the specification.
+    - The client id and client id scheme from the authorization request and the client id and client id scheme received from the response of the request uri should be same.
+- VC format supported is Ldp Vc as of now.
+
+**Note** : The pre-registered client id scheme validation can be toggled on/off based on the optional boolean which you can pass to the authenticateVerifier methods shouldValidateClient parameter. This is false by default.
 ## Functionalities
 
 - Decode and parse the Verifier's encoded Authorization Request received from the Wallet.
@@ -17,7 +54,7 @@ Description: Implementation of OpenID4VP protocols in Kotlin
 Snapshot builds are available - 
 
 ```
-implementation "io.mosip:inji-openID4VP:0.1.0-SNAPSHOT"
+implementation "io.mosip:inji-openid4vp:0.1.0-SNAPSHOT"
 ```
 
 ## Create instance of OpenId4VP library to invoke it's methods
@@ -27,11 +64,13 @@ val openID4VP = OpenID4VP()
 
 ### authenticateVerifier
 - Receives a list of trusted verifiers & Verifier's encoded Authorization request from consumer app(mobile wallet).
-- Decodes and parse the request, extracts the clientId and verifies it against trusted verifier's list clientId.
-- Returns the Authentication response which contains validated Presentation Definition of the Authorization request.
+- Decodes and parses the qr code data. Checks if the data contains request_uri or contains the entire Authorization request data entirely.
+- Constructs the Authorization request object based on the client_id_scheme.
+- Takes an optional boolean to toggle the client validation.
+- Returns the validated Authorization request object.
 
 ```
- val authenticationResponse = openID4VP.authenticateVerifier(encodedAuthenticationRequest: String, trustedVerifierJSON: List<Verifier>)
+ val authenticationResponse = openID4VP.authenticateVerifier(encodedAuthenticationRequest: String, trustedVerifierJSON: List<Verifier>, shouldValidateClient: Bool)
 ```
 
 ###### Parameters
@@ -40,7 +79,7 @@ val openID4VP = OpenID4VP()
 |------------------------------|----------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
 | encodedAuthenticationRequest | String         | Base64 encoded string containing the Verifier's authorization request                | `"T1BFTklENFZQOi8vYXV0"`                                                                   |
 | trustedVerifiers             | List<Verifier> | A list of trusted Verifier objects each containing a clientId and a responseUri list | `listOf(Verifier("https://verify.env1.net",listOf("https://verify.env1.net/responseUri"))` |
-
+| shouldValidateClient         | Bool?          | Optional Boolean to toggle client validation for pre-registered client id scheme     | `true`                                                                                     |
 
 ###### Exceptions
 
@@ -55,6 +94,7 @@ val openID4VP = OpenID4VP()
 3. MissingInput exception is thrown if any of required params are not present in Request
 4. InvalidInput exception is thrown if any of required params value is empty or null
 5. InvalidVerifierClientID exception is thrown if the received request client_iD & response_uri are not matching with any of the trusted verifiers
+6. JWTVerification exception is thrown if there is any error in extracting public key, kid or signature verification failure.
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it. 
 
