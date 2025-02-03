@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     id("maven-publish")
     id("signing")
+    alias(libs.plugins.sonarqube)
     jacoco
 }
 
@@ -72,6 +73,7 @@ tasks {
 
         reports {
             html.required = true
+            xml.required = true
         }
         sourceDirectories.setFrom(layout.projectDirectory.dir("src/main/java"))
         classDirectories.setFrom(
@@ -94,6 +96,16 @@ tasks {
 
 tasks.build {
     finalizedBy("jacocoTestReport")
+}
+
+sonarqube {
+    properties {
+        property( "sonar.java.binaries", "build/intermediates/javac/debug")
+        property( "sonar.language", "kotlin")
+        property( "sonar.exclusions", "**/build/**, **/*.kt.generated, **/R.java, **/BuildConfig.java")
+        property( "sonar.scm.disabled", "true")
+        property( "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+    }
 }
 
 apply {
