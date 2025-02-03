@@ -244,6 +244,26 @@ class AuthorizationRequestTest {
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
+
+    @Test
+    fun `should throw error when client_id_scheme is redirect_uri and redirect_uri and client_id is different`() {
+        encodedAuthorizationRequestUrl = "openid4vp://authorize?Y2xpZW50X2lkPWh0dHBzOi8vaW5qaXZlcmlmeS5kZXYxLm1vc2lwLm5ldCZwcmVzZW50YXRpb25fZGVmaW5pdGlvbj17ImlkIjoidnAgdG9rZW4gZXhhbXBsZSIsInB1cnBvc2UiOiJSZWx5aW5nIHBhcnR5IGlzIHJlcXVlc3RpbmcgeW91ciBkaWdpdGFsIElEIGZvciB0aGUgcHVycG9zZSBvZiBTZWxmLUF1dGhlbnRpY2F0aW9uIiwiZm9ybWF0Ijp7ImxkcF92YyI6eyJwcm9vZl90eXBlIjpbIlJzYVNpZ25hdHVyZTIwMTgiXX19LCJpbnB1dF9kZXNjcmlwdG9ycyI6W3siaWQiOiJpZCBjYXJkIGNyZWRlbnRpYWwiLCJjb25zdHJhaW50cyI6eyJmaWVsZHMiOlt7InBhdGgiOlsiJC5jcmVkZW50aWFsU3ViamVjdC5lbWFpbCJdLCJmaWx0ZXIiOnsidHlwZSI6InN0cmluZyIsInBhdHRlcm4iOiJAbW9zaXAubmV0In19XX19XX0mcmVkaXJlY3RfdXJpPWh0dHBzOi8vaW5qaXZlcmlmeS5kZXYxLm1vc2lwLm5lJnJlc3BvbnNlX3R5cGU9dnBfdG9rZW4mbm9uY2U9ZkdxQnJRUDZiWEdMVHRzcWZBWFlMQT09JnN0YXRlPTVDUXl6Y3YyTWY4cFk2TGM4S2xFOWc9PSZjbGllbnRfbWV0YWRhdGE9eyJjbGllbnRfbmFtZSI6IlJlcXVlc3RlciBuYW1lIiwibG9nb191cmkiOiI8bG9nb191cmk+IiwiYXV0aG9yaXphdGlvbl9lbmNyeXB0ZWRfcmVzcG9uc2VfYWxnIjoiRUNESC1FUyIsImF1dGhvcml6YXRpb25fZW5jcnlwdGVkX3Jlc3BvbnNlX2VuYyI6IkEyNTZHQ00iLCJ2cF9mb3JtYXRzIjp7Im1zb19tZG9jIjp7ImFsZyI6WyJFUzI1NiIsIkVkRFNBIl19LCJsZHBfdnAiOnsicHJvb2ZfdHlwZSI6WyJFZDI1NTE5U2lnbmF0dXJlMjAxOCIsIkVkMjU1MTlTaWduYXR1cmUyMDIwIiwiUnNhU2lnbmF0dXJlMjAxOCJdfX19JmNsaWVudF9pZF9zY2hlbWU9cmVkaXJlY3RfdXJp"
+        shouldValidateClient = true
+
+        val expectedExceptionMessage = "Client id and redirect_uri value should be equal"
+
+        actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidVerifierRedirectUri::class.java) {
+                openID4VP.authenticateVerifier(
+                    encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
+                )
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+
+
     @Test
     fun `should return Authorization Request as Authentication Response if presentation_definition_uri & all the other fields are present and valid in Authorization Request`() {
         val mockResponse = MockResponse().setResponseCode(200).setBody(presentationDefinition)

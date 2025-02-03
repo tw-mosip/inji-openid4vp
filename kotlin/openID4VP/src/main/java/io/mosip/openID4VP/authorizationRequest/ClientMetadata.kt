@@ -92,6 +92,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 	}
 }
 
+
 @Serializable(with = ClientMetadataSerializer::class)
 class ClientMetadata(
 	@SerialName("client_name") val clientName: String?,
