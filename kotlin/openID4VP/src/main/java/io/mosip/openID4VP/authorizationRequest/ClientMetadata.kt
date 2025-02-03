@@ -43,24 +43,29 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 			parentField = "client_metadata"
 		)
 
-		val clientName: String? =
-			deserializer.deserializeField(key = "client_name", fieldType = "String")
-		val logoUri: String? =
-			deserializer.deserializeField(key = "logo_uri", fieldType = "String")
-		val vpFormats: Map<String, String> =
-			deserializer.deserializeField<Map<String, String>>(
-				key = "vp_formats",
-				fieldType = "Map"
-			) ?: throw Logger.handleException(
-				exceptionType = "InvalidInput",
-				fieldPath = listOf("client_metadata", "vp_formats"),
-				className = className,
-				fieldType = "map"
-			)
-		val authorizationEncryptedResponseAlg: String? =
-			deserializer.deserializeField(key = "authorizationEncryptedResponseAlg", fieldType = "String")
-		val authorizationEncryptedResponseEnc: String? =
-			deserializer.deserializeField(key = "authorization_encrypted_response_enc", fieldType = "String")
+        val clientName: String? =
+            deserializer.deserializeField(key = "client_name", fieldType = "String")
+        val logoUri: String? =
+            deserializer.deserializeField(key = "logo_uri", fieldType = "String")
+        val vpFormats: Map<String, String> =
+            deserializer.deserializeField<Map<String, String>>(
+                key = "vp_formats",
+                fieldType = "Map"
+            ) ?: throw Logger.handleException(
+                exceptionType = "InvalidInput",
+                fieldPath = listOf("client_metadata", "vp_formats"),
+                className = className,
+                fieldType = "map"
+            )
+        val authorizationEncryptedResponseAlg: String? =
+            deserializer.deserializeField(
+                key = "authorizationEncryptedResponseAlg",
+                fieldType = "String"
+            )
+        val authorizationEncryptedResponseEnc: String? = deserializer.deserializeField(
+            key = "authorization_encrypted_response_enc",
+            fieldType = "String"
+        )
 
 
         return ClientMetadata(
