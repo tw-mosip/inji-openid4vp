@@ -6,7 +6,7 @@ import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils.JwtP
 import io.mosip.openID4VP.authorizationRequest.proofJwt.handlerFactory.JwtProofTypeHandler
 import io.mosip.openID4VP.common.isJWT
 import io.mosip.openID4VP.common.makeBase64Standard
-import io.mosip.openID4VP.exception.JWTVerificationException
+import io.mosip.openID4VP.authorizationRequest.proofJwt.exception.JWTVerificationException
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters

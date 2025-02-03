@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler
 
-import io.mosip.openID4VP.exception.JWTVerificationException
+import io.mosip.openID4VP.authorizationRequest.proofJwt.exception.JWTVerificationException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test

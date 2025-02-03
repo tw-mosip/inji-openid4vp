@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.exception
+package io.mosip.openID4VP.authorizationRequest.proofJwt.exception
 
 sealed class JWTVerificationException {
     class InvalidJWT : Exception("Invalid JWT format")
