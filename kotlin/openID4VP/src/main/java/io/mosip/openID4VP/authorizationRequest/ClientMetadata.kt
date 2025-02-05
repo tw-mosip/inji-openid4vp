@@ -60,16 +60,19 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 		val authorizationEncryptedResponseAlg: String? =
 			deserializer.deserializeField(key = "authorizationEncryptedResponseAlg", fieldType = "String")
 		val authorizationEncryptedResponseEnc: String? =
-			deserializer.deserializeField(key = "authorization_encrypted_response_enc", fieldType = "String")
+			deserializer.deserializeField(
+				key = "authorization_encrypted_response_enc",
+				fieldType = "String"
+			)
 
 
-        return ClientMetadata(
-            clientName = clientName,
-            logoUri = logoUri,
-            vpFormats = vpFormats,
-            authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg,
-            authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc
-        )
+		return ClientMetadata(
+			clientName = clientName,
+			logoUri = logoUri,
+			vpFormats = vpFormats,
+			authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg,
+			authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc
+		)
     }
 
 	@Generated
