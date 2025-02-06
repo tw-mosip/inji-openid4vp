@@ -139,3 +139,6 @@ This method will also notify the Verifier about the error by sending it to the r
 
 1. InterruptedIOException is thrown if the connection is timed out when network call is made.
 2. NetworkRequestFailed exception is thrown when there is any other exception occurred when sending the response over http post request.
+
+##### The below diagram shows the interactions between Wallet, Verifier and OpenID4VP library
+<figure><img src="openID4VP/assets/sequence-diagram.png" alt=""><figcaption></figcaption></figure>
