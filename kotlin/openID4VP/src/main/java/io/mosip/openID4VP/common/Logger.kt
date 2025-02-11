@@ -2,6 +2,7 @@ package io.mosip.openID4VP.common
 
 import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 
 object Logger {
     private var traceabilityId: String? = null
@@ -64,7 +65,10 @@ object Logger {
                     fieldPath = fieldPathAsString,
                     message = message ?: ""
                 )
-                
+
+            "UnsupportedFormatOfLibrary" -> exception =
+                AuthorizationResponseExceptions.UnsupportedFormatOfLibrary(message = message ?: "Format is not supported by the library")
+
             "" -> exception =
                 Exception("An unexpected exception occurred: exception type: $exceptionType")
         }

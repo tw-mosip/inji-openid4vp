@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse.presentationSubmission
 
 import io.mosip.openID4VP.authorizationResponse.Proof
+import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVpSpecificSigningData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,7 +15,7 @@ data class VPToken(
     val proof: Proof
 ) {
     companion object {
-        fun constructVpToken(signingVPToken: VPTokenForSigning, proof: Proof): VPToken {
+        fun constructVpToken(signingVPToken: LdpVpSpecificSigningData, proof: Proof): VPToken {
             return VPToken(
                 signingVPToken.context,
                 signingVPToken.type,

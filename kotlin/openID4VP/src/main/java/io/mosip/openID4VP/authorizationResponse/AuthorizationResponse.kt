@@ -3,13 +3,12 @@ package io.mosip.openID4VP.authorizationResponse
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
+import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVpSpecificSigningData
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -18,36 +17,8 @@ private val className = AuthorizationResponse::class.simpleName!!
 
 class AuthorizationResponse {
     companion object {
-        private lateinit var vpTokenForSigning: VPTokenForSigning
+        private lateinit var ldpVpSpecificSigningData: LdpVpSpecificSigningData
         private lateinit var verifiableCredentials: Map<String, List<String>>
-
-        fun constructVPTokenForSigning(verifiableCredentials: Map<String, List<String>>): String {
-            try {
-                this.verifiableCredentials = verifiableCredentials
-                val verifiableCredential = mutableListOf<String>()
-                verifiableCredentials.forEach { (_, vcs) ->
-                    vcs.forEach { vcJson ->
-                        verifiableCredential.add(vcJson)
-                    }
-                }
-                this.vpTokenForSigning = VPTokenForSigning(
-                    verifiableCredential = verifiableCredential,
-                    id = UUIDGenerator.generateUUID(),
-                    holder = ""
-                )
-                return Json.encodeToString(vpTokenForSigning)
-            } catch (exception: SerializationException) {
-                throw Logger.handleException(
-                    exceptionType = "JsonEncodingFailed",
-                    message = exception.message,
-                    fieldPath = listOf("vp_token_for_signing"),
-                    className = className
-                )
-            } catch (exception: Exception) {
-                Logger.error(logTag, exception)
-                throw exception
-            }
-        }
 
         fun shareVP(
             vpResponseMetadata: VPResponseMetadata,
@@ -77,7 +48,7 @@ class AuthorizationResponse {
                 val presentationSubmission = PresentationSubmission(
                     UUIDGenerator.generateUUID(), presentationDefinitionId, descriptorMap
                 )
-                val vpToken = VPToken.constructVpToken(this.vpTokenForSigning, proof)
+                val vpToken = VPToken.constructVpToken(this.ldpVpSpecificSigningData, proof)
 
                 return constructHttpRequestBody(
                     vpToken,

@@ -3,7 +3,10 @@ package io.mosip.openID4VP.common
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.proofJwt.didHandler.DidUtils.JwtPart
+import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.CredentialFormatSpecificSigningData
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 fun convertJsonToMap(jsonString: String): MutableMap<String, Any> {
     val mapper = jacksonObjectMapper()
@@ -53,3 +56,22 @@ fun decodeBase64ToJSON(base64String: String): MutableMap<String, Any> {
     return convertJsonToMap(decodedString)
 }
 
+fun encodeVPTokenForSigning(vpTokensForSigning: Map<FormatType, CredentialFormatSpecificSigningData>): Map<String,String>{
+    try {
+        val formatted = mutableMapOf<String, String>()
+
+        for ((key, value) in vpTokensForSigning) {
+            val encodedContent = Json.encodeToString(value)
+            formatted[key.value] = encodedContent
+        }
+
+        return formatted
+    } catch (exception: Exception) {
+        throw Logger.handleException(
+            exceptionType = "JsonEncodingFailed",
+            message = exception.message,
+            fieldPath = listOf("vp_token_for_signing"),
+            className = "AuthorizationResponseUtils"
+        )
+    }
+}

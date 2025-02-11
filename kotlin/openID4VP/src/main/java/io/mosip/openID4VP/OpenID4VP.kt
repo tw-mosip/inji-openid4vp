@@ -2,8 +2,12 @@ package io.mosip.openID4VP
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
+import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
+import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.CredentialFormatSpecificSigningData
+import io.mosip.openID4VP.common.FormatType
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.encodeVPTokenForSigning
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
@@ -36,11 +40,11 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, List<String>>): String {
+    fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, Map<String,List<Any>>>): Map<String, String> {
         try {
-            return AuthorizationResponse.constructVPTokenForSigning(
-                verifiableCredentials
-            )
+            val dataForSigning: MutableMap<FormatType, CredentialFormatSpecificSigningData> =
+                AuthorizationResponseHandler().constructDataForSigning(verifiableCredentials)
+            return encodeVPTokenForSigning(dataForSigning)
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
             throw exception
