@@ -180,22 +180,20 @@ fun createEncodedAuthorizationRequest(
     clientIdScheme: ClientIdScheme,
     applicableFields: List<String>? = null
 ): String {
-    val authorizationRequestParam = when (verifierSentAuthRequestByReference) {
+    val paramList = when (verifierSentAuthRequestByReference) {
         true -> authRequestParamsByReference
-        else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]
-    }?.associateWith { key ->
-        requestParams[key]
-    }?.filterValues {
-        it != null
-    }?.toMutableMap() ?: mutableMapOf()
+        else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
+    }
+
+    val authorizationRequestParam = paramList
+        .filter { requestParams.containsKey(it) }
+        .associateWith { requestParams[it] }
+        .toMutableMap()
 
     return authorizationRequestParam
-        .map { (key, value) ->
-            "$key=${value?.let { URLEncoder.encode(it, StandardCharsets.UTF_8) } ?: "null"}"
-        }
+        .map { (key, value) -> "$key=$value" }
         .joinToString("&")
         .toByteArray(StandardCharsets.UTF_8)
         .let { Base64.getEncoder().encodeToString(it) }
         .let { "OPENID4VP://authorize?$it" }
 }
-

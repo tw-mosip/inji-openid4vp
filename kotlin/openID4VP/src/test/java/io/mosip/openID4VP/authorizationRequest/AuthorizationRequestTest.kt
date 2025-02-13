@@ -113,7 +113,7 @@ class AuthorizationRequestTest {
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
-    /*@Test
+    @Test
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is null`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             "client_id" to null,
@@ -132,7 +132,7 @@ class AuthorizationRequestTest {
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
-    }*/
+    }
 
     @Test
     fun `should throw exception if neither presentation_definition nor presentation_definition_uri param present in Authorization Request`() {
@@ -331,15 +331,6 @@ class AuthorizationRequestTest {
             createEncodedAuthorizationRequest(
                 authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED
             )
-
-/*
-        encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest1(
-            mapOf(
-                "client_id" to "https://verifier.env1.net",
-                "client_id_scheme" to "pre-registered",
-                "presentation_definition_uri" to mockWebServer.url(presentationDefinitionUri).toString(),
-            )
-        )*/
 
         val actualValue =
             openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient)
