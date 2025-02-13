@@ -1,9 +1,9 @@
-package io.mosip.openID4VP.testScripts
+package io.mosip.openID4VP.testData
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
-import io.mosip.openID4VP.testScripts.JWTUtil.Companion.createJWT
-import io.mosip.openID4VP.testScripts.JWTUtil.Companion.encodeB64
+import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
+import io.mosip.openID4VP.testData.JWTUtil.Companion.encodeB64
 import kotlinx.serialization.json.JsonObject
 import java.nio.charset.StandardCharsets
 import java.util.Base64

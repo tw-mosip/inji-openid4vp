@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.testScripts
+package io.mosip.openID4VP.testData
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.serialization.json.JsonObject

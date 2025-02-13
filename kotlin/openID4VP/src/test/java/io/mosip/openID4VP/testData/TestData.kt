@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.testScripts
+package io.mosip.openID4VP.testData
 
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.dto.Verifier

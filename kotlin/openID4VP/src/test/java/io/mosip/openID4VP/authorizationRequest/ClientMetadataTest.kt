@@ -6,10 +6,10 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.testScripts.clientMetadata
-import io.mosip.openID4VP.testScripts.createEncodedAuthorizationRequest
-import io.mosip.openID4VP.testScripts.presentationDefinition
-import io.mosip.openID4VP.testScripts.trustedVerifiers
+import io.mosip.openID4VP.testData.clientMetadata
+import io.mosip.openID4VP.testData.createEncodedAuthorizationRequest
+import io.mosip.openID4VP.testData.presentationDefinition
+import io.mosip.openID4VP.testData.trustedVerifiers
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
