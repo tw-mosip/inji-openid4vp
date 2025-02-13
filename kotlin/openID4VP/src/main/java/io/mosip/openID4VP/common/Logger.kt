@@ -26,7 +26,7 @@ object Logger {
         message: String? = null,
         fieldPath: List<String>? = null,
         className: String,
-        fieldType: Any? = null
+        fieldType: Any? = null,
     ): Exception {
         var fieldPathAsString: String = ""
         fieldPath?.let {
@@ -69,7 +69,20 @@ object Logger {
                 )
 
             "UnsupportedFormatOfLibrary" -> exception =
-                AuthorizationResponseExceptions.UnsupportedFormatOfLibrary(message = message ?: "Format is not supported by the library")
+                AuthorizationResponseExceptions.UnsupportedCredentialFormat(
+                    message = message
+                        ?: "Provided credential format is not supported by the library"
+                )
+
+            "UnsupportedResponseType" -> exception =
+                AuthorizationResponseExceptions.UnsupportedResponseType(
+                    message = message ?: "Provided response_type is not supported by the library"
+                )
+
+            "UnsupportedResponseMode" -> exception =
+                AuthorizationResponseExceptions.UnsupportedResponseMode(
+                    message = message ?: "Provided response_mode is not supported by the library"
+                )
 
             "" -> exception =
                 Exception("An unexpected exception occurred: exception type: $exceptionType")

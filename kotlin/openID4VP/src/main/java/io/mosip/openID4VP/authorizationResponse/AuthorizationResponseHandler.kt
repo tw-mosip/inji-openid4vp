@@ -17,10 +17,7 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 private val className = AuthorizationResponseHandler::class.java.simpleName
 
@@ -63,7 +60,8 @@ class AuthorizationResponseHandler {
 
             else -> throw Logger.handleException(
                 exceptionType = "UnsupportedResponseType",
-                className = className
+                className = className,
+                message = "Provided response_type ${authorizationRequest.responseType} is not supported by the library"
             )
         }
     }
@@ -113,7 +111,8 @@ class AuthorizationResponseHandler {
                 // In case of response_mode not available in authorization request, default mode is fragment
                 throw Logger.handleException(
                     exceptionType = "UnsupportedResponseMode",
-                    className = className
+                    className = className,
+                    message = "Provided response_mode ${authorizationRequest.responseMode} is not supported by the library"
                 )
             }
         }

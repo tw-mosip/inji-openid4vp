@@ -1,7 +1,30 @@
 package io.mosip.openID4VP.testData
 
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
+import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
+
+val publicKey = """-----BEGIN RSA PUBLIC KEY-----
+        MIICCgKCAgEA0IEd3E5CvLAbGvr/ysYT2TLE7WDrPBHGk8pwGqVvlrrFtZJ9wT8E
+        lDNkSfHIgBijphkgSXpVMduwWKidiFFtbqQHgKdr4vdiMKzTy8g0aTpD8T5xPImM
+        CC6CUVgp4EZZHkFK3S2guLZAanXLju3WBD4FuBQTl08vP5MlsiseIIanOnTulUDR
+        baGIYhONq2kN9UnLIXcv8QPIgroP/n76Ir39EwRd20E4jsNfEriZFthBZKQLNbTz
+        GrsVMtpUbHPUlvACrTzXm5RQ1THHDYUa46KmxZfTCKWM2EppaoJlUj1psf3LdlOU
+        MBAarn+3QUxYOMLu9vTLvqsk606WNbeuiHarY6lBAec1E6RXMIcVLKBqMy6NjMCK
+        Va3ZFvn6/G9JI0U+S8Nn3XpH5nLnyAwim7+l9ZnmqeKTTcnE8oxEuGdP7+VvpyHE
+        AF8jilspP0PuBLMNV4eNthKPKPfMvBbFtzLcizqXmSLPx8cOtrEOu+cEU6ckavAS
+        XwPgM27JUjeBwwnAhS8lrN3SiJLYCCi1wXjgqFgESNTBhHq+/H5Mb2wxliJQmfzd
+        BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU
+        IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==
+        -----END RSA PUBLIC KEY-----"""
+val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
+    "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
+    "RsaSignature2018",
+    publicKey,
+    "https://123",
+)
+val vpResponsesMetadata: Map<String, VPResponseMetadata> = mapOf("ldp_vc" to ldpVPResponseMetadata)
 
 val clientMetadata = """
     {

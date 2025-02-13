@@ -102,8 +102,7 @@ class AuthorizationRequestTest {
             "client_id" to "",
             "client_id_scheme" to ClientIdScheme.DID.value
         )
-        val encodedAuthorizationRequest =
-            createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+        val encodedAuthorizationRequest = "openid4vp://authorize?Y2xpZW50X2lkPWRpZDp3ZWI6bW9zaXAuZ2l0aHViLmlvOmluamktbW9jay1zZXJ2aWNlczpvcGVuaWQ0dnAtc2VydmljZTpkb2NzJnJlcXVlc3RfdXJpPWh0dHBzOi8vYTRkMy0yNy01Ny0zNi0yMTYubmdyb2stZnJlZS5hcHAvdmVyaWZpZXIvZ2V0LWF1dGgtcmVxdWVzdC1vYmo="
 
         expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
 
