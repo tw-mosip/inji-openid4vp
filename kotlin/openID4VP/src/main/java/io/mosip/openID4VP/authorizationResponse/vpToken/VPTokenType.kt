@@ -14,10 +14,3 @@ sealed class VPTokenType {
     @SerialName("VPToken")
     data class VPToken(val value: CredentialFormatSpecificVPToken) : VPTokenType()
 }
-
-/**
- * val shape = ShapeType.Shape(CredentialFormatSpecificVPToken(...))
- * val json = Json.encodeToString(shape)
- * println(json)
- * // Output: {"type":"shape","value":{...}}
- */

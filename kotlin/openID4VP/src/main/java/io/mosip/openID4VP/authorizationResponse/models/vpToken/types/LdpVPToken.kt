@@ -2,7 +2,6 @@ package io.mosip.openID4VP.authorizationResponse.models.vpToken.types
 
 import io.mosip.openID4VP.authorizationResponse.Proof
 import io.mosip.openID4VP.authorizationResponse.models.vpToken.CredentialFormatSpecificVPToken
-import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVpSpecificSigningData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,19 +13,9 @@ data class LdpVPToken(
     val id: String,
     val holder: String,
     val proof: Proof,
+    override val dataType: String = "LdpVP",
 ) : CredentialFormatSpecificVPToken {
     companion object {
         const val internalPath: String = "VerifiableCredential"
-
-        fun constructVpToken(signingVPToken: LdpVpSpecificSigningData, proof: Proof): LdpVPToken {
-            return LdpVPToken(
-                signingVPToken.context,
-                signingVPToken.type,
-                signingVPToken.verifiableCredential,
-                signingVPToken.id,
-                signingVPToken.holder,
-                proof
-            )
-        }
     }
 }

@@ -54,7 +54,7 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun shareVerifiablePresentation(vpResponseMetadata: Map<String,VPResponseMetadata>): String {
+    fun shareVerifiablePresentation(vpResponseMetadata: Map<String, VPResponseMetadata>): String {
         try {
             val formattedVPResponseMetadata: MutableMap<FormatType, VPResponseMetadata> = mutableMapOf()
 
@@ -62,6 +62,12 @@ class OpenID4VP(private val traceabilityId: String) {
                 val enumKey = FormatType.entries.find { it.value == key }
                 if (enumKey != null) {
                     formattedVPResponseMetadata[enumKey] = value
+                } else {
+                    throw Logger.handleException(
+                        exceptionType = "UnsupportedCredentialFormat",
+                        message = "Creation of authorization response for VC format $key is not supported by the Library",
+                        className = OpenID4VP::class.java.simpleName
+                    )
                 }
             }
 

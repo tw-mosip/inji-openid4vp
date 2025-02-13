@@ -60,7 +60,8 @@ class AuthorizationResponseHandler {
 
             else -> throw Logger.handleException(
                 exceptionType = "UnsupportedResponseType",
-                className = className
+                className = className,
+                message = "Provided response_type ${authorizationRequest.responseType} is not supported by the library"
             )
         }
     }
@@ -110,7 +111,8 @@ class AuthorizationResponseHandler {
                 // In case of response_mode not available in authorization request, default mode is fragment
                 throw Logger.handleException(
                     exceptionType = "UnsupportedResponseMode",
-                    className = className
+                    className = className,
+                    message = "Provided response_mode ${authorizationRequest.responseMode} is not supported by the library"
                 )
             }
         }

@@ -26,7 +26,7 @@ object Logger {
         message: String? = null,
         fieldPath: List<String>? = null,
         className: String,
-        fieldType: Any? = null
+        fieldType: Any? = null,
     ): Exception {
         var fieldPathAsString = ""
         fieldPath?.let {
@@ -38,41 +38,73 @@ object Logger {
                 fieldPath = fieldPathAsString,
                 fieldType = fieldType
             )
+
             "DeserializationFailure" -> AuthorizationRequestExceptions.DeserializationFailure(
                 fieldPath = fieldPathAsString,
                 message = message ?: ""
             )
+
             "JsonEncodingFailed" -> AuthorizationRequestExceptions.JsonEncodingFailed(
                 fieldPath = fieldPathAsString, message = message ?: ""
             )
+
             "MissingInput" -> AuthorizationRequestExceptions.MissingInput(fieldPath = fieldPathAsString)
 
             "InvalidInputPattern" -> AuthorizationRequestExceptions.InvalidInputPattern(fieldPath = fieldPathAsString)
 
-            "InvalidQueryParams" -> AuthorizationRequestExceptions.InvalidQueryParams(message = message ?: "")
+            "InvalidQueryParams" -> AuthorizationRequestExceptions.InvalidQueryParams(
+                message = message ?: ""
+            )
 
-            "InvalidVerifierRedirectUri" -> AuthorizationRequestExceptions.InvalidVerifierRedirectUri(message = message ?: "")
+            "InvalidVerifierRedirectUri" -> AuthorizationRequestExceptions.InvalidVerifierRedirectUri(
+                message = message ?: ""
+            )
 
-            "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier(message = message ?: "")
+            "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier(
+                message = message ?: ""
+            )
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
 
-            "InvalidClientIdScheme" -> AuthorizationRequestExceptions.InvalidClientIdScheme(message = message ?: "")
+            "InvalidClientIdScheme" -> AuthorizationRequestExceptions.InvalidClientIdScheme(
+                message = message ?: ""
+            )
 
-            "InvalidResponseMode" -> AuthorizationRequestExceptions.InvalidResponseMode(message = message ?: "")
+            "InvalidResponseMode" -> AuthorizationRequestExceptions.InvalidResponseMode(
+                message = message ?: ""
+            )
 
             "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
 
-            "PublicKeyResolutionFailed" -> JWTVerificationException.PublicKeyResolutionFailed(message = message ?: "")
+            "PublicKeyResolutionFailed" -> JWTVerificationException.PublicKeyResolutionFailed(
+                message = message ?: ""
+            )
 
-            "KidExtractionFailed" -> JWTVerificationException.KidExtractionFailed(message = message ?: "")
+            "KidExtractionFailed" -> JWTVerificationException.KidExtractionFailed(
+                message = message ?: ""
+            )
 
-            "PublicKeyExtractionFailed" -> JWTVerificationException.PublicKeyExtractionFailed(message = message ?: "")
+            "PublicKeyExtractionFailed" -> JWTVerificationException.PublicKeyExtractionFailed(
+                message = message ?: ""
+            )
 
             "InvalidSignature" -> JWTVerificationException.InvalidSignature(message = message ?: "")
 
             "UnsupportedFormatOfLibrary" ->
-                AuthorizationResponseExceptions.UnsupportedFormatOfLibrary(message = message ?: "Format is not supported by the library")
+                AuthorizationResponseExceptions.UnsupportedCredentialFormat(
+                    message = message
+                        ?: "Provided credential format is not supported by the library"
+                )
+
+            "UnsupportedResponseType" ->
+                AuthorizationResponseExceptions.UnsupportedResponseType(
+                    message = message ?: "Provided response_type is not supported by the library"
+                )
+
+            "UnsupportedResponseMode" ->
+                AuthorizationResponseExceptions.UnsupportedResponseMode(
+                    message = message ?: "Provided response_mode is not supported by the library"
+                )
 
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")
         }

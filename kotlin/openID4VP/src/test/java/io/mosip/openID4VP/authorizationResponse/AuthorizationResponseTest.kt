@@ -17,6 +17,8 @@ import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import okhttp3.Headers
+import io.mosip.openID4VP.testData.publicKey
+import io.mosip.openID4VP.testData.vpResponsesMetadata
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -40,19 +42,6 @@ class AuthorizationResponseTest {
             )
         )
     )
-    private val publicKey = """-----BEGIN RSA PUBLIC KEY-----
-        MIICCgKCAgEA0IEd3E5CvLAbGvr/ysYT2TLE7WDrPBHGk8pwGqVvlrrFtZJ9wT8E
-        lDNkSfHIgBijphkgSXpVMduwWKidiFFtbqQHgKdr4vdiMKzTy8g0aTpD8T5xPImM
-        CC6CUVgp4EZZHkFK3S2guLZAanXLju3WBD4FuBQTl08vP5MlsiseIIanOnTulUDR
-        baGIYhONq2kN9UnLIXcv8QPIgroP/n76Ir39EwRd20E4jsNfEriZFthBZKQLNbTz
-        GrsVMtpUbHPUlvACrTzXm5RQ1THHDYUa46KmxZfTCKWM2EppaoJlUj1psf3LdlOU
-        MBAarn+3QUxYOMLu9vTLvqsk606WNbeuiHarY6lBAec1E6RXMIcVLKBqMy6NjMCK
-        Va3ZFvn6/G9JI0U+S8Nn3XpH5nLnyAwim7+l9ZnmqeKTTcnE8oxEuGdP7+VvpyHE
-        AF8jilspP0PuBLMNV4eNthKPKPfMvBbFtzLcizqXmSLPx8cOtrEOu+cEU6ckavAS
-        XwPgM27JUjeBwwnAhS8lrN3SiJLYCCi1wXjgqFgESNTBhHq+/H5Mb2wxliJQmfzd
-        BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU
-        IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==
-        -----END RSA PUBLIC KEY-----"""
     private lateinit var presentationDefinition: String
     private lateinit var clientMetadata: String
     private lateinit var trustedVerifiers: List<Verifier>
@@ -133,13 +122,15 @@ class AuthorizationResponseTest {
 
     @Test
     fun `should throw invalid input exception if any input param of VPResponseMetadata class is empty`() {
-        ldpVpResponseMetadata = LdpVPResponseMetadata(
+        val ldpVpResponseMetadata = LdpVPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
-        expectedExceptionMessage = "Invalid Input: vp response metadata->domain value cannot be an empty string, null, or an integer"
+        val vpResponseMetadata = mapOf("ldp_vc" to ldpVpResponseMetadata)
+        expectedExceptionMessage =
+            "Invalid Input: vp response metadata->domain value cannot be an empty string, null, or an integer"
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-                openID4VP.shareVerifiablePresentation(mapOf("ldp_vc" to ldpVpResponseMetadata))
+                openID4VP.shareVerifiablePresentation(vpResponseMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -150,18 +141,12 @@ class AuthorizationResponseTest {
     fun `should throw exception if Authorization Response request call returns the response with http status other than 200`() {
         val mockResponse: MockResponse = MockResponse().setResponseCode(500)
         mockWebServer.enqueue(mockResponse)
-        ldpVpResponseMetadata = LdpVPResponseMetadata(
-            "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
-            "RsaSignature2018",
-            publicKey,
-            "https://123"
-        )
         expectedExceptionMessage =
             "Network request failed with error response - Response{protocol=http/1.1, code=500, message=Server Error, url=http://localhost:8080/injiverify.dev2.mosip.net/redirect}"
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestFailed::class.java) {
-                openID4VP.shareVerifiablePresentation(mapOf("ldp_vc" to ldpVpResponseMetadata))
+                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -170,17 +155,11 @@ class AuthorizationResponseTest {
     @Test
     @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
     fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
-        ldpVpResponseMetadata = LdpVPResponseMetadata(
-            "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
-            "RsaSignature2018",
-            publicKey,
-            "https://123"
-        )
         expectedExceptionMessage = "VP sharing failed due to connection timeout"
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestTimeout::class.java) {
-                openID4VP.shareVerifiablePresentation(mapOf("ldp_vc" to ldpVpResponseMetadata))
+                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -189,15 +168,6 @@ class AuthorizationResponseTest {
     @Test
     @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
     fun `should get response if Verifiable Presentation is shared successfully to the Verifier`() {
-        val mockResponse: MockResponse = MockResponse().setResponseCode(200)
-            .setBody("Verifiable Presentation is shared successfully")
-        mockWebServer.enqueue(mockResponse)
-        ldpVpResponseMetadata = LdpVPResponseMetadata(
-            "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
-            "RsaSignature2018",
-            publicKey,
-            "https://123",
-        )
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "http://localhost:8080/injiverify.dev2.mosip.net/redirect",
@@ -211,7 +181,7 @@ class AuthorizationResponseTest {
         )
         val expectedValue = "Verifiable Presentation is shared successfully"
 
-        val actualResponse = openID4VP.shareVerifiablePresentation(mapOf("ldp_vc" to ldpVpResponseMetadata))
+        val actualResponse = openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
 
         assertEquals(expectedValue, actualResponse)
     }

@@ -13,7 +13,6 @@ private val className = AuthorizationResponseModel::class.java.simpleName
 class AuthorizationResponseModel(
     val vpToken: VPTokenType,
     val presentationSubmission: PresentationSubmission) {
-//    fun  encodedItem
 
     fun encodedItems(): Map<String, String> {
         val encodedVPToken: String
