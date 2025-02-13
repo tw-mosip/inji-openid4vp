@@ -385,33 +385,3 @@ class AuthorizationRequestTest {
     }
 }
 
-fun createEncodedAuthorizationRequest1(
-    params: Map<String, String?>,
-): String {
-    val state = "fsnC8ixCs6mWyV+00k23Qg=="
-    val nonce = "bMHvX1HGhbh8zqlSWf/fuQ=="
-    val authorizationRequestUrl = StringBuilder("")
-
-    if (params.containsKey("client_id")) authorizationRequestUrl.append("client_id=${params["client_id"]}&")
-    if (params.containsKey("client_id_scheme")) authorizationRequestUrl.append("client_id_scheme=${params["client_id_scheme"]}&")
-    if (params.containsKey("presentation_definition")) authorizationRequestUrl.append("presentation_definition=${params["presentation_definition"]}&")
-    if (params.containsKey("presentation_definition_uri")) authorizationRequestUrl.append("presentation_definition_uri=${params["presentation_definition_uri"]}&")
-    val responseUri: String? = if (params.containsKey("response_uri")) {
-        params["response_uri"]
-    } else {
-        "https://verifier.env2.net/responseUri"
-    }
-    val clientMetadata: String? = if (params.containsKey("client_metadata")) {
-        params["client_metadata"]
-    } else {
-        "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
-    }
-
-    authorizationRequestUrl.append("response_type=vp_token&response_mode=direct_post&nonce=$nonce&state=$state&response_uri=$responseUri&client_metadata=$clientMetadata")
-    val encodedAuthorizationRequestInBytes = Base64.encodeBase64(
-        authorizationRequestUrl.toString().toByteArray(
-            StandardCharsets.UTF_8
-        )
-    )
-    return "openid4vp://authorize?"+String(encodedAuthorizationRequestInBytes, StandardCharsets.UTF_8)
-}
