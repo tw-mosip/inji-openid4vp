@@ -6,7 +6,10 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.dto.Verifier
+import io.mosip.openID4VP.testData.clientMetadata
+import io.mosip.openID4VP.testData.createEncodedAuthorizationRequest
+import io.mosip.openID4VP.testData.presentationDefinition
+import io.mosip.openID4VP.testData.trustedVerifiers
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -14,13 +17,23 @@ import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 
 class ClientMetadataTest {
-	private lateinit var presentationDefinition: String
-	private lateinit var expectedExceptionMessage: String
 	private lateinit var actualException: Exception
 	private lateinit var openID4VP: OpenID4VP
-	private lateinit var trustedVerifiers: List<Verifier>
-	private lateinit var encodedAuthorizationRequestUrl: String
 	private var shouldValidateClient = true
+	val requestParams: Map<String, String> = mapOf(
+		"client_id" to "https://mock-verifier.com",
+		"client_id_scheme" to "redirect_uri",
+		"redirect_uri" to "https://mock-verifier.com",
+		"response_uri" to "https://mock-verifier.com",
+		"request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
+		"request_uri_method" to "get",
+		"presentation_definition" to presentationDefinition,
+		"response_type" to "vp_token",
+		"response_mode" to "direct_post",
+		"nonce" to "VbRRB/LTxLiXmVNZuyMO8A==",
+		"state" to "+mRQe1d6pBoJqF6Ab28klg==",
+		"client_metadata" to clientMetadata
+	)
 
 	@Before
 	fun setUp() {
@@ -32,19 +45,6 @@ class ClientMetadataTest {
 			0
 		}
 		openID4VP = OpenID4VP("test-OpenID4VP")
-		presentationDefinition =
-			"""{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"idcardcredential","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
-		trustedVerifiers = listOf(
-			Verifier(
-				"https://verifier.env1.net", listOf(
-					"https://verifier.env1.net/responseUri", "https://verifier.env2.net/responseUri"
-				)
-			), Verifier(
-				"https://verifier.env2.net", listOf(
-					"https://verifier.env3.net/responseUri", "https://verifier.env2.net/responseUri"
-				)
-			)
-		)
 	}
 
 	@After
@@ -54,40 +54,39 @@ class ClientMetadataTest {
 
 	@Test
 	fun `should parse client metadata successfully`() {
-		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			mapOf(
-				"client_id" to "https://verifier.env1.net",
-				"client_id_scheme" to "pre-registered",
-				"presentation_definition" to presentationDefinition,
-				"client_metadata" to "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
-			)
+		val authorizationRequestParamsMap = requestParams + mapOf(
+			"client_id" to "https://verifier.env1.net",
+			"client_id_scheme" to "pre-registered",
+			"response_uri" to "https://verifier.env1.net/responseUri"
 		)
-
+		val encodedAuthorizationRequest =
+			createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
 		assertDoesNotThrow {
 			 openID4VP.authenticateVerifier(
-				encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
+				 encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
 			)
 		}
-
 	}
 
 	@Test
 	fun `should throw invalid input exception if vp_formats field is not available`() {
-		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			mapOf(
-				"client_id" to "https://verifier.env1.net",
-				"client_id_scheme" to "pre-registered",
-				"presentation_definition" to presentationDefinition,
-				"client_metadata" to "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\"}"
-			)
+		val authorizationRequestParamsMap = requestParams + mapOf(
+			"client_id" to "https://verifier.env1.net",
+			"client_id_scheme" to "pre-registered",
+			"response_uri" to "https://verifier.env1.net/responseUri",
+			"client_metadata" to "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\"}"
 		)
+		val encodedAuthorizationRequest =
+			createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+
+
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->vp_formats value cannot be empty or null"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
 				openID4VP.authenticateVerifier(
-					encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
+					encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
 				)
 			}
 
@@ -96,21 +95,21 @@ class ClientMetadataTest {
 
 	@Test
 	fun `should throw invalid input exception if name field is available in client_metadata but the value is empty`() {
-		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			mapOf(
-				"client_id" to "https://verifier.env1.net",
-				"client_id_scheme" to "pre-registered",
-				"presentation_definition" to presentationDefinition,
-				"client_metadata" to "{\"client_name\":\"\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
-			)
+		val authorizationRequestParamsMap = requestParams + mapOf(
+			"client_id" to "https://verifier.env1.net",
+			"client_id_scheme" to "pre-registered",
+			"client_metadata" to "{\"client_name\":\"\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
 		)
+		val encodedAuthorizationRequest =
+			createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->client_name value cannot be an empty string, null, or an integer"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
 				openID4VP.authenticateVerifier(
-					encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
+					encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
 				)
 			}
 
@@ -119,21 +118,22 @@ class ClientMetadataTest {
 
 	@Test
 	fun `should throw invalid input exception if name field is available in client_metadata but the value is null`() {
-		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			mapOf(
-				"client_id" to "https://verifier.env1.net",
-				"client_id_scheme" to "pre-registered",
-				"presentation_definition" to presentationDefinition,
-				"client_metadata" to "{\"client_name\":null,\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
-			)
+		val authorizationRequestParamsMap = requestParams + mapOf(
+			"client_id" to "https://verifier.env1.net",
+			"client_id_scheme" to "pre-registered",
+			"response_uri" to "https://verifier.env1.net/responseUri",
+			"client_metadata" to "{\"client_name\":null,\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
 		)
+		val encodedAuthorizationRequest =
+			createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->client_name value cannot be an empty string, null, or an integer"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
 				openID4VP.authenticateVerifier(
-					encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
+					encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
 				)
 			}
 
@@ -142,21 +142,22 @@ class ClientMetadataTest {
 
 	@Test
 	fun `should throw invalid input exception if log_url field is available in client_metadata but the value is empty`() {
-		encodedAuthorizationRequestUrl = createEncodedAuthorizationRequest(
-			mapOf(
-				"client_id" to "https://verifier.env1.net",
-				"client_id_scheme" to "pre-registered",
-				"presentation_definition" to presentationDefinition,
-				"client_metadata" to "{\"client_name\":\"\",\"client_name\":\"verifier\",\"logo_uri\":\"\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
-			)
+		val authorizationRequestParamsMap = requestParams + mapOf(
+			"client_id" to "https://verifier.env1.net",
+			"client_id_scheme" to "pre-registered",
+			"client_metadata" to "{\"client_name\":\"\",\"client_name\":\"verifier\",\"logo_uri\":\"\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
+
 		)
+		val encodedAuthorizationRequest =
+			createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->logo_uri value cannot be an empty string, null, or an integer"
 
 		actualException =
 			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
 				openID4VP.authenticateVerifier(
-					encodedAuthorizationRequestUrl, trustedVerifiers, shouldValidateClient
+					encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
 				)
 			}
 
