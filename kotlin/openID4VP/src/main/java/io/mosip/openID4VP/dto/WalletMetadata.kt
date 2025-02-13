@@ -23,11 +23,13 @@ private val className = WalletMetadata::class.simpleName!!
 
 object WalletMetadataSerializer : KSerializer<WalletMetadata> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ClientMetadata") {
-        element<String>("presentation_definition_uri_supported", isOptional = true)
-        element<String>("vp_formats_supported", isOptional = false)
-        element<Map<String, String>>("client_id_schemes_supported", isOptional = true)
+        element<Boolean>("presentation_definition_uri_supported", isOptional = true)
+        element<Map<String,VPFormatSupported>>("vp_formats_supported", isOptional = false)
+        element<List<String>>("client_id_schemes_supported", isOptional = true)
+        element<List<String>>("request_object_signing_alg_values_supported", isOptional = true)
+        element<List<String>>("authorization_encryption_alg_values_supported", isOptional = true)
+        element<List<String>>("authorization_encryption_enc_values_supported", isOptional = true)
     }
-
 
     override fun deserialize(decoder: Decoder): WalletMetadata {
         val jsonDecoder = try {
@@ -62,11 +64,20 @@ object WalletMetadataSerializer : KSerializer<WalletMetadata> {
                 )
         val clientIdSchemesSupported: List<String>? =
             deserializer.deserializeField(key = "client_id_schemes_supported", fieldType = "List")
+        val requestObjectSigningAlgValuesSupported: List<String>? =
+            deserializer.deserializeField(key = "request_object_signing_alg_values_supported", fieldType = "List")
+        val authorizationEncryptionAlgValuesSupported: List<String>? =
+            deserializer.deserializeField(key = "authorization_encryption_alg_values_supported", fieldType = "List")
+        val authorizationEncryptionEncValuesSupported: List<String>? =
+            deserializer.deserializeField(key = "authorization_encryption_enc_values_supported", fieldType = "List")
 
         return WalletMetadata(
             presentationDefinitionURISupported = presentationDefinitionURISupported,
             vpFormatsSupported = vpFormatsSupported,
-            clientIdSchemesSupported = clientIdSchemesSupported
+            clientIdSchemesSupported = clientIdSchemesSupported,
+            requestObjectSigningAlgValuesSupported = requestObjectSigningAlgValuesSupported,
+            authorizationEncryptionAlgValuesSupported = authorizationEncryptionAlgValuesSupported,
+            authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported
         )
     }
 
@@ -89,6 +100,30 @@ object WalletMetadataSerializer : KSerializer<WalletMetadata> {
                 it
             )
         }
+        value.requestObjectSigningAlgValuesSupported?.let {
+            builtInEncoder.encodeSerializableElement(
+                descriptor,
+                3,
+                ListSerializer(String.serializer()),
+                it
+            )
+        }
+        value.authorizationEncryptionAlgValuesSupported?.let {
+            builtInEncoder.encodeSerializableElement(
+                descriptor,
+                4,
+                ListSerializer(String.serializer()),
+                it
+            )
+        }
+        value.authorizationEncryptionEncValuesSupported?.let {
+            builtInEncoder.encodeSerializableElement(
+                descriptor,
+                4,
+                ListSerializer(String.serializer()),
+                it
+            )
+        }
         builtInEncoder.endStructure(descriptor)
     }
 }
@@ -98,8 +133,10 @@ class WalletMetadata(
 
     @SerialName("presentation_definition_uri_supported")  val presentationDefinitionURISupported: Boolean? = true,
     @SerialName("vp_formats_supported") val vpFormatsSupported: Map<String, VPFormatSupported>,
-    @SerialName("client_id_schemes_supported")val clientIdSchemesSupported: List<String>? = listOf(
-        ClientIdScheme.PRE_REGISTERED.value),
+    @SerialName("client_id_schemes_supported")val clientIdSchemesSupported: List<String>? = listOf(ClientIdScheme.PRE_REGISTERED.value),
+    @SerialName("request_object_signing_alg_values_supported") val requestObjectSigningAlgValuesSupported: List<String>? = null,
+    @SerialName("authorization_encryption_alg_values_supported") val authorizationEncryptionAlgValuesSupported: List<String>? = null,
+    @SerialName("authorization_encryption_enc_values_supported") val authorizationEncryptionEncValuesSupported: List<String>? = null
 ) : Validatable {
     override fun validate() {
     }

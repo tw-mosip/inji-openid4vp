@@ -52,7 +52,10 @@ val walletMetadata = """
         "redirect_uri",
         "https",
         "did"
-      ]
+      ],
+      "request_object_signing_alg_values_supported": ["EdDSA"],
+      "authorization_encryption_alg_values_supported": ["ECDH-ES"],
+      "authorization_encryption_enc_values_supported": ["A256GCM"] 
     }
 """.trimIndent()
 
