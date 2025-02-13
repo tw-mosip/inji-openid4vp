@@ -2,9 +2,6 @@ package io.mosip.openID4VP.testScripts
 
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.dto.Verifier
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
-import java.util.Base64
 
 val clientMetadata = """
     {
@@ -130,12 +127,12 @@ val authRequestParamsByReference = listOf(
     "request_uri_method"
 )
 
+
 val authRequestWithRedirectUriByValue = listOf(
     "client_id",
     "client_id_scheme",
     "redirect_uri",
     "presentation_definition",
-    "presentation_definition_uri",
     "response_type",
     "nonce",
     "state",
@@ -148,7 +145,6 @@ val authRequestWithPreRegisteredByValue = listOf(
     "response_mode",
     "response_uri",
     "presentation_definition",
-    "presentation_definition_uri",
     "response_type",
     "nonce",
     "state",
@@ -161,7 +157,6 @@ val authRequestWithDidByValue = listOf(
     "response_mode",
     "response_uri",
     "presentation_definition",
-    "presentation_definition_uri",
     "response_type",
     "nonce",
     "state",
@@ -174,26 +169,17 @@ val authorisationRequestListToClientIdSchemeMap = mapOf(
     ClientIdScheme.PRE_REGISTERED to authRequestWithPreRegisteredByValue
 )
 
-fun createEncodedAuthorizationRequest(
-    requestParams: Map<String, String?>,
-    verifierSentAuthRequestByReference: Boolean? = false,
-    clientIdScheme: ClientIdScheme,
-    applicableFields: List<String>? = null
-): String {
-    val paramList = when (verifierSentAuthRequestByReference) {
-        true -> authRequestParamsByReference
-        else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
-    }
+val clientIdAndSchemeOfDid = mapOf(
+    "client_id" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
+    "client_id_scheme" to ClientIdScheme.DID.value
+)
 
-    val authorizationRequestParam = paramList
-        .filter { requestParams.containsKey(it) }
-        .associateWith { requestParams[it] }
-        .toMutableMap()
+val clientIdAndSchemeOfPreRegistered = mapOf(
+    "client_id" to "https://verifier.env1.net",
+    "client_id_scheme" to ClientIdScheme.PRE_REGISTERED.value
+)
 
-    return authorizationRequestParam
-        .map { (key, value) -> "$key=$value" }
-        .joinToString("&")
-        .toByteArray(StandardCharsets.UTF_8)
-        .let { Base64.getEncoder().encodeToString(it) }
-        .let { "OPENID4VP://authorize?$it" }
-}
+val clientIdAndSchemeOfReDirectUri = mapOf(
+    "client_id" to "https://mock-verifier.com",
+    "client_id_scheme" to "redirect_uri",
+)

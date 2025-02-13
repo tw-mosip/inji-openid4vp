@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.testScripts.clientMetadata
 import io.mosip.openID4VP.testScripts.createEncodedAuthorizationRequest
 import io.mosip.openID4VP.testScripts.presentationDefinition
@@ -26,7 +25,7 @@ class ClientMetadataTest {
 		"client_id_scheme" to "redirect_uri",
 		"redirect_uri" to "https://mock-verifier.com",
 		"response_uri" to "https://mock-verifier.com",
-		"request_uri" to "https://verifier/verifier/get-auth-request-obj",
+		"request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
 		"request_uri_method" to "get",
 		"presentation_definition" to presentationDefinition,
 		"response_type" to "vp_token",

@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.testScripts
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
+import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.bouncycastle.crypto.params.Ed25519PrivateKeyParameters
@@ -12,10 +12,7 @@ import java.util.Base64
 class JWTUtil {
     companion object {
         private const val ed25519PrivateKey = "vlo/0lVUn4oCEFo/PiPi3FyqSBSdZ2JDSBJJcvbf6o0="
-        private const val baseUrl = "https://verifier"
-        private const val responseUri = "$baseUrl/verifier/vp-response"
-        private const val didDocumentUrl =
-            "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs"
+        private const val didDocumentUrl = "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs"
         private const val publicKeyId = "$didDocumentUrl#key-0"
         private val jwtHeader = buildJsonObject {
             put("typ", "oauth-authz-req+jwt")
@@ -29,7 +26,7 @@ class JWTUtil {
                 .replace("=+$".toRegex(), "")
         }
 
-        private fun encodeB64(str: String): String {
+        fun encodeB64(str: String): String {
             val encoded = Base64.getEncoder().encodeToString(str.toByteArray())
             return replaceCharactersInB64(encoded)
         }
@@ -44,32 +41,23 @@ class JWTUtil {
             return replaceCharactersInB64(Base64.getEncoder().encodeToString(signature))
         }
 
-        fun createAuthorizationRequestObject(
-            clientIdScheme: ClientIdScheme,
-            authorizationRequestParams: Map<String, String>,
-            applicableFields: List<String>? = null
+        fun createJWT(
+            mapper: ObjectMapper,
+            authorizationRequestParam: Any?,
+            addValidSignature: Boolean,
+            jwtHeader: JsonObject?
         ): String {
-
-            val mapper = jacksonObjectMapper()
-            val authorizationRequestParam =
-                applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]
-                    ?.associateWith { key ->
-                        authorizationRequestParams[key]
-                    }?.filterValues {
-                        it != null
-                    }?.toMutableMap()
-            if (clientIdScheme == ClientIdScheme.DID) {
-                val header64 = encodeB64(jwtHeader.toString())
-                val payload64 = encodeB64(mapper.writeValueAsString(authorizationRequestParam))
-                val preHash = "$header64.$payload64"
-
-                val privateKey = Base64.getDecoder().decode(ed25519PrivateKey)
-                val signature64 = createSignatureED(privateKey, preHash)
-
-                return "$header64.$payload64.$signature64"
-            } else {
-                return encodeB64(mapper.writeValueAsString(authorizationRequestParam))
-            }
+            val header = jwtHeader ?: this.jwtHeader
+            val header64 = encodeB64(header.toString())
+            val payload64 = encodeB64(mapper.writeValueAsString(authorizationRequestParam))
+            val preHash = "$header64.$payload64"
+            val privateKey = Base64.getDecoder().decode(ed25519PrivateKey)
+            val signature64 = if(addValidSignature)
+                createSignatureED(privateKey, preHash)
+            else
+                "aW52YWxpZC1zaWdu"
+            return "$header64.$payload64.$signature64"
         }
     }
 }
+

@@ -3,24 +3,26 @@ package io.mosip.openID4VP.authorizationRequest
 import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.dto.Verifier
+import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.networkManager.NetworkManagerClient
+import io.mosip.openID4VP.testScripts.clientIdAndSchemeOfDid
+import io.mosip.openID4VP.testScripts.clientIdAndSchemeOfPreRegistered
+import io.mosip.openID4VP.testScripts.clientIdAndSchemeOfReDirectUri
 import io.mosip.openID4VP.testScripts.clientMetadata
 import io.mosip.openID4VP.testScripts.createEncodedAuthorizationRequest
 import io.mosip.openID4VP.testScripts.presentationDefinition
 import io.mosip.openID4VP.testScripts.trustedVerifiers
-import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.apache.commons.codec.binary.Base64
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.nio.charset.StandardCharsets
 
 class AuthorizationRequestTest {
     private lateinit var openID4VP: OpenID4VP
@@ -31,12 +33,13 @@ class AuthorizationRequestTest {
 
     val requestParams: Map<String, String> = mapOf(
         "client_id" to "https://mock-verifier.com",
-        "client_id_scheme" to "redirect_uri",
+        "client_id_scheme" to "pre-registered",
         "redirect_uri" to "https://mock-verifier.com",
-        "response_uri" to "https://mock-verifier.com",
-        "request_uri" to "https://verifier/verifier/get-auth-request-obj",
+        "response_uri" to "https://verifier.env1.net/responseUri",
+        "request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
         "request_uri_method" to "get",
         "presentation_definition" to presentationDefinition,
+        "presentation_definition_uri" to "https://mock-verifier/verifier/get-presentation-definition",
         "response_type" to "vp_token",
         "response_mode" to "direct_post",
         "nonce" to "VbRRB/LTxLiXmVNZuyMO8A==",
@@ -49,6 +52,7 @@ class AuthorizationRequestTest {
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
 
+        mockkObject(NetworkManagerClient.Companion)
         openID4VP = OpenID4VP("test-OpenID4VP")
 
         mockkStatic(android.util.Log::class)
@@ -158,11 +162,7 @@ class AuthorizationRequestTest {
 
     @Test
     fun `should throw exception if both presentation_definition and presentation_definition_uri request params are present in Authorization Request`() {
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            "client_id" to "https://mock-service",
-            "client_id_scheme" to ClientIdScheme.DID.value,
-            "presentation_definition_uri" to "https://mock-verifier"
-        )
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
         val applicableFields = listOf(
             "client_id",
             "client_id_scheme",
@@ -198,7 +198,7 @@ class AuthorizationRequestTest {
             "client_id_scheme" to ClientIdScheme.PRE_REGISTERED.value
         )
         val encodedAuthorizationRequest =
-            createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+            createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
 
         val expectedExceptionMessage =
             "VP sharing failed: Verifier authentication was unsuccessful"
@@ -218,9 +218,7 @@ class AuthorizationRequestTest {
         val presentationDefinition =
             """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"idcardcredential","constraints":{"fields":[{"path":["$.type"]}], "limit_disclosure": "not preferred"}}]}"""
 
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            "client_id" to "https://verifier.env1.net",
-            "client_id_scheme" to ClientIdScheme.DID.value,
+        val authorizationRequestParamsMap = requestParams+ clientIdAndSchemeOfDid + mapOf(
             "presentation_definition" to presentationDefinition
         )
         val encodedAuthorizationRequest =
@@ -241,11 +239,7 @@ class AuthorizationRequestTest {
 
     @Test
     fun `should return Authorization Request as Authentication Response if presentation_definition & all the other fields are present and valid in Authorization Request`() {
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            "client_id" to "https://verifier.env1.net",
-            "client_id_scheme" to "pre-registered",
-            "response_uri" to "https://verifier.env1.net/responseUri"
-        )
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
         val encodedAuthorizationRequest =
             createEncodedAuthorizationRequest(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
 
@@ -256,12 +250,8 @@ class AuthorizationRequestTest {
 
     @Test
     fun `should throw error when client_id_scheme is redirect_uri and response_uri is present`() {
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            "client_id" to "https://verifier.env1.net",
-            "redirect_uri" to "https://verifier.env1.net",
-            "client_id_scheme" to "redirect_uri",
-            "response_uri" to "https://verifier.env1.net/responseUri"
-        )
+
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfReDirectUri
         val applicableFields = listOf(
             "client_id",
             "client_id_scheme",
@@ -317,19 +307,29 @@ class AuthorizationRequestTest {
 
     @Test
     fun `should return Authorization Request as Authentication Response if presentation_definition_uri & all the other fields are present and valid in Authorization Request`() {
-        val mockResponse = MockResponse().setResponseCode(200).setBody(presentationDefinition)
-        mockWebServer.enqueue(mockResponse)
-        val presentationDefinitionUri = "verifier/presentation_definition_uri"
+         every {
+            NetworkManagerClient.sendHTTPRequest(
+                "https://mock-verifier/verifier/get-presentation-definition",
+                HTTP_METHOD.GET
+            )
+        } returns presentationDefinition
 
-        val authorizationRequestParamsMap = requestParams.minus("presentation_definition") + mapOf(
-            "client_id" to "https://verifier.env1.net",
-            "response_uri" to "https://verifier.env1.net/responseUri",
-            "client_id_scheme" to "pre-registered",
-            "presentation_definition_uri" to mockWebServer.url(presentationDefinitionUri).toString(),
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
+
+        val applicableFields =  listOf(
+            "client_id",
+            "client_id_scheme",
+            "response_mode",
+            "response_uri",
+            "presentation_definition_uri",
+            "response_type",
+            "nonce",
+            "state",
+            "client_metadata"
         )
         val encodedAuthorizationRequest =
             createEncodedAuthorizationRequest(
-                authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED
+                authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED, applicableFields
             )
 
         val actualValue =
@@ -339,11 +339,7 @@ class AuthorizationRequestTest {
 
     @Test
     fun `should return Authorization Request as Authentication Response if all the fields are valid in Authorization Request and clientValidation is not needed`() {
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            "client_id" to "https://verifier.env1.net",
-            "redirect_uri" to "https://verifier.env1.net",
-            "client_id_scheme" to "redirect_uri",
-        )
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfReDirectUri
         val encodedAuthorizationRequest =
             createEncodedAuthorizationRequest(
                 authorizationRequestParamsMap,false , ClientIdScheme.REDIRECT_URI
