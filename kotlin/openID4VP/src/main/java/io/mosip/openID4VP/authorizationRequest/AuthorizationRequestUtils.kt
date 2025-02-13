@@ -18,8 +18,8 @@ fun validateVerifier(
     params: MutableMap<String, Any>,
     shouldValidateVerifier: Boolean
 ) {
-    val clientIdScheme = params["client_id_scheme"]
     val clientId = params["client_id"]
+    val clientIdScheme = extractClientIdScheme(params["client_id"].toString())
     val redirectUri = params["redirect_uri"]
 
     when (clientIdScheme) {
@@ -51,7 +51,7 @@ fun validateVerifier(
                     message = "Response Uri and Response mode should not be present, when client id scheme is Redirect Uri"
                 )
             }
-            if (redirectUri != null && redirectUri != clientId) {
+            if (redirectUri != null && redirectUri != extractClientIdPartOnly(clientId.toString())) {
                 throw Logger.handleException(
                     exceptionType = "InvalidVerifierRedirectUri",
                     className = AuthorizationRequest.toString(),
@@ -125,7 +125,6 @@ fun commonRequiredKeys(params: Map<String, Any>): MutableList<String> {
     val keys = mutableListOf(
         "presentation_definition",
         "client_id",
-        "client_id_scheme",
         "response_type",
         "nonce",
         "state"
@@ -267,12 +266,44 @@ fun validateMatchOfAuthRequestObjectAndParams(
     if (params["client_id"] != authorizationRequestObject["client_id"]) {
         throw AuthorizationRequestExceptions.InvalidData("Client Id mismatch in Authorization Request parameter and the Request Object")
     }
-    if (params["client_id_scheme"] != null && params["client_id_scheme"] != authorizationRequestObject["client_id_scheme"]) {
-        throw AuthorizationRequestExceptions.InvalidData("Client Id scheme mismatch in Authorization Request parameter and the Request Object")
-    }
 }
 
 fun getValue(params: Map<String, Any>, key: String): String? {
     return params[key]?.toString()
+}
+
+fun extractClientIdScheme(clientId: String): String {
+    if (clientId.isEmpty()) {
+        throw Logger.handleException(
+            exceptionType = "InvalidRequestException",
+            message = "Client ID is not available in the Authorization request",
+            className = "AuthorizationRequest"
+        )
+    }
+
+    val components = clientId.split(":", limit = 2)
+
+    return if (components.size > 1) {
+        components[0]
+    } else {
+        // Fallback client_id_scheme pre-registered; pre-registered clients MUST NOT contain a : character in their Client Identifier
+        ClientIdScheme.PRE_REGISTERED.value
+    }
+}
+
+fun extractClientIdPartOnly(clientIdWithClientIdSchemeAttached: String): String {
+    val components = clientIdWithClientIdSchemeAttached.split(":", limit = 2)
+    return if (components.size > 1) {
+        val clientIdScheme = components[0]
+        // DID client ID scheme will have the client id itself with did prefix, example - did:example:123#1. So there will not be additional prefix stating client_id_scheme
+        if (clientIdScheme == ClientIdScheme.DID.value) {
+            clientIdWithClientIdSchemeAttached
+        } else {
+            components[1]
+        }
+    } else {
+        // client_id_scheme is optional (Fallback client_id_scheme - pre-registered) i.e., a : character is not present in the Client Identifier
+        clientIdWithClientIdSchemeAttached
+    }
 }
 

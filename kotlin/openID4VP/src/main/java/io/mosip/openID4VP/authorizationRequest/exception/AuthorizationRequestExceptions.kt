@@ -38,4 +38,6 @@ sealed class AuthorizationRequestExceptions {
     class InvalidVerifierRedirectUri(message: String) : Exception(message)
 
     class InvalidData(message: String) : Exception(message)
+
+    class InvalidRequest(message: String): Exception(message)
 }

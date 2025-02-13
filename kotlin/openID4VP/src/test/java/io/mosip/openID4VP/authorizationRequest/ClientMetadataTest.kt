@@ -21,8 +21,7 @@ class ClientMetadataTest {
 	private lateinit var openID4VP: OpenID4VP
 	private var shouldValidateClient = true
 	val requestParams: Map<String, String> = mapOf(
-		"client_id" to "https://mock-verifier.com",
-		"client_id_scheme" to "redirect_uri",
+		"client_id" to "redirect_uri:https://mock-verifier.com",
 		"redirect_uri" to "https://mock-verifier.com",
 		"response_uri" to "https://mock-verifier.com",
 		"request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
@@ -55,8 +54,7 @@ class ClientMetadataTest {
 	@Test
 	fun `should parse client metadata successfully`() {
 		val authorizationRequestParamsMap = requestParams + mapOf(
-			"client_id" to "https://verifier.env1.net",
-			"client_id_scheme" to "pre-registered",
+			"client_id" to "mock-client",
 			"response_uri" to "https://verifier.env1.net/responseUri"
 		)
 		val encodedAuthorizationRequest =
@@ -71,8 +69,7 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw invalid input exception if vp_formats field is not available`() {
 		val authorizationRequestParamsMap = requestParams + mapOf(
-			"client_id" to "https://verifier.env1.net",
-			"client_id_scheme" to "pre-registered",
+			"client_id" to "mock-client",
 			"response_uri" to "https://verifier.env1.net/responseUri",
 			"client_metadata" to "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\"}"
 		)
@@ -96,8 +93,7 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw invalid input exception if name field is available in client_metadata but the value is empty`() {
 		val authorizationRequestParamsMap = requestParams + mapOf(
-			"client_id" to "https://verifier.env1.net",
-			"client_id_scheme" to "pre-registered",
+			"client_id" to "mock-client",
 			"client_metadata" to "{\"client_name\":\"\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
 		)
 		val encodedAuthorizationRequest =
@@ -119,8 +115,7 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw invalid input exception if name field is available in client_metadata but the value is null`() {
 		val authorizationRequestParamsMap = requestParams + mapOf(
-			"client_id" to "https://verifier.env1.net",
-			"client_id_scheme" to "pre-registered",
+			"client_id" to "mock-client",
 			"response_uri" to "https://verifier.env1.net/responseUri",
 			"client_metadata" to "{\"client_name\":null,\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
 		)
@@ -143,8 +138,7 @@ class ClientMetadataTest {
 	@Test
 	fun `should throw invalid input exception if log_url field is available in client_metadata but the value is empty`() {
 		val authorizationRequestParamsMap = requestParams + mapOf(
-			"client_id" to "https://verifier.env1.net",
-			"client_id_scheme" to "pre-registered",
+			"client_id" to "mock-client",
 			"client_metadata" to "{\"client_name\":\"\",\"client_name\":\"verifier\",\"logo_uri\":\"\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
 
 		)

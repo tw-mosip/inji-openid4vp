@@ -72,39 +72,31 @@ class AuthorizationResponseHandler {
     ): String {
         when (authorizationRequest.responseMode) {
             ResponseMode.directPost.value -> {
-                try {
-                    // 1.Gather request body items
-                    val bodyParams = mutableMapOf(
-                        "state" to authorizationRequest.state
-                    )
-                    // 1.1 Add authorization response in encoded form
-                    bodyParams.putAll(authorizationResponse.encodedItems())
+                // 1.Gather request body items
+                val bodyParams = mutableMapOf(
+                    "state" to authorizationRequest.state
+                )
+                // 1.1 Add authorization response in encoded form
+                bodyParams.putAll(authorizationResponse.encodedItems())
 
-                    // 2. make api call
-                    try {
-                        val responseUri: String = authorizationRequest.responseUri
-                            ?: if (authorizationRequest.clientIdScheme == ClientIdScheme.REDIRECT_URI.value) {
-                                authorizationRequest.redirectUri!!
-                            } else {
-                                return ""
-                            }
-                        return sendHTTPRequest(
-                            url = responseUri,
-                            method = HTTP_METHOD.POST,
-                            bodyParams = bodyParams,
-                            headers = mapOf("Content-Type" to "application/x-www-form-urlencoded")
-                        )
-                    } catch (exception: Exception) {
-                        throw exception
-                    }
-                } catch (error: Exception) {
-                    println("error os Unable to send authorization response to the provided response_uri via direct_post with error $error")
-                    throw Logger.handleException(
-                        exceptionType = "AuthorizationResponseSendingFailed",
-                        message = "Unable to send authorization response to the provided response_uri via direct_post with error $error",
-                        className = className
+                // 2. make api call
+                try {
+                    val responseUri: String = authorizationRequest.responseUri
+                        ?: if (authorizationRequest.clientIdScheme == ClientIdScheme.REDIRECT_URI.value) {
+                            authorizationRequest.redirectUri!!
+                        } else {
+                            return ""
+                        }
+                    return sendHTTPRequest(
+                        url = responseUri,
+                        method = HTTP_METHOD.POST,
+                        bodyParams = bodyParams,
+                        headers = mapOf("Content-Type" to "application/x-www-form-urlencoded")
                     )
+                } catch (exception: Exception) {
+                    throw exception
                 }
+
             }
 
             else -> {

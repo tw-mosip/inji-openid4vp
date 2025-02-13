@@ -71,7 +71,7 @@ class OpenID4VP(private val traceabilityId: String) {
                 }
             }
 
-            authorizationResponseHandler = AuthorizationResponseHandler()
+            this.authorizationResponseHandler = AuthorizationResponseHandler()
             val authorizationResponse = this.authorizationResponseHandler.createAuthorizationResponse(
                 authorizationRequest = this.authorizationRequest,
                 signingDataForAuthorizationResponseCreation = formattedVPResponseMetadata,

@@ -30,8 +30,7 @@ class AuthorizationRequestObjectObtainedByReference {
     private lateinit var openID4VP: OpenID4VP
 
     private val requestParams: Map<String, String> = mapOf(
-        "client_id" to "https://mock-verifier.com",
-        "client_id_scheme" to "pre-registered",
+        "client_id" to "mock-client",
         "redirect_uri" to "https://mock-verifier.com",
         "response_uri" to "https://verifier.env1.net/responseUri",
         "request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
@@ -206,8 +205,7 @@ class AuthorizationRequestObjectObtainedByReference {
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-            "client_id" to "wrong-client-id",
-            "client_id_scheme" to ClientIdScheme.DID.value
+            "client_id" to "did:wrong-client-id",
         ))
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
@@ -237,8 +235,7 @@ class AuthorizationRequestObjectObtainedByReference {
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-            "client_id" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-            "client_id_scheme" to ClientIdScheme.PRE_REGISTERED.value
+            "client_id" to "pre-registered:did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
         ))
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
@@ -254,7 +251,7 @@ class AuthorizationRequestObjectObtainedByReference {
         }
 
         assertEquals(
-            "Client Id scheme mismatch in Authorization Request parameter and the Request Object",
+            "Client Id mismatch in Authorization Request parameter and the Request Object",
             exception.message
         )
     }
@@ -295,7 +292,6 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
             "client_id" to "wrong-client-id",
-            "client_id_scheme" to ClientIdScheme.PRE_REGISTERED.value
         ))
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
@@ -314,38 +310,6 @@ class AuthorizationRequestObjectObtainedByReference {
         assertEquals(
             "Client Id mismatch in Authorization Request parameter and the Request Object",
             invalidClientIdException.message
-        )
-    }
-
-    //Client Id scheme - Pre-registered
-    @Test
-    fun `should validate client_id_scheme when authorization request is obtained by reference in pre-registered client id scheme`() {
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
-                any()
-            )
-        } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-            "client_id" to "https://verifier.env1.net",
-            "client_id_scheme" to ClientIdScheme.DID.value
-        ))
-
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
-        val encodedAuthorizationRequest =
-            createEncodedAuthorizationRequest(authorizationRequestParamsMap,true , ClientIdScheme.DID)
-
-        val invalidClientIsSchemeException =
-            assertThrows(AuthorizationRequestExceptions.InvalidData::class.java) {
-                openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest,
-                    trustedVerifiers,
-                    shouldValidateClient = true
-                )
-            }
-
-        assertEquals(
-            "Client Id scheme mismatch in Authorization Request parameter and the Request Object",
-            invalidClientIsSchemeException.message
         )
     }
 }

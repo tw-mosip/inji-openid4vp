@@ -140,12 +140,15 @@ val trustedVerifiers: List<Verifier> = listOf(
         "https://verifier.env2.net", listOf(
             "https://verifier.env3.net/responseUri", "https://verifier.env2.net/responseUri"
         )
+    ), Verifier(
+        "mock-client", listOf(
+            "https://verifier.env1.net/responseUri"
+        )
     )
 )
 
 val authRequestParamsByReference = listOf(
     "client_id",
-    "client_id_scheme",
     "request_uri",
     "request_uri_method"
 )
@@ -153,7 +156,6 @@ val authRequestParamsByReference = listOf(
 
 val authRequestWithRedirectUriByValue = listOf(
     "client_id",
-    "client_id_scheme",
     "redirect_uri",
     "presentation_definition",
     "response_type",
@@ -164,7 +166,6 @@ val authRequestWithRedirectUriByValue = listOf(
 
 val authRequestWithPreRegisteredByValue = listOf(
     "client_id",
-    "client_id_scheme",
     "response_mode",
     "response_uri",
     "presentation_definition",
@@ -176,7 +177,6 @@ val authRequestWithPreRegisteredByValue = listOf(
 
 val authRequestWithDidByValue = listOf(
     "client_id",
-    "client_id_scheme",
     "response_mode",
     "response_uri",
     "presentation_definition",
@@ -194,15 +194,12 @@ val authorisationRequestListToClientIdSchemeMap = mapOf(
 
 val clientIdAndSchemeOfDid = mapOf(
     "client_id" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-    "client_id_scheme" to ClientIdScheme.DID.value
 )
 
 val clientIdAndSchemeOfPreRegistered = mapOf(
-    "client_id" to "https://verifier.env1.net",
-    "client_id_scheme" to ClientIdScheme.PRE_REGISTERED.value
+    "client_id" to "mock-client",
 )
 
 val clientIdAndSchemeOfReDirectUri = mapOf(
-    "client_id" to "https://mock-verifier.com",
-    "client_id_scheme" to "redirect_uri",
+    "client_id" to "redirect_uri:https://mock-verifier.com",
 )

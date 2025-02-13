@@ -7,6 +7,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
@@ -15,16 +16,20 @@ import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
+import io.mosip.openID4VP.testData.clientIdAndSchemeOfPreRegistered
+import io.mosip.openID4VP.testData.createEncodedAuthorizationRequest
 import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.vpResponsesMetadata
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
+import java.util.concurrent.TimeUnit
 
 class AuthorizationResponseTest {
     private lateinit var openID4VP: OpenID4VP
@@ -34,7 +39,7 @@ class AuthorizationResponseTest {
                 """{"format":"ldp_vc","verifiableCredential":{"credential":{"issuanceDate":"2024-08-02T16:04:35.304Z","credentialSubject":{"face":"data:image/jpeg;base64,/9j/goKCyuig","dateOfBirth":"2000/01/01","id":"did:jwk:eyJr80435=","UIN":"9012378996","email":"mockuser@gmail.com"},"id":"https://domain.net/credentials/12345-87435","proof":{"type":"RsaSignature2018","created":"2024-04-14T16:04:35Z","proofPurpose":"assertionMethod","verificationMethod":"https://domain.net/.well-known/public-key.json","jws":"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"},"type":["VerifiableCredential"],"@context":["https://www.w3.org/2018/credentials/v1","https://domain.net/.well-known/context.json",{"sec":"https://w3id.org/security#"}],"issuer":"https://domain.net/.well-known/issuer.json"}}}""",
                 """{"verifiableCredential":{"credential":{"issuanceDate":"2024-08-12T18:03:35.304Z","credentialSubject":{"face":"data:image/jpeg;base64,/9j/goKCyuig","dateOfBirth":"2000/01/01","id":"did:jwk:eyJr80435=","UIN":"9012378996","email":"mockuser@gmail.com"},"id":"https://domain.net/credentials/12345-87435","proof":{"type":"RsaSignature2018","created":"2024-04-14T16:04:35Z","proofPurpose":"assertionMethod","verificationMethod":"https://domain.net/.well-known/public-key.json","jws":"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"},"type":["VerifiableCredential"],"@context":["https://www.w3.org/2018/credentials/v1","https://domain.net/.well-known/context.json",{"sec":"https://w3id.org/security#"}],"issuer":"https://domain.net/.well-known/issuer.json"}}}"""
             )
-        ), "789" to mapOf(
+        ), "input_descriptor1" to mapOf(
             "ldp_vc" to listOf(
                 """{"format":"ldp_vc","verifiableCredential":{"credential":{"issuanceDate":"2024-08-18T13:02:35.304Z","credentialSubject":{"face":"data:image/jpeg;base64,/9j/goKCyuig","dateOfBirth":"2000/01/01","id":"did:jwk:eyJr80435=","UIN":"9012378996","email":"mockuser@gmail.com"},"id":"https://domain.net/credentials/12345-87435","proof":{"type":"RsaSignature2018","created":"2024-04-14T16:04:35Z","proofPurpose":"assertionMethod","verificationMethod":"https://domain.net/.well-known/public-key.json","jws":"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"},"type":["VerifiableCredential"],"@context":["https://www.w3.org/2018/credentials/v1","https://domain.net/.well-known/context.json",{"sec":"https://w3id.org/security#"}],"issuer":"https://domain.net/.well-known/issuer.json"}}}"""
             )
@@ -47,6 +52,21 @@ class AuthorizationResponseTest {
     private lateinit var ldpVpResponseMetadata: LdpVPResponseMetadata
     private lateinit var actualException: Exception
     private lateinit var expectedExceptionMessage: String
+
+    val requestParams: Map<String, String> = mapOf(
+        "client_id" to "mock-client",
+        "redirect_uri" to "https://mock-verifier.com",
+        "response_uri" to "https://verifier.env1.net/responseUri",
+        "request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
+        "request_uri_method" to "get",
+        "presentation_definition" to io.mosip.openID4VP.testData.presentationDefinition,
+        "presentation_definition_uri" to "https://mock-verifier/verifier/get-presentation-definition",
+        "response_type" to "vp_token",
+        "response_mode" to "direct_post",
+        "nonce" to "VbRRB/LTxLiXmVNZuyMO8A==",
+        "state" to "+mRQe1d6pBoJqF6Ab28klg==",
+        "client_metadata" to io.mosip.openID4VP.testData.clientMetadata
+    )
 
     @Before
     fun setUp() {
@@ -135,7 +155,6 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
     fun `should throw exception if Authorization Response request call returns the response with http status other than 200`() {
         val mockResponse: MockResponse = MockResponse().setResponseCode(500)
         mockWebServer.enqueue(mockResponse)
@@ -144,7 +163,7 @@ class AuthorizationResponseTest {
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestFailed::class.java) {
-                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+                openID4VP.shareVerifiablePresentation(vpResponseMetadata = vpResponsesMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -153,6 +172,17 @@ class AuthorizationResponseTest {
     @Test
     @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
     fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
+        val encodedAuthorizationRequest =
+            createEncodedAuthorizationRequest(
+                authorizationRequestParamsMap,
+                false,
+                ClientIdScheme.PRE_REGISTERED
+            )
+        openID4VP.authenticateVerifier(
+            encodedAuthorizationRequest,
+            io.mosip.openID4VP.testData.trustedVerifiers, false
+        )
         expectedExceptionMessage = "VP sharing failed due to connection timeout"
 
         actualException =
@@ -164,7 +194,6 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
     fun `should get response if Verifiable Presentation is shared successfully to the Verifier`() {
         val mockResponse: MockResponse = MockResponse().setResponseCode(200)
             .setBody("Verifiable Presentation is shared successfully")

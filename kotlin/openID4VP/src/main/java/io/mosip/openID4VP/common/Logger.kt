@@ -18,7 +18,7 @@ object Logger {
 
     fun error(logTag: String, exception: Exception) {
         println("exception $exception")
-        Log.e(logTag, exception.message!!)
+        Log.e(logTag, exception.message?:"Exception occurred - $exception")
     }
 
     fun handleException(

@@ -130,10 +130,12 @@ data class AuthorizationRequest(
                 authorizationRequestObject = extractDataJsonFromJwt(response, PAYLOAD)
                 validateMatchOfAuthRequestObjectAndParams(params, authorizationRequestObject)
                 val proof = ProofJwtManager()
+                val clientId = getValue(authorizationRequestObject, "client_id")
+                val clientIdScheme = extractClientIdScheme(clientId!!)
                 proof.verifyJWT(
                     response,
-                    getValue(authorizationRequestObject,"client_id")!!,
-                    getValue(authorizationRequestObject,"client_id_scheme")!!,
+                    clientId,
+                    clientIdScheme,
                 )
             } else {
                 authorizationRequestObject = decodeBase64ToJSON(response)
@@ -145,9 +147,10 @@ data class AuthorizationRequest(
         private fun createAuthorizationRequest(
             params: Map<String, Any>
         ): AuthorizationRequest {
+            val clientId = getValue(params, "client_id")!!
             return AuthorizationRequest(
-                clientId = getValue(params, "client_id")!!,
-                clientIdScheme = getValue(params, "client_id_scheme")!!,
+                clientId = clientId,
+                clientIdScheme = extractClientIdScheme(clientId),
                 responseType = getValue(params, "response_type")!!,
                 responseMode = getValue(params, "response_mode"),
                 presentationDefinition = params["presentation_definition"]!!,
