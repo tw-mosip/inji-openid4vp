@@ -12,7 +12,7 @@ private val className = AuthorizationRequest::class.simpleName!!
 
 class CredentialFormatSpecificSigningDataMapCreator {
     @Throws(Exception::class)
-    fun create(selectedCredentials: Map<String, Map<String, List<Any>>>): MutableMap<FormatType, CredentialFormatSpecificSigningData> {
+    fun create(selectedCredentials: Map<String, Map<String, List<Any>>>): Map<FormatType, CredentialFormatSpecificSigningData> {
         val signablePayloads: MutableMap<FormatType, CredentialFormatSpecificSigningData> = mutableMapOf()
         val groupedVcs: MutableMap<FormatType, List<Any>> = mutableMapOf()
 

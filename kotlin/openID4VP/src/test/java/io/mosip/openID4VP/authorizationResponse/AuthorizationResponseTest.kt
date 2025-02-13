@@ -12,7 +12,7 @@ import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.common.UUIDGenerator
-import io.mosip.openID4VP.dto.VPResponseMetadata
+import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import okhttp3.mockwebserver.MockResponse
@@ -55,7 +55,7 @@ class AuthorizationResponseTest {
     private lateinit var clientMetadata: String
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var mockWebServer: MockWebServer
-    private lateinit var vpResponseMetadata: VPResponseMetadata
+    private lateinit var ldpVpResponseMetadata: LdpVPResponseMetadata
     private lateinit var actualException: Exception
     private lateinit var expectedExceptionMessage: String
 
@@ -131,14 +131,14 @@ class AuthorizationResponseTest {
 
     @Test
     fun `should throw invalid input exception if any input param of VPResponseMetadata class is empty`() {
-        vpResponseMetadata = VPResponseMetadata(
+        ldpVpResponseMetadata = LdpVPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
         expectedExceptionMessage =
             "Invalid Input: vp response metadata->domain value cannot be an empty string, null, or an integer"
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-                openID4VP.shareVerifiablePresentation(vpResponseMetadata)
+                openID4VP.shareVerifiablePresentation(ldpVpResponseMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -149,7 +149,7 @@ class AuthorizationResponseTest {
     fun `should throw exception if Authorization Response request call returns the response with http status other than 200`() {
         val mockResponse: MockResponse = MockResponse().setResponseCode(500)
         mockWebServer.enqueue(mockResponse)
-        vpResponseMetadata = VPResponseMetadata(
+        ldpVpResponseMetadata = LdpVPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
             "RsaSignature2018",
             publicKey,
@@ -160,7 +160,7 @@ class AuthorizationResponseTest {
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestFailed::class.java) {
-                openID4VP.shareVerifiablePresentation(vpResponseMetadata)
+                openID4VP.shareVerifiablePresentation(ldpVpResponseMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -169,7 +169,7 @@ class AuthorizationResponseTest {
     @Test
     @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
     fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
-        vpResponseMetadata = VPResponseMetadata(
+        ldpVpResponseMetadata = LdpVPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
             "RsaSignature2018",
             publicKey,
@@ -179,7 +179,7 @@ class AuthorizationResponseTest {
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestTimeout::class.java) {
-                openID4VP.shareVerifiablePresentation(vpResponseMetadata)
+                openID4VP.shareVerifiablePresentation(ldpVpResponseMetadata)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -191,7 +191,7 @@ class AuthorizationResponseTest {
         val mockResponse: MockResponse = MockResponse().setResponseCode(200)
             .setBody("Verifiable Presentation is shared successfully")
         mockWebServer.enqueue(mockResponse)
-        vpResponseMetadata = VPResponseMetadata(
+        ldpVpResponseMetadata = LdpVPResponseMetadata(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
             "RsaSignature2018",
             publicKey,
@@ -199,7 +199,7 @@ class AuthorizationResponseTest {
         )
         val expectedValue = "Verifiable Presentation is shared successfully"
 
-        val actualResponse = openID4VP.shareVerifiablePresentation(vpResponseMetadata)
+        val actualResponse = openID4VP.shareVerifiablePresentation(ldpVpResponseMetadata)
 
         assertEquals(expectedValue, actualResponse)
     }

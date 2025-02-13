@@ -1,22 +1,23 @@
 package io.mosip.openID4VP
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
-import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.CredentialFormatSpecificSigningData
 import io.mosip.openID4VP.common.FormatType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.encodeVPTokenForSigning
-import io.mosip.openID4VP.dto.VPResponseMetadata
+import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
-private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
+private val logTag = Logger.getLogTag(OpenID4VP::class.simpleName!!)
 class OpenID4VP(private val traceabilityId: String) {
+    private lateinit var credentialsMap: Map<String, Map<String, List<Any>>>
     lateinit var authorizationRequest: AuthorizationRequest
     private var responseUri: String? = null
+    private lateinit var authorizationResponseHandler: AuthorizationResponseHandler
+    private lateinit var vpTokensForSigning: Map<FormatType, CredentialFormatSpecificSigningData>
 
     private fun setResponseUri(responseUri: String) {
         this.responseUri = responseUri
@@ -42,8 +43,10 @@ class OpenID4VP(private val traceabilityId: String) {
 
     fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, Map<String,List<Any>>>): Map<String, String> {
         try {
-            val dataForSigning: MutableMap<FormatType, CredentialFormatSpecificSigningData> =
+            val dataForSigning: Map<FormatType, CredentialFormatSpecificSigningData> =
                 AuthorizationResponseHandler().constructDataForSigning(verifiableCredentials)
+            this.vpTokensForSigning = dataForSigning
+            this.credentialsMap = verifiableCredentials
             return encodeVPTokenForSigning(dataForSigning)
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
@@ -51,14 +54,27 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
+    fun shareVerifiablePresentation(vpResponseMetadata: Map<String,VPResponseMetadata>): String {
         try {
-            return AuthorizationResponse.shareVP(
-                vpResponseMetadata,
-                authorizationRequest.nonce,
-                authorizationRequest.state,
-                authorizationRequest.responseUri!!,
-                (this.authorizationRequest.presentationDefinition as PresentationDefinition).id
+            val formattedVPResponseMetadata: MutableMap<FormatType, VPResponseMetadata> = mutableMapOf()
+
+            for ((key, value) in vpResponseMetadata) {
+                val enumKey = FormatType.entries.find { it.value == key }
+                if (enumKey != null) {
+                    formattedVPResponseMetadata[enumKey] = value
+                }
+            }
+
+            authorizationResponseHandler = AuthorizationResponseHandler()
+            val authorizationResponse = this.authorizationResponseHandler.createAuthorizationResponse(
+                authorizationRequest = this.authorizationRequest,
+                signingDataForAuthorizationResponseCreation = formattedVPResponseMetadata,
+                vpTokensForSigning = this.vpTokensForSigning,
+                credentialsMap = this.credentialsMap
+            )
+            return this.authorizationResponseHandler.sendAuthorizationResponseToVerifier(
+                authorizationResponse = authorizationResponse,
+                authorizationRequest = this.authorizationRequest
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)

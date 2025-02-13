@@ -4,6 +4,7 @@ import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 
+//TODO: Log - use common logger
 object Logger {
     private var traceabilityId: String? = null
 
@@ -16,6 +17,7 @@ object Logger {
     }
 
     fun error(logTag: String, exception: Exception) {
+        println("exception $exception")
         Log.e(logTag, exception.message!!)
     }
 
