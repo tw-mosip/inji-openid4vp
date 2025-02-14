@@ -16,18 +16,22 @@ import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.L
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.common.DateUtil
 import io.mosip.openID4VP.common.FormatType
 import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.clientMetadata
 import io.mosip.openID4VP.testData.ldpVPResponseMetadata
 import io.mosip.openID4VP.testData.presentationDefinition
+import io.mosip.openID4VP.testData.publicKey
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -56,8 +60,14 @@ class AuthorizationResponseHandlerTest {
     )
     private val credentialsMap: Map<String, Map<String, List<Any>>> =
         mapOf("idcardcredential" to mapOf("ldp_vc" to listOf("VC1", "VC2")))
+    private val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
+        "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
+        "RsaSignature2018",
+        "--PUBLIC KEY--",
+        "https://123",
+    )
     private val vpResponsesMetadata = mapOf(FormatType.ldp_vc to ldpVPResponseMetadata)
-    val authorizationResponse = AuthorizationResponseModel(
+    private val authorizationResponse = AuthorizationResponseModel(
         vpToken = VPTokenType.VPToken(
             LdpVPToken(
                 verifiableCredential = listOf("VC1", "VC2"),
@@ -88,8 +98,6 @@ class AuthorizationResponseHandlerTest {
     )
 
 
-    private val mockFormatter = mockk<SimpleDateFormat>()
-
     @Before
     fun setUp() {
         mockkStatic(Log::class)
@@ -103,12 +111,17 @@ class AuthorizationResponseHandlerTest {
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
-        every { mockFormatter.format(any<Date>()) } returns "2024-02-13T10:00:00Z"
+        mockkObject(DateUtil)
+        every { DateUtil.formattedCurrentDateTime() } returns "2024-02-13T10:00:00Z"
     }
 
     @Test
-    @Ignore
     fun `should return authorization response successfully when the selected credentials is provided`() {
+        val expectedAuthorizationResponseEncodedItems = mapOf(
+            "vp_token" to "{\"verifiableCredential\":[\"VC1\",\"VC2\"],\"id\":\"id-12\",\"holder\":\"wallet-holder\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-02-13T10:00:00Z\",\"challenge\":\"bMHvX1HGhbh8zqlSWf/fuQ==\",\"domain\":\"https://123\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\",\"verificationMethod\":\"--PUBLIC KEY--\"}}",
+            "presentation_submission" to "{\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"definition_id\":\"https://mock-verifier.com\",\"descriptor_map\":[{\"id\":\"idcardcredential\",\"format\":\"ldp_vc\",\"path\":\"\$\",\"path_nested\":\"\$.VerifiableCredential[0]\"}]}"
+        )
+
         val authorizationResponse =
             AuthorizationResponseHandler().createAuthorizationResponse(
                 authorizationRequest = authorizationRequest,
@@ -116,12 +129,9 @@ class AuthorizationResponseHandlerTest {
                 vpTokensForSigning = vpTokensForSigning,
                 credentialsMap = credentialsMap
             )
+        val encodedItems: Map<String, String> = authorizationResponse.encodedItems()
 
-        //TODO: Failing because of time being populated dynamically, extract time as a separate object to ease mocking
-        assertEquals(
-            "{vp_token={\"type\":\"VPToken\",\"value\":{\"verifiableCredential\":[\"VC1\",\"VC2\"],\"id\":\"id-12\",\"holder\":\"wallet-holder\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2025-02-13T22:24:15Z\",\"challenge\":\"bMHvX1HGhbh8zqlSWf/fuQ==\",\"domain\":\"https://123\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\",\"verificationMethod\":\"-----BEGIN RSA PUBLIC KEY-----\\n        MIICCgKCAgEA0IEd3E5CvLAbGvr/ysYT2TLE7WDrPBHGk8pwGqVvlrrFtZJ9wT8E\\n        lDNkSfHIgBijphkgSXpVMduwWKidiFFtbqQHgKdr4vdiMKzTy8g0aTpD8T5xPImM\\n        CC6CUVgp4EZZHkFK3S2guLZAanXLju3WBD4FuBQTl08vP5MlsiseIIanOnTulUDR\\n        baGIYhONq2kN9UnLIXcv8QPIgroP/n76Ir39EwRd20E4jsNfEriZFthBZKQLNbTz\\n        GrsVMtpUbHPUlvACrTzXm5RQ1THHDYUa46KmxZfTCKWM2EppaoJlUj1psf3LdlOU\\n        MBAarn+3QUxYOMLu9vTLvqsk606WNbeuiHarY6lBAec1E6RXMIcVLKBqMy6NjMCK\\n        Va3ZFvn6/G9JI0U+S8Nn3XpH5nLnyAwim7+l9ZnmqeKTTcnE8oxEuGdP7+VvpyHE\\n        AF8jilspP0PuBLMNV4eNthKPKPfMvBbFtzLcizqXmSLPx8cOtrEOu+cEU6ckavAS\\n        XwPgM27JUjeBwwnAhS8lrN3SiJLYCCi1wXjgqFgESNTBhHq+/H5Mb2wxliJQmfzd\\n        BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU\\n        IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==\\n        -----END RSA PUBLIC KEY-----\"}}}, presentation_submission={\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"definition_id\":\"https://mock-verifier.com\",\"descriptor_map\":[{\"id\":\"idcardcredential\",\"format\":\"ldp_vc\",\"path\":\"\$\",\"path_name\":\"\$.VerifiableCredential[0]\"}]}}",
-            authorizationResponse.encodedItems()
-        )
+        assertTrue(expectedAuthorizationResponseEncodedItems.equals(encodedItems));
     }
 
     @Test
