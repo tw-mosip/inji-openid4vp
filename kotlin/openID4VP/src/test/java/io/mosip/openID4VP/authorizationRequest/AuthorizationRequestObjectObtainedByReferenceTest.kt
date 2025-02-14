@@ -13,11 +13,12 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import io.mosip.openID4VP.testData.clientIdAndSchemeOfDid
 import io.mosip.openID4VP.testData.clientIdAndSchemeOfPreRegistered
-import io.mosip.openID4VP.testData.clientMetadata
 import io.mosip.openID4VP.testData.createAuthorizationRequestObject
 import io.mosip.openID4VP.testData.createEncodedAuthorizationRequest
 import io.mosip.openID4VP.testData.didResponse
 import io.mosip.openID4VP.testData.presentationDefinition
+import io.mosip.openID4VP.testData.requestParams
+import io.mosip.openID4VP.testData.requestUrl
 import io.mosip.openID4VP.testData.trustedVerifiers
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -28,22 +29,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 
 class AuthorizationRequestObjectObtainedByReference {
     private lateinit var openID4VP: OpenID4VP
-
-    private val requestParams: Map<String, String> = mapOf(
-        "client_id" to "https://mock-verifier.com",
-        "client_id_scheme" to "pre-registered",
-        "redirect_uri" to "https://mock-verifier.com",
-        "response_uri" to "https://verifier.env1.net/responseUri",
-        "request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
-        "request_uri_method" to "get",
-        "presentation_definition" to presentationDefinition,
-        "presentation_definition_uri" to "https://mock-verifier/verifier/get-presentation-definition",
-        "response_type" to "vp_token",
-        "response_mode" to "direct_post",
-        "nonce" to "VbRRB/LTxLiXmVNZuyMO8A==",
-        "state" to "+mRQe1d6pBoJqF6Ab28klg==",
-        "client_metadata" to clientMetadata
-    )
 
     @Before
     fun setUp() {
@@ -89,7 +74,7 @@ class AuthorizationRequestObjectObtainedByReference {
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, authorizationRequestParamsMap)
@@ -115,7 +100,7 @@ class AuthorizationRequestObjectObtainedByReference {
     fun `should throw exception when the call to request_uri method fails in did client id scheme`() {
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 HTTP_METHOD.GET
             )
         } throws NetworkManagerClientExceptions.NetworkRequestTimeout()
@@ -145,7 +130,7 @@ class AuthorizationRequestObjectObtainedByReference {
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, authorizationRequestParamsMap)
@@ -162,7 +147,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
         verify {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 HTTP_METHOD.GET
             )
         }
@@ -173,7 +158,7 @@ class AuthorizationRequestObjectObtainedByReference {
         val authorizationRequestParamsMap = requestParams.minus("request_uri_method") + clientIdAndSchemeOfDid
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, authorizationRequestParamsMap)
@@ -192,7 +177,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
         verify {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 HTTP_METHOD.GET
             )
         }
@@ -202,7 +187,7 @@ class AuthorizationRequestObjectObtainedByReference {
     fun `should throw exception when the client_id validation fails while obtaining Authorization request object by reference in did client id scheme`() {
        every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
@@ -233,7 +218,7 @@ class AuthorizationRequestObjectObtainedByReference {
     fun `should throw exception when the client_id_scheme validation fails while obtaining Authorization request object by reference in did client id scheme`() {
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
@@ -266,7 +251,7 @@ class AuthorizationRequestObjectObtainedByReference {
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 HTTP_METHOD.GET
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, authorizationRequestParamsMap)
@@ -290,7 +275,7 @@ class AuthorizationRequestObjectObtainedByReference {
     fun `should validate client_id when authorization request is obtained by reference in pre-registered client id scheme`() {
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
@@ -322,7 +307,7 @@ class AuthorizationRequestObjectObtainedByReference {
     fun `should validate client_id_scheme when authorization request is obtained by reference in pre-registered client id scheme`() {
         every {
             NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier/verifier/get-auth-request-obj",
+                requestUrl,
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(

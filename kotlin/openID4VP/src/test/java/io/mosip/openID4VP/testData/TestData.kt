@@ -3,6 +3,8 @@ package io.mosip.openID4VP.testData
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.dto.Verifier
 
+const val requestUrl = "https://mock-verifier/verifier/get-auth-request-obj"
+
 val clientMetadata = """
     {
   "client_name": "Requester name",
@@ -127,11 +129,11 @@ val authRequestParamsByReference = listOf(
     "request_uri_method"
 )
 
-
 val authRequestWithRedirectUriByValue = listOf(
     "client_id",
     "client_id_scheme",
-    "redirect_uri",
+    "response_uri",
+    "response_mode",
     "presentation_definition",
     "response_type",
     "nonce",
@@ -161,6 +163,22 @@ val authRequestWithDidByValue = listOf(
     "nonce",
     "state",
     "client_metadata"
+)
+
+val requestParams: Map<String, String> = mapOf(
+    "client_id" to "https://mock-verifier.com",
+    "client_id_scheme" to "pre-registered",
+    "redirect_uri" to "https://mock-verifier.com",
+    "response_uri" to "https://verifier.env1.net/responseUri",
+    "request_uri" to requestUrl,
+    "request_uri_method" to "get",
+    "presentation_definition" to presentationDefinition,
+    "presentation_definition_uri" to "https://mock-verifier/verifier/get-presentation-definition",
+    "response_type" to "vp_token",
+    "response_mode" to "direct_post",
+    "nonce" to "VbRRB/LTxLiXmVNZuyMO8A==",
+    "state" to "+mRQe1d6pBoJqF6Ab28klg==",
+    "client_metadata" to clientMetadata
 )
 
 val authorisationRequestListToClientIdSchemeMap = mapOf(

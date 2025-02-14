@@ -6,9 +6,8 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.testData.clientMetadata
 import io.mosip.openID4VP.testData.createEncodedAuthorizationRequest
-import io.mosip.openID4VP.testData.presentationDefinition
+import io.mosip.openID4VP.testData.requestParams
 import io.mosip.openID4VP.testData.trustedVerifiers
 import org.junit.After
 import org.junit.Assert
@@ -20,20 +19,6 @@ class ClientMetadataTest {
 	private lateinit var actualException: Exception
 	private lateinit var openID4VP: OpenID4VP
 	private var shouldValidateClient = true
-	val requestParams: Map<String, String> = mapOf(
-		"client_id" to "https://mock-verifier.com",
-		"client_id_scheme" to "redirect_uri",
-		"redirect_uri" to "https://mock-verifier.com",
-		"response_uri" to "https://mock-verifier.com",
-		"request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
-		"request_uri_method" to "get",
-		"presentation_definition" to presentationDefinition,
-		"response_type" to "vp_token",
-		"response_mode" to "direct_post",
-		"nonce" to "VbRRB/LTxLiXmVNZuyMO8A==",
-		"state" to "+mRQe1d6pBoJqF6Ab28klg==",
-		"client_metadata" to clientMetadata
-	)
 
 	@Before
 	fun setUp() {
