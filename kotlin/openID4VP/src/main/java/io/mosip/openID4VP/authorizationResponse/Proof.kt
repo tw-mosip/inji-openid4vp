@@ -1,10 +1,8 @@
 package io.mosip.openID4VP.authorizationResponse
 
+import io.mosip.openID4VP.common.DateUtil.formattedCurrentDateTime
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import kotlinx.serialization.Serializable
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Serializable
 class Proof(
@@ -22,8 +20,7 @@ class Proof(
             challenge: String,
         ): Proof {
 
-            val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-            val createdDateAndTime = formatter.format(Date())
+            val createdDateAndTime = formattedCurrentDateTime()
 
             return Proof(
                 type = ldpVpResponseMetadata.signatureAlgorithm,
