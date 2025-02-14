@@ -31,6 +31,7 @@ fun validateVerifier(
                         className = AuthorizationRequest.toString()
                     )
                 }
+
                 val isValidVerifier = verifierList.any { verifier ->
                     verifier.clientId == clientId &&
                             verifier.responseUris.contains(params["response_uri"])
@@ -51,6 +52,7 @@ fun validateVerifier(
                     message = "Response Uri and Response mode should not be present, when client id scheme is Redirect Uri"
                 )
             }
+            //TODO: check response_uri (O) == clientId  or redirect_uri == clientId
             if (redirectUri != null && redirectUri != extractClientIdPartOnly(clientId.toString())) {
                 throw Logger.handleException(
                     exceptionType = "InvalidVerifierRedirectUri",
@@ -273,14 +275,6 @@ fun getValue(params: Map<String, Any>, key: String): String? {
 }
 
 fun extractClientIdScheme(clientId: String): String {
-    if (clientId.isEmpty()) {
-        throw Logger.handleException(
-            exceptionType = "InvalidRequestException",
-            message = "Client ID is not available in the Authorization request",
-            className = "AuthorizationRequest"
-        )
-    }
-
     val components = clientId.split(":", limit = 2)
 
     return if (components.size > 1) {

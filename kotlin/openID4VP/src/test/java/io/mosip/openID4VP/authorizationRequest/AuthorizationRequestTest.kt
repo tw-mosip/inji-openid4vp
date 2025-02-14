@@ -77,7 +77,7 @@ class AuthorizationRequestTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw missing input exception if client_id param is missing in Authorization Request`() {
         val authorizationRequestParamsMap = requestParams.minus("client_id")
         val encodedAuthorizationRequest =
@@ -96,12 +96,15 @@ class AuthorizationRequestTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is empty string`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             "client_id" to "",
         )
-        val encodedAuthorizationRequest = "openid4vp://authorize?Y2xpZW50X2lkPWRpZDp3ZWI6bW9zaXAuZ2l0aHViLmlvOmluamktbW9jay1zZXJ2aWNlczpvcGVuaWQ0dnAtc2VydmljZTpkb2NzJnJlcXVlc3RfdXJpPWh0dHBzOi8vYTRkMy0yNy01Ny0zNi0yMTYubmdyb2stZnJlZS5hcHAvdmVyaWZpZXIvZ2V0LWF1dGgtcmVxdWVzdC1vYmo="
+        val encodedAuthorizationRequest = createEncodedAuthorizationRequest(
+            requestParams = authorizationRequestParamsMap,
+            clientIdScheme = ClientIdScheme.PRE_REGISTERED
+        )
 
         expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
 
@@ -116,7 +119,7 @@ class AuthorizationRequestTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is null`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             "client_id" to null,
