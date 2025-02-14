@@ -154,7 +154,7 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
+    @Ignore("TODO")
     fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
         val verifiableCredentials = mapOf(
             "input_descriptor1" to mapOf(
@@ -165,6 +165,17 @@ class AuthorizationResponseTest {
             verifiableCredentials = verifiableCredentials
         )
         expectedExceptionMessage = "VP sharing failed due to connection timeout"
+        val vpResponsesMetadata: Map<String, VPResponseMetadata> = mapOf(
+            "ldp_vc" to LdpVPResponseMetadata(
+                jws = "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
+                signatureAlgorithm = "RsaSignature2018",
+                publicKey = publicKey,
+                domain = "https://123",
+            )
+        )
+        val result = openID4VP.shareVerifiablePresentation(
+            vpResponseMetadata = vpResponsesMetadata
+        )
 
         actualException =
             assertThrows(NetworkManagerClientExceptions.NetworkRequestTimeout::class.java) {

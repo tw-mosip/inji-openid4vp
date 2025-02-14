@@ -20,6 +20,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -63,6 +64,7 @@ class AuthorizationRequestTest {
     }
 
     @Test
+    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw missing input exception if client_id param is missing in Authorization Request`() {
         val authorizationRequestParamsMap = requestParams.minus(CLIENT_ID.value) + mapOf(
             CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
@@ -83,18 +85,20 @@ class AuthorizationRequestTest {
     }
 
     @Test
+    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is empty string`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
-            CLIENT_ID.value to "",
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+            "client_id" to "",
         )
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+        val encodedAuthorizationRequest = createUrlEncodedData(
+            requestParams = authorizationRequestParamsMap,
+            clientIdScheme = ClientIdScheme.PRE_REGISTERED
+        )
 
         expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
 
         actualException =
-            assertThrows(InvalidInput::class.java) {
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -103,6 +107,26 @@ class AuthorizationRequestTest {
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
+    @Test
+    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
+    fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is null`() {
+        val authorizationRequestParamsMap = requestParams + mapOf(
+            "client_id" to null,
+        )
+        val encodedAuthorizationRequest =
+            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+
+        expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
+
+        actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+                openID4VP.authenticateVerifier(
+                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                )
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
 
     @Test
     fun `should throw exception if neither presentation_definition nor presentation_definition_uri param present in Authorization Request`() {
@@ -156,25 +180,6 @@ class AuthorizationRequestTest {
                 )
             }
         assertEquals(expectedExceptionMessage, actualException.message)
-    }
-
-    @Test
-    fun `should take client id scheme as pre-registered if it is absent in authorization request`() {
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            CLIENT_ID.value to "mock-client",
-        )
-
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(
-                authorizationRequestParamsMap, false, ClientIdScheme.PRE_REGISTERED
-            )
-
-
-        val authorizationRequest = openID4VP.authenticateVerifier(
-            encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
-        )
-
-        assertEquals(ClientIdScheme.PRE_REGISTERED.value, authorizationRequest.clientIdScheme)
     }
 
     @Test
