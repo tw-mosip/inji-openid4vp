@@ -4,7 +4,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.authorizationRequest.constants.ResponseMode
 import io.mosip.openID4VP.authorizationRequest.constants.ResponseType
-import io.mosip.openID4VP.authorizationResponse.models.AuthorizationResponseModel
+import io.mosip.openID4VP.authorizationResponse.models.AuthorizationResponse
 import io.mosip.openID4VP.authorizationResponse.models.vpToken.CredentialFormatSpecificVPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpToken.types.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.CredentialFormatSpecificSigningData
@@ -40,7 +40,7 @@ class AuthorizationResponseHandler {
         signingDataForAuthorizationResponseCreation: Map<FormatType, VPResponseMetadata>,
         vpTokensForSigning: Map<FormatType, CredentialFormatSpecificSigningData>,
         credentialsMap: Map<String, Map<String, List<Any>>>,
-    ): AuthorizationResponseModel {
+    ): AuthorizationResponse {
         this.authorizationRequest = authorizationRequest
         this.vpTokensForSigning = vpTokensForSigning
 
@@ -52,7 +52,7 @@ class AuthorizationResponseHandler {
                     authorizationRequest = authorizationRequest
                 )
 
-                return AuthorizationResponseModel(
+                return AuthorizationResponse(
                     vpToken = vpToken,
                     presentationSubmission = presentationSubmission
                 )
@@ -67,7 +67,7 @@ class AuthorizationResponseHandler {
     }
 
     fun sendAuthorizationResponseToVerifier(
-        authorizationResponse: AuthorizationResponseModel,
+        authorizationResponse: AuthorizationResponse,
         authorizationRequest: AuthorizationRequest,
     ): String {
         when (authorizationRequest.responseMode) {

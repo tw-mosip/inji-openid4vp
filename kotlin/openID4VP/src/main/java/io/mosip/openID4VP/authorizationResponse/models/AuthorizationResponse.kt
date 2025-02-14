@@ -7,10 +7,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-private val className = AuthorizationResponseModel::class.java.simpleName
-//TODO: To be renamed to AuthorizationResponse once the old AuthResponse class is deleted
+private val className = AuthorizationResponse::class.java.simpleName
 @Serializable
-class AuthorizationResponseModel(
+class AuthorizationResponse(
     val vpToken: VPTokenType,
     val presentationSubmission: PresentationSubmission) {
 

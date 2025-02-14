@@ -23,14 +23,12 @@ import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.vpResponsesMetadata
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
-import java.util.concurrent.TimeUnit
 
 class AuthorizationResponseTest {
     private lateinit var openID4VP: OpenID4VP
@@ -173,6 +171,14 @@ class AuthorizationResponseTest {
     @Test
     @Ignore("Tests are failing due to pending refactoring because of uninitialized property verifiableCredentials")
     fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
+        val verifiableCredentials = mapOf(
+            "input_descriptor1" to mapOf(
+                "ldp_vc" to listOf("VC1","VC2")
+            )
+        )
+        val vpTokenWithoutProof = openID4VP.constructVerifiablePresentationToken(
+            verifiableCredentials = verifiableCredentials
+        )
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
         val encodedAuthorizationRequest =
             createEncodedAuthorizationRequest(

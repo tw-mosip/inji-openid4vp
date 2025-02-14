@@ -2,7 +2,6 @@ package io.mosip.openID4VP.authorizationResponse
 
 import android.util.Log
 import io.mockk.every
-import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
@@ -10,7 +9,7 @@ import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
-import io.mosip.openID4VP.authorizationResponse.models.AuthorizationResponseModel
+import io.mosip.openID4VP.authorizationResponse.models.AuthorizationResponse
 import io.mosip.openID4VP.authorizationResponse.models.vpToken.types.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVpSpecificSigningData
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
@@ -23,17 +22,12 @@ import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.clientMetadata
-import io.mosip.openID4VP.testData.ldpVPResponseMetadata
 import io.mosip.openID4VP.testData.presentationDefinition
-import io.mosip.openID4VP.testData.publicKey
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import java.text.SimpleDateFormat
-import java.util.Date
 
 class AuthorizationResponseHandlerTest {
     val authorizationRequest = AuthorizationRequest(
@@ -67,7 +61,7 @@ class AuthorizationResponseHandlerTest {
         "https://123",
     )
     private val vpResponsesMetadata = mapOf(FormatType.ldp_vc to ldpVPResponseMetadata)
-    private val authorizationResponse = AuthorizationResponseModel(
+    private val authorizationResponse = AuthorizationResponse(
         vpToken = VPTokenType.VPToken(
             LdpVPToken(
                 verifiableCredential = listOf("VC1", "VC2"),
