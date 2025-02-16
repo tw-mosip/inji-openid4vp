@@ -279,4 +279,4 @@ This method will also notify the Verifier about the error by sending it to the r
 
 ### Note
 
-As per OpenID4VP draft 23
+As per OpenID4VP draft 23, client_id_scheme is not a separate property it is available as part of client_id property in authorization request

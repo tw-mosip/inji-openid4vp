@@ -28,7 +28,7 @@ sealed class VPTokenType {
 }
 
 object VPTokenTypeSerializer : KSerializer<VPTokenType> {
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ShapeType")
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("VPTokenType")
 
     override fun serialize(encoder: Encoder, value: VPTokenType) {
         val jsonEncoder = encoder as? JsonEncoder ?: error("This serializer only works with JSON")
@@ -46,7 +46,7 @@ object VPTokenTypeSerializer : KSerializer<VPTokenType> {
         return when (jsonElement) {
             is JsonArray -> VPTokenType.VPTokenArray(Json.decodeFromJsonElement(jsonElement))
             is JsonObject -> VPTokenType.VPToken(Json.decodeFromJsonElement(jsonElement))
-            else -> error("Invalid ShapeType format")
+            else -> error("Invalid VPTokenType format")
         }
     }
 }

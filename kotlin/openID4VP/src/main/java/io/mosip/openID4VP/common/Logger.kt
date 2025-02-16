@@ -4,7 +4,7 @@ import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 
-//TODO: Log - use common logger
+//TODO: Log - use common logger for android and java environment
 object Logger {
     private var traceabilityId: String? = null
 
@@ -81,6 +81,11 @@ object Logger {
 
             "UnsupportedResponseMode" -> exception =
                 AuthorizationResponseExceptions.UnsupportedResponseMode(
+                    message = message ?: "Provided response_mode is not supported by the library"
+                )
+
+            "access_denied" -> exception =
+                AuthorizationResponseExceptions.AccessDenied(
                     message = message ?: "Provided response_mode is not supported by the library"
                 )
 

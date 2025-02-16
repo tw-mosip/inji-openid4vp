@@ -31,7 +31,7 @@ class OpenID4VP(private val traceabilityId: String) {
     ): AuthorizationRequest {
         try {
             Logger.setTraceabilityId(traceabilityId)
-            authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
+            this.authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
                 encodedAuthorizationRequest, ::setResponseUri, trustedVerifiers, shouldValidateClient
             )
             return this.authorizationRequest
@@ -57,7 +57,8 @@ class OpenID4VP(private val traceabilityId: String) {
     fun shareVerifiablePresentation(vpResponseMetadata: Map<String,VPResponseMetadata>): String {
         try {
             val formattedVPResponseMetadata: MutableMap<FormatType, VPResponseMetadata> = mutableMapOf()
-
+            if(vpResponseMetadata.isEmpty())
+                throw IllegalArgumentException("expected the input map to have atleast one entry")
             for ((key, value) in vpResponseMetadata) {
                 val enumKey = FormatType.entries.find { it.value == key }
                 if (enumKey != null) {

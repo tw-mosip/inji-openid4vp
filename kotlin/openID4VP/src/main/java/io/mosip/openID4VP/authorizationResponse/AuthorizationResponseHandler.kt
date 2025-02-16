@@ -28,8 +28,14 @@ class AuthorizationResponseHandler {
     private lateinit var authorizationRequest: AuthorizationRequest
     private var path: MutableMap<FormatType, Pair<Int, Int>> = mutableMapOf()
 
-    @Throws(Exception::class)
     fun constructDataForSigning(credentialsMap: Map<String, Map<String, List<Any>>>): Map<FormatType, CredentialFormatSpecificSigningData> {
+        if(credentialsMap.isEmpty()){
+            throw Logger.handleException(
+                exceptionType = "access_denied",
+                className = className,
+                message = "The Wallet did not have the requested Credentials to satisfy the Authorization Request."
+            )
+        }
         vpTokensForSigning =
             CredentialFormatSpecificSigningDataMapCreator().create(selectedCredentials = credentialsMap)
         return vpTokensForSigning
@@ -161,7 +167,6 @@ class AuthorizationResponseHandler {
 
     @Throws(Exception::class)
     private fun createInputDescriptor(credentialsMap: Map<String, Map<String, List<Any>>>): List<DescriptorMap> {
-        //TODO: Handle for single VP
         //In case of only single VP, presentation_submission -> path = $, path_nest = $.<credentialPathIdentifier - internalPath>[n]
         //and in case of multiple VPs, presentation_submission -> path = $[i], path_nest = $[i].<credentialPathIdentifier - internalPath>[n]
         val descriptorsMap: MutableList<DescriptorMap> = mutableListOf()

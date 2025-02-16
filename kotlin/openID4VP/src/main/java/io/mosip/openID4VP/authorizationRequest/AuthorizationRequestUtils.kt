@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest
 
+import io.mosip.openID4VP.authorizationRequest.constants.ResponseMode
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
@@ -16,11 +17,10 @@ private val className = AuthorizationRequest::class.simpleName!!
 fun validateVerifier(
     verifierList: List<Verifier>,
     params: MutableMap<String, Any>,
-    shouldValidateVerifier: Boolean
+    shouldValidateVerifier: Boolean,
 ) {
     val clientId = params["client_id"]
     val clientIdScheme = extractClientIdScheme(params["client_id"].toString())
-    val redirectUri = params["redirect_uri"]
 
     when (clientIdScheme) {
         ClientIdScheme.PRE_REGISTERED.value -> {
@@ -44,21 +44,30 @@ fun validateVerifier(
                 }
             }
         }
+
         ClientIdScheme.REDIRECT_URI.value -> {
-            if(params["response_uri"]!=null && params["response_mode"] != null){
-                throw Logger.handleException(
-                    exceptionType = "InvalidQueryParams",
-                    className = AuthorizationRequest.toString(),
-                    message = "Response Uri and Response mode should not be present, when client id scheme is Redirect Uri"
-                )
-            }
+            val redirectUri = params["redirect_uri"]
+            val responseUri = params["response_uri"]
+
             //TODO: check response_uri (O) == clientId  or redirect_uri == clientId
-            if (redirectUri != null && redirectUri != extractClientIdPartOnly(clientId.toString())) {
-                throw Logger.handleException(
-                    exceptionType = "InvalidVerifierRedirectUri",
-                    className = AuthorizationRequest.toString(),
-                    message = "Client id and redirect_uri value should be equal"
-                )
+            val clientIdentifier = extractClientIdPartOnly(clientId.toString())
+            if (params["response_mode"] == ResponseMode.directPost.value) {
+                if (redirectUri != null && redirectUri != clientIdentifier) {
+                    throw Logger.handleException(
+                        exceptionType = "InvalidVerifierRedirectUri",
+                        className = AuthorizationRequest.toString(),
+                        message = "Client id and redirect_uri value should be equal"
+                    )
+                }
+            } else {
+                //TODO: Add tests for this and exception class
+                if (responseUri != null && responseUri != clientIdentifier) {
+                    throw Logger.handleException(
+                        exceptionType = "InvalidVerifierResponseUri",
+                        className = AuthorizationRequest.toString(),
+                        message = "Client id and response_uri value should be equal"
+                    )
+                }
             }
         }
 
