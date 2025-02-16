@@ -7,7 +7,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
@@ -17,8 +16,6 @@ import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
-import io.mosip.openID4VP.testData.clientIdAndSchemeOfPreRegistered
-import io.mosip.openID4VP.testData.createEncodedAuthorizationRequest
 import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.vpResponsesMetadata
 import okhttp3.mockwebserver.MockResponse
@@ -27,7 +24,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class AuthorizationResponseTest {
@@ -48,24 +44,8 @@ class AuthorizationResponseTest {
     private lateinit var clientMetadata: String
     private lateinit var trustedVerifiers: List<Verifier>
     private lateinit var mockWebServer: MockWebServer
-    private lateinit var ldpVpResponseMetadata: LdpVPResponseMetadata
     private lateinit var actualException: Exception
     private lateinit var expectedExceptionMessage: String
-
-    val requestParams: Map<String, String> = mapOf(
-        "client_id" to "mock-client",
-        "redirect_uri" to "https://mock-verifier.com",
-        "response_uri" to "https://verifier.env1.net/responseUri",
-        "request_uri" to "https://mock-verifier/verifier/get-auth-request-obj",
-        "request_uri_method" to "get",
-        "presentation_definition" to io.mosip.openID4VP.testData.presentationDefinition,
-        "presentation_definition_uri" to "https://mock-verifier/verifier/get-presentation-definition",
-        "response_type" to "vp_token",
-        "response_mode" to "direct_post",
-        "nonce" to "VbRRB/LTxLiXmVNZuyMO8A==",
-        "state" to "+mRQe1d6pBoJqF6Ab28klg==",
-        "client_metadata" to io.mosip.openID4VP.testData.clientMetadata
-    )
 
     @Before
     fun setUp() {
@@ -169,27 +149,7 @@ class AuthorizationResponseTest {
     }
 
     @Test
-    @Ignore("TODO")
     fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
-        val verifiableCredentials = mapOf(
-            "input_descriptor1" to mapOf(
-                "ldp_vc" to listOf("VC1","VC2")
-            )
-        )
-        val vpTokenWithoutProof = openID4VP.constructVerifiablePresentationToken(
-            verifiableCredentials = verifiableCredentials
-        )
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
-        val encodedAuthorizationRequest =
-            createEncodedAuthorizationRequest(
-                authorizationRequestParamsMap,
-                false,
-                ClientIdScheme.PRE_REGISTERED
-            )
-        openID4VP.authenticateVerifier(
-            encodedAuthorizationRequest,
-            io.mosip.openID4VP.testData.trustedVerifiers, false
-        )
         expectedExceptionMessage = "VP sharing failed due to connection timeout"
         val vpResponsesMetadata: Map<String, VPResponseMetadata> = mapOf(
             "ldp_vc" to LdpVPResponseMetadata(
@@ -198,9 +158,6 @@ class AuthorizationResponseTest {
                 publicKey = publicKey,
                 domain = "https://123",
             )
-        )
-        val result = openID4VP.shareVerifiablePresentation(
-            vpResponseMetadata = vpResponsesMetadata
         )
 
         actualException =
