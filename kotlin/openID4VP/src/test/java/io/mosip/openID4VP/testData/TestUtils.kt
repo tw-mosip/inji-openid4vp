@@ -5,6 +5,7 @@ import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
 import io.mosip.openID4VP.testData.JWTUtil.Companion.encodeB64
 import kotlinx.serialization.json.JsonObject
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
@@ -19,12 +20,13 @@ fun createEncodedAuthorizationRequest(
         else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     }
     val authorizationRequestParam = createAuthorizationRequest(paramList, requestParams)
-    return authorizationRequestParam
-        .map { (key, value) -> "$key=$value" }
-        .joinToString("&")
-        .toByteArray(StandardCharsets.UTF_8)
-        .let { Base64.getEncoder().encodeToString(it) }
-        .let { "OPENID4VP://authorize?$it" }
+    val charset = StandardCharsets.UTF_8.toString()
+
+    val encodedParams = authorizationRequestParam.entries.joinToString("&") {
+        "${URLEncoder.encode(it.key, charset)}=${URLEncoder.encode(it.value, charset)}"
+    }
+    return "OPENID4VP://authorize?$encodedParams"
+
 }
 
 fun createAuthorizationRequestObject(
