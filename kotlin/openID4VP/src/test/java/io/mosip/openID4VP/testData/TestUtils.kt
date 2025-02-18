@@ -7,7 +7,6 @@ import io.mosip.openID4VP.testData.JWTUtil.Companion.encodeB64
 import kotlinx.serialization.json.JsonObject
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.util.Base64
 
 fun createUrlEncodedData(
     requestParams: Map<String, String?>,
@@ -20,12 +19,14 @@ fun createUrlEncodedData(
         else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     }
     val authorizationRequestParam = createAuthorizationRequest(paramList, requestParams)
-    return authorizationRequestParam
-        .map { (key, value) -> "$key=$value" }
-        .joinToString("&")
-        .toByteArray(StandardCharsets.UTF_8)
-        .let { Base64.getEncoder().encodeToString(it) }
-        .let { "OPENID4VP://authorize?$it" }
+    val charset = StandardCharsets.UTF_8.toString()
+
+    val queryString = authorizationRequestParam.entries.joinToString("&") {
+        "${it.key}=${it.value}"
+    }
+    val urlEncodedQueryParameters = URLEncoder.encode(queryString, charset)
+    return "openid4vp://authorize?$urlEncodedQueryParameters"
+
 }
 
 fun createAuthorizationRequestObject(

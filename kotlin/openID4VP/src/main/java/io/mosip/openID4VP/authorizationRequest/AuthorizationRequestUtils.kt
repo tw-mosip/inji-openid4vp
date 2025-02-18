@@ -70,12 +70,9 @@ fun validateKey(
 
 fun extractQueryParameters(query: String): MutableMap<String, Any> {
     try {
-        return query.split("&").map { it.split("=") }
-            .associateByTo(mutableMapOf(), { it[0] }, {
-                if (it.size > 1) URLDecoder.decode(
-                    it[1], StandardCharsets.UTF_8.toString()
-                ) else ""
-            })
+        val urlDecodedQueryString = URLDecoder.decode(query, StandardCharsets.UTF_8.toString())
+        return urlDecodedQueryString.split("&").map { it.split("=") }
+            .associateByTo(mutableMapOf(), { it[0] }, { it[1] })
     } catch (exception: Exception) {
         throw Logger.handleException(
             exceptionType = "InvalidQueryParams",

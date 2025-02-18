@@ -2,12 +2,7 @@ package io.mosip.openID4VP.authorizationRequest
 
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
-import io.mosip.openID4VP.common.Decoder
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.Verifier
-import java.net.URI
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 enum class ClientIdScheme(val value: String) {
     PRE_REGISTERED("pre-registered"),
@@ -15,8 +10,6 @@ enum class ClientIdScheme(val value: String) {
     DID("did")
 }
 
-private val className = AuthorizationRequest::class.simpleName!!
-private val logTag = Logger.getLogTag(className)
 
 data class AuthorizationRequest(
     val clientId: String,
@@ -45,50 +38,24 @@ data class AuthorizationRequest(
     companion object {
 
         fun validateAndCreateAuthorizationRequest(
-            encodedAuthorizationRequest: String,
+            urlEncodedAuthorizationRequest: String,
             trustedVerifiers: List<Verifier>,
             setResponseUri: (String) -> Unit,
             shouldValidateClient: Boolean
         ): AuthorizationRequest {
-            try {
-                val queryStart = encodedAuthorizationRequest.indexOf('?') + 1
-                val encodedString = encodedAuthorizationRequest.substring(queryStart)
-                val decodedQueryString = Decoder.decodeBase64ToString(encodedString)
-                return parseAuthorizationRequest(decodedQueryString,setResponseUri,trustedVerifiers,shouldValidateClient)
-            } catch (e: Exception) {
-                throw e
-            }
-        }
 
-        private fun parseAuthorizationRequest(
-            queryString: String,
-            setResponseUri: (String) -> Unit,
-            trustedVerifiers: List<Verifier>,
-            shouldValidateClient: Boolean
-        ): AuthorizationRequest {
-            try {
-                val encodedQuery = URLEncoder.encode(queryString, StandardCharsets.UTF_8.toString())
-                val uriString = "?$encodedQuery"
-                val uri = URI(uriString)
-                val query = uri.query
-                    ?: throw Logger.handleException(
-                        exceptionType = "InvalidQueryParams",
-                        message = "Query parameters are missing in the Authorization request",
-                        className = className
-                    )
-                val params = extractQueryParameters(query)
-                return getAuthorizationRequestObject(
-                    params,
-                    trustedVerifiers,
-                    shouldValidateClient,
-                    setResponseUri
+            val queryParameter = extractQueryParameters(
+                urlEncodedAuthorizationRequest.substring(
+                    urlEncodedAuthorizationRequest.indexOf('?') + 1
                 )
-            } catch (exception: Exception) {
-                Logger.error(logTag, exception)
-                throw exception
-            }
+            )
+            return getAuthorizationRequestObject(
+                queryParameter,
+                trustedVerifiers,
+                shouldValidateClient,
+                setResponseUri
+            )
         }
-
 
         private fun getAuthorizationRequestObject(
             params: MutableMap<String, Any>,
@@ -106,15 +73,13 @@ data class AuthorizationRequest(
             return authRequestHandler.createAuthorizationRequestObject()
         }
 
+
         private fun processAndValidateAuthorizationRequestParameter(authorizationRequestHandler: ClientIdSchemeBasedAuthorizationRequestHandler) {
             authorizationRequestHandler.validateClientId()
             authorizationRequestHandler.fetchAuthorizationRequest()
             authorizationRequestHandler.setResponseUrlForSendingResponseToVerifier()
             authorizationRequestHandler.validateAndParseRequestFields()
         }
-
-
-
 
     }
 }
