@@ -5,6 +5,7 @@ import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
 import io.mosip.openID4VP.testData.JWTUtil.Companion.encodeB64
 import kotlinx.serialization.json.JsonObject
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 

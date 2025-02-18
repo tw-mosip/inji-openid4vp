@@ -7,6 +7,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
@@ -191,8 +192,8 @@ class AuthorizationRequestObjectObtainedByReference {
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-            "client_id" to "wrong-client-id",
-            "client_id_scheme" to ClientIdScheme.DID.value
+            CLIENT_ID.value to "wrong-client-id",
+            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
         ))
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
@@ -222,8 +223,8 @@ class AuthorizationRequestObjectObtainedByReference {
                 any()
             )
         } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-            "client_id" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-            "client_id_scheme" to ClientIdScheme.PRE_REGISTERED.value
+            CLIENT_ID.value to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
+            CLIENT_ID_SCHEME.value to ClientIdScheme.PRE_REGISTERED.value
         ))
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
@@ -278,14 +279,14 @@ class AuthorizationRequestObjectObtainedByReference {
                 requestUrl,
                 any()
             )
-        } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-            "client_id" to "wrong-client-id",
-            "client_id_scheme" to ClientIdScheme.PRE_REGISTERED.value
+        } returns createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, requestParams + mapOf(
+            CLIENT_ID.value to "wrong-client-id",
+            CLIENT_ID_SCHEME.value to ClientIdScheme.PRE_REGISTERED.value
         ))
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
         val encodedAuthorizationRequest =
-            createEncodedAuthorizationRequest(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createEncodedAuthorizationRequest(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
 
         val invalidClientIdException =
             assertThrows(AuthorizationRequestExceptions.InvalidData::class.java) {
@@ -310,14 +311,14 @@ class AuthorizationRequestObjectObtainedByReference {
                 requestUrl,
                 any()
             )
-        } returns createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-            "client_id" to "https://verifier.env1.net",
-            "client_id_scheme" to ClientIdScheme.DID.value
+        } returns createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, requestParams + mapOf(
+            CLIENT_ID.value to "https://verifier.env1.net",
+            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
         ))
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
         val encodedAuthorizationRequest =
-            createEncodedAuthorizationRequest(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createEncodedAuthorizationRequest(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
 
         val invalidClientIsSchemeException =
             assertThrows(AuthorizationRequestExceptions.InvalidData::class.java) {
