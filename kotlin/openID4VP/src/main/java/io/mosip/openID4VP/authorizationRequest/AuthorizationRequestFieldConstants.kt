@@ -10,7 +10,7 @@ enum class AuthorizationRequestFieldConstants(val value: String) {
     RESPONSE_URI ("response_uri"),
     REDIRECT_URI ("redirect_uri"),
     REQUEST_URI ("request_uri"),
-    REQUEST_URI_MODE ("request_uri_mode"),
+    REQUEST_URI_METHOD ("request_uri_method"),
     NONCE ("nonce"),
     STATE ("state"),
     CLIENT_METADATA ("client_metadata")

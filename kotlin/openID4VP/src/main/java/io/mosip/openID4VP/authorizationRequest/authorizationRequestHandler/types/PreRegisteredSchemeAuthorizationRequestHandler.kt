@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.authorizationRequest.authRequestHandler.types
+package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
@@ -7,19 +7,20 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.decodeBase64ToJSON
 import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.isJWT
-import io.mosip.openID4VP.authorizationRequest.authRequestHandler.ClientIdSchemeBasedAuthRequestHandler
+import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.common.getStringValue
+import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
-private val className = PreRegisteredAuthRequestHandler::class.simpleName!!
+private val className = PreRegisteredSchemeAuthorizationRequestHandler::class.simpleName!!
 
-class PreRegisteredAuthRequestHandler(
+class PreRegisteredSchemeAuthorizationRequestHandler(
     private val trustedVerifiers: List<Verifier>,
-    authRequestParam: MutableMap<String, Any>,
+    authorizationRequestParameters: MutableMap<String, Any>,
     private val shouldValidateClient: Boolean,
     setResponseUri: (String) -> Unit
-) : ClientIdSchemeBasedAuthRequestHandler(authRequestParam, setResponseUri) {
+) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
     override fun validateClientId() {
         super.validateClientId()
         if (!shouldValidateClient) return
@@ -30,20 +31,25 @@ class PreRegisteredAuthRequestHandler(
             )
 
             trustedVerifiers.none {
-                it.clientId == getStringValue(authRequestParam, CLIENT_ID.value)!!
+                it.clientId == getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
             } -> throw Logger.handleException(
-                exceptionType = "InvalidVerifierClientID",
+                exceptionType = "InvalidVerifier",
                 className = className
             )
         }
     }
 
-    override fun gatherAuthRequest() {
-        authRequestParam = authRequestParam[REQUEST_URI.value]?.let {
-            val requestUri = getStringValue(authRequestParam, REQUEST_URI.value)!!
-            val requestUriMethod = getStringValue(authRequestParam, REQUEST_URI_MODE.value) ?: "get"
+    override fun fetchAuthorizationRequest() {
+        authorizationRequestParameters = getStringValue(authorizationRequestParameters, REQUEST_URI.value)?.let {
+            if (!isValidUrl(it))
+                throw Logger.handleException(
+                    exceptionType = "InvalidData",
+                    className = className,
+                    message = "$REQUEST_URI data is not valid"
+                )
+            val requestUriMethod = getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
             val httpMethod = determineHttpMethod(requestUriMethod)
-            val response = sendHTTPRequest(requestUri, httpMethod)
+            val response = sendHTTPRequest(it, httpMethod)
             if (isJWT(response)) {
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
@@ -52,10 +58,10 @@ class PreRegisteredAuthRequestHandler(
                 )
             } else {
                 val authorizationRequestObject = decodeBase64ToJSON(response)
-                validateMatchOfAuthRequestObjectAndParams(authRequestParam, authorizationRequestObject)
+                validateMatchOfAuthRequestObjectAndParams(authorizationRequestParameters, authorizationRequestObject)
                 authorizationRequestObject
             }
-        } ?: authRequestParam
+        } ?: authorizationRequestParameters
     }
 
     override fun validateAndParseRequestFields() {
@@ -69,10 +75,10 @@ class PreRegisteredAuthRequestHandler(
             )
 
             trustedVerifiers.none {
-                it.clientId == getStringValue(authRequestParam, CLIENT_ID.value)!!
-                        &&  it.responseUris.contains(getStringValue(authRequestParam, RESPONSE_URI.value)!!)
+                it.clientId == getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+                        &&  it.responseUris.contains(getStringValue(authorizationRequestParameters, RESPONSE_URI.value)!!)
             } -> throw Logger.handleException(
-                exceptionType = "InvalidVerifierClientID",
+                exceptionType = "InvalidVerifier",
                 className = className
             )
         }

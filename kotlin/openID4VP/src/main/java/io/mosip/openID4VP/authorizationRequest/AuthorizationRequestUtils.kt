@@ -1,14 +1,15 @@
 package io.mosip.openID4VP.authorizationRequest
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.authRequestHandler.ClientIdSchemeBasedAuthRequestHandler
-import io.mosip.openID4VP.authorizationRequest.authRequestHandler.types.DidAuthRequestHandler
-import io.mosip.openID4VP.authorizationRequest.authRequestHandler.types.PreRegisteredAuthRequestHandler
-import io.mosip.openID4VP.authorizationRequest.authRequestHandler.types.RedirectUriAuthRequestHandler
+import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
+import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.DidSchemeAuthorizationRequestHandler
+import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.PreRegisteredSchemeAuthorizationRequestHandler
+import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.RedirectUriSchemeAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
+import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
@@ -17,18 +18,33 @@ import java.nio.charset.StandardCharsets
 
 private val className = AuthorizationRequest::class.simpleName!!
 
-fun getAuthRequestHandler(
-    params: MutableMap<String, Any>,
+fun getAuthorizationRequestHandler(
+    authorizationRequestParameters: MutableMap<String, Any>,
     trustedVerifiers: List<Verifier>,
-    shouldValidateClient: Boolean,
-    setResponseUri: (String) -> Unit
-): ClientIdSchemeBasedAuthRequestHandler {
-    val clientIdScheme = getStringValue(params,CLIENT_ID_SCHEME.value) ?: ClientIdScheme.PRE_REGISTERED.value
-    params[CLIENT_ID_SCHEME.value] = clientIdScheme
+    setResponseUri: (String) -> Unit,
+    shouldValidateClient: Boolean
+): ClientIdSchemeBasedAuthorizationRequestHandler {
+    val clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value)
+        ?: ClientIdScheme.PRE_REGISTERED.value
+    authorizationRequestParameters[CLIENT_ID_SCHEME.value] = clientIdScheme
     return when (clientIdScheme) {
-        ClientIdScheme.PRE_REGISTERED.value -> PreRegisteredAuthRequestHandler(trustedVerifiers, params, shouldValidateClient, setResponseUri)
-        ClientIdScheme.REDIRECT_URI.value -> RedirectUriAuthRequestHandler(params, setResponseUri)
-        ClientIdScheme.DID.value -> DidAuthRequestHandler(params, setResponseUri)
+        ClientIdScheme.PRE_REGISTERED.value -> PreRegisteredSchemeAuthorizationRequestHandler(
+            trustedVerifiers,
+            authorizationRequestParameters,
+            shouldValidateClient,
+            setResponseUri
+        )
+
+        ClientIdScheme.REDIRECT_URI.value -> RedirectUriSchemeAuthorizationRequestHandler(
+            authorizationRequestParameters,
+            setResponseUri
+        )
+
+        ClientIdScheme.DID.value -> DidSchemeAuthorizationRequestHandler(
+            authorizationRequestParameters,
+            setResponseUri
+        )
+
         else -> throw Logger.handleException(
             exceptionType = "InvalidClientIdScheme",
             className = className,
@@ -38,13 +54,13 @@ fun getAuthRequestHandler(
 }
 
 fun validateKey(
-    params: MutableMap<String, Any>,
+    authorizationRequestParameters: MutableMap<String, Any>,
     key: String,
 ) {
-    val value = getStringValue(params, key)
+    val value = getStringValue(authorizationRequestParameters, key)
     if (value == null || value == "null" || value.isEmpty()) {
         throw Logger.handleException(
-            exceptionType = if (params[key] == null) "MissingInput" else "InvalidInput",
+            exceptionType = if (authorizationRequestParameters[key] == null) "MissingInput" else "InvalidInput",
             fieldPath = listOf(key),
             className = AuthorizationRequest.toString(),
             fieldType = "String"
@@ -52,7 +68,7 @@ fun validateKey(
     }
 }
 
-fun extractQueryParams(query: String): MutableMap<String, Any> {
+fun extractQueryParameters(query: String): MutableMap<String, Any> {
     try {
         return query.split("&").map { it.split("=") }
             .associateByTo(mutableMapOf(), { it[0] }, {
@@ -69,9 +85,11 @@ fun extractQueryParams(query: String): MutableMap<String, Any> {
     }
 }
 
-fun parseAndValidatePresentationDefinitionInAuthorizationRequest(params: MutableMap<String, Any>): MutableMap<String, Any> {
-    val hasPresentationDefinition = params.containsKey(PRESENTATION_DEFINITION.value)
-    val hasPresentationDefinitionUri = params.containsKey(PRESENTATION_DEFINITION_URI.value)
+fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
+    val hasPresentationDefinition =
+        authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
+    val hasPresentationDefinitionUri =
+        authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION_URI.value)
     var presentationDefinitionString = ""
 
     when {
@@ -84,16 +102,28 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(params: Mutable
         }
 
         hasPresentationDefinition -> {
-            validateKey(params, PRESENTATION_DEFINITION.value)
-            presentationDefinitionString = getStringValue(params, PRESENTATION_DEFINITION.value)!!
+            validateKey(authorizationRequestParameters, PRESENTATION_DEFINITION.value)
+            presentationDefinitionString =
+                getStringValue(authorizationRequestParameters, PRESENTATION_DEFINITION.value)!!
         }
 
         hasPresentationDefinitionUri -> {
             try {
-                validateKey(params, PRESENTATION_DEFINITION_URI.value)
+                validateKey(authorizationRequestParameters, PRESENTATION_DEFINITION_URI.value)
+                val presentationDefinitionUri = getStringValue(
+                    authorizationRequestParameters,
+                    PRESENTATION_DEFINITION_URI.value
+                )!!
+                if (!isValidUrl(presentationDefinitionUri)) {
+                    throw Logger.handleException(
+                        exceptionType = "InvalidData",
+                        className = className,
+                        message = "$PRESENTATION_DEFINITION_URI data is not valid"
+                    )
+                }
                 presentationDefinitionString =
                     sendHTTPRequest(
-                        url = getStringValue(params, PRESENTATION_DEFINITION_URI.value)!!,
+                        url = presentationDefinitionUri,
                         method = HTTP_METHOD.GET
                     )
             } catch (exception: Exception) {
@@ -110,23 +140,24 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(params: Mutable
         }
     }
 
-    val presentationDefinition = deserializeAndValidate((presentationDefinitionString), PresentationDefinitionSerializer)
-    params[PRESENTATION_DEFINITION.value] = presentationDefinition
+    val presentationDefinition =
+        deserializeAndValidate((presentationDefinitionString), PresentationDefinitionSerializer)
+    authorizationRequestParameters[PRESENTATION_DEFINITION.value] = presentationDefinition
 
-    return params
+    return authorizationRequestParameters
 }
 
-fun parseAndValidateClientMetadataInAuthorizationRequest(params: MutableMap<String, Any>): MutableMap<String, Any> {
+fun parseAndValidateClientMetadataInAuthorizationRequest(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
     var clientMetadata: ClientMetadata?
-    getStringValue(params,CLIENT_METADATA.value)?.let {
+    getStringValue(authorizationRequestParameters, CLIENT_METADATA.value)?.let {
         clientMetadata =
             deserializeAndValidate(
                 it,
                 ClientMetadataSerializer
             )
-        params[CLIENT_METADATA.value] = clientMetadata!!
+        authorizationRequestParameters[CLIENT_METADATA.value] = clientMetadata!!
     }
-    return params
+    return authorizationRequestParameters
 }
 
 fun validateMatchOfAuthRequestObjectAndParams(
@@ -134,10 +165,19 @@ fun validateMatchOfAuthRequestObjectAndParams(
     authorizationRequestObject: MutableMap<String, Any>,
 ) {
     if (params[CLIENT_ID.value] != authorizationRequestObject[CLIENT_ID.value]) {
-        throw AuthorizationRequestExceptions.InvalidData("Client Id mismatch in Authorization Request parameter and the Request Object")
+        throw Logger.handleException(
+            exceptionType = "InvalidData",
+            message = "Client Id mismatch in Authorization Request parameter and the Request Object",
+            className = className
+        )
+
     }
     if (params[CLIENT_ID_SCHEME.value] != null && params[CLIENT_ID_SCHEME.value] != authorizationRequestObject[CLIENT_ID_SCHEME.value]) {
-        throw AuthorizationRequestExceptions.InvalidData("Client Id scheme mismatch in Authorization Request parameter and the Request Object")
+        throw Logger.handleException(
+            exceptionType = "InvalidData",
+            message = "Client Id Scheme mismatch in Authorization Request parameter and the Request Object",
+            className = className
+        )
     }
 }
 

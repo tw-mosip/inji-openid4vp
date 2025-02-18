@@ -9,7 +9,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-fun createEncodedAuthorizationRequest(
+fun createUrlEncodedData(
     requestParams: Map<String, String?>,
     verifierSentAuthRequestByReference: Boolean? = false,
     clientIdScheme: ClientIdScheme,
@@ -39,7 +39,7 @@ fun createAuthorizationRequestObject(
     val paramList = applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     return createAuthorizationRequest(paramList, authorizationRequestParams).let { authRequestParam ->
         when (clientIdScheme) {
-            ClientIdScheme.DID -> createJWT(mapper, authRequestParam, addValidSignature!!, jwtHeader)
+            ClientIdScheme.DID -> createJWT(authRequestParam, addValidSignature!!, jwtHeader)
             else -> encodeB64(mapper.writeValueAsString(authRequestParam))
         }
     }

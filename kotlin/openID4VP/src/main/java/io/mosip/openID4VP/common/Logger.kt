@@ -51,7 +51,7 @@ object Logger {
 
             "InvalidVerifierRedirectUri" -> AuthorizationRequestExceptions.InvalidVerifierRedirectUri(message = message ?: "")
 
-            "InvalidVerifierClientID" -> AuthorizationRequestExceptions.InvalidVerifierClientID()
+            "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier()
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
 
@@ -59,7 +59,7 @@ object Logger {
 
             "InvalidResponseMode" -> AuthorizationRequestExceptions.InvalidResponseMode(message = message ?: "")
 
-            "InvalidJWT" -> JWTVerificationException.InvalidJWT(message = message ?: "")
+            "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
 
             "KidExtractionFailed" -> JWTVerificationException.KidExtractionFailed(message = message ?: "")
 

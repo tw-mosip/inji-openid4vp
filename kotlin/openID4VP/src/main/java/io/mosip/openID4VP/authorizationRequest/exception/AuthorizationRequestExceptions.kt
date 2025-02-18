@@ -14,7 +14,7 @@ sealed class AuthorizationRequestExceptions {
             }"
         )
 
-    class InvalidVerifierClientID :
+    class InvalidVerifier :
     Exception("VP sharing failed: Verifier authentication was unsuccessful")
 
     class MissingInput(fieldPath: String) :

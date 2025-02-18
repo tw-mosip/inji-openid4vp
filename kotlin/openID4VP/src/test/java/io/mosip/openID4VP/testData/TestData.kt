@@ -4,7 +4,7 @@ import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 
-const val requestUrl = "https://mock-verifier/verifier/get-auth-request-obj"
+const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
 val clientMetadata = """
     {
@@ -126,8 +126,8 @@ val trustedVerifiers: List<Verifier> = listOf(
 val authRequestParamsByReference = listOf(
     CLIENT_ID.value,
     CLIENT_ID_SCHEME.value,
-    "request_uri",
-    "request_uri_method"
+    REQUEST_URI.value,
+    REQUEST_URI_METHOD.value
 )
 
 val authRequestWithRedirectUriByValue = listOf(
@@ -171,10 +171,10 @@ val requestParams: Map<String, String> = mapOf(
     CLIENT_ID_SCHEME.value to "pre-registered",
     REDIRECT_URI.value to "https://mock-verifier.com",
     RESPONSE_URI.value to "https://verifier.env1.net/responseUri",
-    "request_uri" to requestUrl,
-    "request_uri_method" to "get",
+    REQUEST_URI.value to requestUrl,
+    REQUEST_URI_METHOD.value to "get",
     PRESENTATION_DEFINITION.value to presentationDefinition,
-    PRESENTATION_DEFINITION_URI.value to "https://mock-verifier/verifier/get-presentation-definition",
+    PRESENTATION_DEFINITION_URI.value to "https://mock-verifier.com/verifier/get-presentation-definition",
     RESPONSE_TYPE.value to "vp_token",
     RESPONSE_MODE.value to "direct_post",
     NONCE.value to "VbRRB/LTxLiXmVNZuyMO8A==",

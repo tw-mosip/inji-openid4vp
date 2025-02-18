@@ -1,24 +1,22 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.authRequestHandler.ClientIdSchemeBasedAuthRequestHandler
+import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.dto.Verifier
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-
-private val className = AuthorizationRequest::class.simpleName!!
-private val logTag = Logger.getLogTag(className)
 
 enum class ClientIdScheme(val value: String) {
     PRE_REGISTERED("pre-registered"),
     REDIRECT_URI("redirect_uri"),
     DID("did")
 }
+
+private val className = AuthorizationRequest::class.simpleName!!
+private val logTag = Logger.getLogTag(className)
 
 data class AuthorizationRequest(
     val clientId: String,
@@ -46,18 +44,17 @@ data class AuthorizationRequest(
 
     companion object {
 
-        fun validateAndGetAuthorizationRequest(
+        fun validateAndCreateAuthorizationRequest(
             encodedAuthorizationRequest: String,
-            setResponseUri: (String) -> Unit,
             trustedVerifiers: List<Verifier>,
+            setResponseUri: (String) -> Unit,
             shouldValidateClient: Boolean
         ): AuthorizationRequest {
             try {
                 val queryStart = encodedAuthorizationRequest.indexOf('?') + 1
                 val encodedString = encodedAuthorizationRequest.substring(queryStart)
                 val decodedQueryString = Decoder.decodeBase64ToString(encodedString)
-                val authorizationRequestParams = parseAuthorizationRequest(decodedQueryString,setResponseUri,trustedVerifiers,shouldValidateClient)
-                return createAuthorizationRequestObject(authorizationRequestParams)
+                return parseAuthorizationRequest(decodedQueryString,setResponseUri,trustedVerifiers,shouldValidateClient)
             } catch (e: Exception) {
                 throw e
             }
@@ -68,7 +65,7 @@ data class AuthorizationRequest(
             setResponseUri: (String) -> Unit,
             trustedVerifiers: List<Verifier>,
             shouldValidateClient: Boolean
-        ): MutableMap<String, Any> {
+        ): AuthorizationRequest {
             try {
                 val encodedQuery = URLEncoder.encode(queryString, StandardCharsets.UTF_8.toString())
                 val uriString = "?$encodedQuery"
@@ -79,8 +76,8 @@ data class AuthorizationRequest(
                         message = "Query parameters are missing in the Authorization request",
                         className = className
                     )
-                val params = extractQueryParams(query)
-                return getAuthorizationRequestObjectMap(
+                val params = extractQueryParameters(query)
+                return getAuthorizationRequestObject(
                     params,
                     trustedVerifiers,
                     shouldValidateClient,
@@ -93,46 +90,31 @@ data class AuthorizationRequest(
         }
 
 
-        private fun getAuthorizationRequestObjectMap(
+        private fun getAuthorizationRequestObject(
             params: MutableMap<String, Any>,
             trustedVerifiers: List<Verifier>,
             shouldValidateClient: Boolean,
             setResponseUri: (String) -> Unit
-        ): MutableMap<String, Any> {
-            val authRequestHandler = getAuthRequestHandler(
+        ): AuthorizationRequest {
+            val authRequestHandler = getAuthorizationRequestHandler(
                 params,
                 trustedVerifiers,
-                shouldValidateClient,
-                setResponseUri
+                setResponseUri,
+                shouldValidateClient
             )
             processAndValidateAuthorizationRequestParameter(authRequestHandler)
-            return authRequestHandler.authRequestParam
+            return authRequestHandler.createAuthorizationRequestObject()
         }
 
-        private fun processAndValidateAuthorizationRequestParameter(authRequestHandler: ClientIdSchemeBasedAuthRequestHandler) {
-            authRequestHandler.validateClientId()
-            authRequestHandler.gatherAuthRequest()
-            authRequestHandler.gatherInfoForSendingResponseToVerifier()
-            authRequestHandler.validateAndParseRequestFields()
+        private fun processAndValidateAuthorizationRequestParameter(authorizationRequestHandler: ClientIdSchemeBasedAuthorizationRequestHandler) {
+            authorizationRequestHandler.validateClientId()
+            authorizationRequestHandler.fetchAuthorizationRequest()
+            authorizationRequestHandler.setResponseUrlForSendingResponseToVerifier()
+            authorizationRequestHandler.validateAndParseRequestFields()
         }
 
 
-        private fun createAuthorizationRequestObject(
-            params: Map<String, Any>
-        ): AuthorizationRequest {
-            return AuthorizationRequest(
-                clientId = getStringValue(params, CLIENT_ID.value)!!,
-                clientIdScheme = getStringValue(params, CLIENT_ID_SCHEME.value)!!,
-                responseType = getStringValue(params, RESPONSE_TYPE.value)!!,
-                responseMode = getStringValue(params, RESPONSE_MODE.value),
-                presentationDefinition = params[PRESENTATION_DEFINITION.value]!!,
-                responseUri = getStringValue(params, RESPONSE_URI.value),
-                redirectUri = getStringValue(params, REDIRECT_URI.value),
-                nonce = getStringValue(params, NONCE.value)!!,
-                state = getStringValue(params, STATE.value)!!,
-                clientMetadata = getStringValue(params, CLIENT_METADATA.value),
-            )
-        }
+
 
     }
 }
