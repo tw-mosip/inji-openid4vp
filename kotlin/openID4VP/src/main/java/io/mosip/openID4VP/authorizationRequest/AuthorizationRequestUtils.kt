@@ -118,11 +118,12 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRe
                         message = "$PRESENTATION_DEFINITION_URI data is not valid"
                     )
                 }
-                presentationDefinitionString =
+                val response =
                     sendHTTPRequest(
                         url = presentationDefinitionUri,
                         method = HTTP_METHOD.GET
                     )
+                presentationDefinitionString = response["body"].toString()
             } catch (exception: Exception) {
                 throw exception
             }

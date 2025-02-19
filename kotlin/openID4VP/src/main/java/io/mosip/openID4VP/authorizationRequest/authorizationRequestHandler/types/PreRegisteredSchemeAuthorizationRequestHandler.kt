@@ -4,14 +4,14 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.validateMatchOfAuthRequestObjectAndParams
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.decodeBase64ToJSON
 import io.mosip.openID4VP.common.determineHttpMethod
-import io.mosip.openID4VP.common.isJWT
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
+import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import okhttp3.Headers
 
 private val className = PreRegisteredSchemeAuthorizationRequestHandler::class.simpleName!!
 
@@ -50,16 +50,19 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
             val requestUriMethod = getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
             val httpMethod = determineHttpMethod(requestUriMethod)
             val response = sendHTTPRequest(it, httpMethod)
-            if (isJWT(response)) {
+            val headers = response["header"] as Headers
+            val responseBody = response["body"].toString()
+
+            if(isValidContentType(headers)) {
+                val authorizationRequestObject = convertJsonToMap(responseBody)
+                validateMatchOfAuthRequestObjectAndParams(authorizationRequestParameters, authorizationRequestObject)
+                authorizationRequestObject
+            }else {
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
                     className = className,
                     message = "Authorization Request must not be signed for given client_id_scheme"
                 )
-            } else {
-                val authorizationRequestObject = decodeBase64ToJSON(response)
-                validateMatchOfAuthRequestObjectAndParams(authorizationRequestParameters, authorizationRequestObject)
-                authorizationRequestObject
             }
         } ?: authorizationRequestParameters
     }
@@ -84,4 +87,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         }
 
     }
+
+    private fun isValidContentType(headers: Headers): Boolean =
+        headers["content-type"]?.contains("application/json", ignoreCase = true) == true
 }

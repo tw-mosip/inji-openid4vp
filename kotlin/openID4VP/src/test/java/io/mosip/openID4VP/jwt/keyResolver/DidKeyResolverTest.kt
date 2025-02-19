@@ -53,7 +53,7 @@ class DidKeyResolverTest {
                 ]
             }
         }"""
-        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mockResponse
+        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mapOf("body" to mockResponse)
 
         val header = mapOf("kid" to "did:example:123456789#keys-1")
         val result = resolver.resolveKey(header)
@@ -65,7 +65,7 @@ class DidKeyResolverTest {
 
     @Test
     fun `should throw exception when kid is missing` (){
-        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns "mockResponse"
+        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mapOf("body" to "mockResponse")
 
         val exception = assertThrows(JWTVerificationException.KidExtractionFailed::class.java) { resolver.resolveKey(emptyMap()) }
         assertEquals(
@@ -82,7 +82,7 @@ class DidKeyResolverTest {
             }
         }"""
 
-        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mockResponse
+        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mapOf("body" to mockResponse)
 
         val header = mapOf("kid" to "did:example:123456789#keys-1")
 

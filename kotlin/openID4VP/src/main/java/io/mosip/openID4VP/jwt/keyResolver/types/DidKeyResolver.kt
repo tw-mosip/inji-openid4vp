@@ -16,7 +16,8 @@ class DidKeyResolver(private val didUrl: String) : KeyResolver {
     //TODO: should create public key object from the string based on signature algorithm
     override fun resolveKey(header: Map<String, Any>): String {
         val url = "$RESOLVER_API${didUrl}"
-        val didResponse = sendHTTPRequest(url, HTTP_METHOD.GET)
+        val response = sendHTTPRequest(url, HTTP_METHOD.GET)
+        val didResponse = response["body"].toString()
 
         val kid = header["kid"]?.toString()
             ?: throw Logger.handleException(

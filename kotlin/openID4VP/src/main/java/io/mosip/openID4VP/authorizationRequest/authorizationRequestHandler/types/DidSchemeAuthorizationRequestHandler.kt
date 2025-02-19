@@ -12,6 +12,7 @@ import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.jwt.JwtHandler
 import io.mosip.openID4VP.jwt.keyResolver.types.DidKeyResolver
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import okhttp3.Headers
 
 private val className = DidSchemeAuthorizationRequestHandler::class.simpleName!!
 
@@ -30,19 +31,28 @@ class DidSchemeAuthorizationRequestHandler(
             val requestUriMethod = getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
             val httpMethod = determineHttpMethod(requestUriMethod)
             val response = sendHTTPRequest(it, httpMethod)
-            val authorizationRequestObject: MutableMap<String, Any>
+            val headers = response["header"] as Headers
+            val responseBody = response["body"].toString()
 
-            if (isJWT(response)) {
-                JwtHandler(response, DidKeyResolver(getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!)).verify()
-                authorizationRequestObject = extractDataJsonFromJwt(response,
+            if(isValidContentType(headers) &&  isJWT(responseBody)){
+                JwtHandler(responseBody, DidKeyResolver(getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!)).verify()
+                val authorizationRequestObject = extractDataJsonFromJwt(
+                    responseBody,
                     JwtHandler.JwtPart.PAYLOAD
                 )
+
                 validateMatchOfAuthRequestObjectAndParams(
                     authorizationRequestParameters,
                     authorizationRequestObject
                 )
                 authorizationRequestParameters = authorizationRequestObject
-            } else throw IllegalArgumentException("Authorization Request must be signed and contain JWT for given client_id_scheme")
+
+            } else
+                throw Logger.handleException(
+                exceptionType = "InvalidData",
+                className = className,
+                message = "Authorization Request must not be signed for given client_id_scheme"
+            )
 
         } ?: throw Logger.handleException(
             exceptionType = "MissingInput",
@@ -50,5 +60,8 @@ class DidSchemeAuthorizationRequestHandler(
             message = "request_uri must be present for given client_id_scheme"
         )
     }
+
+    private fun isValidContentType(headers: Headers): Boolean =
+        headers["content-type"]?.contains("application/oauth-authz-req+jwt", ignoreCase = true) == true
 }
 

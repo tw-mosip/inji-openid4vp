@@ -41,7 +41,7 @@ fun createAuthorizationRequestObject(
     return createAuthorizationRequest(paramList, authorizationRequestParams).let { authRequestParam ->
         when (clientIdScheme) {
             ClientIdScheme.DID -> createJWT(authRequestParam, addValidSignature!!, jwtHeader)
-            else -> encodeB64(mapper.writeValueAsString(authRequestParam))
+            else -> mapper.writeValueAsString(authRequestParam)
         }
     }
 }

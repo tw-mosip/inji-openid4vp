@@ -313,7 +313,7 @@ class AuthorizationRequestTest {
                 "https://mock-verifier.com/verifier/get-presentation-definition",
                 HTTP_METHOD.GET
             )
-        } returns presentationDefinition
+        } returns mapOf("body" to presentationDefinition)
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
 
