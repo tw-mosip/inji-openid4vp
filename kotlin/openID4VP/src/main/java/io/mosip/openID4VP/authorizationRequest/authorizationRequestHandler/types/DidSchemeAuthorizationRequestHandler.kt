@@ -20,6 +20,16 @@ class DidSchemeAuthorizationRequestHandler(
     authorizationRequestParameters: MutableMap<String, Any>,
     setResponseUri: (String) -> Unit
 ) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
+    override fun validateClientId(){
+        super.validateClientId()
+        if(!getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!.startsWith("did"))
+            throw Logger.handleException(
+                exceptionType =  "InvalidData",
+                className = className,
+                message = "Given client id is not valid"
+            )
+    }
+
     override fun fetchAuthorizationRequest() {
         getStringValue(authorizationRequestParameters, REQUEST_URI.value)?.let {
             if (!isValidUrl(it))

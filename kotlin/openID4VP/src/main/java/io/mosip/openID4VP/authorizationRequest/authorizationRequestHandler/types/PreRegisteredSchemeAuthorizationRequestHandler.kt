@@ -27,7 +27,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         when {
             trustedVerifiers.isEmpty() -> throw Logger.handleException(
                 exceptionType = "EmptyVerifierList",
-                className = AuthorizationRequest.toString()
+                className = className
             )
 
             trustedVerifiers.none {
@@ -74,7 +74,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         when {
             trustedVerifiers.isEmpty() -> throw Logger.handleException(
                 exceptionType = "EmptyVerifierList",
-                className = AuthorizationRequest.toString()
+                className = className
             )
 
             trustedVerifiers.none {
