@@ -2,8 +2,8 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.parseAndValidateClientMetadataInAuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.parseAndValidatePresentationDefinitionInAuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.parseAndValidateClientMetadata
+import io.mosip.openID4VP.authorizationRequest.parseAndValidatePresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.validateKey
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.determineHttpMethod
@@ -67,8 +67,8 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
         validateKey(authorizationRequestParameters, RESPONSE_TYPE.value)
         validateKey(authorizationRequestParameters, NONCE.value)
         validateKey(authorizationRequestParameters, STATE.value)
-        parseAndValidateClientMetadataInAuthorizationRequest(authorizationRequestParameters)
-        parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRequestParameters)
+        parseAndValidateClientMetadata(authorizationRequestParameters)
+        parseAndValidatePresentationDefinition(authorizationRequestParameters)
     }
 
     fun createAuthorizationRequestObject(

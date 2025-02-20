@@ -79,7 +79,7 @@ fun extractQueryParameters(query: String): MutableMap<String, Any> {
     }
 }
 
-fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
+fun parseAndValidatePresentationDefinition(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
     val hasPresentationDefinition =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
     val hasPresentationDefinitionUri =
@@ -143,7 +143,7 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRe
     return authorizationRequestParameters
 }
 
-fun parseAndValidateClientMetadataInAuthorizationRequest(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
+fun parseAndValidateClientMetadata(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
     authorizationRequestParameters[CLIENT_METADATA.value]?.let {
         val clientMetadata = when (it) {
             is String -> deserializeAndValidate(it, ClientMetadataSerializer)
