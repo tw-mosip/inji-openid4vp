@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.jwt.JwtHandler
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 

@@ -2,10 +2,7 @@ package io.mosip.openID4VP.authorizationRequest
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.DidSchemeAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.PreRegisteredSchemeAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.RedirectUriSchemeAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.*
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
@@ -62,7 +59,7 @@ fun validateKey(
         throw Logger.handleException(
             exceptionType = if (authorizationRequestParameters[key] == null) "MissingInput" else "InvalidInput",
             fieldPath = listOf(key),
-            className = AuthorizationRequest.toString(),
+            className = className,
             fieldType = "String"
         )
     }
@@ -87,7 +84,7 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRe
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
     val hasPresentationDefinitionUri =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION_URI.value)
-    var presentationDefinitionString = ""
+    var presentationDefinition : Any
 
     when {
         hasPresentationDefinition && hasPresentationDefinitionUri -> {
@@ -100,8 +97,7 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRe
 
         hasPresentationDefinition -> {
             validateKey(authorizationRequestParameters, PRESENTATION_DEFINITION.value)
-            presentationDefinitionString =
-                getStringValue(authorizationRequestParameters, PRESENTATION_DEFINITION.value)!!
+            presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value]!!
         }
 
         hasPresentationDefinitionUri -> {
@@ -123,7 +119,7 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRe
                         url = presentationDefinitionUri,
                         method = HTTP_METHOD.GET
                     )
-                presentationDefinitionString = response["body"].toString()
+                presentationDefinition = response["body"].toString()
             } catch (exception: Exception) {
                 throw exception
             }
@@ -138,22 +134,23 @@ fun parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRe
         }
     }
 
-    val presentationDefinition =
-        deserializeAndValidate((presentationDefinitionString), PresentationDefinitionSerializer)
-    authorizationRequestParameters[PRESENTATION_DEFINITION.value] = presentationDefinition
-
+    val presentationDefinitionObj = when (presentationDefinition) {
+        is String -> deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+        is Map<*, *> -> deserializeAndValidate (presentationDefinition as Map<String, Any>, PresentationDefinitionSerializer)
+        else -> null
+    }
+    authorizationRequestParameters[PRESENTATION_DEFINITION.value] = presentationDefinitionObj !!
     return authorizationRequestParameters
 }
 
 fun parseAndValidateClientMetadataInAuthorizationRequest(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
-    var clientMetadata: ClientMetadata?
-    getStringValue(authorizationRequestParameters, CLIENT_METADATA.value)?.let {
-        clientMetadata =
-            deserializeAndValidate(
-                it,
-                ClientMetadataSerializer
-            )
-        authorizationRequestParameters[CLIENT_METADATA.value] = clientMetadata!!
+    authorizationRequestParameters[CLIENT_METADATA.value]?.let {
+        val clientMetadata = when (it) {
+            is String -> deserializeAndValidate(it, ClientMetadataSerializer)
+            is Map<*, *> -> deserializeAndValidate(it as Map<String, Any>, ClientMetadataSerializer)
+            else -> null
+        }
+        authorizationRequestParameters[CLIENT_METADATA.value] = clientMetadata !!
     }
     return authorizationRequestParameters
 }

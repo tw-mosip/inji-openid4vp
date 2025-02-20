@@ -3,11 +3,31 @@ package io.mosip.openID4VP.testData
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.ClientMetadata
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
-val clientMetadata = """
-    {
+val clientMetadataMap = mapOf(
+        "client_name" to "Requester name",
+        "logo_uri" to "<logo_uri>",
+        "authorization_encrypted_response_alg" to "ECDH-ES",
+        "authorization_encrypted_response_enc" to "A256GCM",
+        "vp_formats" to mapOf(
+            "mso_mdoc" to mapOf(
+                "alg" to listOf("ES256", "EdDSA")
+            ),
+            "ldp_vp" to mapOf(
+                "proof_type" to listOf(
+                    "Ed25519Signature2018",
+                    "Ed25519Signature2020",
+                    "RsaSignature2018"
+                )
+            )
+        )
+    )
+
+
+val clientMetadataString = """{
   "client_name": "Requester name",
   "logo_uri": "<logo_uri>",
   "authorization_encrypted_response_alg": "ECDH-ES",
@@ -30,7 +50,28 @@ val clientMetadata = """
 }
 """.trimIndent()
 
-val presentationDefinition = """
+val presentationDefinitionMap = mapOf(
+    "id" to "649d581c-f891-4969-9cd5-2c27385a348f",
+    "input_descriptors" to listOf(
+        mapOf(
+            "id" to "idcardcredential",
+            "format" to mapOf(
+                "ldp_vc" to mapOf(
+                    "proof_type" to listOf("Ed25519Signature2018")
+                )
+            ),
+            "constraints" to mapOf(
+                "fields" to listOf(
+                    mapOf(
+                        "path" to listOf("\$.type") // Escaped '$' as Kotlin requires '\$'
+                    )
+                )
+            )
+        )
+    )
+)
+
+val presentationDefinitionString = """
     {
       "id": "649d581c-f891-4969-9cd5-2c27385a348f",
       "input_descriptors": [
@@ -173,13 +214,13 @@ val requestParams: Map<String, String> = mapOf(
     RESPONSE_URI.value to "https://verifier.env1.net/responseUri",
     REQUEST_URI.value to requestUrl,
     REQUEST_URI_METHOD.value to "get",
-    PRESENTATION_DEFINITION.value to presentationDefinition,
+    PRESENTATION_DEFINITION.value to presentationDefinitionString,
     PRESENTATION_DEFINITION_URI.value to "https://mock-verifier.com/verifier/get-presentation-definition",
     RESPONSE_TYPE.value to "vp_token",
     RESPONSE_MODE.value to "direct_post",
     NONCE.value to "VbRRB/LTxLiXmVNZuyMO8A==",
     STATE.value to "+mRQe1d6pBoJqF6Ab28klg==",
-    CLIENT_METADATA.value to clientMetadata
+    CLIENT_METADATA.value to clientMetadataString
 )
 
 val authorisationRequestListToClientIdSchemeMap = mapOf(
@@ -201,4 +242,14 @@ val clientIdAndSchemeOfPreRegistered = mapOf(
 val clientIdAndSchemeOfReDirectUri = mapOf(
     CLIENT_ID.value to "https://verifier.env1.net/responseUri",
     CLIENT_ID_SCHEME.value to REDIRECT_URI.value,
+)
+
+val clientMetadataPresentationDefinitionMap = mapOf(
+    PRESENTATION_DEFINITION.value to presentationDefinitionMap,
+    CLIENT_METADATA.value to clientMetadataMap
+)
+
+val clientMetadataPresentationDefinitionString = mapOf(
+    PRESENTATION_DEFINITION.value to presentationDefinitionString,
+    CLIENT_METADATA.value to clientMetadataString
 )

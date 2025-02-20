@@ -13,7 +13,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.testData.clientIdAndSchemeOfPreRegistered
 import io.mosip.openID4VP.testData.clientIdAndSchemeOfReDirectUri
 import io.mosip.openID4VP.testData.createUrlEncodedData
-import io.mosip.openID4VP.testData.presentationDefinition
+import io.mosip.openID4VP.testData.presentationDefinitionString
 import io.mosip.openID4VP.testData.requestParams
 import io.mosip.openID4VP.testData.trustedVerifiers
 import org.junit.After
@@ -313,7 +313,7 @@ class AuthorizationRequestTest {
                 "https://mock-verifier.com/verifier/get-presentation-definition",
                 HTTP_METHOD.GET
             )
-        } returns mapOf("body" to presentationDefinition)
+        } returns mapOf("body" to presentationDefinitionString)
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
 

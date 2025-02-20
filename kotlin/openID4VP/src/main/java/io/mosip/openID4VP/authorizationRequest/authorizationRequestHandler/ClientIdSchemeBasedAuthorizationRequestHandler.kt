@@ -6,8 +6,10 @@ import io.mosip.openID4VP.authorizationRequest.parseAndValidateClientMetadataInA
 import io.mosip.openID4VP.authorizationRequest.parseAndValidatePresentationDefinitionInAuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.validateKey
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
+import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val className = AuthorizationRequest::class.simpleName!!
 
@@ -15,12 +17,26 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     var authorizationRequestParameters: MutableMap<String, Any>,
     val setResponseUri: (String) -> Unit
 ) {
+    var requestUriResponse: Map<String, Any> = emptyMap()
 
     open fun validateClientId() {
         validateKey(authorizationRequestParameters, CLIENT_ID.value)
     }
 
-    abstract fun fetchAuthorizationRequest()
+    open fun fetchAuthorizationRequest() {
+        getStringValue(authorizationRequestParameters, REQUEST_URI.value)?.let {
+            if (!isValidUrl(it))
+                throw Logger.handleException(
+                    exceptionType = "InvalidData",
+                    className = className,
+                    message = "$REQUEST_URI data is not valid"
+                )
+            val requestUriMethod =
+                getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
+            val httpMethod = determineHttpMethod(requestUriMethod)
+            requestUriResponse =  sendHTTPRequest(it, httpMethod)
+        }
+    }
 
     fun setResponseUrlForSendingResponseToVerifier() {
         val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value) ?: "fragment"
@@ -51,8 +67,8 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
         validateKey(authorizationRequestParameters, RESPONSE_TYPE.value)
         validateKey(authorizationRequestParameters, NONCE.value)
         validateKey(authorizationRequestParameters, STATE.value)
-        authorizationRequestParameters = parseAndValidateClientMetadataInAuthorizationRequest(authorizationRequestParameters)
-        authorizationRequestParameters = parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRequestParameters)
+        parseAndValidateClientMetadataInAuthorizationRequest(authorizationRequestParameters)
+        parseAndValidatePresentationDefinitionInAuthorizationRequest(authorizationRequestParameters)
     }
 
     fun createAuthorizationRequestObject(

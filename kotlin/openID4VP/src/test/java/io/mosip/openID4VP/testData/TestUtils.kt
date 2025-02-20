@@ -3,7 +3,6 @@ package io.mosip.openID4VP.testData
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
-import io.mosip.openID4VP.testData.JWTUtil.Companion.encodeB64
 import kotlinx.serialization.json.JsonObject
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -18,7 +17,12 @@ fun createUrlEncodedData(
         true -> authRequestParamsByReference
         else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     }
-    val authorizationRequestParam = createAuthorizationRequest(paramList, requestParams)
+    var authorizationRequestParam = createAuthorizationRequest(paramList, requestParams ) as Map<String, Any>
+
+    authorizationRequestParam = if(verifierSentAuthRequestByReference == true)
+        authorizationRequestParam + clientMetadataPresentationDefinitionString
+    else authorizationRequestParam
+
     val charset = StandardCharsets.UTF_8.toString()
 
     val queryString = authorizationRequestParam.entries.joinToString("&") {
@@ -35,13 +39,14 @@ fun createAuthorizationRequestObject(
     applicableFields: List<String>? = null,
     addValidSignature: Boolean? = true,
     jwtHeader: JsonObject? = null
-): String {
+): Any {
     val mapper = jacksonObjectMapper()
     val paramList = applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     return createAuthorizationRequest(paramList, authorizationRequestParams).let { authRequestParam ->
+        val param = authRequestParam + clientMetadataPresentationDefinitionMap
         when (clientIdScheme) {
-            ClientIdScheme.DID -> createJWT(authRequestParam, addValidSignature!!, jwtHeader)
-            else -> mapper.writeValueAsString(authRequestParam)
+            ClientIdScheme.DID -> createJWT(param, addValidSignature!!, jwtHeader)
+            else -> mapper.writeValueAsString(param)
         }
     }
 }

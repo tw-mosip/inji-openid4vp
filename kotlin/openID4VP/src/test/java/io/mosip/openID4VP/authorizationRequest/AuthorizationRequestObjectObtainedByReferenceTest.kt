@@ -12,17 +12,10 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
-import io.mosip.openID4VP.testData.clientIdAndSchemeOfDid
-import io.mosip.openID4VP.testData.clientIdAndSchemeOfPreRegistered
+import io.mosip.openID4VP.testData.*
 import io.mosip.openID4VP.testData.createAuthorizationRequestObject
 import io.mosip.openID4VP.testData.createUrlEncodedData
-import io.mosip.openID4VP.testData.didResponse
-import io.mosip.openID4VP.testData.presentationDefinition
-import io.mosip.openID4VP.testData.requestParams
-import io.mosip.openID4VP.testData.requestUrl
-import io.mosip.openID4VP.testData.trustedVerifiers
 import okhttp3.Headers
-import okhttp3.Headers.Companion.toHeaders
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -43,7 +36,7 @@ class AuthorizationRequestObjectObtainedByReference {
                 "https://mock-verifier.com/verifier/get-presentation-definition",
                 HTTP_METHOD.GET
             )
-        } returns mapOf("body" to presentationDefinition)
+        } returns mapOf("body" to presentationDefinitionString)
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "https://resolver.identity.foundation/1.0/identifiers/did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
