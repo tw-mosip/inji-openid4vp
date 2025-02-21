@@ -23,7 +23,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
         validateKey(authorizationRequestParameters, CLIENT_ID.value)
     }
 
-    open fun fetchAuthorizationRequest() {
+    fun fetchAuthorizationRequest() {
         getStringValue(authorizationRequestParameters, REQUEST_URI.value)?.let {
             if (!isValidUrl(it))
                 throw Logger.handleException(
@@ -35,8 +35,11 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                 getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
             val httpMethod = determineHttpMethod(requestUriMethod)
             requestUriResponse =  sendHTTPRequest(it, httpMethod)
+            this.validateRequestUriResponse()
         }
     }
+
+    abstract fun validateRequestUriResponse()
 
     fun setResponseUrlForSendingResponseToVerifier() {
         val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value) ?: "fragment"

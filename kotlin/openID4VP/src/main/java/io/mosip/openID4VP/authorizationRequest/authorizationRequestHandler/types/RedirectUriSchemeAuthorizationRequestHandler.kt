@@ -16,9 +16,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
     setResponseUri: (String) -> Unit
 ) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
 
-    override fun fetchAuthorizationRequest() {
-        super.fetchAuthorizationRequest()
-
+    override fun validateRequestUriResponse() {
         authorizationRequestParameters = if (requestUriResponse.isEmpty())
             authorizationRequestParameters
         else {

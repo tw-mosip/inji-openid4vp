@@ -35,8 +35,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         }
     }
 
-    override fun fetchAuthorizationRequest() {
-        super.fetchAuthorizationRequest()
+    override fun validateRequestUriResponse() {
 
         authorizationRequestParameters = if (requestUriResponse.isEmpty())
             authorizationRequestParameters

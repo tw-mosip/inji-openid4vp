@@ -27,9 +27,7 @@ class DidSchemeAuthorizationRequestHandler(
             )
     }
 
-    override fun fetchAuthorizationRequest() {
-        super.fetchAuthorizationRequest()
-
+    override fun validateRequestUriResponse() {
         if(requestUriResponse.isNotEmpty()){
             val headers = requestUriResponse["header"] as Headers
             val responseBody = requestUriResponse["body"].toString()
@@ -52,10 +50,10 @@ class DidSchemeAuthorizationRequestHandler(
 
             } else
                 throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "Authorization Request must not be signed for given ${CLIENT_ID_SCHEME.value}"
-            )
+                    exceptionType = "InvalidData",
+                    className = className,
+                    message = "Authorization Request must not be signed for given ${CLIENT_ID_SCHEME.value}"
+                )
 
         } else  throw Logger.handleException(
             exceptionType = "MissingInput",
