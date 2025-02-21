@@ -15,7 +15,7 @@ object Logger {
         return "INJI-OpenID4VP : class name - $className | traceID - ${this.traceabilityId ?: ""}"
     }
 
-    fun error(logTag: String, exception: Exception) {
+    fun error(logTag: String, exception: Exception, className: String? = "") {
         Log.e(logTag, exception.message!!)
     }
 

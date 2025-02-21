@@ -58,7 +58,7 @@ class DidSchemeAuthorizationRequestHandler(
         } else  throw Logger.handleException(
             exceptionType = "MissingInput",
             className = className,
-            message = "${REQUEST_URI.value} must be present for given ${CLIENT_ID_SCHEME.value}"
+            fieldType = REQUEST_URI.value,
         )
     }
 

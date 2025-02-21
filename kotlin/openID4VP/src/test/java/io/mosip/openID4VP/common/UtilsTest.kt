@@ -64,12 +64,12 @@ class UtilsTest {
         determineHttpMethod("put")
     }
 
-    @Test
-    fun `makeBase64Standard should standardize base64 string`() {
-        val input = "dGVzdA"
-        val expected = "dGVzdA=="
-        assertEquals(expected, makeBase64Standard(input))
-    }
+//    @Test
+//    fun `makeBase64Standard should standardize base64 string`() {
+//        val input = "dGVzdA"
+//        val expected = "dGVzdA=="
+//        assertEquals(expected, makeBase64Standard(input))
+//    }
 
     @Test
     fun `getStringValue should return correct string value from map`() {

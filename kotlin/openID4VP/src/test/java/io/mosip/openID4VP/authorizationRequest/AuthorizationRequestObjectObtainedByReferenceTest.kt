@@ -9,6 +9,7 @@ import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.MissingInput
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
@@ -150,6 +151,29 @@ class AuthorizationRequestObjectObtainedByReference {
         assertEquals(
             "VP sharing failed due to connection timeout",
             exceptionWhenRequestUriNetworkCallFails.message
+        )
+    }
+
+    @Test
+    fun `should throw exception when request_uri is not present in did client id scheme`() {
+
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
+        val encodedAuthorizationRequest =
+            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID, authRequestWithDidByValue)
+
+
+        val missingInputException = assertThrows(MissingInput::class.java) {
+            AuthorizationRequest.validateAndCreateAuthorizationRequest(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                { _: String -> },
+                false
+            )
+        }
+
+        assertEquals(
+            "Missing Input:  param is required",
+            missingInputException.message
         )
     }
 

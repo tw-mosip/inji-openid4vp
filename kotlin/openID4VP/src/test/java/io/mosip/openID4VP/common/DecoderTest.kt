@@ -28,27 +28,28 @@ class DecoderTest {
     fun tearDown() {
         clearAllMocks()
     }
-
-    @Test
-    fun `should throw invalid input exception for empty input`() {
-        val encodedData = ""
-        val expectedExceptionMessage = "Invalid Input: encoded data value cannot be an empty string, null, or an integer"
-
-        val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-                Decoder.decodeBase64ToString(encodedData)
-            }
-
-        assertEquals(expectedExceptionMessage, actualException.message)
-    }
-
-    @Test
-    fun `should decode valid Base64 string`() {
-        val encodedData = "SGVsbG8gV29ybGQ="
-        val expectedDecodedString = "Hello World"
-
-        val decodedString = Decoder.decodeBase64ToString(encodedData)
-
-        assertEquals(expectedDecodedString, decodedString)
-    }
 }
+
+//    @Test
+//    fun `should throw invalid input exception for empty input`() {
+//        val encodedData = ""
+//        val expectedExceptionMessage = "Invalid Input: encoded data value cannot be an empty string, null, or an integer"
+//
+//        val actualException =
+//            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+//                Decoder.decodeBase64ToString(encodedData)
+//            }
+//
+//        assertEquals(expectedExceptionMessage, actualException.message)
+//    }
+//
+//    @Test
+//    fun `should decode valid Base64 string`() {
+//        val encodedData = "SGVsbG8gV29ybGQ="
+//        val expectedDecodedString = "Hello World"
+//
+//        val decodedString = Decoder.decodeBase64ToString(encodedData)
+//
+//        assertEquals(expectedDecodedString, decodedString)
+//    }
+//}

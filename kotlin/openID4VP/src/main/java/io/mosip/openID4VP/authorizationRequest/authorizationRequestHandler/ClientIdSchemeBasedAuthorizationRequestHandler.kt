@@ -11,7 +11,7 @@ import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
-private val className = AuthorizationRequest::class.simpleName!!
+private val className = ClientIdSchemeBasedAuthorizationRequestHandler::class.simpleName!!
 
 abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     var authorizationRequestParameters: MutableMap<String, Any>,
@@ -35,8 +35,8 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                 getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
             val httpMethod = determineHttpMethod(requestUriMethod)
             requestUriResponse =  sendHTTPRequest(it, httpMethod)
-            this.validateRequestUriResponse()
         }
+        this.validateRequestUriResponse()
     }
 
     abstract fun validateRequestUriResponse()
