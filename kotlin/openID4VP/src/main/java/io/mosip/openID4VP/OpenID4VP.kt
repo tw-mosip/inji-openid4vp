@@ -20,14 +20,14 @@ class OpenID4VP(private val traceabilityId: String) {
 
     @JvmOverloads
     fun authenticateVerifier(
-        encodedAuthorizationRequest: String,
+        urlEncodedAuthorizationRequest: String,
         trustedVerifiers: List<Verifier>,
         shouldValidateClient: Boolean = false
     ): AuthorizationRequest {
         try {
             Logger.setTraceabilityId(traceabilityId)
-            authorizationRequest = AuthorizationRequest.validateAndGetAuthorizationRequest(
-                encodedAuthorizationRequest, ::setResponseUri, trustedVerifiers, shouldValidateClient
+            authorizationRequest = AuthorizationRequest.validateAndCreateAuthorizationRequest(
+                urlEncodedAuthorizationRequest, trustedVerifiers, ::setResponseUri,shouldValidateClient
             )
             return this.authorizationRequest
         } catch (exception: Exception) {

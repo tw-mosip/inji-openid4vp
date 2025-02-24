@@ -17,7 +17,7 @@ class NetworkManagerClient {
 			method: HTTP_METHOD,
 			bodyParams: Map<String, String>? = null,
 			headers: Map<String, String>? = null
-		): String {
+		): Map<String, Any> {
 			try {
 				val client = OkHttpClient.Builder().build()
 				val request: Request
@@ -40,8 +40,13 @@ class NetworkManagerClient {
 				val response: Response = client.newCall(request).execute()
 
 				if (response.isSuccessful) {
-					return response.body?.byteStream()?.bufferedReader().use { it?.readText() }
+					val body = response.body?.byteStream()?.bufferedReader().use { it?.readText() }
 						?: ""
+
+					return mapOf(
+						"body" to body,
+						"header" to response.headers
+					)
 				} else {
 					throw Exception(response.toString())
 				}
@@ -62,4 +67,9 @@ class NetworkManagerClient {
 
 enum class HTTP_METHOD {
 	POST, GET
+}
+
+enum class CONTENT_TYPES(val value: String) {
+	APPLICATION_JSON("application/json"),
+	APPLICATION_JWT("application/oauth-authz-req+jwt")
 }

@@ -3,12 +3,11 @@ package io.mosip.openID4VP.testData
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
-import io.mosip.openID4VP.testData.JWTUtil.Companion.encodeB64
 import kotlinx.serialization.json.JsonObject
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.util.Base64
 
-fun createEncodedAuthorizationRequest(
+fun createUrlEncodedData(
     requestParams: Map<String, String?>,
     verifierSentAuthRequestByReference: Boolean? = false,
     clientIdScheme: ClientIdScheme,
@@ -18,13 +17,20 @@ fun createEncodedAuthorizationRequest(
         true -> authRequestParamsByReference
         else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     }
-    val authorizationRequestParam = createAuthorizationRequest(paramList, requestParams)
-    return authorizationRequestParam
-        .map { (key, value) -> "$key=$value" }
-        .joinToString("&")
-        .toByteArray(StandardCharsets.UTF_8)
-        .let { Base64.getEncoder().encodeToString(it) }
-        .let { "OPENID4VP://authorize?$it" }
+    var authorizationRequestParam = createAuthorizationRequest(paramList, requestParams ) as Map<String, Any>
+
+    authorizationRequestParam = if(verifierSentAuthRequestByReference == true)
+        authorizationRequestParam + clientMetadataPresentationDefinitionString
+    else authorizationRequestParam
+
+    val charset = StandardCharsets.UTF_8.toString()
+
+    val queryString = authorizationRequestParam.entries.joinToString("&") {
+        "${it.key}=${it.value}"
+    }
+    val urlEncodedQueryParameters = URLEncoder.encode(queryString, charset)
+    return "openid4vp://authorize?$urlEncodedQueryParameters"
+
 }
 
 fun createAuthorizationRequestObject(
@@ -33,13 +39,14 @@ fun createAuthorizationRequestObject(
     applicableFields: List<String>? = null,
     addValidSignature: Boolean? = true,
     jwtHeader: JsonObject? = null
-): String {
+): Any {
     val mapper = jacksonObjectMapper()
     val paramList = applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     return createAuthorizationRequest(paramList, authorizationRequestParams).let { authRequestParam ->
+        val param = authRequestParam + clientMetadataPresentationDefinitionMap
         when (clientIdScheme) {
-            ClientIdScheme.DID -> createJWT(mapper, authRequestParam, addValidSignature!!, jwtHeader)
-            else -> encodeB64(mapper.writeValueAsString(authRequestParam))
+            ClientIdScheme.DID -> createJWT(param, addValidSignature!!, jwtHeader)
+            else -> mapper.writeValueAsString(param)
         }
     }
 }
