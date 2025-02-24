@@ -4,7 +4,7 @@ import io.mosip.openID4VP.common.Decoder.decodeBase64Data
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.extractDataJsonFromJwt
 import io.mosip.openID4VP.jwt.JwtHandler.JwtPart.*
-import io.mosip.openID4VP.jwt.keyResolver.KeyResolver
+import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import org.bouncycastle.util.encoders.Base64
@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets
 
 private val className = JwtHandler::class.simpleName!!
 
-class JwtHandler(private val jwt: String, private val keyResolver: KeyResolver) {
+class JwtHandler(private val jwt: String, private val publicKeyResolver: PublicKeyResolver) {
 
     enum class JwtPart(val number: Int) {
         HEADER(0),
@@ -27,10 +27,10 @@ class JwtHandler(private val jwt: String, private val keyResolver: KeyResolver) 
             val header = parts[HEADER.number]
             val payload = parts[PAYLOAD.number]
             val signature = decodeBase64Data(parts[SIGNATURE.number])
-            val publicKey = keyResolver.resolveKey(extractDataJsonFromJwt(jwt, HEADER))
+            val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJwt(jwt, HEADER))
             val publicKeyBytes = Base64.decode(publicKey)
             val publicKeyParams = Ed25519PublicKeyParameters(publicKeyBytes, 0)
-            val signer = Ed25519Signer()
+            val signer = Ed25519Signer() //TODO: check should not be signer but verifier
             signer.init(false, publicKeyParams)
 
             val messageBytes = "$header.$payload".toByteArray(StandardCharsets.UTF_8)

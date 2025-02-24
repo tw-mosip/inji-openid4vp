@@ -19,8 +19,8 @@ fun convertJsonToMap(jsonString: String): MutableMap<String, Any> {
         object : TypeReference<MutableMap<String, Any>>() {})
 }
 
-fun isJWT(authorizationRequest: String): Boolean {
-    return authorizationRequest.split(".").size == 3
+fun isJWT(input: String): Boolean {
+    return input.split(".").size == 3
 }
 
 fun determineHttpMethod(method: String): HTTP_METHOD {

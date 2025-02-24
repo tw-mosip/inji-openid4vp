@@ -2,13 +2,13 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.type
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.validateMatchOfAuthRequestObjectAndParams
+import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.extractDataJsonFromJwt
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isJWT
 import io.mosip.openID4VP.jwt.JwtHandler
-import io.mosip.openID4VP.jwt.keyResolver.types.DidKeyResolver
+import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import okhttp3.Headers
 
 private val className = DidSchemeAuthorizationRequestHandler::class.simpleName!!
@@ -21,9 +21,9 @@ class DidSchemeAuthorizationRequestHandler(
         super.validateClientId()
         if(!getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!.startsWith("did"))
             throw Logger.handleException(
-                exceptionType =  "InvalidData",
+                exceptionType =  "InvalidVerifier",
                 className = className,
-                message = "Given client id is not valid"
+                message = "Client ID should start with did prefix if client_id_scheme is did"
             )
     }
 
@@ -35,14 +35,14 @@ class DidSchemeAuthorizationRequestHandler(
             if(isValidContentType(headers) &&  isJWT(responseBody)){
                 JwtHandler(
                     responseBody,
-                    DidKeyResolver(getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!)
+                    DidPublicKeyResolver(getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!)
                 ).verify()
                 val authorizationRequestObject = extractDataJsonFromJwt(
                     responseBody,
                     JwtHandler.JwtPart.PAYLOAD
                 )
 
-                validateMatchOfAuthRequestObjectAndParams(
+                validateAuthorizationRequestObjectAndParameters(
                     authorizationRequestParameters,
                     authorizationRequestObject
                 )
@@ -52,13 +52,13 @@ class DidSchemeAuthorizationRequestHandler(
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
                     className = className,
-                    message = "Authorization Request must not be signed for given ${CLIENT_ID_SCHEME.value}"
+                    message = "Authorization Request must not be signed for given client_id_scheme"
                 )
 
         } else  throw Logger.handleException(
             exceptionType = "MissingInput",
             className = className,
-            fieldType = REQUEST_URI.value,
+            fieldPath = listOf(REQUEST_URI.value),
         )
     }
 

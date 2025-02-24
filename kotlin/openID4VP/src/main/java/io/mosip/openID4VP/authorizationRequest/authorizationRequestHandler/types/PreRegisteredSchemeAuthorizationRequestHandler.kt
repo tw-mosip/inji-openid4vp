@@ -2,7 +2,7 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.type
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.validateMatchOfAuthRequestObjectAndParams
+import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
@@ -20,15 +20,11 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
     override fun validateClientId() {
         super.validateClientId()
         if (!shouldValidateClient) return
-        when {
-            trustedVerifiers.isEmpty() -> throw Logger.handleException(
-                exceptionType = "EmptyVerifierList",
-                className = className
-            )
 
-            trustedVerifiers.none {
-                it.clientId == getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
-            } -> throw Logger.handleException(
+        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+
+        if (trustedVerifiers.none { it.clientId == clientId }) {
+            throw Logger.handleException(
                 exceptionType = "InvalidVerifier",
                 className = className
             )
@@ -45,7 +41,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
 
             if (isValidContentType(headers)) {
                 val authorizationRequestObject = convertJsonToMap(responseBody)
-                validateMatchOfAuthRequestObjectAndParams(
+                validateAuthorizationRequestObjectAndParameters(
                     authorizationRequestParameters,
                     authorizationRequestObject
                 )
@@ -64,16 +60,12 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         super.validateAndParseRequestFields()
 
         if (!shouldValidateClient) return
-        when {
-            trustedVerifiers.isEmpty() -> throw Logger.handleException(
-                exceptionType = "EmptyVerifierList",
-                className = className
-            )
 
-            trustedVerifiers.none {
-                it.clientId == getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
-                        &&  it.responseUris.contains(getStringValue(authorizationRequestParameters, RESPONSE_URI.value)!!)
-            } -> throw Logger.handleException(
+        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+        val responseUri = getStringValue(authorizationRequestParameters, RESPONSE_URI.value)!!
+
+        if (trustedVerifiers.none { it.clientId == clientId && it.responseUris.contains(responseUri) }) {
+            throw Logger.handleException(
                 exceptionType = "InvalidVerifier",
                 className = className
             )

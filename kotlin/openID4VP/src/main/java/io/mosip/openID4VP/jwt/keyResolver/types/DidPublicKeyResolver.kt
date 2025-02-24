@@ -2,16 +2,15 @@ package io.mosip.openID4VP.jwt.keyResolver.types
 
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
-import io.mosip.openID4VP.jwt.keyResolver.KeyResolver
+import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
-class DidKeyResolver(private val didUrl: String) : KeyResolver {
+private val className = DidPublicKeyResolver::class.simpleName!!
 
-    companion object {
-        private val className = DidKeyResolver::class.simpleName ?: "DidHandler"
-        private const val RESOLVER_API = "https://resolver.identity.foundation/1.0/identifiers/"
-    }
+class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
+
+    private val RESOLVER_API = "https://resolver.identity.foundation/1.0/identifiers/"
 
     //TODO: should create public key object from the string based on signature algorithm
     override fun resolveKey(header: Map<String, Any>): String {

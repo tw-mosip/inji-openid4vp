@@ -20,7 +20,7 @@ data class AuthorizationRequest(
     val responseUri: String?,
     val redirectUri: String?,
     val nonce: String,
-    val state: String,
+    val state: String?,
     var clientMetadata: Any? = null
 ) {
     init {
@@ -49,7 +49,7 @@ data class AuthorizationRequest(
                     urlEncodedAuthorizationRequest.indexOf('?') + 1
                 )
             )
-            return getAuthorizationRequestObject(
+            return getAuthorizationRequest(
                 queryParameter,
                 trustedVerifiers,
                 shouldValidateClient,
@@ -57,27 +57,27 @@ data class AuthorizationRequest(
             )
         }
 
-        private fun getAuthorizationRequestObject(
+        private fun getAuthorizationRequest(
             params: MutableMap<String, Any>,
             trustedVerifiers: List<Verifier>,
             shouldValidateClient: Boolean,
             setResponseUri: (String) -> Unit
         ): AuthorizationRequest {
-            val authRequestHandler = getAuthorizationRequestHandler(
+            val authorizationRequestHandler = getAuthorizationRequestHandler(
                 params,
                 trustedVerifiers,
                 setResponseUri,
                 shouldValidateClient
             )
-            processAndValidateAuthorizationRequestParameter(authRequestHandler)
-            return authRequestHandler.createAuthorizationRequestObject()
+            processAndValidateAuthorizationRequestParameter(authorizationRequestHandler)
+            return authorizationRequestHandler.createAuthorizationRequest()
         }
 
 
         private fun processAndValidateAuthorizationRequestParameter(authorizationRequestHandler: ClientIdSchemeBasedAuthorizationRequestHandler) {
             authorizationRequestHandler.validateClientId()
             authorizationRequestHandler.fetchAuthorizationRequest()
-            authorizationRequestHandler.setResponseUrlForSendingResponseToVerifier()
+            authorizationRequestHandler.setResponseUrl()
             authorizationRequestHandler.validateAndParseRequestFields()
         }
 

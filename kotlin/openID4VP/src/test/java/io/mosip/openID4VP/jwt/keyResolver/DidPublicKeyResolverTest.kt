@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.jwt.exception.JWTVerificationException
-import io.mosip.openID4VP.jwt.keyResolver.types.DidKeyResolver
+import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import org.junit.After
 import org.junit.Before
@@ -15,14 +15,14 @@ import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 
 
-class DidKeyResolverTest {
-    private lateinit var  resolver : DidKeyResolver
+class DidPublicKeyResolverTest {
+    private lateinit var  resolver : DidPublicKeyResolver
     @Before
     fun setUp() {
 
         mockkObject(NetworkManagerClient.Companion)
         val mockDidUrl = "did:example:123456789"
-        resolver = DidKeyResolver(mockDidUrl)
+        resolver = DidPublicKeyResolver(mockDidUrl)
 
         mockkStatic(android.util.Log::class)
         every { Log.e(any(), any()) } answers {

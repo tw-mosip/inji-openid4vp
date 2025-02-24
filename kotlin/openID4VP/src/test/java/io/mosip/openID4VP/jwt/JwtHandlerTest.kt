@@ -5,7 +5,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.jwt.keyResolver.KeyResolver
+import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import io.mosip.openID4VP.testData.JWTUtil
 import io.mosip.openID4VP.testData.JWTUtil.Companion.jwtHeader
 import io.mosip.openID4VP.testData.JWTUtil.Companion.jwtPayload
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 
 class JwtHandlerTest {
 
-    private val keyResolver = mockk<KeyResolver>()
+    private val publicKeyResolver = mockk<PublicKeyResolver>()
 
     @Before
     fun setUp() {
@@ -47,9 +47,9 @@ class JwtHandlerTest {
     fun `verify should pass with valid signature`() {
         val publicKey = "IKXhA7W1HD1sAl+OfG59VKAqciWrrOL1Rw5F+PGLhi4="
         val jwt =JWTUtil.createJWT(jwtPayload, true, jwtHeader)
-        every { keyResolver.resolveKey(any()) } returns publicKey
+        every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwtHandler = JwtHandler(jwt, keyResolver)
+        val jwtHandler = JwtHandler(jwt, publicKeyResolver)
 
         assertDoesNotThrow { jwtHandler.verify() }
     }
@@ -58,9 +58,9 @@ class JwtHandlerTest {
     fun `verify should throw exception with invalid public key`() {
         val publicKey = "invalidPublicKeyBase64"
         val jwt =JWTUtil.createJWT(jwtPayload, true, jwtHeader)
-        every { keyResolver.resolveKey(any()) } returns publicKey
+        every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwtHandler = JwtHandler(jwt, keyResolver)
+        val jwtHandler = JwtHandler(jwt, publicKeyResolver)
 
         val exception = assertThrows(Exception::class.java) { jwtHandler.verify() }
 
@@ -74,9 +74,9 @@ class JwtHandlerTest {
     fun `verify should throw exception with invalid signature`() {
         val publicKey = "IKXhA7W1HD1sAl+OfG59VKAqciWrrOL1Rw5F+PGLhi4="
         val jwt =JWTUtil.createJWT(jwtPayload, false, jwtHeader)
-        every { keyResolver.resolveKey(any()) } returns publicKey
+        every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwtHandler = JwtHandler(jwt, keyResolver)
+        val jwtHandler = JwtHandler(jwt, publicKeyResolver)
 
         val exception = assertThrows(Exception::class.java) { jwtHandler.verify() }
 

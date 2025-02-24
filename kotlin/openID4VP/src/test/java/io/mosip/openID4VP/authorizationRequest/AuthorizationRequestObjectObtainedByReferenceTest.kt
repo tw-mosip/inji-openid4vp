@@ -172,7 +172,7 @@ class AuthorizationRequestObjectObtainedByReference {
         }
 
         assertEquals(
-            "Missing Input:  param is required",
+            "Missing Input: request_uri param is required",
             missingInputException.message
         )
     }

@@ -2,11 +2,8 @@ package io.mosip.openID4VP.common
 
 import android.annotation.SuppressLint
 import android.os.Build
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.BuildConfig.getVersionSDKInt
 import io.mosip.openID4VP.common.BuildConfig.isAndroid
-import org.apache.commons.codec.binary.Base64
-import java.nio.charset.StandardCharsets
 
 object Decoder {
 

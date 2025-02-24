@@ -267,7 +267,7 @@ class AuthorizationRequestTest {
             CLIENT_METADATA.value,
             RESPONSE_MODE.value
         )
-        val expectedExceptionMessage = "Given response_mode is not supported"
+        val expectedExceptionMessage = "Missing Input: response_mode param is required"
 
         val encodedAuthorizationRequest = createUrlEncodedData(
             authorizationRequestParamsMap,
@@ -277,7 +277,7 @@ class AuthorizationRequestTest {
         )
 
         actualException =
-        assertThrows(AuthorizationRequestExceptions.InvalidResponseMode::class.java) {
+        assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
             )

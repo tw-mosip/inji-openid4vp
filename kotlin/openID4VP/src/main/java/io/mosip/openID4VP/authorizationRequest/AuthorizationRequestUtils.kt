@@ -23,7 +23,6 @@ fun getAuthorizationRequestHandler(
 ): ClientIdSchemeBasedAuthorizationRequestHandler {
     val clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value)
         ?: ClientIdScheme.PRE_REGISTERED.value
-    authorizationRequestParameters[CLIENT_ID_SCHEME.value] = clientIdScheme
     return when (clientIdScheme) {
         ClientIdScheme.PRE_REGISTERED.value -> PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers,
@@ -50,15 +49,15 @@ fun getAuthorizationRequestHandler(
     }
 }
 
-fun validateKey(
+fun validateAttribute(
     authorizationRequestParameters: MutableMap<String, Any>,
-    key: String,
+    attribute: String,
 ) {
-    val value = getStringValue(authorizationRequestParameters, key)
+    val value = getStringValue(authorizationRequestParameters, attribute)
     if (value == null || value == "null" || value.isEmpty()) {
         throw Logger.handleException(
-            exceptionType = if (authorizationRequestParameters[key] == null) "MissingInput" else "InvalidInput",
-            fieldPath = listOf(key),
+            exceptionType = if (authorizationRequestParameters[attribute] == null) "MissingInput" else "InvalidInput",
+            fieldPath = listOf(attribute),
             className = className,
             fieldType = "String"
         )
@@ -79,7 +78,7 @@ fun extractQueryParameters(query: String): MutableMap<String, Any> {
     }
 }
 
-fun parseAndValidatePresentationDefinition(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
+fun parseAndValidatePresentationDefinition(authorizationRequestParameters: MutableMap<String, Any>) {
     val hasPresentationDefinition =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
     val hasPresentationDefinitionUri =
@@ -96,13 +95,13 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
         }
 
         hasPresentationDefinition -> {
-            validateKey(authorizationRequestParameters, PRESENTATION_DEFINITION.value)
+            validateAttribute(authorizationRequestParameters, PRESENTATION_DEFINITION.value)
             presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value]!!
         }
 
         hasPresentationDefinitionUri -> {
             try {
-                validateKey(authorizationRequestParameters, PRESENTATION_DEFINITION_URI.value)
+                validateAttribute(authorizationRequestParameters, PRESENTATION_DEFINITION_URI.value)
                 val presentationDefinitionUri = getStringValue(
                     authorizationRequestParameters,
                     PRESENTATION_DEFINITION_URI.value
@@ -140,10 +139,9 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
         else -> null
     }
     authorizationRequestParameters[PRESENTATION_DEFINITION.value] = presentationDefinitionObj !!
-    return authorizationRequestParameters
 }
 
-fun parseAndValidateClientMetadata(authorizationRequestParameters: MutableMap<String, Any>): MutableMap<String, Any> {
+fun parseAndValidateClientMetadata(authorizationRequestParameters: MutableMap<String, Any>) {
     authorizationRequestParameters[CLIENT_METADATA.value]?.let {
         val clientMetadata = when (it) {
             is String -> deserializeAndValidate(it, ClientMetadataSerializer)
@@ -152,10 +150,9 @@ fun parseAndValidateClientMetadata(authorizationRequestParameters: MutableMap<St
         }
         authorizationRequestParameters[CLIENT_METADATA.value] = clientMetadata !!
     }
-    return authorizationRequestParameters
 }
 
-fun validateMatchOfAuthRequestObjectAndParams(
+fun validateAuthorizationRequestObjectAndParameters(
     params: MutableMap<String, Any>,
     authorizationRequestObject: MutableMap<String, Any>,
 ) {

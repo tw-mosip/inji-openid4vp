@@ -2,8 +2,8 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.type
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.validateKey
-import io.mosip.openID4VP.authorizationRequest.validateMatchOfAuthRequestObjectAndParams
+import io.mosip.openID4VP.authorizationRequest.validateAttribute
+import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
@@ -25,7 +25,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
 
             if (isValidContentType(headers)) {
                 val authorizationRequestObject = convertJsonToMap(responseBody)
-                validateMatchOfAuthRequestObjectAndParams(
+                validateAuthorizationRequestObjectAndParameters(
                     authorizationRequestParameters,
                     authorizationRequestObject
                 )
@@ -42,18 +42,18 @@ class RedirectUriSchemeAuthorizationRequestHandler(
 
     override fun validateAndParseRequestFields(){
         super.validateAndParseRequestFields()
-        val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value) ?: "fragment"
+        val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value) ?:
+        throw Logger.handleException(
+            exceptionType = "MissingInput",
+            className = className,
+            fieldPath = listOf(RESPONSE_MODE.value)
+        )
          when (responseMode) {
             "direct_post", "direct_post.jwt" -> {
-                validateUriCombinations(authorizationRequestParameters,
+                validateUriCombinations(
+                    authorizationRequestParameters,
                     RESPONSE_URI.value,
                     REDIRECT_URI.value
-                )
-            }
-            "fragment" -> {
-                validateUriCombinations(authorizationRequestParameters,
-                    REDIRECT_URI.value,
-                    RESPONSE_URI.value,
                 )
             }
             else -> throw Logger.handleException(
@@ -66,26 +66,26 @@ class RedirectUriSchemeAuthorizationRequestHandler(
 
     private fun validateUriCombinations(
         authRequestParam: MutableMap<String, Any>,
-        validKey: String,
-        inValidKey: String,
+        validAttribute: String,
+        inValidAttribute: String,
     )  {
         when {
-            authRequestParam.containsKey(inValidKey) -> {
+            authRequestParam.containsKey(inValidAttribute) -> {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
                     className = className,
-                    message = "$inValidKey should not be present for given response_mode"
+                    message = "$inValidAttribute should not be present for given response_mode"
                 )
             }
             else -> {
-                validateKey(authRequestParam, validKey)
+                validateAttribute(authRequestParam, validAttribute)
             }
         }
-        if(authRequestParam[validKey] != authRequestParam[CLIENT_ID.value]!!)
+        if(authRequestParam[validAttribute] != authRequestParam[CLIENT_ID.value]!!)
             throw Logger.handleException(
                 exceptionType = "InvalidVerifierRedirectUri",
                 className = className,
-                message = "$validKey should be equal to client_id for given client_id_scheme"
+                message = "$validAttribute should be equal to client_id for given client_id_scheme"
             )
 
     }

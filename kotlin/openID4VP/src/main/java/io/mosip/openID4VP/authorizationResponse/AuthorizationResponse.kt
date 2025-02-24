@@ -52,7 +52,7 @@ class AuthorizationResponse {
         fun shareVP(
             vpResponseMetadata: VPResponseMetadata,
             nonce: String,
-            state: String,
+            state: String?,
             responseUri: String,
             presentationDefinitionId: String
         ): String {
@@ -93,7 +93,7 @@ class AuthorizationResponse {
         private fun constructHttpRequestBody(
             vpToken: VPToken,
             presentationSubmission: PresentationSubmission,
-            responseUri: String, state: String
+            responseUri: String, state: String?
         ): String {
             val encodedVPToken: String
             val encodedPresentationSubmission: String
@@ -122,8 +122,9 @@ class AuthorizationResponse {
                 val bodyParams = mapOf(
                     "vp_token" to encodedVPToken,
                     "presentation_submission" to encodedPresentationSubmission,
-                    "state" to state
-                )
+                ) .let { baseParams ->
+                    state?.let { baseParams + mapOf("state" to it) } ?: baseParams
+                }
 
                  val response = sendHTTPRequest(
                     url = responseUri,
