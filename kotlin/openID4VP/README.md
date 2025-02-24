@@ -2,6 +2,19 @@
 
 Description: Implementation of OpenID for Verifiable Presentations - draft 21 specifications in Kotlin
 
+# Supported features
+
+| Feature                                                    | Supported values                                                                                                                                                                                                                                                                                                                                                   |
+|------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Device flow                                                | cross device flow                                                                                                                                                                                                                                                                                                                                                  |
+| Client id scheme                                           | `pre-registered`, `redirect_uri`, `did`                                                                                                                                                                                                                                                                                                                            |
+| Signed authorization request verification algorithms       | ed25519                                                                                                                                                                                                                                                                                                                                                            |
+| Obtaining authorization request                            | By value, By reference ( via `request_uri` method) <br> _[Note: Authorization request by value is not supported for the did client ID scheme, as it requires a signed request. Instead, a Request URI should be used to fetch the signed authorization request ([reference](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html#section-3.2))]_ |
+| Obtaining presentation definition in authorization request | By value, By reference (via `presentation_definition_uri`)                                                                                                                                                                                                                                                                                                         |
+| Authorization Response mode                                | `direct_post`                                                                                                                                                                                                                                                                                                                                                      |
+| Authorization Response type                                | `vp_token`                                                                                                                                                                                                                                                                                                                                                         |
+
+
 
 ## Specifications supported
 - The implementation follows OpenID for Verifiable Presentations - draft 21. [Specification](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html).
@@ -75,11 +88,11 @@ val openID4VP = OpenID4VP()
 
 ###### Parameters
 
-| Name                         | Type           | Description                                                                          | Sample                                                                                     |
-|------------------------------|----------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
-| encodedAuthenticationRequest | String         | Base64 encoded string containing the Verifier's authorization request                | `"T1BFTklENFZQOi8vYXV0"`                                                                   |
-| trustedVerifiers             | List<Verifier> | A list of trusted Verifier objects each containing a clientId and a responseUri list | `listOf(Verifier("https://verify.env1.net",listOf("https://verify.env1.net/responseUri"))` |
-| shouldValidateClient         | Bool?          | Optional Boolean to toggle client validation for pre-registered client id scheme     | `true`                                                                                     |
+| Name                            | Type           | Description                                                                          | Sample                                                                                     |
+|---------------------------------|----------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| urlEncodedAuthorizationRequest  | String         | Base64 encoded string containing the Verifier's authorization request                | `"T1BFTklENFZQOi8vYXV0"`                                                                   |
+| trustedVerifiers                | List<Verifier> | A list of trusted Verifier objects each containing a clientId and a responseUri list | `listOf(Verifier("https://verify.env1.net",listOf("https://verify.env1.net/responseUri"))` |
+| shouldValidateClient            | Bool?          | Optional Boolean to toggle client validation for pre-registered client id scheme     | `true`                                                                                     |
 
 ###### Exceptions
 
