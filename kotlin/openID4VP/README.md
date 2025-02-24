@@ -90,7 +90,7 @@ val openID4VP = OpenID4VP()
 
 | Name                            | Type           | Description                                                                          | Sample                                                                                     |
 |---------------------------------|----------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
-| urlEncodedAuthorizationRequest  | String         | Base64 encoded string containing the Verifier's authorization request                | `"T1BFTklENFZQOi8vYXV0"`                                                                   |
+| urlEncodedAuthorizationRequest  | String         | URL encoded query parameter string containing the Verifier's authorization request   | `"T1BFTklENFZQOi8vYXV0"`                                                                   |
 | trustedVerifiers                | List<Verifier> | A list of trusted Verifier objects each containing a clientId and a responseUri list | `listOf(Verifier("https://verify.env1.net",listOf("https://verify.env1.net/responseUri"))` |
 | shouldValidateClient            | Bool?          | Optional Boolean to toggle client validation for pre-registered client id scheme     | `true`                                                                                     |
 
