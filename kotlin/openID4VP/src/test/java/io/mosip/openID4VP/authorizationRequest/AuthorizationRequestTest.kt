@@ -116,28 +116,7 @@ class AuthorizationRequestTest {
 
         assertEquals(expectedExceptionMessage, actualException.message)
     }
-
-    @Test
-    @Ignore
-    fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is null`() {
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            CLIENT_ID.value to null,
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
-        )
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
-
-        expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
-
-        actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-                openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
-                )
-            }
-
-        assertEquals(expectedExceptionMessage, actualException.message)
-    }
+    
 
     @Test
     fun `should throw exception if neither presentation_definition nor presentation_definition_uri param present in Authorization Request`() {

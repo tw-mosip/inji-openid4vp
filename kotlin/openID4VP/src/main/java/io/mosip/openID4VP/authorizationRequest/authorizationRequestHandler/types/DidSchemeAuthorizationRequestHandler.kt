@@ -9,6 +9,7 @@ import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isJWT
 import io.mosip.openID4VP.jwt.JwtHandler
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
+import io.mosip.openID4VP.networkManager.CONTENT_TYPES.APPLICATION_JWT
 import okhttp3.Headers
 
 private val className = DidSchemeAuthorizationRequestHandler::class.simpleName!!
@@ -63,6 +64,6 @@ class DidSchemeAuthorizationRequestHandler(
     }
 
     private fun isValidContentType(headers: Headers): Boolean =
-        headers["content-type"]?.contains("application/oauth-authz-req+jwt", ignoreCase = true) == true
+        headers["content-type"]?.contains(APPLICATION_JWT.value, ignoreCase = true) == true
 }
 

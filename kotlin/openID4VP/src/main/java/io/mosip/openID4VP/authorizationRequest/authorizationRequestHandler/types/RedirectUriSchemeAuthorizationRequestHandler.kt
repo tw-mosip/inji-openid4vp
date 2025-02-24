@@ -4,6 +4,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
+import io.mosip.openID4VP.networkManager.CONTENT_TYPES.APPLICATION_JSON
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
@@ -91,6 +92,6 @@ class RedirectUriSchemeAuthorizationRequestHandler(
     }
 
     private fun isValidContentType(headers: Headers): Boolean =
-        headers["content-type"]?.contains("application/json", ignoreCase = true) == true
+        headers["content-type"]?.contains(APPLICATION_JSON.value, ignoreCase = true) == true
 
 }
