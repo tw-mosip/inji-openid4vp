@@ -50,7 +50,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                 fieldPath = listOf(RESPONSE_MODE.value)
             )
         val verifierResponseUri = when (responseMode) {
-            "direct_post", "direct_post.jwt" -> {
+            "direct_post" -> {
                 validateAttribute(authorizationRequestParameters, RESPONSE_URI.value)
                 getStringValue(authorizationRequestParameters, RESPONSE_URI.value)
             }

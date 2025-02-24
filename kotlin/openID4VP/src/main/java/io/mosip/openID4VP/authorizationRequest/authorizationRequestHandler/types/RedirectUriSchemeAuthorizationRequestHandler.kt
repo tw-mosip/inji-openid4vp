@@ -49,7 +49,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
             fieldPath = listOf(RESPONSE_MODE.value)
         )
          when (responseMode) {
-            "direct_post", "direct_post.jwt" -> {
+            "direct_post" -> {
                 validateUriCombinations(
                     authorizationRequestParameters,
                     RESPONSE_URI.value,
