@@ -61,6 +61,8 @@ object Logger {
 
             "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
 
+            "PublicKeyResolutionFailed" -> JWTVerificationException.PublicKeyResolutionFailed(message = message ?: "")
+
             "KidExtractionFailed" -> JWTVerificationException.KidExtractionFailed(message = message ?: "")
 
             "PublicKeyExtractionFailed" -> JWTVerificationException.PublicKeyExtractionFailed(message = message ?: "")

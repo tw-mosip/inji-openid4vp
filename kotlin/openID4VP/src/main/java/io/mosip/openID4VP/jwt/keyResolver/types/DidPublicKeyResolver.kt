@@ -1,22 +1,24 @@
 package io.mosip.openID4VP.jwt.keyResolver.types
 
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import io.mosip.vercred.vcverifier.DidWebResolver
 
 private val className = DidPublicKeyResolver::class.simpleName!!
 
 class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
 
-    private val RESOLVER_API = "https://resolver.identity.foundation/1.0/identifiers/"
-
     //TODO: should create public key object from the string based on signature algorithm
     override fun resolveKey(header: Map<String, Any>): String {
-        val url = "$RESOLVER_API${didUrl}"
-        val response = sendHTTPRequest(url, HTTP_METHOD.GET)
-        val didResponse = response["body"].toString()
+        val didResponse = try {
+            DidWebResolver(didUrl).resolve()
+        }catch (e: Exception){
+            throw Logger.handleException(
+                exceptionType = "PublicKeyResolutionFailed",
+                className = className,
+                message = e.message
+            )
+        }
 
         val kid = header["kid"]?.toString()
             ?: throw Logger.handleException(
@@ -32,9 +34,7 @@ class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
             )
     }
 
-    private fun extractPublicKeyMultibase(kid: String, response: String): String? {
-        val rootJson = convertJsonToMap(response)
-        val didDocument = rootJson["didDocument"] as Map<*, *>
+    private fun extractPublicKeyMultibase(kid: String, didDocument: Map<String, Any>): String? {
         val verificationMethod = didDocument["verificationMethod"] as? List<Map<String, Any>>
         if (verificationMethod != null) {
             for (method in verificationMethod) {

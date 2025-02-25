@@ -6,5 +6,7 @@ sealed class JWTVerificationException {
 
     class KidExtractionFailed(message: String) : Exception(message)
 
+    class PublicKeyResolutionFailed(message: String) : Exception(message)
+
     class InvalidSignature(message: String) : Exception(message)
 }

@@ -3,25 +3,29 @@ package io.mosip.openID4VP.jwt.keyResolver
 import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkClass
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.jwt.exception.JWTVerificationException
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
-import io.mosip.openID4VP.networkManager.NetworkManagerClient
+import io.mosip.vercred.vcverifier.DidWebResolver
+import io.mosip.vercred.vcverifier.exception.DidResolverExceptions
+import io.mosip.vercred.vcverifier.exception.DidResolverExceptions.DidResolutionFailed
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
-
 
 class DidPublicKeyResolverTest {
     private lateinit var  resolver : DidPublicKeyResolver
     @Before
     fun setUp() {
 
-        mockkObject(NetworkManagerClient.Companion)
-        val mockDidUrl = "did:example:123456789"
+        val mockDidUrl = "did:web:example:123456789#keys-1"
+         mockkConstructor(DidWebResolver::class)
         resolver = DidPublicKeyResolver(mockDidUrl)
 
         mockkStatic(android.util.Log::class)
@@ -46,28 +50,34 @@ class DidPublicKeyResolverTest {
 
     @Test
     fun `should return public key when kid matches`() {
-        val mockResponse = """{
-            "didDocument": {
-                "verificationMethod": [
-                    {"id": "did:example:123456789#keys-1", "publicKey": "mockPublicKey123"}
-                ]
-            }
-        }"""
-        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mapOf("body" to mockResponse)
+        val mockResponse =
+            mapOf(
+                "verificationMethod" to listOf(
+                    mapOf(
+                        "id" to "did:web:example:123456789#keys-1",
+                        "publicKey" to "mockPublicKey123"
+                    )
+                )
+            )
 
-        val header = mapOf("kid" to "did:example:123456789#keys-1")
+
+        every { anyConstructed<DidWebResolver>().resolve() } returns mockResponse
+
+        val header = mapOf("kid" to "did:web:example:123456789#keys-1")
         val result = resolver.resolveKey(header)
 
-        assertEquals("mockPublicKey123", result )
+        assertEquals("mockPublicKey123", result)
 
     }
 
 
     @Test
-    fun `should throw exception when kid is missing` (){
-        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mapOf("body" to "mockResponse")
+    fun `should throw exception when kid is missing`() {
+        every { anyConstructed<DidWebResolver>().resolve()} returns mapOf("didDocument" to "mockResponse")
 
-        val exception = assertThrows(JWTVerificationException.KidExtractionFailed::class.java) { resolver.resolveKey(emptyMap()) }
+        val exception = assertThrows(JWTVerificationException.KidExtractionFailed::class.java) {
+            resolver.resolveKey(emptyMap())
+        }
         assertEquals(
             "KID extraction from DID document failed",
             exception.message
@@ -75,18 +85,36 @@ class DidPublicKeyResolverTest {
     }
 
     @Test
-    fun `should throw exception when public key extraction fails`(){
-        val mockResponse = """{
-            "didDocument": {
-                "verificationMethod": []
-            }
-        }"""
+    fun `should throw exception did resolution fails`() {
+        every { anyConstructed<DidWebResolver>().resolve()} throws DidResolutionFailed("Did document could not be fetched")
 
-        every { NetworkManagerClient.sendHTTPRequest(any(), any()) } returns mapOf("body" to mockResponse)
+        val exception = assertThrows(JWTVerificationException.PublicKeyResolutionFailed::class.java) {
+            resolver.resolveKey(emptyMap())
+        }
+        assertEquals(
+            "Did document could not be fetched",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `should throw exception when public key extraction fails`() {
+        val mockResponse =
+            mapOf(
+                "verificationMethod" to listOf(
+                    mapOf(
+                        "id" to "did:web:example:123456789#keys-1",
+                    )
+                )
+            )
+        every { anyConstructed<DidWebResolver>().resolve() }  returns mockResponse
 
         val header = mapOf("kid" to "did:example:123456789#keys-1")
 
-        val exception = assertThrows(JWTVerificationException.PublicKeyExtractionFailed::class.java) { resolver.resolveKey(header) }
+        val exception =
+            assertThrows(JWTVerificationException.PublicKeyExtractionFailed::class.java) {
+                resolver.resolveKey(header)
+            }
         assertEquals(
             "Public key extraction failed",
             exception.message
