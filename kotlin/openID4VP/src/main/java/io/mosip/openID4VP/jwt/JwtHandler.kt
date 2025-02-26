@@ -21,7 +21,7 @@ class JwtHandler(private val jwt: String, private val publicKeyResolver: PublicK
     }
 
     fun verify() {
-        var verificationResult : Boolean = false
+        val verificationResult : Boolean
         try {
             val parts = jwt.split(".")
             val header = parts[HEADER.number]

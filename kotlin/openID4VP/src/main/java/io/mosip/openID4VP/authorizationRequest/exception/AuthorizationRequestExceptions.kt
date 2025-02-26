@@ -14,7 +14,7 @@ sealed class AuthorizationRequestExceptions {
             }"
         )
 
-    class InvalidVerifier(message: String) : Exception(message)
+    class InvalidVerifier(message: String) : Exception(message = message)
 
     class MissingInput(fieldPath: String) :
         Exception("Missing Input: $fieldPath param is required")

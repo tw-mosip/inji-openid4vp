@@ -66,7 +66,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
     }
 
     private fun validateUriCombinations(
-        authRequestParam: MutableMap<String, Any>,
+        authRequestParam: Map<String, Any>,
         validAttribute: String,
         inValidAttribute: String,
     )  {
@@ -82,7 +82,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 validateAttribute(authRequestParam, validAttribute)
             }
         }
-        if(authRequestParam[validAttribute] != authRequestParam[CLIENT_ID.value]!!)
+        if(authRequestParam[validAttribute] != authRequestParam[CLIENT_ID.value])
             throw Logger.handleException(
                 exceptionType = "InvalidVerifierRedirectUri",
                 className = className,
