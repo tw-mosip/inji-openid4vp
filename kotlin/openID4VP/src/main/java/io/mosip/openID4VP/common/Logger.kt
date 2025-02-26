@@ -51,7 +51,7 @@ object Logger {
 
             "InvalidVerifierRedirectUri" -> AuthorizationRequestExceptions.InvalidVerifierRedirectUri(message = message ?: "")
 
-            "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier()
+            "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier(message = message ?: "")
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
 

@@ -100,30 +100,25 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
         }
 
         hasPresentationDefinitionUri -> {
-            try {
-                validateAttribute(authorizationRequestParameters, PRESENTATION_DEFINITION_URI.value)
-                val presentationDefinitionUri = getStringValue(
-                    authorizationRequestParameters,
-                    PRESENTATION_DEFINITION_URI.value
-                )!!
-                if (!isValidUrl(presentationDefinitionUri)) {
-                    throw Logger.handleException(
-                        exceptionType = "InvalidData",
-                        className = className,
-                        message = "$PRESENTATION_DEFINITION_URI data is not valid"
-                    )
-                }
-                val response =
-                    sendHTTPRequest(
-                        url = presentationDefinitionUri,
-                        method = HTTP_METHOD.GET
-                    )
-                presentationDefinition = response["body"].toString()
-            } catch (exception: Exception) {
-                throw exception
+            validateAttribute(authorizationRequestParameters, PRESENTATION_DEFINITION_URI.value)
+            val presentationDefinitionUri = getStringValue(
+                authorizationRequestParameters,
+                PRESENTATION_DEFINITION_URI.value
+            )!!
+            if (!isValidUrl(presentationDefinitionUri)) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidData",
+                    className = className,
+                    message = "${PRESENTATION_DEFINITION_URI.value} data is not valid"
+                )
             }
+            val response =
+                sendHTTPRequest(
+                    url = presentationDefinitionUri,
+                    method = HTTP_METHOD.GET
+                )
+            presentationDefinition = response["body"].toString()
         }
-
         else -> {
             throw Logger.handleException(
                 exceptionType = "InvalidQueryParams",

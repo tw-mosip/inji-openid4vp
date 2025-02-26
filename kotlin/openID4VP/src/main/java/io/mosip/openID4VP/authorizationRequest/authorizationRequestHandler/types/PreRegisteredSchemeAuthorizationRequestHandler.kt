@@ -27,7 +27,8 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         if (trustedVerifiers.none { it.clientId == clientId }) {
             throw Logger.handleException(
                 exceptionType = "InvalidVerifier",
-                className = className
+                className = className,
+                message = "Verifier is not trusted by the wallet"
             )
         }
     }
@@ -68,7 +69,8 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         if (trustedVerifiers.none { it.clientId == clientId && it.responseUris.contains(responseUri) }) {
             throw Logger.handleException(
                 exceptionType = "InvalidVerifier",
-                className = className
+                className = className,
+                message = "Verifier is not trusted by the wallet"
             )
         }
 
