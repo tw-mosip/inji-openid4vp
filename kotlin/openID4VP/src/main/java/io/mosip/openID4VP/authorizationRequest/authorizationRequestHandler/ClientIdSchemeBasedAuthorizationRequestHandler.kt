@@ -30,7 +30,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
                     className = className,
-                    message = "$REQUEST_URI data is not valid"
+                    message = "${REQUEST_URI.value} data is not valid"
                 )
             val requestUriMethod =
                 getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
@@ -65,7 +65,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
             throw Logger.handleException(
                 exceptionType = "InvalidData",
                 className = className,
-                message = "$RESPONSE_URI data is not valid"
+                message = "${RESPONSE_URI.value} data is not valid"
             )
         }
         setResponseUri(verifierResponseUri)

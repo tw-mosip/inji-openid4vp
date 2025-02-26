@@ -73,7 +73,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
         when {
             authRequestParam.containsKey(inValidAttribute) -> {
                 throw Logger.handleException(
-                    exceptionType = "InvalidInput",
+                    exceptionType = "InvalidData",
                     className = className,
                     message = "$inValidAttribute should not be present for given response_mode"
                 )

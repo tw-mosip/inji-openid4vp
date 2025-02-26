@@ -14,8 +14,7 @@ sealed class AuthorizationRequestExceptions {
             }"
         )
 
-    class InvalidVerifier :
-    Exception("VP sharing failed: Verifier authentication was unsuccessful")
+    class InvalidVerifier(message: String) : Exception(message)
 
     class MissingInput(fieldPath: String) :
         Exception("Missing Input: $fieldPath param is required")
