@@ -1,6 +1,8 @@
 package io.mosip.openID4VP.testData
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
 import kotlinx.serialization.json.JsonObject
@@ -11,17 +13,13 @@ fun createUrlEncodedData(
     requestParams: Map<String, String?>,
     verifierSentAuthRequestByReference: Boolean? = false,
     clientIdScheme: ClientIdScheme,
-    applicableFields: List<String>? = null
+    applicableFields: List<String>? = null,
 ): String {
     val paramList = when (verifierSentAuthRequestByReference) {
         true -> authRequestParamsByReference
         else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     }
-    var authorizationRequestParam = createAuthorizationRequest(paramList, requestParams ) as Map<String, Any>
-
-    authorizationRequestParam = if(verifierSentAuthRequestByReference == true)
-        authorizationRequestParam + clientMetadataPresentationDefinitionString
-    else authorizationRequestParam
+    val authorizationRequestParam = createAuthorizationRequest(paramList, requestParams ) as Map<String, Any>
 
     val charset = StandardCharsets.UTF_8.toString()
 
@@ -38,12 +36,19 @@ fun createAuthorizationRequestObject(
     authorizationRequestParams: Map<String, String>,
     applicableFields: List<String>? = null,
     addValidSignature: Boolean? = true,
-    jwtHeader: JsonObject? = null
+    jwtHeader: JsonObject? = null,
+    isPresentationDefinitionUriPresent: Boolean? = false
 ): Any {
     val mapper = jacksonObjectMapper()
     val paramList = applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     return createAuthorizationRequest(paramList, authorizationRequestParams).let { authRequestParam ->
-        val param = authRequestParam + clientMetadataPresentationDefinitionMap
+
+        val param = if(isPresentationDefinitionUriPresent != true)
+            authRequestParam + clientMetadataPresentationDefinitionMap
+        else
+            authRequestParam + mapOf(
+                CLIENT_METADATA.value to clientMetadataMap
+            )
         when (clientIdScheme) {
             ClientIdScheme.DID -> createJWT(param, addValidSignature!!, jwtHeader)
             else -> mapper.writeValueAsString(param)

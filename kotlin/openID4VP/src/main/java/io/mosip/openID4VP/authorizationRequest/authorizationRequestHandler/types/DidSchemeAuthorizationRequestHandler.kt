@@ -54,7 +54,7 @@ class DidSchemeAuthorizationRequestHandler(
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
                     className = className,
-                    message = "Authorization Request must not be signed for given client_id_scheme"
+                    message = "Authorization Request must be signed for given client_id_scheme"
                 )
 
         } else  throw Logger.handleException(
