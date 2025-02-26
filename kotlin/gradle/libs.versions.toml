@@ -1,9 +1,8 @@
 [versions]
 agp = "8.4.2"
-bcprovJdk15on = "1.74"
 identityCredential = "20231002"
-jacksonAnnotations = "2.15.2"
-jacksonModuleKotlin = "2.15.2"
+jacksonAnnotations = "2.14.0"
+jacksonModuleKotlin = "2.14.0"
 jsonldCommonJava = "1.8.0"
 kotlin = "2.0.0"
 coreKtx = "1.9.0"
@@ -21,11 +20,10 @@ commonsCodecVersion = "1.16.0"
 mockk = "1.13.10"
 mockwebserver = "4.12.0"
 sonarqube = "5.1.0.4872"
-vcverifierJar = "1.1.5-SNAPSHOT"
+vcverifier = "1.2.0-SNAPSHOT"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bcprovJdk15on" }
 bouncyCastle = { group = "org.bouncycastle", name = "bcprov-jdk15to18", version.ref = "bouncyCastle" }
 identity-credential = { module = "com.android.identity:identity-credential", version.ref = "identityCredential" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
@@ -44,7 +42,7 @@ commons-codec = {group = "commons-codec", name ="commons-codec", version.ref = "
 mockk = {group = "io.mockk", name = "mockk", version.ref = "mockk"}
 mockwebserver = {group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "mockwebserver"}
 jupiter-junit = {group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "jupiterJunit"}
-vcverifier-jar = { module = "io.mosip:vcverifier-jar", version.ref = "vcverifierJar" }
+vcverifier = {group = "io.mosip", name = "vcverifier-jar", version.ref = "vcverifier"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

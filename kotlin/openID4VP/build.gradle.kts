@@ -62,7 +62,8 @@ dependencies {
     implementation(libs.identity.credential)
     implementation(libs.ld.signatures.java)
     implementation(libs.jsonld.common.java)
-    implementation(libs.vcverifier.jar)
+    implementation(libs.vcverifier)
+
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
