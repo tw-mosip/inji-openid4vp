@@ -8,6 +8,7 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidData
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidVerifier
@@ -248,6 +249,39 @@ class AuthorizationRequestObjectObtainedByReference {
             authorizationRequestParamsMap,
             true,
             ClientIdScheme.DID
+        )
+
+        openID4VP.authenticateVerifier(
+            encodedAuthorizationRequest,
+            trustedVerifiers,
+            shouldValidateClient = true
+        )
+
+        verify {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                HTTP_METHOD.GET
+            )
+        }
+
+    }
+
+    @Test
+    fun `should return authorization request from redirect uri scheme where request uri is present`() {
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfReDirectUri
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                any()
+            )
+        } returns  mapOf(
+            "header" to Headers.Builder().add("content-type", "application/json").build(),
+            "body" to createAuthorizationRequestObject(ClientIdScheme.REDIRECT_URI, authorizationRequestParamsMap)
+        )
+        val encodedAuthorizationRequest = createUrlEncodedData(
+            authorizationRequestParamsMap,
+            true,
+            ClientIdScheme.REDIRECT_URI
         )
 
         openID4VP.authenticateVerifier(

@@ -3,9 +3,8 @@ package io.mosip.openID4VP.authorizationRequest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 
-interface Validatable {
+fun interface Validatable {
     fun validate()
 }
 

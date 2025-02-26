@@ -50,7 +50,7 @@ fun getAuthorizationRequestHandler(
 }
 
 fun validateAttribute(
-    authorizationRequestParameters: MutableMap<String, Any>,
+    authorizationRequestParameters: Map<String, Any>,
     attribute: String,
 ) {
     val value = getStringValue(authorizationRequestParameters, attribute)
@@ -148,8 +148,8 @@ fun parseAndValidateClientMetadata(authorizationRequestParameters: MutableMap<St
 }
 
 fun validateAuthorizationRequestObjectAndParameters(
-    params: MutableMap<String, Any>,
-    authorizationRequestObject: MutableMap<String, Any>,
+    params: Map<String, Any>,
+    authorizationRequestObject: Map<String, Any>,
 ) {
     if (params[CLIENT_ID.value] != authorizationRequestObject[CLIENT_ID.value]) {
         throw Logger.handleException(

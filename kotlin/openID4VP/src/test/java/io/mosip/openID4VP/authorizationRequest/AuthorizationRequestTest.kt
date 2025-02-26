@@ -10,30 +10,19 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidData
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidInput
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidResponseMode
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidVerifier
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.MissingInput
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
-import io.mosip.openID4VP.testData.clientIdAndSchemeOfPreRegistered
-import io.mosip.openID4VP.testData.clientIdAndSchemeOfReDirectUri
-import io.mosip.openID4VP.testData.createAuthorizationRequestObject
+import io.mosip.openID4VP.testData.*
 import io.mosip.openID4VP.testData.createUrlEncodedData
-import io.mosip.openID4VP.testData.presentationDefinitionString
-import io.mosip.openID4VP.testData.requestParams
-import io.mosip.openID4VP.testData.requestUrl
-import io.mosip.openID4VP.testData.trustedVerifiers
 import okhttp3.Headers
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 
 class AuthorizationRequestTest {
     private lateinit var openID4VP: OpenID4VP
@@ -588,7 +577,7 @@ class AuthorizationRequestTest {
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, authorizationRequestParamsMap, applicationFields, isPresentationDefinitionUriPresent = true)
+            "body" to createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, authorizationRequestParamsMap, applicationFields)
         )
 
 
