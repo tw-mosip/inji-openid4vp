@@ -93,6 +93,7 @@ class AuthorizationRequestObjectObtainedByReference {
                 shouldValidateClient = true
             )
         }
+
     }
 
     @Test

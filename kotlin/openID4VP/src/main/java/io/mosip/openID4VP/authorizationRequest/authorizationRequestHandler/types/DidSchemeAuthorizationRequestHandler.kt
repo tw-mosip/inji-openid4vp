@@ -34,9 +34,10 @@ class DidSchemeAuthorizationRequestHandler(
             val responseBody = requestUriResponse["body"].toString()
 
             if(isValidContentType(headers) &&  isJWT(responseBody)){
+                val didUrl = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
                 JwtHandler(
                     responseBody,
-                    DidPublicKeyResolver(getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!)
+                    DidPublicKeyResolver(didUrl)
                 ).verify()
                 val authorizationRequestObject = extractDataJsonFromJwt(
                     responseBody,

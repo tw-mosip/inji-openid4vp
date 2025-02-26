@@ -116,7 +116,7 @@ class AuthorizationRequestTest {
 
         assertEquals(expectedExceptionMessage, actualException.message)
     }
-    
+
 
     @Test
     fun `should throw exception if neither presentation_definition nor presentation_definition_uri param present in Authorization Request`() {

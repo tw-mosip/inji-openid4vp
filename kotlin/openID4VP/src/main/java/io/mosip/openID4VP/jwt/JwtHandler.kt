@@ -30,7 +30,7 @@ class JwtHandler(private val jwt: String, private val publicKeyResolver: PublicK
             val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJwt(jwt, HEADER))
             val publicKeyBytes = Base64.decode(publicKey)
             val publicKeyParams = Ed25519PublicKeyParameters(publicKeyBytes, 0)
-            val signer = Ed25519Signer() //TODO: check should not be signer but verifier
+            val signer = Ed25519Signer()
             signer.init(false, publicKeyParams)
 
             val messageBytes = "$header.$payload".toByteArray(StandardCharsets.UTF_8)
