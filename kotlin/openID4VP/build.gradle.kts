@@ -59,6 +59,11 @@ dependencies {
     implementation(libs.jackson.annotations)
     implementation (libs.nimbus.jose.jwt)
     implementation(libs.bouncyCastle)
+    implementation(libs.identity.credential)
+    implementation(libs.ld.signatures.java)
+    implementation(libs.jsonld.common.java)
+    implementation(libs.vcverifier)
+
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

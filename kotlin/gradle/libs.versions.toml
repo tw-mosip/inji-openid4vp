@@ -1,8 +1,9 @@
 [versions]
 agp = "8.4.2"
-bcprovJdk15on = "1.74"
-jacksonAnnotations = "2.15.2"
-jacksonModuleKotlin = "2.15.2"
+identityCredential = "20231002"
+jacksonAnnotations = "2.14.0"
+jacksonModuleKotlin = "2.14.0"
+jsonldCommonJava = "1.8.0"
 kotlin = "2.0.0"
 coreKtx = "1.9.0"
 bouncyCastle = "1.70"
@@ -10,6 +11,7 @@ junit = "4.13.2"
 jupiterJunit = "5.10.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+ldSignaturesJava = "1.5.0"
 nimbusJoseJwt = "9.22"
 serializationJson = "1.7.1"
 serialization = "2.0.0"
@@ -17,26 +19,30 @@ okhttp3 = "4.12.0"
 commonsCodecVersion = "1.16.0"
 mockk = "1.13.10"
 mockwebserver = "4.12.0"
+vcverifier = "1.2.0-SNAPSHOT"
 sonarqube = "5.1.0.4872"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-bcprov-jdk15on = { module = "org.bouncycastle:bcprov-jdk15on", version.ref = "bcprovJdk15on" }
 bouncyCastle = { group = "org.bouncycastle", name = "bcprov-jdk15to18", version.ref = "bouncyCastle" }
+identity-credential = { module = "com.android.identity:identity-credential", version.ref = "identityCredential" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
 jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jacksonAnnotations" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jacksonAnnotations" }
 jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jacksonModuleKotlin" }
+jsonld-common-java = { module = "decentralized-identity:jsonld-common-java", version.ref = "jsonldCommonJava" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 jetbrains-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref="serializationJson"}
+ld-signatures-java = { module = "info.weboftrust:ld-signatures-java", version.ref = "ldSignaturesJava" }
 nimbus-jose-jwt = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbusJoseJwt" }
 okhttp3 = {group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3"}
 commons-codec = {group = "commons-codec", name ="commons-codec", version.ref = "commonsCodecVersion"}
 mockk = {group = "io.mockk", name = "mockk", version.ref = "mockk"}
 mockwebserver = {group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "mockwebserver"}
 jupiter-junit = {group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "jupiterJunit"}
+vcverifier = {group = "io.mosip", name = "vcverifier-jar", version.ref = "vcverifier"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
