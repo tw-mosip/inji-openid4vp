@@ -3,6 +3,7 @@ package io.mosip.openID4VP.common
 import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.jwt.exception.JWTVerificationException
+import io.mosip.openID4VP.jwe.exception.JWEExceptions
 
 object Logger {
     private var traceabilityId: String? = null
@@ -68,6 +69,27 @@ object Logger {
             "PublicKeyExtractionFailed" -> JWTVerificationException.PublicKeyExtractionFailed(message = message ?: "")
 
             "InvalidSignature" -> JWTVerificationException.InvalidSignature(message = message ?: "")
+
+
+
+
+
+            //JWK Algorithm Exceptions
+            "PublicKeyConversionFailed" ->  JWEExceptions.PublicKeyConversionFailed()
+
+            "PayloadConversionFailed" ->  JWEExceptions.PayloadConversionFailed()
+
+            "UnsupportedKeyExchangeAlgorithm" ->  JWEExceptions.UnsupportedKeyExchangeAlgorithm()
+
+            "UnsupportedEncryptionAlgorithm" ->  JWEExceptions.UnsupportedEncryptionAlgorithm()
+
+            "InvalidJwksInput" ->  JWEExceptions.InvalidJwksInput(fieldPathAsString)
+
+            "EncryptionConfigExtractionFailed" ->  JWEExceptions.EncryptionConfigExtractionFailed()
+
+
+//          Client Metadata verification for jwk
+            "MissingInputsInClientMetadataForResponseModeDirectPostJwt" -> AuthorizationRequestExceptions.MissingInputsInClientMetadataForResponseModeDirectPostJwt()
 
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")
         }

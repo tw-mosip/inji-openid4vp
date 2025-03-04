@@ -7,7 +7,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
@@ -16,6 +16,10 @@ import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
+import io.mosip.openID4VP.testData.clientMetadataString
+import io.mosip.openID4VP.testData.clientMetadataWithEmptyPublicKey
+import io.mosip.openID4VP.testData.encodedAuthorizationRequestForValidRequestWithResponseUriAndResponseModeJWT
+
 import okhttp3.Headers
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -199,5 +203,37 @@ class AuthorizationResponseTest {
         val actualResponse = openID4VP.shareVerifiablePresentation(vpResponseMetadata)
 
         assertEquals(expectedValue, actualResponse)
+    }
+
+    @Test
+    fun `test empty PublicKey in ClientMetadata Jwks`() {
+        try {
+            println(deserializeAndValidate(clientMetadataString, ClientMetadataSerializer))
+            assert(false) { "Expected an exception but none was thrown." }
+        } catch (e: Exception) {
+            assertEquals("Invalid Input: jwk->x value cannot be an empty string, null, or an integer", e.localizedMessage)
+        }
+    }
+
+    @Test
+    fun `test return data for valid Request with ResponseUri and ResponseModeJWT`() {
+        try {
+            openID4VP.authorizationRequest = encodedAuthorizationRequestForValidRequestWithResponseUriAndResponseModeJWT
+            //openID4VP.responseUri = encodedAuthorizationRequestForValidRequestWithResponseUriAndResponseModeJWT.responseUri
+            val mockResponse: MockResponse = MockResponse().setResponseCode(200).setBody("Verifiable Presentation is shared successfully")
+            mockWebServer.enqueue(mockResponse)
+            vpResponseMetadata = VPResponseMetadata(
+                "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
+                "RsaSignature2018",
+                publicKey,
+                "https://123",
+            )
+
+            val response = openID4VP.shareVerifiablePresentation(vpResponseMetadata)
+            assertEquals("Verifiable Presentation is shared successfully", response)
+        } catch (e: Exception) {
+            println(e.localizedMessage)
+            e.printStackTrace()
+        }
     }
 }

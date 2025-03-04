@@ -2,11 +2,12 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.ClientIdScheme.PRE_REGISTERED
-import io.mosip.openID4VP.authorizationRequest.parseAndValidateClientMetadata
-import io.mosip.openID4VP.authorizationRequest.parseAndValidatePresentationDefinition
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.validateAttribute
+import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.ResponseMode.*
 import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
@@ -50,11 +51,10 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                 fieldPath = listOf(RESPONSE_MODE.value)
             )
         val verifierResponseUri = when (responseMode) {
-            "direct_post" -> {
+           DIRECT_POST.value, DIRECT_POST_JWT.value -> {
                 validateAttribute(authorizationRequestParameters, RESPONSE_URI.value)
                 getStringValue(authorizationRequestParameters, RESPONSE_URI.value)
             }
-
             else -> throw Logger.handleException(
                 exceptionType = "InvalidResponseMode",
                 className = className,

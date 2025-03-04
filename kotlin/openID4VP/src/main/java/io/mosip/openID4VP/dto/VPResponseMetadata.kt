@@ -4,6 +4,7 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
 
 private val className = VPResponseMetadata::class.simpleName!!
+
 data class VPResponseMetadata(
     val jws: String,
     val signatureAlgorithm: String,

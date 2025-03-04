@@ -10,7 +10,10 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.REDIRECT_URI
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
+import io.mosip.openID4VP.common.ClientIdScheme
+import io.mosip.openID4VP.common.ClientIdScheme.*
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.testData.*
 import io.mosip.openID4VP.testData.createUrlEncodedData
@@ -65,10 +68,10 @@ class AuthorizationRequestTest {
     @Test
     fun `should throw missing input exception if client_id param is missing in Authorization Request`() {
         val authorizationRequestParamsMap = requestParams.minus(CLIENT_ID.value) + mapOf(
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+            CLIENT_ID_SCHEME.value to DID.value
         )
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,false , DID)
 
         expectedExceptionMessage = "Missing Input: client_id param is required"
 
@@ -88,7 +91,7 @@ class AuthorizationRequestTest {
             CLIENT_ID_SCHEME.value to "wrong-value"
         )
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,false , DID)
 
         expectedExceptionMessage = "Given client_id_scheme is not supported"
 
@@ -106,10 +109,10 @@ class AuthorizationRequestTest {
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is empty string`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             CLIENT_ID.value to "",
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+            CLIENT_ID_SCHEME.value to DID.value
         )
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,false , DID)
 
         expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
 

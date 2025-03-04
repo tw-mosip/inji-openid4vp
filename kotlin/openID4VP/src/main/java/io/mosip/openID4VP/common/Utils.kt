@@ -19,6 +19,13 @@ fun convertJsonToMap(jsonString: String): MutableMap<String, Any> {
         object : TypeReference<MutableMap<String, Any>>() {})
 }
 
+fun convertMapToJsonString(map: Map<String, Any>): String {
+    val mapper = jacksonObjectMapper()
+    return mapper.writeValueAsString(map)
+}
+
+
+
 fun isJWT(input: String): Boolean {
     return input.split(".").size == 3
 }

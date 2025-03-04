@@ -1,7 +1,6 @@
 package io.mosip.openID4VP
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.VPResponseMetadata
@@ -49,12 +48,11 @@ class OpenID4VP(private val traceabilityId: String) {
 
     fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
         try {
+            //TODO: fix this
             return AuthorizationResponse.shareVP(
                 vpResponseMetadata,
-                authorizationRequest.nonce,
-                authorizationRequest.state,
-                authorizationRequest.responseUri!!,
-                (this.authorizationRequest.presentationDefinition as PresentationDefinition).id
+                authorizationRequest,
+                responseUri ?: "http://localhost:8080/injiverify.dev2.mosip.net/redirect"
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)

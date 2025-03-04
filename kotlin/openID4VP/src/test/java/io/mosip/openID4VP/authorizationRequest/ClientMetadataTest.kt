@@ -7,6 +7,10 @@ import io.mockk.mockkStatic
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
+import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.testData.clientIdAndSchemeOfPreRegistered
+import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.createUrlEncodedData
 import io.mosip.openID4VP.testData.requestParams
 import io.mosip.openID4VP.testData.trustedVerifiers
@@ -40,13 +44,9 @@ class ClientMetadataTest {
 
 	@Test
 	fun `should parse client metadata successfully`() {
-		val authorizationRequestParamsMap = requestParams + mapOf(
-			CLIENT_ID.value to "https://verifier.env1.net",
-			CLIENT_ID_SCHEME.value to "pre-registered",
-			RESPONSE_URI.value to "https://verifier.env1.net/responseUri"
-		)
+		val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
 		val encodedAuthorizationRequest =
-			createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+			createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED)
 		assertDoesNotThrow {
 			 openID4VP.authenticateVerifier(
 				 encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
@@ -63,7 +63,7 @@ class ClientMetadataTest {
 			CLIENT_METADATA.value to "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\"}"
 		)
 		val encodedAuthorizationRequest =
-			createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+			createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED)
 
 
 		val expectedExceptionMessage =
@@ -87,7 +87,7 @@ class ClientMetadataTest {
 			CLIENT_METADATA.value to "{\"client_name\":\"\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
 		)
 		val encodedAuthorizationRequest =
-			createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+			createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED)
 
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->client_name value cannot be an empty string, null, or an integer"
@@ -111,7 +111,7 @@ class ClientMetadataTest {
 			CLIENT_METADATA.value to "{\"client_name\":null,\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
 		)
 		val encodedAuthorizationRequest =
-			createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+			createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED)
 
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->client_name value cannot be an empty string, null, or an integer"
@@ -135,7 +135,7 @@ class ClientMetadataTest {
 
 		)
 		val encodedAuthorizationRequest =
-			createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
+			createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED)
 
 		val expectedExceptionMessage =
 			"Invalid Input: client_metadata->logo_uri value cannot be an empty string, null, or an integer"
@@ -148,5 +148,11 @@ class ClientMetadataTest {
 			}
 
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+	}
+
+	@Test
+	fun `test function`() {
+		val c = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
+		println(c)
 	}
 }

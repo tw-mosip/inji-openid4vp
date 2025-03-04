@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.authorizationRequest
+package io.mosip.openID4VP.authorizationRequest.clientMetadata
 
 import Generated
 import io.mosip.openID4VP.common.FieldDeserializer
@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.Validatable
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -24,6 +25,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 		element<Map<String,String>>("vp_formats", isOptional = false)
 		element<String>("authorization_encrypted_response_alg", isOptional = true)
 		element<String>("authorization_encrypted_response_enc", isOptional = true)
+		element<Jwks>("jwks", isOptional = true)
 	}
 
 	override fun deserialize(decoder: Decoder): ClientMetadata {
@@ -44,38 +46,42 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 			parentField = CLIENT_METADATA.value
 		)
 
-        val clientName: String? =
-            deserializer.deserializeField(key = "client_name", fieldType = "String")
-        val logoUri: String? =
-            deserializer.deserializeField(key = "logo_uri", fieldType = "String")
-        val vpFormats: Map<String, String> =
-            deserializer.deserializeField<Map<String, String>>(
-                key = "vp_formats",
-                fieldType = "Map"
-            ) ?: throw Logger.handleException(
-                exceptionType = "InvalidInput",
-                fieldPath = listOf(CLIENT_METADATA.value, "vp_formats"),
-                className = className,
-                fieldType = "map"
-            )
-        val authorizationEncryptedResponseAlg: String? =
-            deserializer.deserializeField(
-                key = "authorizationEncryptedResponseAlg",
-                fieldType = "String"
-            )
-        val authorizationEncryptedResponseEnc: String? = deserializer.deserializeField(
-            key = "authorization_encrypted_response_enc",
-            fieldType = "String"
-        )
+		val clientName: String? =
+			deserializer.deserializeField(key = "client_name", fieldType = "String")
+		val logoUri: String? =
+			deserializer.deserializeField(key = "logo_uri", fieldType = "String")
+		val vpFormats: Map<String, String> =
+			deserializer.deserializeField<Map<String, String>>(
+				key = "vp_formats",
+				fieldType = "Map"
+			) ?: throw Logger.handleException(
+				exceptionType = "InvalidInput",
+				fieldPath = listOf(CLIENT_METADATA.value, "vp_formats"),
+				className = className,
+				fieldType = "map"
+			)
+		val authorizationEncryptedResponseAlg: String? =
+			deserializer.deserializeField(key = "authorization_encrypted_response_alg", fieldType = "String")
+		val authorizationEncryptedResponseEnc: String? =
+			deserializer.deserializeField(
+				key = "authorization_encrypted_response_enc",
+				fieldType = "String"
+			)
+		val jwks: Jwks? = deserializer.deserializeField(
+			key = "jwks",
+			fieldType = "Jwks",
+			deserializer = Jwks.serializer(),
+			isMandatory = false
+		)
 
-
-        return ClientMetadata(
-            clientName = clientName,
-            logoUri = logoUri,
-            vpFormats = vpFormats,
-            authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg,
-            authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc
-        )
+		return ClientMetadata(
+			clientName = clientName,
+			logoUri = logoUri,
+			vpFormats = vpFormats,
+			authorizationEncryptedResponseAlg = authorizationEncryptedResponseAlg,
+			authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc,
+			jwks = jwks,
+		)
     }
 
 	@Generated
@@ -101,8 +107,15 @@ class ClientMetadata(
 	@SerialName("vp_formats") val vpFormats: Map<String, String>,
 	@SerialName("authorization_encrypted_response_alg") val authorizationEncryptedResponseAlg: String?,
 	@SerialName("authorization_encrypted_response_enc") val authorizationEncryptedResponseEnc: String?,
+	@SerialName("jwks") val jwks: Jwks?,
 ) : Validatable {
 
 	override fun validate() {
 	}
+
+	override fun toString(): String {
+		return "ClientMetadata(authorizationEncryptedResponseAlg=$authorizationEncryptedResponseAlg, clientName=$clientName, logoUri=$logoUri, vpFormats=$vpFormats, authorizationEncryptedResponseEnc=$authorizationEncryptedResponseEnc, jwks=$jwks)"
+	}
+
+
 }
