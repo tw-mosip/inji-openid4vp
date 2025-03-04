@@ -129,6 +129,21 @@ class AuthorizationResponseHandlerTest {
     }
 
     @Test
+    fun `should throw error during construction of data for signing when selected Credentials is empty`() {
+        val actualException =
+            Assert.assertThrows(AuthorizationResponseExceptions.AccessDenied::class.java) {
+                AuthorizationResponseHandler().constructDataForSigning(
+                    credentialsMap = mapOf()
+                )
+            }
+
+        Assert.assertEquals(
+            "The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
+            actualException.message
+        )
+    }
+
+    @Test
     fun `should throw exception when response_type in authorization request is not vp_token`() {
         val authorizationRequestWithUnsupportedResponseType = AuthorizationRequest(
             clientId = "redirect_uri:https://mock-verifier.com",

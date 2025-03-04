@@ -7,4 +7,6 @@ sealed class AuthorizationResponseExceptions {
     class UnsupportedResponseType(message: String) : Exception(message)
 
     class UnsupportedResponseMode(message: String) : Exception(message)
+
+    class AccessDenied(message: String) : Exception(message)
 }

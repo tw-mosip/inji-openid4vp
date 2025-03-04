@@ -30,6 +30,13 @@ class AuthorizationResponseHandler {
 
     @Throws(Exception::class)
     fun constructDataForSigning(credentialsMap: Map<String, Map<String, List<Any>>>): Map<FormatType, CredentialFormatSpecificSigningData> {
+        if(credentialsMap.isEmpty()){
+            throw Logger.handleException(
+                exceptionType = "access_denied",
+                className = className,
+                message = "The Wallet did not have the requested Credentials to satisfy the Authorization Request."
+            )
+        }
         vpTokensForSigning =
             CredentialFormatSpecificSigningDataMapCreator().create(selectedCredentials = credentialsMap)
         return vpTokensForSigning
@@ -72,38 +79,30 @@ class AuthorizationResponseHandler {
     ): String {
         when (authorizationRequest.responseMode) {
             ResponseMode.directPost.value -> {
+                // 1.Gather request body items
+                val bodyParams = authorizationResponse.encodedItems().let { baseParams ->
+                    authorizationRequest.state?.let { baseParams + mapOf("state" to it) }
+                        ?: baseParams
+                }
+
+
+                // 2. make api call
                 try {
-                    // 1.Gather request body items
-                    val bodyParams = authorizationResponse.encodedItems() .let { baseParams ->
-                        authorizationRequest.state?.let { baseParams + mapOf("state" to it) } ?: baseParams
-                    }
-
-
-                    // 2. make api call
-                    try {
-                        val responseUri: String = authorizationRequest.responseUri
-                            ?: if (authorizationRequest.clientIdScheme == ClientIdScheme.REDIRECT_URI.value) {
-                                authorizationRequest.redirectUri!!
-                            } else {
-                                return ""
-                            }
-                        val response = sendHTTPRequest(
-                            url = responseUri,
-                            method = HTTP_METHOD.POST,
-                            bodyParams = bodyParams,
-                            headers = mapOf("Content-Type" to "application/x-www-form-urlencoded")
-                        )
-                        return response["body"].toString()
-                    } catch (exception: Exception) {
-                        throw exception
-                    }
-                } catch (error: Exception) {
-                    println("error os Unable to send authorization response to the provided response_uri via direct_post with error $error")
-                    throw Logger.handleException(
-                        exceptionType = "AuthorizationResponseSendingFailed",
-                        message = "Unable to send authorization response to the provided response_uri via direct_post with error $error",
-                        className = className
+                    val responseUri: String = authorizationRequest.responseUri
+                        ?: if (authorizationRequest.clientIdScheme == ClientIdScheme.REDIRECT_URI.value) {
+                            authorizationRequest.redirectUri!!
+                        } else {
+                            return ""
+                        }
+                    val response = sendHTTPRequest(
+                        url = responseUri,
+                        method = HTTP_METHOD.POST,
+                        bodyParams = bodyParams,
+                        headers = mapOf("Content-Type" to "application/x-www-form-urlencoded")
                     )
+                    return response["body"].toString()
+                } catch (exception: Exception) {
+                    throw exception
                 }
             }
 
@@ -169,7 +168,6 @@ class AuthorizationResponseHandler {
 
     @Throws(Exception::class)
     private fun createInputDescriptor(credentialsMap: Map<String, Map<String, List<Any>>>): List<DescriptorMap> {
-        //TODO: Handle for single VP
         //In case of only single VP, presentation_submission -> path = $, path_nest = $.<credentialPathIdentifier - internalPath>[n]
         //and in case of multiple VPs, presentation_submission -> path = $[i], path_nest = $[i].<credentialPathIdentifier - internalPath>[n]
         val descriptorsMap: MutableList<DescriptorMap> = mutableListOf()

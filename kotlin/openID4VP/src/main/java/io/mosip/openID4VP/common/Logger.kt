@@ -106,6 +106,11 @@ object Logger {
                     message = message ?: "Provided response_mode is not supported by the library"
                 )
 
+            "access_denied" ->
+                AuthorizationResponseExceptions.AccessDenied(
+                    message = message ?: "Provided response_mode is not supported by the library"
+                )
+
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")
         }
         this.error(getLogTag(className), exception)

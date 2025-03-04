@@ -37,10 +37,8 @@ class CredentialFormatSpecificSigningDataMapCreator {
                     if (!groupedVcs.containsKey(formatType)) {
                         groupedVcs[formatType] = matchingVcOfFormat
                     } else {
-//                        val existingData = groupedVcs[formatType] as MutableList<Any>
                         val existingData = groupedVcs[formatType]!!.toMutableList()
                         existingData.addAll(matchingVcOfFormat)
-//                        matchingVcOfFormat.forEach { matchingVc -> existingData.add(matchingVc) }
                         groupedVcs[formatType] = existingData
                     }
                 }

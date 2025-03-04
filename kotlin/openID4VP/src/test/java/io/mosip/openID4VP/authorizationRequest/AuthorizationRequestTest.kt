@@ -34,10 +34,10 @@ class AuthorizationRequestTest {
     @Before
     fun setUp() {
 
-        mockkObject(NetworkManagerClient.Companion)
+        mockkObject(NetworkManagerClient)
         openID4VP = OpenID4VP("test-OpenID4VP")
 
-        mockkStatic(android.util.Log::class)
+        mockkStatic(Log::class)
         every { Log.e(any(), any()) } answers {
             val tag = arg<String>(0)
             val msg = arg<String>(1)
