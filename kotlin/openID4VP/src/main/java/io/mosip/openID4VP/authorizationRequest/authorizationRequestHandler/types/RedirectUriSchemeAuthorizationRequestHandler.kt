@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.type
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
+import io.mosip.openID4VP.authorizationRequest.extractClientIdentifier
 import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.networkManager.CONTENT_TYPES.APPLICATION_JSON
@@ -82,7 +83,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 validateAttribute(authRequestParam, validAttribute)
             }
         }
-        if(authRequestParam[validAttribute] != authRequestParam[CLIENT_ID.value])
+        if(authRequestParam[validAttribute] != extractClientIdentifier(getStringValue(authRequestParam, CLIENT_ID.value)!!))
             throw Logger.handleException(
                 exceptionType = "InvalidVerifierRedirectUri",
                 className = className,

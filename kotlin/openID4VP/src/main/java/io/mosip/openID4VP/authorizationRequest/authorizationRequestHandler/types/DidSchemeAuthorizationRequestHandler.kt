@@ -18,16 +18,6 @@ class DidSchemeAuthorizationRequestHandler(
     authorizationRequestParameters: MutableMap<String, Any>,
     setResponseUri: (String) -> Unit
 ) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
-    override fun validateClientId(){
-        super.validateClientId()
-        if(!getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!.startsWith("did"))
-            throw Logger.handleException(
-                exceptionType =  "InvalidVerifier",
-                className = className,
-                message = "Client ID should start with did prefix if client_id_scheme is did"
-            )
-    }
-
     override fun validateRequestUriResponse() {
         if(requestUriResponse.isNotEmpty()){
             val headers = requestUriResponse["header"] as Headers

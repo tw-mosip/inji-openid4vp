@@ -21,7 +21,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     var requestUriResponse: Map<String, Any> = emptyMap()
 
     open fun validateClientId() {
-        validateAttribute(authorizationRequestParameters, CLIENT_ID.value)
+        return
     }
 
     fun fetchAuthorizationRequest() {

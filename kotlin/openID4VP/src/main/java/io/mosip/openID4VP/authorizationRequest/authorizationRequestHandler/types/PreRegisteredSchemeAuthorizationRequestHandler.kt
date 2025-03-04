@@ -19,7 +19,6 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
     setResponseUri: (String) -> Unit
 ) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
     override fun validateClientId() {
-        super.validateClientId()
         if (!shouldValidateClient) return
 
         val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!

@@ -66,7 +66,7 @@ class AuthorizationRequestObjectObtainedByReference {
     //Client Id scheme - DID
     @Test
     fun `should return Authorization Request if it has request uri and it is a valid authorization request in did client id scheme`() {
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -95,7 +95,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
     @Test
     fun `should throw error if context type is wrong for request uri response`() {
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -132,7 +132,7 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } throws NetworkManagerClientExceptions.NetworkRequestTimeout()
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid
         val encodedAuthorizationRequest =
             createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
 
@@ -155,7 +155,7 @@ class AuthorizationRequestObjectObtainedByReference {
     @Test
     fun `should throw exception when request_uri is not present in did client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid
         val encodedAuthorizationRequest =
             createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID, authRequestWithDidByValue)
 
@@ -177,7 +177,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
     @Test
     fun `should make call to request_uri with the request_uri_method when the fields are available in did client id scheme`() {
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -208,7 +208,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
     @Test
     fun `should throw error if  request_uri is not valid in authorization request`() {
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid + mapOf(REQUEST_URI.value to "test-data")
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid + mapOf(REQUEST_URI.value to "test-data")
 
         val encodedAuthorizationRequest =
             createUrlEncodedData(authorizationRequestParamsMap,true, ClientIdScheme.REDIRECT_URI )
@@ -227,7 +227,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
     @Test
     fun `should make a call to request_uri in get http call if request_uri_method is not available in did client id scheme`() {
-        val authorizationRequestParamsMap = requestParams.minus("request_uri_method") + clientIdAndSchemeOfDid
+        val authorizationRequestParamsMap = requestParams.minus("request_uri_method") + clientIdOfDid
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -260,7 +260,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
     @Test
     fun `should return authorization request from redirect uri scheme where request uri is present`() {
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfReDirectUri
+        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUri
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -292,32 +292,6 @@ class AuthorizationRequestObjectObtainedByReference {
     }
 
     @Test
-    fun `should throw invalid verifier for invalid client id in authorization request in did client id scheme`() {
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            CLIENT_ID.value to "invaliddid:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
-        )
-
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(
-                authorizationRequestParamsMap,
-                true,
-                ClientIdScheme.DID
-            )
-
-        val exception = assertThrows<InvalidVerifier> {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true
-            )
-        }
-
-        assertEquals("Client ID should start with did prefix if client_id_scheme is did", exception.message)
-
-    }
-
-    @Test
     fun `should throw exception when the client_id validation fails while obtaining Authorization request object by reference in did client id scheme`() {
         every {
             NetworkManagerClient.sendHTTPRequest(requestUrl, any())
@@ -331,7 +305,7 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         )
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid
         val encodedAuthorizationRequest =
             createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
 
@@ -350,44 +324,11 @@ class AuthorizationRequestObjectObtainedByReference {
         )
     }
 
-    @Test
-    fun `should throw exception when the client_id_scheme validation fails while obtaining Authorization request object by reference in did client id scheme`() {
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns  mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
-                CLIENT_ID.value to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-                CLIENT_ID_SCHEME.value to ClientIdScheme.PRE_REGISTERED.value
-            ))
-        )
-
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
-
-        val exception = assertThrows(InvalidData::class.java) {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true
-            )
-        }
-
-        assertEquals(
-            "Client Id Scheme mismatch in Authorization Request parameter and the Request Object",
-            exception.message
-        )
-    }
-
     //Client Id scheme - Pre-registered
     @Test
     fun `should return back authorization request successfully when authorization request is obtained by reference in pre-registered client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -415,7 +356,7 @@ class AuthorizationRequestObjectObtainedByReference {
     @Test
     fun `should throw error when signed authorization request is obtained by reference in pre-registered client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -443,7 +384,7 @@ class AuthorizationRequestObjectObtainedByReference {
     @Test
     fun `should throw error when signed authorization request is obtained by reference in redirect client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfReDirectUri
+        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUri
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -470,6 +411,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
     //Client Id - Pre-registered
     @Test
+//    @Ignore("fix the test")
     fun `should validate client_id when authorization request is obtained by reference in pre-registered client id scheme`() {
         every {
             NetworkManagerClient.sendHTTPRequest(requestUrl, any())
@@ -483,7 +425,7 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         )
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
         val encodedAuthorizationRequest =
             createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
 
@@ -499,81 +441,6 @@ class AuthorizationRequestObjectObtainedByReference {
         assertEquals(
             "Client Id mismatch in Authorization Request parameter and the Request Object",
             invalidClientIdException.message
-        )
-    }
-
-    //Client Id scheme - Pre-registered
-    @Test
-    fun `should validate client_id_scheme when authorization request is obtained by reference in pre-registered client id scheme`() {
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/json").build(),
-            "body" to createAuthorizationRequestObject(
-                ClientIdScheme.PRE_REGISTERED, requestParams + mapOf(
-                    CLIENT_ID.value to "https://verifier.env1.net",
-                    CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
-                )
-            )
-        )
-
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
-
-        val invalidClientIsSchemeException =
-            assertThrows(InvalidData::class.java) {
-                openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest,
-                    trustedVerifiers,
-                    shouldValidateClient = true
-                )
-            }
-
-        assertEquals(
-            "Client Id Scheme mismatch in Authorization Request parameter and the Request Object",
-            invalidClientIsSchemeException.message
-        )
-    }
-
-    @Test
-    fun `should validate client_id_scheme when authorization request is obtained by reference in pre-registered client id scheme and it is null in qr code data`() {
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/json").build(),
-            "body" to createAuthorizationRequestObject(
-                ClientIdScheme.PRE_REGISTERED, requestParams + mapOf(
-                    CLIENT_ID.value to "https://verifier.env1.net",
-                    CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
-                )
-            )
-        )
-
-        val authorizationRequestParamsMap = requestParams + mapOf(
-            CLIENT_ID.value to "https://verifier.env1.net",
-        )
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
-
-        val invalidClientIsSchemeException =
-            assertThrows(InvalidData::class.java) {
-                openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest,
-                    trustedVerifiers,
-                    shouldValidateClient = true
-                )
-            }
-
-        assertEquals(
-            "Client Id Scheme mismatch in Authorization Request parameter and the Request Object",
-            invalidClientIsSchemeException.message
         )
     }
 }

@@ -153,7 +153,7 @@ val didResponse = """
 
 val trustedVerifiers: List<Verifier> = listOf(
     Verifier(
-        "https://verifier.env1.net", listOf(
+        "mock-client", listOf(
             "https://verifier.env1.net/responseUri", "https://verifier.env2.net/responseUri"
         )
     ), Verifier(
@@ -165,7 +165,6 @@ val trustedVerifiers: List<Verifier> = listOf(
 
 val authRequestParamsByReference = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     REQUEST_URI.value,
     REQUEST_URI_METHOD.value
 )
@@ -173,7 +172,6 @@ val authRequestParamsByReference = listOf(
 
 val authRequestWithRedirectUriByValue = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     RESPONSE_URI.value,
     RESPONSE_MODE.value,
     PRESENTATION_DEFINITION.value,
@@ -185,7 +183,6 @@ val authRequestWithRedirectUriByValue = listOf(
 
 val authRequestWithPreRegisteredByValue = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     RESPONSE_MODE.value,
     RESPONSE_URI.value,
     PRESENTATION_DEFINITION.value,
@@ -197,7 +194,6 @@ val authRequestWithPreRegisteredByValue = listOf(
 
 val authRequestWithDidByValue = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     RESPONSE_MODE.value,
     RESPONSE_URI.value,
     PRESENTATION_DEFINITION.value,
@@ -208,8 +204,6 @@ val authRequestWithDidByValue = listOf(
 )
 
 val requestParams: Map<String, String> = mapOf(
-    CLIENT_ID.value to "https://mock-verifier.com",
-    CLIENT_ID_SCHEME.value to "pre-registered",
     REDIRECT_URI.value to "https://mock-verifier.com",
     RESPONSE_URI.value to "https://verifier.env1.net/responseUri",
     REQUEST_URI.value to requestUrl,
@@ -229,19 +223,16 @@ val authorisationRequestListToClientIdSchemeMap = mapOf(
     ClientIdScheme.PRE_REGISTERED to authRequestWithPreRegisteredByValue
 )
 
-val clientIdAndSchemeOfDid = mapOf(
+val clientIdOfDid = mapOf(
     CLIENT_ID.value to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-    CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
 )
 
-val clientIdAndSchemeOfPreRegistered = mapOf(
-    CLIENT_ID.value to "https://verifier.env1.net",
-    CLIENT_ID_SCHEME.value to ClientIdScheme.PRE_REGISTERED.value
+val clientIdOfPreRegistered = mapOf(
+    CLIENT_ID.value to "mock-client",
 )
 
-val clientIdAndSchemeOfReDirectUri = mapOf(
-    CLIENT_ID.value to "https://verifier.env1.net/responseUri",
-    CLIENT_ID_SCHEME.value to REDIRECT_URI.value,
+val clientIdOfReDirectUri = mapOf(
+    CLIENT_ID.value to "${REDIRECT_URI.value}:https://verifier.env1.net/responseUri",
 )
 
 val clientMetadataPresentationDefinitionMap = mapOf(
