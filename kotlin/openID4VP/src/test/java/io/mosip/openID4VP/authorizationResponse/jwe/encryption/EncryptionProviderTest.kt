@@ -7,8 +7,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
-import io.mosip.openID4VP.jwe.exception.JWEExceptions.UnsupportedEncryptionAlgorithm
-import io.mosip.openID4VP.jwe.exception.JWEExceptions.UnsupportedKeyExchangeAlgorithm
+import io.mosip.openID4VP.authorizationResponse.exception.JWEExceptions.UnsupportedEncryptionAlgorithm
+import io.mosip.openID4VP.authorizationResponse.exception.JWEExceptions.UnsupportedKeyExchangeAlgorithm
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows

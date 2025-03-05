@@ -1,9 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse.jwe.keyExchange
 
 import com.nimbusds.jose.JWEAlgorithm
-import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.jwe.exception.JWEExceptions.UnsupportedKeyExchangeAlgorithm
 
 private val className = KeyExchangeProvider::class.simpleName!!
 object KeyExchangeProvider {

@@ -3,7 +3,7 @@ package io.mosip.openID4VP.common
 import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.jwt.exception.JWTVerificationException
-import io.mosip.openID4VP.jwe.exception.JWEExceptions
+import io.mosip.openID4VP.authorizationResponse.exception.JWEExceptions
 
 object Logger {
     private var traceabilityId: String? = null

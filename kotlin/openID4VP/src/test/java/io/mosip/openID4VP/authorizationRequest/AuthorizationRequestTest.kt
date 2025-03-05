@@ -96,7 +96,7 @@ class AuthorizationRequestTest {
         expectedExceptionMessage = "Given client_id_scheme is not supported"
 
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidClientIdScheme::class.java) {
+            assertThrows(InvalidClientIdScheme::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
