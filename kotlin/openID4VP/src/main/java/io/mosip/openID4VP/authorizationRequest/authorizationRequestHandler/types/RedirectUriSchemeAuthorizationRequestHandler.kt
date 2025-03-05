@@ -4,7 +4,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
-import io.mosip.openID4VP.networkManager.CONTENT_TYPES.APPLICATION_JSON
+import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JSON
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
@@ -50,7 +50,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
             fieldPath = listOf(RESPONSE_MODE.value)
         )
          when (responseMode) {
-            "direct_post" -> {
+            "direct_post", "direct_post.jwt" -> {
                 validateUriCombinations(
                     authorizationRequestParameters,
                     RESPONSE_URI.value,

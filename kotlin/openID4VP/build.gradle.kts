@@ -57,12 +57,16 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.jackson.core)
     implementation(libs.jackson.annotations)
-    implementation (libs.nimbus.jose.jwt)
+    implementation(libs.nimbus.jose.jwt)
     implementation(libs.bouncyCastle)
     implementation(libs.identity.credential)
     implementation(libs.ld.signatures.java)
     implementation(libs.jsonld.common.java)
     implementation(libs.vcverifier)
+    implementation(libs.bcpkix)
+    implementation("org.bitbucket.b_c:jose4j:0.9.6")
+    implementation("com.google.crypto.tink:tink:1.11.0") // Check for latest version
+
 
 
     testImplementation(libs.junit)

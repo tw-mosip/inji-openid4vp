@@ -14,7 +14,7 @@ data class VPToken(
     val proof: Proof
 ) {
     companion object {
-        fun constructVpToken(signingVPToken: VPTokenForSigning, proof: Proof): VPToken {
+        fun construct(signingVPToken: VPTokenForSigning, proof: Proof): VPToken {
             return VPToken(
                 signingVPToken.context,
                 signingVPToken.type,

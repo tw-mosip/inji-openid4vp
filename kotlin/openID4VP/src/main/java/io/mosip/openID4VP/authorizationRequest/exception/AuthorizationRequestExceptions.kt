@@ -41,6 +41,9 @@ sealed class AuthorizationRequestExceptions {
 
     class InvalidVerifierRedirectUri(message: String) : Exception(message)
 
+    class MissingInputsInClientMetadataForResponseModeDirectPostJwt:
+            Exception("JWKS is required in client metadata for response mode direct post jwt type")
+
     class InvalidData(message: String) : Exception(message)
 }
 

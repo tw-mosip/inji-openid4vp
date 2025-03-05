@@ -35,16 +35,11 @@ class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
     }
 
     private fun extractPublicKeyMultibase(kid: String, didDocument: Map<String, Any>): String? {
-        val verificationMethod = didDocument["verificationMethod"] as? List<Map<String, Any>>
-        if (verificationMethod != null) {
-            for (method in verificationMethod) {
-                val id = method["id"] as? String
-                val publicKeyMultibase = method["publicKey"] as? String
-                if (id == kid && !publicKeyMultibase.isNullOrEmpty()) {
-                    return publicKeyMultibase
-                }
-            }
-        }
-        return null
+        val verificationMethod = didDocument["verificationMethod"] as? List<Map<String, Any>> ?: return null
+
+        return verificationMethod
+            .find { method -> method["id"] == kid }
+            ?.let { method -> method["publicKey"] as? String }
+            ?.takeIf { it.isNotEmpty() }
     }
 }

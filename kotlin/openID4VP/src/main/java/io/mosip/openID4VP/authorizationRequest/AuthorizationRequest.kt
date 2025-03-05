@@ -1,15 +1,9 @@
 package io.mosip.openID4VP.authorizationRequest
 
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.dto.Verifier
-
-enum class ClientIdScheme(val value: String) {
-    PRE_REGISTERED("pre-registered"),
-    REDIRECT_URI("redirect_uri"),
-    DID("did")
-}
-
 
 data class AuthorizationRequest(
     val clientId: String,
