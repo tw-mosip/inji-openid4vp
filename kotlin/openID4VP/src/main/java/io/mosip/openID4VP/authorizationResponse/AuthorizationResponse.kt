@@ -56,7 +56,6 @@ class AuthorizationResponse {
                 presentationSubmission = presentationSubmission,
                 state = authorizationRequest.state
             )
-            println(authorizationResponseBody)
             val response = sendHTTPRequest(
                 url = responseUri,
                 method = HTTP_METHOD.POST,

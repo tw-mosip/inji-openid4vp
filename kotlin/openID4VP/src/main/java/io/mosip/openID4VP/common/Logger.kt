@@ -70,27 +70,11 @@ object Logger {
 
             "InvalidSignature" -> JWTVerificationException.InvalidSignature(message = message ?: "")
 
-
-
-
-
-
             //JWK Algorithm Exceptions
-            "PublicKeyConversionFailed" ->  JWEExceptions.PublicKeyConversionFailed()
-
-            "PayloadConversionFailed" ->  JWEExceptions.PayloadConversionFailed()
 
             "UnsupportedKeyExchangeAlgorithm" ->  JWEExceptions.UnsupportedKeyExchangeAlgorithm()
 
             "UnsupportedEncryptionAlgorithm" ->  JWEExceptions.UnsupportedEncryptionAlgorithm()
-
-            "InvalidJwksInput" ->  JWEExceptions.InvalidJwksInput(fieldPathAsString)
-
-            "EncryptionConfigExtractionFailed" ->  JWEExceptions.EncryptionConfigExtractionFailed()
-
-
-//          Client Metadata verification for jwk
-            "MissingInputsInClientMetadataForResponseModeDirectPostJwt" -> AuthorizationRequestExceptions.MissingInputsInClientMetadataForResponseModeDirectPostJwt()
 
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")
         }
