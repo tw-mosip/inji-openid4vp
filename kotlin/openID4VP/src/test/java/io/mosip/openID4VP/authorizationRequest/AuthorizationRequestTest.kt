@@ -64,7 +64,6 @@ class AuthorizationRequestTest {
     }
 
     @Test
-    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw missing input exception if client_id param is missing in Authorization Request`() {
         val authorizationRequestParamsMap = requestParams.minus(CLIENT_ID.value) + mapOf(
             CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
@@ -85,7 +84,6 @@ class AuthorizationRequestTest {
     }
 
     @Test
-    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is empty string`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             "client_id" to "",
@@ -108,7 +106,6 @@ class AuthorizationRequestTest {
     }
 
     @Test
-    @Ignore("Throws InvalidVerifierClientID since verifier validation is done before request param validation")
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is null`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             "client_id" to null,

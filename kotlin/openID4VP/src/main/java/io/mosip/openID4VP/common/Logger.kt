@@ -93,22 +93,22 @@ object Logger {
             "UnsupportedFormatOfLibrary" ->
                 AuthorizationResponseExceptions.UnsupportedCredentialFormat(
                     message = message
-                        ?: "Provided credential format is not supported by the library"
+                        ?: "Provided credential format is not supported"
                 )
 
             "UnsupportedResponseType" ->
                 AuthorizationResponseExceptions.UnsupportedResponseType(
-                    message = message ?: "Provided response_type is not supported by the library"
+                    message = message ?: "Provided response_type is not supported"
                 )
 
             "UnsupportedResponseMode" ->
                 AuthorizationResponseExceptions.UnsupportedResponseMode(
-                    message = message ?: "Provided response_mode is not supported by the library"
+                    message = message ?: "Provided response_mode is not supported"
                 )
 
-            "access_denied" ->
-                AuthorizationResponseExceptions.AccessDenied(
-                    message = message ?: "Provided response_mode is not supported by the library"
+            "EmptyCredentialsList" ->
+                AuthorizationResponseExceptions.EmptyCredentialsList(
+                    message = message ?: "No credentials match the provided authorization request"
                 )
 
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")

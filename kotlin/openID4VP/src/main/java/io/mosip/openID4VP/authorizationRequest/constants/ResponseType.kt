@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.constants
 
+//TODO: Move enums to constants folder at root level
 enum class ResponseType(val value: String)  {
-    vp_token("vp_token")
+    VP_TOKEN("vp_token")
 }

@@ -411,7 +411,6 @@ class AuthorizationRequestObjectObtainedByReference {
 
     //Client Id - Pre-registered
     @Test
-//    @Ignore("fix the test")
     fun `should validate client_id when authorization request is obtained by reference in pre-registered client id scheme`() {
         every {
             NetworkManagerClient.sendHTTPRequest(requestUrl, any())

@@ -2,12 +2,14 @@ package io.mosip.openID4VP.common
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.InputDescriptor
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer.descriptor
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
 import io.mosip.openID4VP.jwt.JwtHandler
-import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.CredentialFormatSpecificSigningData
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.encoding.Encoder
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 
@@ -45,23 +47,17 @@ fun getStringValue(params: Map<String, Any>, key: String): String? {
     return params[key]?.toString()
 }
 
-
-fun encodeVPTokenForSigning(vpTokensForSigning: Map<FormatType, CredentialFormatSpecificSigningData>): Map<String,String>{
-    try {
-        val formatted = mutableMapOf<String, String>()
-
-        for ((key, value) in vpTokensForSigning) {
-            val encodedContent = Json.encodeToString(value)
-            formatted[key.value] = encodedContent
-        }
-
-        return formatted
-    } catch (exception: Exception) {
-        throw Logger.handleException(
-            exceptionType = "JsonEncodingFailed",
-            message = exception.message,
-            fieldPath = listOf("vp_token_for_signing"),
-            className = "AuthorizationResponseUtils"
-        )
-    }
+fun serialize(encoder: Encoder, value: PresentationDefinition) {
+    val builtInEncoder = encoder.beginStructure(descriptor)
+    builtInEncoder.encodeStringElement(descriptor, 0, value.id)
+    builtInEncoder.encodeSerializableElement(
+        descriptor,
+        1,
+        ListSerializer(InputDescriptor.serializer()),
+        value.inputDescriptors
+    )
+    value.name?.let { builtInEncoder.encodeStringElement(descriptor, 2, it) }
+    value.purpose?.let { builtInEncoder.encodeStringElement(descriptor, 3, it) }
+    builtInEncoder.endStructure(descriptor)
 }
+

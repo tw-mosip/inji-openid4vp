@@ -1,10 +1,16 @@
 package io.mosip.openID4VP.testData
 
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
+import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
+import io.mosip.openID4VP.common.FormatType
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
@@ -27,7 +33,17 @@ val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
     publicKey,
     "https://123",
 )
-val vpResponsesMetadata: Map<String, VPResponseMetadata> = mapOf("ldp_vc" to ldpVPResponseMetadata)
+val vpResponsesMetadata: Map<FormatType, VPResponseMetadata> = mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
+
+val ldpVpTokenForSigning : LdpVPTokenForSigning = LdpVPTokenForSigning(
+    context = listOf("https://www.w3.org/2018/credentials/v1"),
+    type = listOf("VerifiableCredential"),
+    verifiableCredential = listOf("credential1"),
+    id = "id",
+    holder = "",
+)
+
+val vpTokensForSigning = mapOf(FormatType.LDP_VC to ldpVpTokenForSigning)
 
 val clientMetadataMap = mapOf(
     "client_name" to "Requester name",
@@ -265,4 +281,20 @@ val clientMetadataPresentationDefinitionMap = mapOf(
 val clientMetadataPresentationDefinitionString = mapOf(
     PRESENTATION_DEFINITION.value to presentationDefinitionString,
     CLIENT_METADATA.value to clientMetadataString
+)
+
+val authorizationRequest = AuthorizationRequest(
+    clientId = "https://mock-verifier.com",
+    responseType = "vp_token",
+    responseMode = "direct_post",
+    presentationDefinition = deserializeAndValidate(
+        presentationDefinitionMap,
+        PresentationDefinitionSerializer
+    ),
+    nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    state = "fsnC8ixCs6mWyV+00k23Qg==",
+    responseUri = "https://mock-verifier.com",
+    clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer),
+    clientIdScheme = "redirect_uri",
+    redirectUri = null
 )

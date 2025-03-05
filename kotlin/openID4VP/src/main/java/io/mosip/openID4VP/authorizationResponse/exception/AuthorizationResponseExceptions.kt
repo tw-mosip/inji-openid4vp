@@ -8,5 +8,5 @@ sealed class AuthorizationResponseExceptions {
 
     class UnsupportedResponseMode(message: String) : Exception(message)
 
-    class AccessDenied(message: String) : Exception(message)
+    class EmptyCredentialsList(message: String) : Exception(message)
 }
