@@ -438,6 +438,47 @@ class AuthorizationRequestTest {
     }
 
     @Test
+    fun `should add default client id scheme as pre-registered if not present in authorization request`() {
+        val authorizationRequestParamsMap = requestParams +  mapOf(
+            CLIENT_ID.value to "https://verifier.env1.net",
+        )
+        val applicationFields =
+            listOf(
+                CLIENT_ID.value,
+                CLIENT_ID_SCHEME.value,
+                RESPONSE_MODE.value,
+                RESPONSE_URI.value,
+                PRESENTATION_DEFINITION_URI.value,
+                RESPONSE_TYPE.value,
+                NONCE.value,
+                STATE.value,
+                CLIENT_METADATA.value
+            )
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/json").build(),
+            "body" to createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, authorizationRequestParamsMap, applicationFields)
+        )
+
+
+        val encodedAuthorizationRequest =
+            createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED, applicationFields)
+
+        assertDoesNotThrow {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                shouldValidateClient = true
+            )
+        }
+
+    }
+
+    @Test
     fun `should return Authorization Request for redirect uri scheme when passed by value`() {
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfReDirectUri
 

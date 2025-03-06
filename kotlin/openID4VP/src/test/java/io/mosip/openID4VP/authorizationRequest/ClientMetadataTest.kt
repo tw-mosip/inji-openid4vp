@@ -177,5 +177,22 @@ class ClientMetadataTest {
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
+	@Test
+	fun `should throw InvalidData exception if client metadata is not of string or map type`() {
+		val invalidClientMetadata  = true
+		val authorizationRequestParam : MutableMap<String, Any> = mutableMapOf(
+			CLIENT_METADATA.value to invalidClientMetadata,
+			RESPONSE_MODE.value to DIRECT_POST_JWT.value
+		)
+		val expectedExceptionMessage =
+			"client_metadata must be of type String or Map"
+
+		actualException =
+			Assert.assertThrows(InvalidData::class.java) {
+				parseAndValidateClientMetadata(authorizationRequestParam)
+			}
+		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+	}
+
 
 }
