@@ -30,7 +30,7 @@ fun createAuthorizationResponseBody(
     ).let { baseParams ->
         state?.let { baseParams + mapOf("state" to it) } ?: baseParams
     }
-    val clientMetadata = authorizationRequest.clientMetadata as ClientMetadata
+    val clientMetadata = authorizationRequest.clientMetadata !!
 
     return when (authorizationRequest.responseMode) {
         DIRECT_POST.value -> {

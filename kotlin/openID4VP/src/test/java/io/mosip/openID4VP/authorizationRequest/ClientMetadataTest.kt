@@ -103,7 +103,6 @@ class ClientMetadataTest {
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
-
 	@Test
 	fun `should throw missing input exception if encryption algorithm is missing for response mode is direct_post jwt`() {
 		val invalidClientMetadata  =
@@ -186,6 +185,21 @@ class ClientMetadataTest {
 		)
 		val expectedExceptionMessage =
 			"client_metadata must be of type String or Map"
+
+		actualException =
+			Assert.assertThrows(InvalidData::class.java) {
+				parseAndValidateClientMetadata(authorizationRequestParam)
+			}
+		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+	}
+
+	@Test
+	fun `should throw InvalidData exception if client metadata is not present for response mode direct_post jwt`() {
+		val authorizationRequestParam : MutableMap<String, Any> = mutableMapOf(
+			RESPONSE_MODE.value to DIRECT_POST_JWT.value
+		)
+		val expectedExceptionMessage =
+			"client_metadata must be present for given response mode"
 
 		actualException =
 			Assert.assertThrows(InvalidData::class.java) {

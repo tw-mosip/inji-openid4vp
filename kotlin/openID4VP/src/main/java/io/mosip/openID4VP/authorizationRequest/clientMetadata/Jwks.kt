@@ -62,8 +62,4 @@ object JwksSerializer : KSerializer<Jwks> {
 @Serializable(with = JwksSerializer::class)
 data class Jwks(
     val keys: List<Jwk>
-){
-    override fun toString(): String {
-        return "Jwks(keys=$keys)"
-    }
-}
+)

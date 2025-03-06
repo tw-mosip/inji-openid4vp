@@ -107,8 +107,4 @@ data class Jwk(
     val alg: String,
     val kid: String,
     val y: String? = null
-){
-    override fun toString(): String {
-        return "Jwk(alg='$alg', kty='$kty', use='$use', crv='$crv', x='$x', kid='$kid', y=$y)"
-    }
-}
+)

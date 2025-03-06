@@ -6,6 +6,7 @@ import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JSON
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.ResponseMode.*
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
 import okhttp3.Headers
@@ -50,7 +51,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
             fieldPath = listOf(RESPONSE_MODE.value)
         )
          when (responseMode) {
-            "direct_post", "direct_post.jwt" -> {
+            DIRECT_POST.value, DIRECT_POST_JWT.value -> {
                 validateUriCombinations(
                     authorizationRequestParameters,
                     RESPONSE_URI.value,
