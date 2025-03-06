@@ -110,11 +110,6 @@ class ClientMetadata(
 	@SerialName("jwks") val jwks: Jwks?,
 ) : Validatable {
 
-
 	override fun validate() {
-	}
-
-	override fun toString(): String {
-		return "ClientMetadata(authorizationEncryptedResponseAlg=$authorizationEncryptedResponseAlg, clientName=$clientName, logoUri=$logoUri, vpFormats=$vpFormats, authorizationEncryptedResponseEnc=$authorizationEncryptedResponseEnc, jwks=$jwks)"
 	}
 }

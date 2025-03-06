@@ -97,7 +97,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
             redirectUri = getStringValue(authorizationRequestParameters, REDIRECT_URI.value),
             nonce = getStringValue(authorizationRequestParameters, NONCE.value)!!,
             state = getStringValue(authorizationRequestParameters, STATE.value),
-            clientMetadata = getStringValue(authorizationRequestParameters, CLIENT_METADATA.value),
+            clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value]!!
         )
     }
 }
