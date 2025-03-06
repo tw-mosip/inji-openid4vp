@@ -64,10 +64,7 @@ dependencies {
     implementation(libs.jsonld.common.java)
     implementation(libs.vcverifier)
     implementation(libs.bcpkix)
-    implementation("org.bitbucket.b_c:jose4j:0.9.6")
-    implementation("com.google.crypto.tink:tink:1.11.0") // Check for latest version
-
-
+    implementation(libs.google.tink)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
