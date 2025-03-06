@@ -21,7 +21,11 @@ class JWEProcessor(private val clientMetadata: ClientMetadata) {
         val jwk =
             clientMetadata.jwks?.keys?.find { it.alg == clientMetadata.authorizationEncryptedResponseAlg }!!
 
-        val header = JWEHeader(algorithm, encryptionMethod)
+        val header = JWEHeader(algorithm, encryptionMethod,
+            null, null, null, null, null, null, null, null, null, jwk.kid,
+            null, null, null, null, null, 0,
+            null, null,
+            null, null, null)
 
         val claimsSet = JWTClaimsSet.Builder().apply {
             payload.forEach { (key, value) -> claim(key, value) }
@@ -30,7 +34,6 @@ class JWEProcessor(private val clientMetadata: ClientMetadata) {
             val encrypter = EncryptionProvider.getEncrypter(jwk)
             val jwt = EncryptedJWT(header, claimsSet)
             jwt.encrypt(encrypter)
-
             return jwt.serialize()
         } catch (exception: Exception) {
             throw Logger.handleException(
