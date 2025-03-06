@@ -3,19 +3,11 @@ package io.mosip.openID4VP.authorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.*
-import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
-import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.common.ClientIdScheme
 import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.ResponseMode
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST_JWT
 import io.mosip.openID4VP.common.getStringValue
-import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -45,7 +37,7 @@ fun getAuthorizationRequestHandler(
             setResponseUri
         )
         else -> throw Logger.handleException(
-            exceptionType = "InvalidClientIdScheme",
+            exceptionType = "InvalidData",
             className = className,
             message = "Given client_id_scheme is not supported"
         )

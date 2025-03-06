@@ -58,7 +58,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 )
             }
             else -> throw Logger.handleException(
-                exceptionType = "InvalidResponseMode",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "Given response_mode is not supported"
             )
@@ -84,7 +84,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
         }
         if(authRequestParam[validAttribute] != authRequestParam[CLIENT_ID.value])
             throw Logger.handleException(
-                exceptionType = "InvalidVerifierRedirectUri",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "$validAttribute should be equal to client_id for given client_id_scheme"
             )

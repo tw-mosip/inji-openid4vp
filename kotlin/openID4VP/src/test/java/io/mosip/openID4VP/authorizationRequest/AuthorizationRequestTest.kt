@@ -96,7 +96,7 @@ class AuthorizationRequestTest {
         expectedExceptionMessage = "Given client_id_scheme is not supported"
 
         actualException =
-            assertThrows(InvalidClientIdScheme::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -143,7 +143,7 @@ class AuthorizationRequestTest {
             "Either presentation_definition or presentation_definition_uri request param must be present"
 
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -175,7 +175,7 @@ class AuthorizationRequestTest {
         val expectedExceptionMessage =
             "Either presentation_definition or presentation_definition_uri request param can be provided but not both"
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -322,7 +322,7 @@ class AuthorizationRequestTest {
 
         val expectedExceptionMessage = "response_uri should be equal to client_id for given client_id_scheme"
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidVerifierRedirectUri::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -479,7 +479,7 @@ class AuthorizationRequestTest {
             createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.REDIRECT_URI,)
 
         expectedExceptionMessage = "Given response_mode is not supported"
-        actualException = assertThrows<InvalidResponseMode> {
+        actualException = assertThrows<InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,

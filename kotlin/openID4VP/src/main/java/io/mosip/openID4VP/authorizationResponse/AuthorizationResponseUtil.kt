@@ -42,7 +42,7 @@ fun createAuthorizationResponseBody(
         }
         else -> {
             throw Logger.handleException(
-                exceptionType = "InvalidResponseMode",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "Given response_mode is not supported"
             )

@@ -199,7 +199,7 @@ class AuthorizationResponseTest {
 
 
     @Test
-    fun `should senr JWE response to the Verifier if response mode is direct post jwt`() {
+    fun `should send JWE response to the Verifier if response mode is direct post jwt`() {
         openID4VP.authorizationRequest = authorizationRequestForResponseModeJWT
         every {
             NetworkManagerClient.sendHTTPRequest(

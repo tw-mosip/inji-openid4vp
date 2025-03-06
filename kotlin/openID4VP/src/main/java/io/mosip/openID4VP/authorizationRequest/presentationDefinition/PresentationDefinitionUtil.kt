@@ -21,7 +21,7 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
     when {
         hasPresentationDefinition && hasPresentationDefinitionUri -> {
             throw Logger.handleException(
-                exceptionType = "InvalidQueryParams",
+                exceptionType = "InvalidData",
                 message = "Either presentation_definition or presentation_definition_uri request param can be provided but not both",
                 className = className
             )
@@ -54,7 +54,7 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
         }
         else -> {
             throw Logger.handleException(
-                exceptionType = "InvalidQueryParams",
+                exceptionType = "InvalidData",
                 message = "Either presentation_definition or presentation_definition_uri request param must be present",
                 className = className
             )

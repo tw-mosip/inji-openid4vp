@@ -14,7 +14,7 @@ fun parseAndValidateClientMetadata(authorizationRequestParameters: MutableMap<St
             is Map<*, *> -> deserializeAndValidate(it as Map<String, Any>, ClientMetadataSerializer)
             else -> throw Logger.handleException(
                 exceptionType = "InvalidData",
-                message = "client_metadata must be of type String or Map ",
+                message = "client_metadata must be of type String or Map",
                 className = className
             )
         }

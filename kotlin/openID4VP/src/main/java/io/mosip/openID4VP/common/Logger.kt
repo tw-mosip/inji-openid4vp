@@ -50,15 +50,9 @@ object Logger {
 
             "InvalidQueryParams" -> AuthorizationRequestExceptions.InvalidQueryParams(message = message ?: "")
 
-            "InvalidVerifierRedirectUri" -> AuthorizationRequestExceptions.InvalidVerifierRedirectUri(message = message ?: "")
-
             "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier(message = message ?: "")
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
-
-            "InvalidClientIdScheme" -> AuthorizationRequestExceptions.InvalidClientIdScheme(message = message ?: "")
-
-            "InvalidResponseMode" -> AuthorizationRequestExceptions.InvalidResponseMode(message = message ?: "")
 
             "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
 

@@ -56,7 +56,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                 getStringValue(authorizationRequestParameters, RESPONSE_URI.value)
             }
             else -> throw Logger.handleException(
-                exceptionType = "InvalidResponseMode",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "Given response_mode is not supported"
             )
