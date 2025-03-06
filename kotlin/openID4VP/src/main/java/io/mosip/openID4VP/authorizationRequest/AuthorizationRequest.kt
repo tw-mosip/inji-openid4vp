@@ -10,24 +10,13 @@ data class AuthorizationRequest(
     val clientIdScheme: String,
     val responseType: String,
     val responseMode: String?,
-    var presentationDefinition: Any,
+    var presentationDefinition: PresentationDefinition,
     val responseUri: String?,
     val redirectUri: String?,
     val nonce: String,
     val state: String?,
-    var clientMetadata: Any? = null
+    var clientMetadata: ClientMetadata? = null
 ) {
-    init {
-        require(presentationDefinition is PresentationDefinition || presentationDefinition is String) {
-            "presentationDefinition must be of type String or PresentationDefinition"
-        }
-
-        clientMetadata?.let {
-            require(clientMetadata is ClientMetadata || clientMetadata is String) {
-                "clientMetadata must be of type String or ClientMetadata"
-            }
-        }
-    }
 
     companion object {
 

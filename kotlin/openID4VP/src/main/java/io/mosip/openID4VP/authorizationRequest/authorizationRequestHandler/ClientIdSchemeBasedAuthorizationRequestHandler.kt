@@ -2,7 +2,9 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
@@ -92,12 +94,12 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
             clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value) ?: PRE_REGISTERED.value,
             responseType = getStringValue(authorizationRequestParameters, RESPONSE_TYPE.value)!!,
             responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value),
-            presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value]!!,
+            presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value] as PresentationDefinition,
             responseUri = getStringValue(authorizationRequestParameters, RESPONSE_URI.value),
             redirectUri = getStringValue(authorizationRequestParameters, REDIRECT_URI.value),
             nonce = getStringValue(authorizationRequestParameters, NONCE.value)!!,
             state = getStringValue(authorizationRequestParameters, STATE.value),
-            clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value]!!
+            clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value] as? ClientMetadata
         )
     }
 }
