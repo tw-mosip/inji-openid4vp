@@ -22,7 +22,7 @@ import org.junit.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
-class AuthorizationRequestObjectObtainedByReference {
+class AuthorizationRequestObjectObtainedByReferenceTest {
     private lateinit var openID4VP: OpenID4VP
 
     @Before
