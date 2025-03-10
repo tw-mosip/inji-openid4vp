@@ -5,7 +5,7 @@ import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
 import io.mosip.openID4VP.common.FormatType
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.authorizationResponse.encodeVPTokenForSigning
+import io.mosip.openID4VP.common.toJson
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
@@ -56,7 +56,7 @@ class OpenID4VP(private val traceabilityId: String) {
                     holder = ""
                 )
 
-            return encodeVPTokenForSigning(this.vpTokensForSigning)
+            return this.vpTokensForSigning.toJson()
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
             throw exception

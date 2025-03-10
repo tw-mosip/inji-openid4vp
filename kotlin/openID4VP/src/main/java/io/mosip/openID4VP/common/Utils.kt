@@ -61,3 +61,22 @@ fun serialize(encoder: Encoder, value: PresentationDefinition) {
     builtInEncoder.endStructure(descriptor)
 }
 
+
+fun Map<*, *>.toJson(): Map<String, String> {
+    val objectMapper = jacksonObjectMapper()
+
+    return this.mapKeys { (key, _) ->
+        when (key) {
+            is Enum<*> -> {
+                key.let {
+                    it::class.members.find { member -> member.name == "value" }
+                        ?.call(it) as? String ?: it.toString()
+                }
+            }
+            else -> key?.toString() ?: "null"
+        }
+
+    }.mapValues { (_, value) ->
+        objectMapper.writeValueAsString(value)
+    }
+}
