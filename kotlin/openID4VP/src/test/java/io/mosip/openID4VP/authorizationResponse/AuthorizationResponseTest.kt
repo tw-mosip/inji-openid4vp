@@ -11,15 +11,24 @@ import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
+import io.mosip.openID4VP.authorizationResponse.models.vpToken.VPToken
+import io.mosip.openID4VP.authorizationResponse.models.vpToken.types.LdpVPToken
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.common.FormatType
 import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.common.toJsonEncodedMap
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import io.mosip.openID4VP.testData.publicKey
+import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.vpResponsesMetadata
+import junit.framework.Assert
 import okhttp3.Headers
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -53,7 +62,7 @@ class AuthorizationResponseTest {
 
     @Before
     fun setUp() {
-        mockkObject(NetworkManagerClient.Companion)
+        mockkObject(NetworkManagerClient)
         openID4VP = OpenID4VP("test-OpenID4VP")
         presentationDefinition =
             """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"id_123","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
@@ -88,6 +97,11 @@ class AuthorizationResponseTest {
             clientMetadata = deserializeAndValidate(clientMetadata, ClientMetadataSerializer),
             clientIdScheme = "did",
             redirectUri = "ji"
+        )
+        setField(
+            openID4VP,
+            "responseUri",
+            "http://localhost:8080/injiverify.dev2.mosip.net/redirect"
         )
 
         mockkStatic(Log::class)
@@ -191,5 +205,108 @@ class AuthorizationResponseTest {
         val actualResponse = openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
 
         assertEquals(expectedValue, actualResponse)
+    }
+
+    @Test
+    fun `should create encodedJsonMap successfully`() {
+        val authorizationResponse = AuthorizationResponse(
+            presentationSubmission = PresentationSubmission(
+                id = "ps_id",
+                definitionId = "client_id",
+                descriptorMap = listOf(
+                    DescriptorMap(
+                        id = "input_descriptor_1",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "input_descriptor_1",
+                            format = "ldp_vp",
+                            path = "$.verifiableCredential[0]"
+                        )
+                    )
+                )
+            ),
+            vpToken = VPTokenType.VPTokenElement(
+                LdpVPToken(
+                    context = listOf("context"),
+                    type = listOf("type"),
+                    verifiableCredential = listOf("VC1"),
+                    id = "id",
+                    holder = "holder",
+                    proof = Proof(
+                        type = "type",
+                        created = "time",
+                        challenge = "challenge",
+                        domain = "domain",
+                        jws = "eryy....ewr",
+                        proofPurpose = "authentication",
+                        verificationMethod = "did:example:holder#key-1"
+                    )
+                )
+            ),
+            state = "state"
+        )
+
+        val encodedJsonMap = authorizationResponse.toJsonEncodedMap()
+
+        assertEquals(
+            mapOf(
+                "presentation_submission" to "{\"id\":\"ps_id\",\"definition_id\":\"client_id\",\"descriptor_map\":[{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$\",\"path_nested\":{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$.verifiableCredential[0]\"}}]}",
+                "vp_token" to "{\"@context\":[\"context\"],\"type\":[\"type\"],\"verifiableCredential\":[\"VC1\"],\"id\":\"id\",\"holder\":\"holder\",\"proof\":{\"type\":\"type\",\"created\":\"time\",\"challenge\":\"challenge\",\"domain\":\"domain\",\"jws\":\"eryy....ewr\",\"proofPurpose\":\"authentication\",\"verificationMethod\":\"did:example:holder#key-1\"}}",
+                "state" to "state"
+            ),
+            encodedJsonMap
+        )
+    }
+
+    @Test
+    fun `should create encodedJsonMap with no nullable fields`() {
+        val authorizationResponse = AuthorizationResponse(
+            presentationSubmission = PresentationSubmission(
+                id = "ps_id",
+                definitionId = "client_id",
+                descriptorMap = listOf(
+                    DescriptorMap(
+                        id = "input_descriptor_1",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "input_descriptor_1",
+                            format = "ldp_vp",
+                            path = "$.verifiableCredential[0]"
+                        )
+                    )
+                )
+            ),
+            vpToken = VPTokenType.VPTokenElement(
+                LdpVPToken(
+                    context = listOf("context"),
+                    type = listOf("type"),
+                    verifiableCredential = listOf("VC1"),
+                    id = "id",
+                    holder = "holder",
+                    proof = Proof(
+                        type = "type",
+                        created = "time",
+                        challenge = "challenge",
+                        domain = "domain",
+                        jws = "eryy....ewr",
+                        proofPurpose = "authentication",
+                        verificationMethod = "did:example:holder#key-1"
+                    )
+                )
+            ),
+            state = null
+        )
+
+        val encodedJsonMap = authorizationResponse.toJsonEncodedMap()
+
+        assertEquals(
+            mapOf(
+                "presentation_submission" to "{\"id\":\"ps_id\",\"definition_id\":\"client_id\",\"descriptor_map\":[{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$\",\"path_nested\":{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$.verifiableCredential[0]\"}}]}",
+                "vp_token" to "{\"@context\":[\"context\"],\"type\":[\"type\"],\"verifiableCredential\":[\"VC1\"],\"id\":\"id\",\"holder\":\"holder\",\"proof\":{\"type\":\"type\",\"created\":\"time\",\"challenge\":\"challenge\",\"domain\":\"domain\",\"jws\":\"eryy....ewr\",\"proofPurpose\":\"authentication\",\"verificationMethod\":\"did:example:holder#key-1\"}}"
+            ),
+            encodedJsonMap
+        )
     }
 }

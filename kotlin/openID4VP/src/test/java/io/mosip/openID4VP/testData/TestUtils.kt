@@ -5,8 +5,15 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
 import kotlinx.serialization.json.JsonObject
+import java.lang.reflect.Field
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+
+fun setField(instance: Any, fieldName: String, value: Any?) {
+    val field: Field = instance::class.java.getDeclaredField(fieldName)
+    field.isAccessible = true
+    field.set(instance, value)
+}
 
 fun createUrlEncodedData(
     requestParams: Map<String, String?>,

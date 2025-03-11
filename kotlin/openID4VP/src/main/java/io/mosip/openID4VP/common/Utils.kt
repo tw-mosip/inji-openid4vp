@@ -73,10 +73,26 @@ fun Map<*, *>.toJson(): Map<String, String> {
                         ?.call(it) as? String ?: it.toString()
                 }
             }
+
             else -> key?.toString() ?: "null"
         }
 
     }.mapValues { (_, value) ->
         objectMapper.writeValueAsString(value)
     }
+}
+
+fun Any.toJsonEncodedMap(): Map<String, String> {
+    val objectMapper = jacksonObjectMapper()
+    val jsonString = objectMapper.writeValueAsString(this)
+    val rawMap = objectMapper.readValue(jsonString, Map::class.java) as Map<String, Any>
+
+    return rawMap
+        .filterValues { it != null }
+        .mapValues { (_, value) ->
+            when (value) {
+                is Map<*, *> -> objectMapper.writeValueAsString(value)
+                else -> value.toString()
+            }
+        }
 }
