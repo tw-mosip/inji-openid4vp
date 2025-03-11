@@ -3,15 +3,11 @@ package io.mosip.openID4VP.jwt.keyResolver
 import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkClass
 import io.mockk.mockkConstructor
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.jwt.exception.JWTVerificationException
+import io.mosip.openID4VP.jwt.exception.JWSException
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import io.mosip.vercred.vcverifier.DidWebResolver
-import io.mosip.vercred.vcverifier.exception.DidResolverExceptions
 import io.mosip.vercred.vcverifier.exception.DidResolverExceptions.DidResolutionFailed
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -75,7 +71,7 @@ class DidPublicKeyResolverTest {
     fun `should throw exception when kid is missing`() {
         every { anyConstructed<DidWebResolver>().resolve()} returns mapOf("didDocument" to "mockResponse")
 
-        val exception = assertThrows(JWTVerificationException.KidExtractionFailed::class.java) {
+        val exception = assertThrows(JWSException.KidExtractionFailed::class.java) {
             resolver.resolveKey(emptyMap())
         }
         assertEquals(
@@ -88,7 +84,7 @@ class DidPublicKeyResolverTest {
     fun `should throw exception did resolution fails`() {
         every { anyConstructed<DidWebResolver>().resolve()} throws DidResolutionFailed("Did document could not be fetched")
 
-        val exception = assertThrows(JWTVerificationException.PublicKeyResolutionFailed::class.java) {
+        val exception = assertThrows(JWSException.PublicKeyResolutionFailed::class.java) {
             resolver.resolveKey(emptyMap())
         }
         assertEquals(
@@ -112,7 +108,7 @@ class DidPublicKeyResolverTest {
         val header = mapOf("kid" to "did:example:123456789#keys-1")
 
         val exception =
-            assertThrows(JWTVerificationException.PublicKeyExtractionFailed::class.java) {
+            assertThrows(JWSException.PublicKeyExtractionFailed::class.java) {
                 resolver.resolveKey(header)
             }
         assertEquals(

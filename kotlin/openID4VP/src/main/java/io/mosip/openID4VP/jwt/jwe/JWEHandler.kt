@@ -1,29 +1,33 @@
-package io.mosip.openID4VP.authorizationResponse.jwe
+package io.mosip.openID4VP.jwt.jwe
 
 import com.nimbusds.jose.JWEHeader
+import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jwt.EncryptedJWT
 import com.nimbusds.jwt.JWTClaimsSet
-import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
-import io.mosip.openID4VP.authorizationResponse.jwe.encryption.EncryptionProvider
-import io.mosip.openID4VP.authorizationResponse.jwe.keyExchange.KeyExchangeProvider
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
+import io.mosip.openID4VP.jwt.jwe.encryption.EncryptionProvider
+import io.mosip.openID4VP.jwt.jwe.keyExchange.KeyExchangeProvider
 import io.mosip.openID4VP.common.Logger
 
-private val className = JWEProcessor::class.simpleName!!
+private val className = JWEHandler::class.simpleName!!
 
-class JWEProcessor(private val clientMetadata: ClientMetadata) {
+class JWEHandler(
+    private val keyEncryptionAlg: String,
+    private val contentEncryptionAlg: String,
+    private val publicKey: Jwk
+) {
 
     fun generateEncryptedResponse(payload: Map<String, Any>): String {
 
         val algorithm =
-            KeyExchangeProvider.getAlgorithm(clientMetadata.authorizationEncryptedResponseAlg!!)
+            KeyExchangeProvider.getAlgorithm(keyEncryptionAlg)
         val encryptionMethod =
-            EncryptionProvider.getMethod(clientMetadata.authorizationEncryptedResponseEnc!!)
-        val jwk =
-            clientMetadata.jwks?.keys?.find { it.alg == clientMetadata.authorizationEncryptedResponseAlg }!!
-        val encrypter = EncryptionProvider.getEncrypter(jwk)
+            EncryptionProvider.getMethod(contentEncryptionAlg)
+
+        val encrypter = EncryptionProvider.getEncrypter(publicKey)
 
         val header = JWEHeader(algorithm, encryptionMethod,
-            null, null, null, null, null, null, null, null, null, jwk.kid,
+            null, null, null, null, null, null, null, null, null, publicKey.kid,
             null, null, null, null, null, 0,
             null, null,
             null, null, null)

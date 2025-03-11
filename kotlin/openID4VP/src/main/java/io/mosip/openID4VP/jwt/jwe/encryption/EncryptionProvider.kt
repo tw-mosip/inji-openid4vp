@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.authorizationResponse.jwe.encryption
+package io.mosip.openID4VP.jwt.jwe.encryption
 
 import com.nimbusds.jose.Algorithm
 import com.nimbusds.jose.EncryptionMethod

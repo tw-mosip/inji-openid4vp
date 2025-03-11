@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.authorizationResponse.jwe.keyExchange
+package io.mosip.openID4VP.jwt.jwe.keyExchange
 
 import com.nimbusds.jose.JWEAlgorithm
 import io.mosip.openID4VP.common.Logger

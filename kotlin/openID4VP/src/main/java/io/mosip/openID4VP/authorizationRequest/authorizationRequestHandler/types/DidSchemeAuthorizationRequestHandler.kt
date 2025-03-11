@@ -4,10 +4,11 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.extractDataJsonFromJwt
+import io.mosip.openID4VP.common.extractDataJsonFromJws
 import io.mosip.openID4VP.common.getStringValue
-import io.mosip.openID4VP.common.isJWT
-import io.mosip.openID4VP.jwt.JwtHandler
+import io.mosip.openID4VP.common.isJWS
+import io.mosip.openID4VP.jwt.jws.JWSHandler
+import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.PAYLOAD
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JWT
 import okhttp3.Headers
@@ -33,15 +34,15 @@ class DidSchemeAuthorizationRequestHandler(
             val headers = requestUriResponse["header"] as Headers
             val responseBody = requestUriResponse["body"].toString()
 
-            if(isValidContentType(headers) &&  isJWT(responseBody)){
+            if(isValidContentType(headers) &&  isJWS(responseBody)){
                 val didUrl = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
-                JwtHandler(
+                JWSHandler(
                     responseBody,
                     DidPublicKeyResolver(didUrl)
                 ).verify()
-                val authorizationRequestObject = extractDataJsonFromJwt(
+                val authorizationRequestObject = extractDataJsonFromJws(
                     responseBody,
-                    JwtHandler.JwtPart.PAYLOAD
+                    PAYLOAD
                 )
 
                 validateAuthorizationRequestObjectAndParameters(

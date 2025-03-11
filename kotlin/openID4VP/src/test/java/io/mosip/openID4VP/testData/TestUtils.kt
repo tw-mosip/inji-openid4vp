@@ -3,7 +3,7 @@ package io.mosip.openID4VP.testData
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
 import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.testData.JWTUtil.Companion.createJWT
+import io.mosip.openID4VP.testData.JWSUtil.Companion.createJWT
 import kotlinx.serialization.json.JsonObject
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets

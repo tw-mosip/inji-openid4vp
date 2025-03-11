@@ -8,6 +8,8 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
+import io.mosip.openID4VP.common.ResponseMode
+import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST
 import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST_JWT
 import io.mosip.openID4VP.testData.clientMetadataString
 import org.junit.After
@@ -207,6 +209,16 @@ class ClientMetadataTest {
 			}
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
 	}
+
+    @Test
+    fun `should not throw any exception if client metadata is not present for response mode direct_post`() {
+        val authorizationRequestParam: MutableMap<String, Any> = mutableMapOf(
+            RESPONSE_MODE.value to DIRECT_POST.value
+        )
+        assertDoesNotThrow {
+            parseAndValidateClientMetadata(authorizationRequestParam)
+        }
+    }
 
 
 }

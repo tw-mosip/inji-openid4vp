@@ -9,7 +9,7 @@ import org.bouncycastle.crypto.signers.Ed25519Signer
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-class JWTUtil {
+class JWSUtil {
     companion object {
         private const val ed25519PrivateKey = "vlo/0lVUn4oCEFo/PiPi3FyqSBSdZ2JDSBJJcvbf6o0="
         private const val didDocumentUrl = "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs"

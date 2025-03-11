@@ -5,7 +5,6 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
@@ -15,12 +14,10 @@ import io.mosip.openID4VP.authorizationRequest.presentationDefinition.Presentati
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
-import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
 import io.mosip.openID4VP.testData.authorizationRequestForResponseModeJWT
 import okhttp3.Headers
-import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals

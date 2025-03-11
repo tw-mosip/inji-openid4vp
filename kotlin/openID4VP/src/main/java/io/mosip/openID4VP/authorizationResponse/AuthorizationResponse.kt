@@ -1,14 +1,16 @@
 package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
 import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.common.encode
 import io.mosip.openID4VP.dto.VPResponseMetadata
-import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_FORM_URL_ENCODED
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
+
+private val className = AuthorizationResponse::class.simpleName!!
 
 class AuthorizationResponse {
     companion object {
@@ -28,7 +30,7 @@ class AuthorizationResponse {
                 id = UUIDGenerator.generateUUID(),
                 holder = ""
             )
-            return encode(vpTokenForSigning, "vp_token_for_signing")
+            return encode(vpTokenForSigning, "vp_token_for_signing", className)
         }
 
         fun shareVP(
@@ -50,20 +52,33 @@ class AuthorizationResponse {
                     challenge = authorizationRequest.nonce
                 )
             )
-            val authorizationResponseBody = createAuthorizationResponseBody(
-                vpToken = vpToken,
-                authorizationRequest = authorizationRequest,
-                presentationSubmission = presentationSubmission,
-                state = authorizationRequest.state
-            )
-            val response = sendHTTPRequest(
-                url = responseUri,
-                method = HTTP_METHOD.POST,
-                bodyParams = authorizationResponseBody,
-                headers = mapOf("Content-Type" to APPLICATION_FORM_URL_ENCODED.value)
-            )
-            return response["body"].toString()
+            return ResponseModeBasedHandlerFactory.get(authorizationRequest.responseMode!!)
+                .sendAuthorizationResponse(
+                    vpToken = vpToken,
+                    authorizationRequest = authorizationRequest,
+                    presentationSubmission = presentationSubmission,
+                    state = authorizationRequest.state,
+                    url = responseUri
+                )
 
         }
+
+        private fun createDescriptorMap(verifiableCredentials: Map<String, List<String>>): MutableList<DescriptorMap> {
+            var pathIndex = 0
+            val descriptorMap = mutableListOf<DescriptorMap>()
+            verifiableCredentials.forEach { (inputDescriptorId, vcs) ->
+                vcs.forEach { _ ->
+                    descriptorMap.add(
+                        DescriptorMap(
+                            inputDescriptorId,
+                            "ldp_vp",
+                            "$.verifiableCredential[${pathIndex++}]"
+                        )
+                    )
+                }
+            }
+            return descriptorMap
+        }
+
     }
 }

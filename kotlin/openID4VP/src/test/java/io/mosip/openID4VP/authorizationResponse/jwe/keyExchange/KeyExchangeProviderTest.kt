@@ -6,7 +6,8 @@ import com.nimbusds.jose.JWEAlgorithm
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.authorizationResponse.exception.JWEExceptions.UnsupportedKeyExchangeAlgorithm
+import io.mosip.openID4VP.jwt.exception.JWEException.UnsupportedKeyExchangeAlgorithm
+import io.mosip.openID4VP.jwt.jwe.keyExchange.KeyExchangeProvider
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
