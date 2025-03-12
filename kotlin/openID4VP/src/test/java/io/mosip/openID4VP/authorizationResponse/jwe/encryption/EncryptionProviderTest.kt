@@ -30,17 +30,6 @@ class EncryptionProviderTest {
     fun tearDown() {
         clearAllMocks()
     }
-    @Test
-    fun `getMethod should return A256GCM for A256GCM input`() {
-        assertEquals(EncryptionMethod.A256GCM, EncryptionProvider.getMethod("A256GCM"))
-    }
-
-    @Test
-    fun `getMethod should throw UnsupportedEncryptionAlgorithm for unsupported method`() {
-        assertThrows(UnsupportedEncryptionAlgorithm::class.java)  {
-            EncryptionProvider.getMethod("UNSUPPORTED")
-        }
-    }
 
     @Test
     fun `getEncrypter should create X25519Encrypter for OKP key type`() {

@@ -14,15 +14,6 @@ import io.mosip.openID4VP.common.Logger
 
 private val className = EncryptionProvider::class.simpleName!!
 object EncryptionProvider {
-    fun getMethod(method: String): EncryptionMethod =
-        when (method) {
-            "A256GCM" -> EncryptionMethod.A256GCM
-            else -> throw Logger.handleException(
-                exceptionType = "UnsupportedEncryptionAlgorithm",
-                className = className
-            )
-
-        }
 
     fun getEncrypter(jwk: Jwk): JWEEncrypter =
         when (jwk.kty) {
