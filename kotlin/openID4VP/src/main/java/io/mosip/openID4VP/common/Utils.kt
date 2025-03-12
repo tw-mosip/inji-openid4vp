@@ -44,6 +44,20 @@ fun getStringValue(params: Map<String, Any>, key: String): String? {
     return params[key]?.toString()
 }
 
+fun validate(
+    key: String,
+    value: String?,
+    className: String
+) {
+    if (value == null || value == "null" || value.isEmpty()) {
+        throw Logger.handleException(
+            exceptionType = if (value == null) "MissingInput" else "InvalidInput",
+            fieldPath = listOf(key),
+            className = className,
+            fieldType = "String"
+        )
+    }
+}
 
 inline fun <reified T> encode(data: T, fieldName: String, className: String): String {
     try {

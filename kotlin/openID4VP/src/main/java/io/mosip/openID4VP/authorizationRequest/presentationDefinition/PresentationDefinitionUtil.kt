@@ -3,10 +3,10 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
+import io.mosip.openID4VP.common.validate
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
@@ -16,7 +16,7 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
     val hasPresentationDefinitionUri =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION_URI.value)
-    var presentationDefinition : Any
+    val presentationDefinition : Any?
 
     when {
         hasPresentationDefinition && hasPresentationDefinitionUri -> {
@@ -28,17 +28,18 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
         }
 
         hasPresentationDefinition -> {
-            validateAttribute(authorizationRequestParameters, PRESENTATION_DEFINITION.value)
-            presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value]!!
+            presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value]
+            validate(PRESENTATION_DEFINITION.value, presentationDefinition?.toString(), className)
         }
 
         hasPresentationDefinitionUri -> {
-            validateAttribute(authorizationRequestParameters, PRESENTATION_DEFINITION_URI.value)
             val presentationDefinitionUri = getStringValue(
                 authorizationRequestParameters,
                 PRESENTATION_DEFINITION_URI.value
-            )!!
-            if (!isValidUrl(presentationDefinitionUri)) {
+            )
+            validate(PRESENTATION_DEFINITION_URI.value, presentationDefinitionUri, className)
+
+            if (!isValidUrl(presentationDefinitionUri!!)) {
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
                     className = className,

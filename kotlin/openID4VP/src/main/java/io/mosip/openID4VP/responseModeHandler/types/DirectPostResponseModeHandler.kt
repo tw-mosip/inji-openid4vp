@@ -13,7 +13,7 @@ import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
 private val className = DirectPostResponseModeHandler::class.simpleName!!
 
 
-class DirectPostResponseModeHandler: ResponseModeBasedHandler {
+class DirectPostResponseModeHandler: ResponseModeBasedHandler() {
     override fun validate(clientMetadata: ClientMetadata?) {
         return
     }

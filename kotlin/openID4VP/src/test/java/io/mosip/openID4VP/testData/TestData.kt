@@ -64,43 +64,6 @@ val clientMetadataString = """{
 }
 """.trimIndent()
 
-val clientMetadataWithEmptyPublicKey  = """
-    {
-  "client_name": "Requester name",
-  "logo_uri": "<logo_uri>",
-  "authorization_encrypted_response_alg": "ECDH-ES",
-  "authorization_encrypted_response_enc": "A256GCM",
-  "jwks": {
-      "keys": [
-          {
-              "kty": "OKP",
-              "use": "enc",
-              "crv": "Ed25519",
-              "x": "",
-              "alg": "EdDSA",
-              "kid": "ed-key1",
-              "y": null
-          }
-      ]
-  },
-  "vp_formats": {
-    "mso_mdoc": {
-      "alg": [
-        "ES256",
-        "EdDSA"
-      ]
-    },
-    "ldp_vp": {
-      "proof_type": [
-        "Ed25519Signature2018",
-        "Ed25519Signature2020",
-        "RsaSignature2018"
-      ]
-    }
-  }
-}
-""".trimIndent()
-
 val presentationDefinitionMap = mapOf(
     "id" to "649d581c-f891-4969-9cd5-2c27385a348f",
     "input_descriptors" to listOf(

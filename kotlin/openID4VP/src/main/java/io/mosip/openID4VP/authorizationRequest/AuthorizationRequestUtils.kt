@@ -44,21 +44,6 @@ fun getAuthorizationRequestHandler(
     }
 }
 
-fun validateAttribute(
-    authorizationRequestParameters: Map<String, Any>,
-    attribute: String,
-) {
-    val value = getStringValue(authorizationRequestParameters, attribute)
-    if (value == null || value == "null" || value.isEmpty()) {
-        throw Logger.handleException(
-            exceptionType = if (authorizationRequestParameters[attribute] == null) "MissingInput" else "InvalidInput",
-            fieldPath = listOf(attribute),
-            className = className,
-            fieldType = "String"
-        )
-    }
-}
-
 fun extractQueryParameters(query: String): MutableMap<String, Any> {
     try {
         val urlDecodedQueryString = URLDecoder.decode(query, StandardCharsets.UTF_8.toString())

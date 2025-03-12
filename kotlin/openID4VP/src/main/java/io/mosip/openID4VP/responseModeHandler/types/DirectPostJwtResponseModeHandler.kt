@@ -2,11 +2,11 @@ package io.mosip.openID4VP.responseModeHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
-import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.encode
+import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.networkManager.CONTENT_TYPE
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
@@ -14,7 +14,7 @@ import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
 
 private val className = DirectPostJwtResponseModeHandler::class.simpleName!!
 
-class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler {
+class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
     override fun validate(clientMetadata: ClientMetadata?) {
         clientMetadata?.let {
             val alg = clientMetadata.authorizationEncryptedResponseAlg
@@ -86,5 +86,6 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler {
         )
         return response["body"].toString()
     }
+
 
 }

@@ -6,14 +6,14 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
-import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.ResponseMode.*
 import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
+import io.mosip.openID4VP.common.validate
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
 private val className = ClientIdSchemeBasedAuthorizationRequestHandler::class.simpleName!!
 
@@ -24,7 +24,8 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     var requestUriResponse: Map<String, Any> = emptyMap()
 
     open fun validateClientId() {
-        validateAttribute(authorizationRequestParameters, CLIENT_ID.value)
+        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)
+        validate(CLIENT_ID.value, clientId, className)
     }
 
     fun fetchAuthorizationRequest() {
@@ -46,42 +47,24 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     abstract fun validateRequestUriResponse()
 
     fun setResponseUrl() {
-        val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value) ?:
-            throw Logger.handleException(
+        val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value)
+            ?: throw Logger.handleException(
                 exceptionType = "MissingInput",
                 className = className,
                 fieldPath = listOf(RESPONSE_MODE.value)
             )
-        val verifierResponseUri = when (responseMode) {
-           DIRECT_POST.value, DIRECT_POST_JWT.value -> {
-                validateAttribute(authorizationRequestParameters, RESPONSE_URI.value)
-                getStringValue(authorizationRequestParameters, RESPONSE_URI.value)
-            }
-            else -> throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "Given response_mode is not supported"
-            )
-        }
-        if (!isValidUrl(verifierResponseUri!!)) {
-            throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "${RESPONSE_URI.value} data is not valid"
-            )
-        }
-        setResponseUri(verifierResponseUri)
-
+        ResponseModeBasedHandlerFactory.get(responseMode)
+            .setResponseUrl(authorizationRequestParameters, setResponseUri)
     }
 
     open fun validateAndParseRequestFields() {
-        validateAttribute(authorizationRequestParameters, RESPONSE_TYPE.value)
-        validateAttribute(authorizationRequestParameters, NONCE.value)
-        getStringValue(authorizationRequestParameters, STATE.value)?.let {
-            validateAttribute(
-                authorizationRequestParameters,
-                STATE.value
-            )
+        val responseType = getStringValue(authorizationRequestParameters, RESPONSE_TYPE.value)
+        validate(RESPONSE_TYPE.value, responseType, className)
+        val nonce = getStringValue(authorizationRequestParameters, NONCE.value)
+        validate(NONCE.value, nonce, className)
+        val state = getStringValue(authorizationRequestParameters, STATE.value)
+        state?.let {
+            validate(STATE.value, state, className)
         }
         parseAndValidateClientMetadata(authorizationRequestParameters)
         parseAndValidatePresentationDefinition(authorizationRequestParameters)
