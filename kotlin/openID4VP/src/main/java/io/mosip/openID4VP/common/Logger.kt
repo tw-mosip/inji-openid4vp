@@ -2,7 +2,8 @@ package io.mosip.openID4VP.common
 
 import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.jwt.exception.JWTVerificationException
+import io.mosip.openID4VP.jwt.exception.JWEException
+import io.mosip.openID4VP.jwt.exception.JWSException
 
 object Logger {
     private var traceabilityId: String? = null
@@ -49,25 +50,25 @@ object Logger {
 
             "InvalidQueryParams" -> AuthorizationRequestExceptions.InvalidQueryParams(message = message ?: "")
 
-            "InvalidVerifierRedirectUri" -> AuthorizationRequestExceptions.InvalidVerifierRedirectUri(message = message ?: "")
-
             "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier(message = message ?: "")
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
 
-            "InvalidClientIdScheme" -> AuthorizationRequestExceptions.InvalidClientIdScheme(message = message ?: "")
-
-            "InvalidResponseMode" -> AuthorizationRequestExceptions.InvalidResponseMode(message = message ?: "")
-
             "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
 
-            "PublicKeyResolutionFailed" -> JWTVerificationException.PublicKeyResolutionFailed(message = message ?: "")
+            "PublicKeyResolutionFailed" -> JWSException.PublicKeyResolutionFailed(message = message ?: "")
 
-            "KidExtractionFailed" -> JWTVerificationException.KidExtractionFailed(message = message ?: "")
+            "KidExtractionFailed" -> JWSException.KidExtractionFailed(message = message ?: "")
 
-            "PublicKeyExtractionFailed" -> JWTVerificationException.PublicKeyExtractionFailed(message = message ?: "")
+            "PublicKeyExtractionFailed" -> JWSException.PublicKeyExtractionFailed(message = message ?: "")
 
-            "InvalidSignature" -> JWTVerificationException.InvalidSignature(message = message ?: "")
+            "InvalidSignature" -> JWSException.InvalidSignature(message = message ?: "")
+
+            //JWK Algorithm Exceptions
+
+            "UnsupportedKeyExchangeAlgorithm" ->  JWEException.UnsupportedKeyExchangeAlgorithm()
+
+            "JweEncryptionFailure" ->  JWEException.JweEncryptionFailure()
 
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")
         }

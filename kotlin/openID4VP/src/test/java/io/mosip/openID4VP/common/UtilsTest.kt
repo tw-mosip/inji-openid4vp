@@ -44,13 +44,13 @@ class UtilsTest {
     @Test
     fun `isJWT should return true for valid JWT`() {
         val jwt = "header.payload.signature"
-        assertTrue(isJWT(jwt))
+        assertTrue(isJWS(jwt))
     }
 
     @Test
     fun `isJWT should return false for invalid JWT`() {
         val jwt = "invalid.jwt"
-        assertFalse(isJWT(jwt))
+        assertFalse(isJWS(jwt))
     }
 
     @Test

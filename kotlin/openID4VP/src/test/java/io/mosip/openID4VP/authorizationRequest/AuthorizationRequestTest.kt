@@ -10,7 +10,10 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.REDIRECT_URI
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
+import io.mosip.openID4VP.common.ClientIdScheme
+import io.mosip.openID4VP.common.ClientIdScheme.*
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.testData.*
 import io.mosip.openID4VP.testData.createUrlEncodedData
@@ -65,10 +68,10 @@ class AuthorizationRequestTest {
     @Test
     fun `should throw missing input exception if client_id param is missing in Authorization Request`() {
         val authorizationRequestParamsMap = requestParams.minus(CLIENT_ID.value) + mapOf(
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+            CLIENT_ID_SCHEME.value to DID.value
         )
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,false , DID)
 
         expectedExceptionMessage = "Missing Input: client_id param is required"
 
@@ -88,12 +91,12 @@ class AuthorizationRequestTest {
             CLIENT_ID_SCHEME.value to "wrong-value"
         )
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,false , DID)
 
         expectedExceptionMessage = "Given client_id_scheme is not supported"
 
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidClientIdScheme::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -106,10 +109,10 @@ class AuthorizationRequestTest {
     fun `should throw invalid input exception if client_id param is present in Authorization Request but it's value is empty string`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             CLIENT_ID.value to "",
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+            CLIENT_ID_SCHEME.value to DID.value
         )
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,false , DID)
 
         expectedExceptionMessage = "Invalid Input: client_id value cannot be an empty string, null, or an integer"
 
@@ -140,7 +143,7 @@ class AuthorizationRequestTest {
             "Either presentation_definition or presentation_definition_uri request param must be present"
 
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -172,7 +175,7 @@ class AuthorizationRequestTest {
         val expectedExceptionMessage =
             "Either presentation_definition or presentation_definition_uri request param can be provided but not both"
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -319,7 +322,7 @@ class AuthorizationRequestTest {
 
         val expectedExceptionMessage = "response_uri should be equal to client_id for given client_id_scheme"
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidVerifierRedirectUri::class.java) {
+            assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
                 )
@@ -435,6 +438,47 @@ class AuthorizationRequestTest {
     }
 
     @Test
+    fun `should add default client id scheme as pre-registered if not present in authorization request`() {
+        val authorizationRequestParamsMap = requestParams +  mapOf(
+            CLIENT_ID.value to "https://verifier.env1.net",
+        )
+        val applicationFields =
+            listOf(
+                CLIENT_ID.value,
+                CLIENT_ID_SCHEME.value,
+                RESPONSE_MODE.value,
+                RESPONSE_URI.value,
+                PRESENTATION_DEFINITION_URI.value,
+                RESPONSE_TYPE.value,
+                NONCE.value,
+                STATE.value,
+                CLIENT_METADATA.value
+            )
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/json").build(),
+            "body" to createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, authorizationRequestParamsMap, applicationFields)
+        )
+
+
+        val encodedAuthorizationRequest =
+            createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED, applicationFields)
+
+        assertDoesNotThrow {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                shouldValidateClient = true
+            )
+        }
+
+    }
+
+    @Test
     fun `should return Authorization Request for redirect uri scheme when passed by value`() {
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfReDirectUri
 
@@ -476,7 +520,7 @@ class AuthorizationRequestTest {
             createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.REDIRECT_URI,)
 
         expectedExceptionMessage = "Given response_mode is not supported"
-        actualException = assertThrows<InvalidResponseMode> {
+        actualException = assertThrows<InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,

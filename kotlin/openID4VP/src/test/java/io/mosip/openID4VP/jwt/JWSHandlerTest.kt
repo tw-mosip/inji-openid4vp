@@ -5,10 +5,11 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
-import io.mosip.openID4VP.testData.JWTUtil
-import io.mosip.openID4VP.testData.JWTUtil.Companion.jwtHeader
-import io.mosip.openID4VP.testData.JWTUtil.Companion.jwtPayload
+import io.mosip.openID4VP.testData.JWSUtil
+import io.mosip.openID4VP.testData.JWSUtil.Companion.jwtHeader
+import io.mosip.openID4VP.testData.JWSUtil.Companion.jwtPayload
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -17,7 +18,7 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertThrows
 
 
-class JwtHandlerTest {
+class JWSHandlerTest {
 
     private val publicKeyResolver = mockk<PublicKeyResolver>()
 
@@ -46,23 +47,23 @@ class JwtHandlerTest {
     @Test
     fun `verify should pass with valid signature`() {
         val publicKey = "IKXhA7W1HD1sAl+OfG59VKAqciWrrOL1Rw5F+PGLhi4="
-        val jwt =JWTUtil.createJWT(jwtPayload, true, jwtHeader)
+        val jwt =JWSUtil.createJWS(jwtPayload, true, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwtHandler = JwtHandler(jwt, publicKeyResolver)
+        val jwsHandler = JWSHandler(jwt, publicKeyResolver)
 
-        assertDoesNotThrow { jwtHandler.verify() }
+        assertDoesNotThrow { jwsHandler.verify() }
     }
 
     @Test
     fun `verify should throw exception with invalid public key`() {
         val publicKey = "invalidPublicKeyBase64"
-        val jwt =JWTUtil.createJWT(jwtPayload, true, jwtHeader)
+        val jwt =JWSUtil.createJWS(jwtPayload, true, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwtHandler = JwtHandler(jwt, publicKeyResolver)
+        val jwsHandler = JWSHandler(jwt, publicKeyResolver)
 
-        val exception = assertThrows(Exception::class.java) { jwtHandler.verify() }
+        val exception = assertThrows(Exception::class.java) { jwsHandler.verify() }
 
         assertEquals(
             "An unexpected exception occurred: exception type: VerificationFailure",
@@ -73,15 +74,15 @@ class JwtHandlerTest {
     @Test
     fun `verify should throw exception with invalid signature`() {
         val publicKey = "IKXhA7W1HD1sAl+OfG59VKAqciWrrOL1Rw5F+PGLhi4="
-        val jwt =JWTUtil.createJWT(jwtPayload, false, jwtHeader)
+        val jwt =JWSUtil.createJWS(jwtPayload, false, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwtHandler = JwtHandler(jwt, publicKeyResolver)
+        val jwsHandler = JWSHandler(jwt, publicKeyResolver)
 
-        val exception = assertThrows(Exception::class.java) { jwtHandler.verify() }
+        val exception = assertThrows(Exception::class.java) { jwsHandler.verify() }
 
         assertEquals(
-            "JWT signature verification failed",
+            "JWS signature verification failed",
             exception.message
         )
     }

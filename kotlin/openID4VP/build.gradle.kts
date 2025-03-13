@@ -57,13 +57,14 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.jackson.core)
     implementation(libs.jackson.annotations)
-    implementation (libs.nimbus.jose.jwt)
+    implementation(libs.nimbus.jose.jwt)
     implementation(libs.bouncyCastle)
     implementation(libs.identity.credential)
     implementation(libs.ld.signatures.java)
     implementation(libs.jsonld.common.java)
     implementation(libs.vcverifier)
-
+    implementation(libs.bcpkix)
+    implementation(libs.google.tink)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

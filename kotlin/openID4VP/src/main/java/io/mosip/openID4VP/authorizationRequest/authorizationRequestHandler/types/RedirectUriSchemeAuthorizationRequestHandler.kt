@@ -2,12 +2,13 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.type
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
-import io.mosip.openID4VP.authorizationRequest.validateAttribute
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
-import io.mosip.openID4VP.networkManager.CONTENT_TYPES.APPLICATION_JSON
+import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JSON
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.ResponseMode.*
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
+import io.mosip.openID4VP.common.validate
 import okhttp3.Headers
 
 private val className = RedirectUriSchemeAuthorizationRequestHandler::class.simpleName!!
@@ -50,7 +51,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
             fieldPath = listOf(RESPONSE_MODE.value)
         )
          when (responseMode) {
-            "direct_post" -> {
+            DIRECT_POST.value, DIRECT_POST_JWT.value -> {
                 validateUriCombinations(
                     authorizationRequestParameters,
                     RESPONSE_URI.value,
@@ -58,7 +59,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 )
             }
             else -> throw Logger.handleException(
-                exceptionType = "InvalidResponseMode",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "Given response_mode is not supported"
             )
@@ -79,12 +80,13 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 )
             }
             else -> {
-                validateAttribute(authRequestParam, validAttribute)
+                val data = getStringValue(authRequestParam, validAttribute)
+                validate(validAttribute,data, className)
             }
         }
         if(authRequestParam[validAttribute] != authRequestParam[CLIENT_ID.value])
             throw Logger.handleException(
-                exceptionType = "InvalidVerifierRedirectUri",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "$validAttribute should be equal to client_id for given client_id_scheme"
             )

@@ -1,36 +1,51 @@
 package io.mosip.openID4VP.testData
 
-import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.common.ClientIdScheme
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
 val clientMetadataMap = mapOf(
-        "client_name" to "Requester name",
-        "logo_uri" to "<logo_uri>",
-        "authorization_encrypted_response_alg" to "ECDH-ES",
-        "authorization_encrypted_response_enc" to "A256GCM",
-        "vp_formats" to mapOf(
-            "mso_mdoc" to mapOf(
-                "alg" to listOf("ES256", "EdDSA")
-            ),
-            "ldp_vp" to mapOf(
-                "proof_type" to listOf(
-                    "Ed25519Signature2018",
-                    "Ed25519Signature2020",
-                    "RsaSignature2018"
-                )
+    "client_name" to "Requester name",
+    "logo_uri" to "<logo_uri>",
+    "authorization_encrypted_response_alg" to "ECDH-ES",
+    "authorization_encrypted_response_enc" to "A256GCM",
+    "vp_formats" to mapOf(
+        "mso_mdoc" to mapOf(
+            "alg" to listOf("ES256", "EdDSA")
+        ),
+        "ldp_vp" to mapOf(
+            "proof_type" to listOf(
+                "Ed25519Signature2018",
+                "Ed25519Signature2020",
+                "RsaSignature2018"
             )
         )
     )
-
+)
 
 val clientMetadataString = """{
   "client_name": "Requester name",
   "logo_uri": "<logo_uri>",
   "authorization_encrypted_response_alg": "ECDH-ES",
   "authorization_encrypted_response_enc": "A256GCM",
+  "jwks": {
+    "keys": [
+      {
+        "kty": "OKP",
+        "crv": "X25519",
+        "use": "enc",
+        "x": "BVNVdqorpxCCnTOkkw8S2NAYXvfEvkC-8RDObhrAUA4",
+        "alg": "ECDH-ES",
+        "kid": "ed-key1"
+      }
+    ]
+  },
   "vp_formats": {
     "mso_mdoc": {
       "alg": [
@@ -154,7 +169,7 @@ val didResponse = """
 val trustedVerifiers: List<Verifier> = listOf(
     Verifier(
         "https://verifier.env1.net", listOf(
-            "https://verifier.env1.net/responseUri", "https://verifier.env2.net/responseUri"
+            "https://mock-verifier.net/responseUri", "https://verifier.env2.net/responseUri"
         )
     ), Verifier(
         "https://verifier.env2.net", listOf(
@@ -169,7 +184,6 @@ val authRequestParamsByReference = listOf(
     REQUEST_URI.value,
     REQUEST_URI_METHOD.value
 )
-
 
 val authRequestWithRedirectUriByValue = listOf(
     CLIENT_ID.value,
@@ -211,7 +225,7 @@ val requestParams: Map<String, String> = mapOf(
     CLIENT_ID.value to "https://mock-verifier.com",
     CLIENT_ID_SCHEME.value to "pre-registered",
     REDIRECT_URI.value to "https://mock-verifier.com",
-    RESPONSE_URI.value to "https://verifier.env1.net/responseUri",
+    RESPONSE_URI.value to "https://mock-verifier.net/responseUri",
     REQUEST_URI.value to requestUrl,
     REQUEST_URI_METHOD.value to "get",
     PRESENTATION_DEFINITION.value to presentationDefinitionString,
@@ -240,7 +254,7 @@ val clientIdAndSchemeOfPreRegistered = mapOf(
 )
 
 val clientIdAndSchemeOfReDirectUri = mapOf(
-    CLIENT_ID.value to "https://verifier.env1.net/responseUri",
+    CLIENT_ID.value to "https://mock-verifier.net/responseUri",
     CLIENT_ID_SCHEME.value to REDIRECT_URI.value,
 )
 
@@ -249,7 +263,19 @@ val clientMetadataPresentationDefinitionMap = mapOf(
     CLIENT_METADATA.value to clientMetadataMap
 )
 
-val clientMetadataPresentationDefinitionString = mapOf(
-    PRESENTATION_DEFINITION.value to presentationDefinitionString,
-    CLIENT_METADATA.value to clientMetadataString
+
+val authorizationRequestForResponseModeJWT = AuthorizationRequest(
+    clientId = "https://injiverify.dev2.mosip.net",
+    responseType = "vp_token",
+    responseMode = "direct_post.jwt",
+    presentationDefinition = deserializeAndValidate(
+        presentationDefinitionString,
+        PresentationDefinitionSerializer
+    ),
+    nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    state = "fsnC8ixCs6mWyV+00k23Qg==",
+    responseUri = "https://mock-verifier.com/response-uri",
+    clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer),
+    clientIdScheme = "did",
+    redirectUri = null
 )

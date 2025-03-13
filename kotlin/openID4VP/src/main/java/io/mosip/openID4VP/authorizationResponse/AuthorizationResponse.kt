@@ -1,19 +1,15 @@
 package io.mosip.openID4VP.authorizationResponse
 
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.dto.VPResponseMetadata
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
-private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
 private val className = AuthorizationResponse::class.simpleName!!
 
 class AuthorizationResponse {
@@ -22,120 +18,67 @@ class AuthorizationResponse {
         private lateinit var verifiableCredentials: Map<String, List<String>>
 
         fun constructVPTokenForSigning(verifiableCredentials: Map<String, List<String>>): String {
-            try {
-                this.verifiableCredentials = verifiableCredentials
-                val verifiableCredential = mutableListOf<String>()
-                verifiableCredentials.forEach { (_, vcs) ->
-                    vcs.forEach { vcJson ->
-                        verifiableCredential.add(vcJson)
-                    }
+            this.verifiableCredentials = verifiableCredentials
+            val verifiableCredential = mutableListOf<String>()
+            verifiableCredentials.forEach { (_, vcs) ->
+                vcs.forEach { vcJson ->
+                    verifiableCredential.add(vcJson)
                 }
-                this.vpTokenForSigning = VPTokenForSigning(
-                    verifiableCredential = verifiableCredential,
-                    id = UUIDGenerator.generateUUID(),
-                    holder = ""
-                )
-                return Json.encodeToString(vpTokenForSigning)
-            } catch (exception: SerializationException) {
-                throw Logger.handleException(
-                    exceptionType = "JsonEncodingFailed",
-                    message = exception.message,
-                    fieldPath = listOf("vp_token_for_signing"),
-                    className = className
-                )
-            } catch (exception: Exception) {
-                Logger.error(logTag, exception)
-                throw exception
             }
+            this.vpTokenForSigning = VPTokenForSigning(
+                verifiableCredential = verifiableCredential,
+                id = UUIDGenerator.generateUUID(),
+                holder = ""
+            )
+            return encodeToJsonString(vpTokenForSigning, "vp_token_for_signing", className)
         }
 
         fun shareVP(
             vpResponseMetadata: VPResponseMetadata,
-            nonce: String,
-            state: String?,
+            authorizationRequest: AuthorizationRequest,
             responseUri: String,
-            presentationDefinitionId: String
         ): String {
-            try {
-                vpResponseMetadata.validate()
-                var pathIndex = 0
-                val proof = Proof.constructProof(
-                    vpResponseMetadata, challenge = nonce
+            vpResponseMetadata.validate()
+
+            val presentationSubmission = PresentationSubmission(
+                id = UUIDGenerator.generateUUID(),
+                definitionId = authorizationRequest.clientId,
+                descriptorMap = createDescriptorMap(this.verifiableCredentials)
+            )
+            val vpToken = VPToken.construct(
+                signingVPToken = this.vpTokenForSigning,
+                proof = Proof.construct(
+                    vpResponseMetadata = vpResponseMetadata,
+                    challenge = authorizationRequest.nonce
                 )
-                val descriptorMap = mutableListOf<DescriptorMap>()
-                verifiableCredentials.forEach { (inputDescriptorId, vcs) ->
-                    vcs.forEach { _ ->
-                        descriptorMap.add(
-                            DescriptorMap(
-                                inputDescriptorId,
-                                "ldp_vp",
-                                "$.verifiableCredential[${pathIndex++}]"
-                            )
+            )
+            return ResponseModeBasedHandlerFactory.get(authorizationRequest.responseMode!!)
+                .sendAuthorizationResponse(
+                    vpToken = vpToken,
+                    authorizationRequest = authorizationRequest,
+                    presentationSubmission = presentationSubmission,
+                    state = authorizationRequest.state,
+                    url = responseUri
+                )
+
+        }
+
+        private fun createDescriptorMap(verifiableCredentials: Map<String, List<String>>): MutableList<DescriptorMap> {
+            var pathIndex = 0
+            val descriptorMap = mutableListOf<DescriptorMap>()
+            verifiableCredentials.forEach { (inputDescriptorId, vcs) ->
+                vcs.forEach { _ ->
+                    descriptorMap.add(
+                        DescriptorMap(
+                            inputDescriptorId,
+                            "ldp_vp",
+                            "$.verifiableCredential[${pathIndex++}]"
                         )
-                    }
+                    )
                 }
-                val presentationSubmission = PresentationSubmission(
-                    UUIDGenerator.generateUUID(), presentationDefinitionId, descriptorMap
-                )
-                val vpToken = VPToken.constructVpToken(this.vpTokenForSigning, proof)
-
-                return constructHttpRequestBody(
-                    vpToken,
-                    presentationSubmission,
-                    responseUri, state
-                )
-            } catch (exception: Exception) {
-                Logger.error(logTag, exception)
-                throw exception
             }
+            return descriptorMap
         }
 
-        private fun constructHttpRequestBody(
-            vpToken: VPToken,
-            presentationSubmission: PresentationSubmission,
-            responseUri: String, state: String?
-        ): String {
-            val encodedVPToken: String
-            val encodedPresentationSubmission: String
-            try {
-                encodedVPToken = Json.encodeToString(vpToken)
-            } catch (exception: Exception) {
-                throw Logger.handleException(
-                    exceptionType = "JsonEncodingFailed",
-                    message = exception.message,
-                    fieldPath = listOf("vp_token"),
-                    className = className
-                )
-            }
-            try {
-                encodedPresentationSubmission = Json.encodeToString(presentationSubmission)
-            } catch (exception: Exception) {
-                throw Logger.handleException(
-                    exceptionType = "JsonEncodingFailed",
-                    message = exception.message,
-                    fieldPath = listOf("presentation_submission"),
-                    className = className
-                )
-            }
-
-            try {
-                val bodyParams = mapOf(
-                    "vp_token" to encodedVPToken,
-                    "presentation_submission" to encodedPresentationSubmission,
-                ) .let { baseParams ->
-                    state?.let { baseParams + mapOf("state" to it) } ?: baseParams
-                }
-
-                 val response = sendHTTPRequest(
-                    url = responseUri,
-                    method = HTTP_METHOD.POST,
-                    bodyParams = bodyParams,
-                    headers = mapOf("content-type" to "application/x-www-form-urlencoded")
-                )
-                return response["body"].toString()
-            } catch (exception: Exception) {
-                throw exception
-            }
-        }
     }
 }

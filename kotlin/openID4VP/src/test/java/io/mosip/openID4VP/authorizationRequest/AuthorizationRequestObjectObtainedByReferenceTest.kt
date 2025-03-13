@@ -9,6 +9,8 @@ import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
+import io.mosip.openID4VP.common.ClientIdScheme
+import io.mosip.openID4VP.common.ClientIdScheme.*
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
@@ -74,14 +76,14 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.DID, authorizationRequestParamsMap)
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
         )
 
         val encodedAuthorizationRequest =
             createUrlEncodedData(
                 authorizationRequestParamsMap,
                 true,
-                ClientIdScheme.DID
+                DID
             )
 
         assertDoesNotThrow {
@@ -103,14 +105,14 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.DID, authorizationRequestParamsMap)
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
         )
 
         val encodedAuthorizationRequest =
             createUrlEncodedData(
                 authorizationRequestParamsMap,
                 true,
-                ClientIdScheme.DID
+                DID
             )
 
         val invalidInputException = assertThrows(InvalidData::class.java){
@@ -134,7 +136,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
         val exceptionWhenRequestUriNetworkCallFails = assertThrows(Exception::class.java) {
@@ -157,7 +159,7 @@ class AuthorizationRequestObjectObtainedByReference {
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.DID, authRequestWithDidByValue)
+            createUrlEncodedData(authorizationRequestParamsMap,false , DID, authRequestWithDidByValue)
 
 
         val missingInputException = assertThrows(MissingInput::class.java) {
@@ -185,11 +187,11 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns  mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.DID, authorizationRequestParamsMap)
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
         )
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true, ClientIdScheme.REDIRECT_URI )
+            createUrlEncodedData(authorizationRequestParamsMap,true, ClientIdScheme.REDIRECT_URI)
 
 
         openID4VP.authenticateVerifier(
@@ -211,7 +213,7 @@ class AuthorizationRequestObjectObtainedByReference {
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid + mapOf(REQUEST_URI.value to "test-data")
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true, ClientIdScheme.REDIRECT_URI )
+            createUrlEncodedData(authorizationRequestParamsMap,true, ClientIdScheme.REDIRECT_URI)
 
 
         val exception = assertThrows<InvalidData> {
@@ -235,12 +237,12 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns  mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.DID, authorizationRequestParamsMap)
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
         )
         val encodedAuthorizationRequest = createUrlEncodedData(
             authorizationRequestParamsMap,
             true,
-            ClientIdScheme.DID
+            DID
         )
 
         openID4VP.authenticateVerifier(
@@ -295,14 +297,14 @@ class AuthorizationRequestObjectObtainedByReference {
     fun `should throw invalid verifier for invalid client id in authorization request in did client id scheme`() {
         val authorizationRequestParamsMap = requestParams + mapOf(
             CLIENT_ID.value to "invaliddid:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-            CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+            CLIENT_ID_SCHEME.value to DID.value
         )
 
         val encodedAuthorizationRequest =
             createUrlEncodedData(
                 authorizationRequestParamsMap,
                 true,
-                ClientIdScheme.DID
+                DID
             )
 
         val exception = assertThrows<InvalidVerifier> {
@@ -324,16 +326,16 @@ class AuthorizationRequestObjectObtainedByReference {
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
             "body" to createAuthorizationRequestObject(
-                ClientIdScheme.DID, requestParams + mapOf(
+                DID, requestParams + mapOf(
                     CLIENT_ID.value to "wrong-client-id",
-                    CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+                    CLIENT_ID_SCHEME.value to DID.value
                 )
             )
         )
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
         val exception = assertThrows(InvalidData::class.java) {
@@ -359,15 +361,16 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns  mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.DID, requestParams + mapOf(
+            "body" to createAuthorizationRequestObject(
+                DID, requestParams + mapOf(
                 CLIENT_ID.value to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-                CLIENT_ID_SCHEME.value to ClientIdScheme.PRE_REGISTERED.value
+                CLIENT_ID_SCHEME.value to PRE_REGISTERED.value
             ))
         )
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
         val exception = assertThrows(InvalidData::class.java) {
             openID4VP.authenticateVerifier(
@@ -395,11 +398,11 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, authorizationRequestParamsMap)
+            "body" to createAuthorizationRequestObject(PRE_REGISTERED, authorizationRequestParamsMap)
         )
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
         assertDoesNotThrow {
@@ -423,11 +426,11 @@ class AuthorizationRequestObjectObtainedByReference {
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
-            "body" to createAuthorizationRequestObject(ClientIdScheme.PRE_REGISTERED, authorizationRequestParamsMap)
+            "body" to createAuthorizationRequestObject(PRE_REGISTERED, authorizationRequestParamsMap)
         )
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
         assertThrows<InvalidData> {
@@ -455,7 +458,7 @@ class AuthorizationRequestObjectObtainedByReference {
         )
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.DID)
+            createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
         assertThrows<InvalidData> {
@@ -476,16 +479,16 @@ class AuthorizationRequestObjectObtainedByReference {
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
             "body" to createAuthorizationRequestObject(
-                ClientIdScheme.PRE_REGISTERED, requestParams + mapOf(
+                PRE_REGISTERED, requestParams + mapOf(
                     CLIENT_ID.value to "wrong-client-id",
-                    CLIENT_ID_SCHEME.value to ClientIdScheme.PRE_REGISTERED.value
+                    CLIENT_ID_SCHEME.value to PRE_REGISTERED.value
                 )
             )
         )
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
+            createUrlEncodedData(authorizationRequestParamsMap,true , PRE_REGISTERED)
 
         val invalidClientIdException =
             assertThrows(InvalidData::class.java) {
@@ -513,16 +516,16 @@ class AuthorizationRequestObjectObtainedByReference {
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
             "body" to createAuthorizationRequestObject(
-                ClientIdScheme.PRE_REGISTERED, requestParams + mapOf(
+                PRE_REGISTERED, requestParams + mapOf(
                     CLIENT_ID.value to "https://verifier.env1.net",
-                    CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+                    CLIENT_ID_SCHEME.value to DID.value
                 )
             )
         )
 
         val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
+            createUrlEncodedData(authorizationRequestParamsMap,true , PRE_REGISTERED)
 
         val invalidClientIsSchemeException =
             assertThrows(InvalidData::class.java) {
@@ -549,9 +552,9 @@ class AuthorizationRequestObjectObtainedByReference {
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
             "body" to createAuthorizationRequestObject(
-                ClientIdScheme.PRE_REGISTERED, requestParams + mapOf(
+                PRE_REGISTERED, requestParams + mapOf(
                     CLIENT_ID.value to "https://verifier.env1.net",
-                    CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
+                    CLIENT_ID_SCHEME.value to DID.value
                 )
             )
         )
@@ -560,7 +563,7 @@ class AuthorizationRequestObjectObtainedByReference {
             CLIENT_ID.value to "https://verifier.env1.net",
         )
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , ClientIdScheme.PRE_REGISTERED)
+            createUrlEncodedData(authorizationRequestParamsMap,true , PRE_REGISTERED)
 
         val invalidClientIsSchemeException =
             assertThrows(InvalidData::class.java) {
