@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.VPToken
 
 @JsonSerialize(using = VPTokenTypeSerializer::class)
 sealed class VPTokenType {

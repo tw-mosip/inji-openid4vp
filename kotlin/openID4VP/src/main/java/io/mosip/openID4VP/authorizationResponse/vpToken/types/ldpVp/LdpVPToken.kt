@@ -1,8 +1,7 @@
-package io.mosip.openID4VP.authorizationResponse.models.vpToken.types
+package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.mosip.openID4VP.authorizationResponse.Proof
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.VPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
 
 data class LdpVPToken(
     @JsonProperty("@context")

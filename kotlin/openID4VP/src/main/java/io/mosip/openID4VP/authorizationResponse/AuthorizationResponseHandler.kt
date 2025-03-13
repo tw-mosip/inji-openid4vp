@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.constants.ResponseType
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.VPToken
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.types.LdpVPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
@@ -37,9 +37,9 @@ class AuthorizationResponseHandler {
         this.credentialsMap = credentialsMap
         if (credentialsMap.isEmpty()) {
             throw Logger.handleException(
-                exceptionType = "EmptyCredentialsList",
+                exceptionType = "InvalidInput",
                 className = className,
-                message = "The Wallet did not have the requested Credentials to satisfy the Authorization Request."
+                message = "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request."
             )
         }
         this.vpTokensForSigning = createVPTokenForSigning(credentialsMap, holder)
@@ -53,13 +53,10 @@ class AuthorizationResponseHandler {
     ): String {
         val authorizationResponse: Map<String, String> = createAuthorizationResponse(
             authorizationRequest = authorizationRequest,
-            vpResponsesMetadata = vpResponsesMetadata,
-            credentialsMap = this.credentialsMap,
-            vpTokensForSigning = this.vpTokensForSigning
+            vpResponsesMetadata = vpResponsesMetadata
         )
 
         println("output")
-        println(authorizationResponse.toKotlinMapSyntax())
 
         return sendAuthorizationResponse(
             authorizationResponse = authorizationResponse,
@@ -71,8 +68,6 @@ class AuthorizationResponseHandler {
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
         vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
-        credentialsMap: Map<String, Map<FormatType, List<String>>>,
-        vpTokensForSigning: Map<FormatType, VPTokenForSigning>,
     ): Map<String, String> {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
@@ -80,11 +75,9 @@ class AuthorizationResponseHandler {
                 val vpToken = createVPToken(
                     vpResponsesMetadata,
                     authorizationRequest,
-                    vpTokensForSigning,
                     credentialFormatIndex
                 )
                 val presentationSubmission: PresentationSubmission = createPresentationSubmission(
-                    credentialsMap = credentialsMap,
                     authorizationRequest = authorizationRequest,
                     credentialFormatIndex = credentialFormatIndex
                 )
@@ -123,7 +116,6 @@ class AuthorizationResponseHandler {
     private fun createVPToken(
         vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
         authorizationRequest: AuthorizationRequest,
-        vpTokensForSigning: Map<FormatType, VPTokenForSigning>,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): VPTokenType {
         val vpTokens: MutableList<VPToken> = mutableListOf()
@@ -152,7 +144,6 @@ class AuthorizationResponseHandler {
     }
 
     private fun createPresentationSubmission(
-        credentialsMap: Map<String, Map<FormatType, List<String>>>,
         authorizationRequest: AuthorizationRequest,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): PresentationSubmission {

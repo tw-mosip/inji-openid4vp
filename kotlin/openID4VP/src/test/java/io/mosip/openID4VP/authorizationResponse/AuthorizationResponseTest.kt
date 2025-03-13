@@ -11,12 +11,12 @@ import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.VPToken
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.types.LdpVPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
 import io.mosip.openID4VP.common.FormatType
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.common.toJsonEncodedMap
@@ -28,7 +28,6 @@ import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientException
 import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.vpResponsesMetadata
-import junit.framework.Assert
 import okhttp3.Headers
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer

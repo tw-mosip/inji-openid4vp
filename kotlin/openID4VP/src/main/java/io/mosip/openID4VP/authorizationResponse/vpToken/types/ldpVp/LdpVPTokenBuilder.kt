@@ -1,10 +1,8 @@
-package io.mosip.openID4VP.authorizationResponse.vpToken.builder.types
+package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp
 
-import io.mosip.openID4VP.authorizationResponse.Proof
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.VPToken
-import io.mosip.openID4VP.authorizationResponse.models.vpToken.types.LdpVPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
-import io.mosip.openID4VP.authorizationResponse.vpToken.builder.VPTokenBuilder
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenBuilder
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 
 class LdpVPTokenBuilder(
