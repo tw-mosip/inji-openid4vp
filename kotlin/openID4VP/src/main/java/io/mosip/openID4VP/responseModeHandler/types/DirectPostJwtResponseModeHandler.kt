@@ -5,7 +5,7 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.encode
+import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.networkManager.CONTENT_TYPE
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
@@ -56,9 +56,9 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
         state: String?,
         url: String
     ): String {
-        val encodedVPToken = encode(vpToken, "vp_token", className)
+        val encodedVPToken = encodeToJsonString(vpToken, "vp_token", className)
         val encodedPresentationSubmission =
-            encode(presentationSubmission, "presentation_submission", className)
+            encodeToJsonString(presentationSubmission, "presentation_submission", className)
         val bodyParams = mapOf(
             "vp_token" to encodedVPToken,
             "presentation_submission" to encodedPresentationSubmission,

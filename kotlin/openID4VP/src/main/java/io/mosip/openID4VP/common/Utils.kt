@@ -59,7 +59,7 @@ fun validate(
     }
 }
 
-inline fun <reified T> encode(data: T, fieldName: String, className: String): String {
+inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className: String): String {
     try {
         return Json.encodeToString(data)
     } catch (exception: Exception) {

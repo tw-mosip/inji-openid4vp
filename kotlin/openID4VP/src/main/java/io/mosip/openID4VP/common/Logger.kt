@@ -68,7 +68,7 @@ object Logger {
 
             "UnsupportedKeyExchangeAlgorithm" ->  JWEException.UnsupportedKeyExchangeAlgorithm()
 
-            "UnsupportedEncryptionAlgorithm" ->  JWEException.UnsupportedEncryptionAlgorithm()
+            "JweEncryptionFailure" ->  JWEException.JweEncryptionFailure()
 
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")
         }

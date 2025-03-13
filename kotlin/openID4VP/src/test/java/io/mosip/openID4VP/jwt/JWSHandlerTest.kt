@@ -47,7 +47,7 @@ class JWSHandlerTest {
     @Test
     fun `verify should pass with valid signature`() {
         val publicKey = "IKXhA7W1HD1sAl+OfG59VKAqciWrrOL1Rw5F+PGLhi4="
-        val jwt =JWSUtil.createJWT(jwtPayload, true, jwtHeader)
+        val jwt =JWSUtil.createJWS(jwtPayload, true, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
         val jwsHandler = JWSHandler(jwt, publicKeyResolver)
@@ -58,7 +58,7 @@ class JWSHandlerTest {
     @Test
     fun `verify should throw exception with invalid public key`() {
         val publicKey = "invalidPublicKeyBase64"
-        val jwt =JWSUtil.createJWT(jwtPayload, true, jwtHeader)
+        val jwt =JWSUtil.createJWS(jwtPayload, true, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
         val jwsHandler = JWSHandler(jwt, publicKeyResolver)
@@ -74,7 +74,7 @@ class JWSHandlerTest {
     @Test
     fun `verify should throw exception with invalid signature`() {
         val publicKey = "IKXhA7W1HD1sAl+OfG59VKAqciWrrOL1Rw5F+PGLhi4="
-        val jwt =JWSUtil.createJWT(jwtPayload, false, jwtHeader)
+        val jwt =JWSUtil.createJWS(jwtPayload, false, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
         val jwsHandler = JWSHandler(jwt, publicKeyResolver)

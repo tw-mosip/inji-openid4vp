@@ -46,13 +46,13 @@ class JWSUtil {
             return replaceCharactersInB64(Base64.getEncoder().encodeToString(signature))
         }
 
-        fun createJWT(
+        fun createJWS(
             authorizationRequestParam: Any?,
             addValidSignature: Boolean,
-            jwtHeader: JsonObject?
+            jwsHeader: JsonObject?
         ): String {
             val mapper = jacksonObjectMapper()
-            val header = jwtHeader ?: this.jwtHeader
+            val header = jwsHeader ?: this.jwtHeader
             val header64 = encodeB64(header.toString())
             val payload64 = encodeB64(mapper.writeValueAsString(authorizationRequestParam))
             val preHash = "$header64.$payload64"

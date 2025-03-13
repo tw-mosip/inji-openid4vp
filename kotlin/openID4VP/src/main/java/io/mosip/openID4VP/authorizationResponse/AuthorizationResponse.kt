@@ -6,7 +6,7 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.Presentat
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPTokenForSigning
 import io.mosip.openID4VP.common.UUIDGenerator
-import io.mosip.openID4VP.common.encode
+import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
@@ -30,7 +30,7 @@ class AuthorizationResponse {
                 id = UUIDGenerator.generateUUID(),
                 holder = ""
             )
-            return encode(vpTokenForSigning, "vp_token_for_signing", className)
+            return encodeToJsonString(vpTokenForSigning, "vp_token_for_signing", className)
         }
 
         fun shareVP(

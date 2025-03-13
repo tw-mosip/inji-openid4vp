@@ -36,7 +36,7 @@ class JWEHandler(
             return jwt.serialize()
         } catch (exception: Exception) {
             throw Logger.handleException(
-                exceptionType = "JWTEncryptionFailure",
+                exceptionType = "JweEncryptionFailure",
                 message = exception.message,
                 className = className
             )
