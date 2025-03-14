@@ -22,7 +22,7 @@ import okhttp3.internal.toImmutableMap
 
 private val className = AuthorizationResponseHandler::class.java.simpleName
 
-class AuthorizationResponseHandler {
+internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<String>>>
     private lateinit var vpTokensForSigning: Map<FormatType, VPTokenForSigning>
 
@@ -33,7 +33,7 @@ class AuthorizationResponseHandler {
         this.credentialsMap = credentialsMap
         if (credentialsMap.isEmpty()) {
             throw Logger.handleException(
-                exceptionType = "EmptyCredentialsList",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request."
             )
@@ -87,7 +87,7 @@ class AuthorizationResponseHandler {
             }
 
             else -> throw Logger.handleException(
-                exceptionType = "UnsupportedResponseType",
+                exceptionType = "InvalidData",
                 className = className,
                 message = "Provided response_type - ${authorizationRequest.responseType} is not supported"
             )

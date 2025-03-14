@@ -3,7 +3,6 @@ package io.mosip.openID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.common.FormatType
-import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.toJson
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata

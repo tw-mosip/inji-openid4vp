@@ -4,7 +4,7 @@ import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.jwt.exception.JWEException
 import io.mosip.openID4VP.jwt.exception.JWSException
-import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
+import io.mosip.openID4VP.exceptions.Exceptions
 
 //TODO: Log - use common logger for android and Java env
 object Logger {
@@ -56,7 +56,7 @@ object Logger {
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
 
-            "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
+            "InvalidData" -> Exceptions.InvalidData(message = message ?: "")
 
             "PublicKeyResolutionFailed" -> JWSException.PublicKeyResolutionFailed(message = message ?: "")
 
@@ -71,27 +71,6 @@ object Logger {
             "UnsupportedKeyExchangeAlgorithm" ->  JWEException.UnsupportedKeyExchangeAlgorithm()
 
             "JweEncryptionFailure" ->  JWEException.JweEncryptionFailure()
-
-            "UnsupportedFormatOfLibrary" ->
-                AuthorizationResponseExceptions.UnsupportedCredentialFormat(
-                    message = message
-                        ?: "Provided credential format is not supported"
-                )
-
-            "UnsupportedResponseType" ->
-                AuthorizationResponseExceptions.UnsupportedResponseType(
-                    message = message ?: "Provided response_type is not supported"
-                )
-
-            "UnsupportedResponseMode" ->
-                AuthorizationResponseExceptions.UnsupportedResponseMode(
-                    message = message ?: "Provided response_mode is not supported"
-                )
-
-            "EmptyCredentialsList" ->
-                AuthorizationResponseExceptions.EmptyCredentialsList(
-                    message = message ?: "No credentials match the provided authorization request"
-                )
 
             else -> Exception("An unexpected exception occurred: exception type: $exceptionType")
         }

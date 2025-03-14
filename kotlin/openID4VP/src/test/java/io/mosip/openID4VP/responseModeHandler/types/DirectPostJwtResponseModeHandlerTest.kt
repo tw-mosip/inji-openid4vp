@@ -7,8 +7,7 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidData
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.MissingInput
 import io.mosip.openID4VP.testData.clientMetadataString
 import org.junit.After

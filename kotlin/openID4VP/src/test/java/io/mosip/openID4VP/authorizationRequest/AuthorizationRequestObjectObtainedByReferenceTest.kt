@@ -11,6 +11,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
 import io.mosip.openID4VP.common.ClientIdScheme
 import io.mosip.openID4VP.common.ClientIdScheme.*
+import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
@@ -115,7 +116,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
                 DID
             )
 
-        val invalidInputException = assertThrows(InvalidData::class.java){
+        val invalidInputException = assertThrows(Exceptions.InvalidData::class.java){
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -216,7 +217,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap,true, ClientIdScheme.REDIRECT_URI)
 
 
-        val exception = assertThrows<InvalidData> {
+        val exception = assertThrows<Exceptions.InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -312,7 +313,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
-        val exception = assertThrows(InvalidData::class.java) {
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -373,7 +374,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
-        assertThrows<InvalidData> {
+        assertThrows<Exceptions.InvalidData> {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -401,7 +402,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap,true , DID)
 
 
-        assertThrows<InvalidData> {
+        assertThrows<Exceptions.InvalidData> {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -431,7 +432,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap,true , PRE_REGISTERED)
 
         val invalidClientIdException =
-            assertThrows(InvalidData::class.java) {
+            assertThrows(Exceptions.InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest,
                     trustedVerifiers,

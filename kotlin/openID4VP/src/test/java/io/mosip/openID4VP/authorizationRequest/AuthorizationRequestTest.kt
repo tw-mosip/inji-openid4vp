@@ -18,7 +18,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_URI
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.STATE
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidData
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidInput
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidVerifier
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.MissingInput
