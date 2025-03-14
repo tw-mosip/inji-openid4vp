@@ -1,0 +1,43 @@
+package io.mosip.openID4VP.responseModeHandler
+
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_URI
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.getStringValue
+import io.mosip.openID4VP.common.isValidUrl
+import io.mosip.openID4VP.common.validate
+
+private val className = ResponseModeBasedHandler::class.simpleName!!
+
+abstract class ResponseModeBasedHandler {
+
+    abstract fun validate(clientMetadata: ClientMetadata?)
+
+    abstract fun sendAuthorizationResponse(
+        vpToken: VPTokenType,
+        authorizationRequest: AuthorizationRequest,
+        presentationSubmission: PresentationSubmission,
+        state: String?,
+        url: String,
+    ): String
+
+    fun setResponseUrl(
+        authorizationRequestParameters: Map<String, Any>,
+        setResponseUri: (String) -> Unit
+    ) {
+        val responseUri = getStringValue(authorizationRequestParameters, RESPONSE_URI.value)
+        validate(RESPONSE_URI.value, responseUri, className)
+        if (!isValidUrl(responseUri!!)) {
+            throw Logger.handleException(
+                exceptionType = "InvalidData",
+                className = className,
+                message = "${RESPONSE_URI.value} data is not valid"
+            )
+        }
+        setResponseUri(responseUri)
+    }
+}

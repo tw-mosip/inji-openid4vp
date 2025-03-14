@@ -24,7 +24,7 @@ data class LdpVPResponseMetadata(
             require(value != "null" && validateField(value, "String")) {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
-                    fieldPath = listOf("vp response metadata", key),
+                    fieldPath = listOf("vp_response_metadata",key),
                     className = className,
                     fieldType = key::class.simpleName
                 )

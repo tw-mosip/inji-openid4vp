@@ -2,15 +2,18 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.ClientIdScheme.PRE_REGISTERED
-import io.mosip.openID4VP.authorizationRequest.parseAndValidateClientMetadata
-import io.mosip.openID4VP.authorizationRequest.parseAndValidatePresentationDefinition
-import io.mosip.openID4VP.authorizationRequest.validateAttribute
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
+import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
+import io.mosip.openID4VP.common.validate
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
 private val className = ClientIdSchemeBasedAuthorizationRequestHandler::class.simpleName!!
 
@@ -43,43 +46,24 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     abstract fun validateRequestUriResponse()
 
     fun setResponseUrl() {
-        val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value) ?:
-            throw Logger.handleException(
+        val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value)
+            ?: throw Logger.handleException(
                 exceptionType = "MissingInput",
                 className = className,
                 fieldPath = listOf(RESPONSE_MODE.value)
             )
-        val verifierResponseUri = when (responseMode) {
-            "direct_post" -> {
-                validateAttribute(authorizationRequestParameters, RESPONSE_URI.value)
-                getStringValue(authorizationRequestParameters, RESPONSE_URI.value)
-            }
-
-            else -> throw Logger.handleException(
-                exceptionType = "InvalidResponseMode",
-                className = className,
-                message = "Given response_mode is not supported"
-            )
-        }
-        if (!isValidUrl(verifierResponseUri!!)) {
-            throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "${RESPONSE_URI.value} data is not valid"
-            )
-        }
-        setResponseUri(verifierResponseUri)
-
+        ResponseModeBasedHandlerFactory.get(responseMode)
+            .setResponseUrl(authorizationRequestParameters, setResponseUri)
     }
 
     open fun validateAndParseRequestFields() {
-        validateAttribute(authorizationRequestParameters, RESPONSE_TYPE.value)
-        validateAttribute(authorizationRequestParameters, NONCE.value)
-        getStringValue(authorizationRequestParameters, STATE.value)?.let {
-            validateAttribute(
-                authorizationRequestParameters,
-                STATE.value
-            )
+        val responseType = getStringValue(authorizationRequestParameters, RESPONSE_TYPE.value)
+        validate(RESPONSE_TYPE.value, responseType, className)
+        val nonce = getStringValue(authorizationRequestParameters, NONCE.value)
+        validate(NONCE.value, nonce, className)
+        val state = getStringValue(authorizationRequestParameters, STATE.value)
+        state?.let {
+            validate(STATE.value, state, className)
         }
         parseAndValidateClientMetadata(authorizationRequestParameters)
         parseAndValidatePresentationDefinition(authorizationRequestParameters)
@@ -92,12 +76,12 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
             clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value) ?: PRE_REGISTERED.value,
             responseType = getStringValue(authorizationRequestParameters, RESPONSE_TYPE.value)!!,
             responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value),
-            presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value]!!,
+            presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value] as PresentationDefinition,
             responseUri = getStringValue(authorizationRequestParameters, RESPONSE_URI.value),
             redirectUri = getStringValue(authorizationRequestParameters, REDIRECT_URI.value),
             nonce = getStringValue(authorizationRequestParameters, NONCE.value)!!,
             state = getStringValue(authorizationRequestParameters, STATE.value),
-            clientMetadata = getStringValue(authorizationRequestParameters, CLIENT_METADATA.value),
+            clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value] as? ClientMetadata
         )
     }
 }

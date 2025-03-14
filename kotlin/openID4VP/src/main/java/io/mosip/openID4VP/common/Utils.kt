@@ -6,10 +6,12 @@ import io.mosip.openID4VP.authorizationRequest.presentationDefinition.InputDescr
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer.descriptor
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
-import io.mosip.openID4VP.jwt.JwtHandler
+import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 
@@ -24,7 +26,7 @@ fun convertJsonToMap(jsonString: String): MutableMap<String, Any> {
         object : TypeReference<MutableMap<String, Any>>() {})
 }
 
-fun isJWT(input: String): Boolean {
+fun isJWS(input: String): Boolean {
     return input.split(".").size == 3
 }
 
@@ -36,8 +38,8 @@ fun determineHttpMethod(method: String): HTTP_METHOD {
     }
 }
 
-fun extractDataJsonFromJwt(jwtToken: String, part: JwtHandler.JwtPart): MutableMap<String, Any> {
-    val components = jwtToken.split(".")
+fun extractDataJsonFromJws(jws: String, part: JwsPart): MutableMap<String, Any> {
+    val components = jws.split(".")
     val payload = components[part.number]
     val decodedString = decodeBase64Data(payload)
     return convertJsonToMap(String(decodedString,Charsets.UTF_8))
@@ -47,20 +49,34 @@ fun getStringValue(params: Map<String, Any>, key: String): String? {
     return params[key]?.toString()
 }
 
-fun serialize(encoder: Encoder, value: PresentationDefinition) {
-    val builtInEncoder = encoder.beginStructure(descriptor)
-    builtInEncoder.encodeStringElement(descriptor, 0, value.id)
-    builtInEncoder.encodeSerializableElement(
-        descriptor,
-        1,
-        ListSerializer(InputDescriptor.serializer()),
-        value.inputDescriptors
-    )
-    value.name?.let { builtInEncoder.encodeStringElement(descriptor, 2, it) }
-    value.purpose?.let { builtInEncoder.encodeStringElement(descriptor, 3, it) }
-    builtInEncoder.endStructure(descriptor)
+fun validate(
+    key: String,
+    value: String?,
+    className: String
+) {
+    if (value == null || value == "null" || value.isEmpty()) {
+        throw Logger.handleException(
+            exceptionType = if (value == null) "MissingInput" else "InvalidInput",
+            fieldPath = listOf(key),
+            className = className,
+            fieldType = "String"
+        )
+    }
 }
 
+inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className: String): String {
+    try {
+        val objectMapper = jacksonObjectMapper()
+        return objectMapper.writeValueAsString(data)
+    } catch (exception: Exception) {
+        throw Logger.handleException(
+            exceptionType = "JsonEncodingFailed",
+            message = exception.message,
+            fieldPath = listOf(fieldName),
+            className = className
+        )
+    }
+}
 
 fun Map<*, *>.toJson(): Map<String, String> {
     val objectMapper = jacksonObjectMapper()

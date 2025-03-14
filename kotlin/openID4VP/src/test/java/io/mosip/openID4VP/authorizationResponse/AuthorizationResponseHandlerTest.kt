@@ -6,8 +6,9 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
@@ -21,7 +22,6 @@ import io.mosip.openID4VP.testData.clientMetadataMap
 import io.mosip.openID4VP.testData.presentationDefinitionMap
 import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.vpResponsesMetadata
-import io.mosip.openID4VP.testData.vpTokensForSigning
 import org.junit.Assert
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -40,11 +40,6 @@ class AuthorizationResponseHandlerTest {
             )
         )
     )
-    private val credentialsMap: Map<String, Map<FormatType, List<String>>> =
-        mapOf(
-            "idcardcredential" to mapOf(FormatType.LDP_VC to listOf("VC1", "VC2")),
-            "input-descriptor2" to mapOf(FormatType.LDP_VC to listOf("VC3"))
-        )
     private val ldpVpTokenForSigning: LdpVPTokenForSigning = LdpVPTokenForSigning(
         context = listOf("https://www.w3.org/2018/credentials/v1"),
         type = listOf("VerifiableCredential"),
@@ -171,7 +166,7 @@ class AuthorizationResponseHandlerTest {
             }
 
         Assert.assertEquals(
-            "The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
+            "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
             actualException.message
         )
     }

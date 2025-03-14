@@ -1,20 +1,20 @@
 package io.mosip.openID4VP.testData
 
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.ClientIdScheme
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.ClientMetadataSerializer
-import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
+import io.mosip.openID4VP.common.ClientIdScheme
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.common.FormatType
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
-val publicKey = """-----BEGIN RSA PUBLIC KEY-----
+const val publicKey = """-----BEGIN RSA PUBLIC KEY-----
         MIICCgKCAgEA0IEd3E5CvLAbGvr/ysYT2TLE7WDrPBHGk8pwGqVvlrrFtZJ9wT8E
         lDNkSfHIgBijphkgSXpVMduwWKidiFFtbqQHgKdr4vdiMKzTy8g0aTpD8T5xPImM
         CC6CUVgp4EZZHkFK3S2guLZAanXLju3WBD4FuBQTl08vP5MlsiseIIanOnTulUDR
@@ -69,6 +69,18 @@ val clientMetadataString = """{
   "logo_uri": "<logo_uri>",
   "authorization_encrypted_response_alg": "ECDH-ES",
   "authorization_encrypted_response_enc": "A256GCM",
+  "jwks": {
+    "keys": [
+      {
+        "kty": "OKP",
+        "crv": "X25519",
+        "use": "enc",
+        "x": "BVNVdqorpxCCnTOkkw8S2NAYXvfEvkC-8RDObhrAUA4",
+        "alg": "ECDH-ES",
+        "kid": "ed-key1"
+      }
+    ]
+  },
   "vp_formats": {
     "mso_mdoc": {
       "alg": [
@@ -192,10 +204,10 @@ val didResponse = """
 val trustedVerifiers: List<Verifier> = listOf(
     Verifier(
         "mock-client", listOf(
-            "https://verifier.env1.net/responseUri", "https://verifier.env2.net/responseUri"
+            "https://mock-verifier.net/responseUri", "https://verifier.env2.net/responseUri"
         )
     ), Verifier(
-        "https://verifier.env2.net", listOf(
+        "mock-client2", listOf(
             "https://verifier.env3.net/responseUri", "https://verifier.env2.net/responseUri"
         )
     )
@@ -206,7 +218,6 @@ val authRequestParamsByReference = listOf(
     REQUEST_URI.value,
     REQUEST_URI_METHOD.value
 )
-
 
 val authRequestWithRedirectUriByValue = listOf(
     CLIENT_ID.value,
@@ -243,7 +254,7 @@ val authRequestWithDidByValue = listOf(
 
 val requestParams: Map<String, String> = mapOf(
     REDIRECT_URI.value to "https://mock-verifier.com",
-    RESPONSE_URI.value to "https://verifier.env1.net/responseUri",
+    RESPONSE_URI.value to "https://mock-verifier.net/responseUri",
     REQUEST_URI.value to requestUrl,
     REQUEST_URI_METHOD.value to "get",
     PRESENTATION_DEFINITION.value to presentationDefinitionString,
@@ -270,7 +281,7 @@ val clientIdOfPreRegistered = mapOf(
 )
 
 val clientIdOfReDirectUri = mapOf(
-    CLIENT_ID.value to "${REDIRECT_URI.value}:https://verifier.env1.net/responseUri",
+    CLIENT_ID.value to "${REDIRECT_URI.value}:https://mock-verifier.net/responseUri",
 )
 
 val clientMetadataPresentationDefinitionMap = mapOf(
@@ -278,9 +289,21 @@ val clientMetadataPresentationDefinitionMap = mapOf(
     CLIENT_METADATA.value to clientMetadataMap
 )
 
-val clientMetadataPresentationDefinitionString = mapOf(
-    PRESENTATION_DEFINITION.value to presentationDefinitionString,
-    CLIENT_METADATA.value to clientMetadataString
+
+val authorizationRequestForResponseModeJWT = AuthorizationRequest(
+    clientId = "https://injiverify.dev2.mosip.net",
+    responseType = "vp_token",
+    responseMode = "direct_post.jwt",
+    presentationDefinition = deserializeAndValidate(
+        presentationDefinitionString,
+        PresentationDefinitionSerializer
+    ),
+    nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    state = "fsnC8ixCs6mWyV+00k23Qg==",
+    responseUri = "https://mock-verifier.com/response-uri",
+    clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer),
+    clientIdScheme = "did",
+    redirectUri = null
 )
 
 val authorizationRequest = AuthorizationRequest(

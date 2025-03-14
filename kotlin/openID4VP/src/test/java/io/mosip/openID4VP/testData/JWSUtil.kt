@@ -9,7 +9,7 @@ import org.bouncycastle.crypto.signers.Ed25519Signer
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-class JWTUtil {
+class JWSUtil {
     companion object {
         private const val ed25519PrivateKey = "vlo/0lVUn4oCEFo/PiPi3FyqSBSdZ2JDSBJJcvbf6o0="
         private const val didDocumentUrl = "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs"
@@ -46,13 +46,13 @@ class JWTUtil {
             return replaceCharactersInB64(Base64.getEncoder().encodeToString(signature))
         }
 
-        fun createJWT(
+        fun createJWS(
             authorizationRequestParam: Any?,
             addValidSignature: Boolean,
-            jwtHeader: JsonObject?
+            jwsHeader: JsonObject?
         ): String {
             val mapper = jacksonObjectMapper()
-            val header = jwtHeader ?: this.jwtHeader
+            val header = jwsHeader ?: this.jwtHeader
             val header64 = encodeB64(header.toString())
             val payload64 = encodeB64(mapper.writeValueAsString(authorizationRequestParam))
             val preHash = "$header64.$payload64"

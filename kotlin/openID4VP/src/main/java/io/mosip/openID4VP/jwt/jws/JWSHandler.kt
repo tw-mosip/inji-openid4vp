@@ -1,20 +1,20 @@
-package io.mosip.openID4VP.jwt
+package io.mosip.openID4VP.jwt.jws
 
-import io.mosip.openID4VP.common.Decoder.decodeBase64Data
+import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.extractDataJsonFromJwt
-import io.mosip.openID4VP.jwt.JwtHandler.JwtPart.*
+import io.mosip.openID4VP.common.extractDataJsonFromJws
+import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.*
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
 import org.bouncycastle.util.encoders.Base64
 import java.nio.charset.StandardCharsets
 
-private val className = JwtHandler::class.simpleName!!
+private val className = JWSHandler::class.simpleName!!
 
-class JwtHandler(private val jwt: String, private val publicKeyResolver: PublicKeyResolver) {
+class JWSHandler(private val jws: String, private val publicKeyResolver: PublicKeyResolver) {
 
-    enum class JwtPart(val number: Int) {
+    enum class JwsPart(val number: Int) {
         HEADER(0),
         PAYLOAD(1),
         SIGNATURE(2)
@@ -23,11 +23,11 @@ class JwtHandler(private val jwt: String, private val publicKeyResolver: PublicK
     fun verify() {
         val verificationResult : Boolean
         try {
-            val parts = jwt.split(".")
+            val parts = jws.split(".")
             val header = parts[HEADER.number]
             val payload = parts[PAYLOAD.number]
-            val signature = decodeBase64Data(parts[SIGNATURE.number])
-            val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJwt(jwt, HEADER))
+            val signature = Decoder.decodeBase64Data(parts[SIGNATURE.number])
+            val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJws(jws, HEADER))
             val publicKeyBytes = Base64.decode(publicKey)
             val publicKeyParams = Ed25519PublicKeyParameters(publicKeyBytes, 0)
             val signer = Ed25519Signer()
@@ -47,7 +47,7 @@ class JwtHandler(private val jwt: String, private val publicKeyResolver: PublicK
             throw Logger.handleException(
                 exceptionType = "InvalidSignature",
                 className = className,
-                message = "JWT signature verification failed"
+                message = "JWS signature verification failed"
             )
     }
 

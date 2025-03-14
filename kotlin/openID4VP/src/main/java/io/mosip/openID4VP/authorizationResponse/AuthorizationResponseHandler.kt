@@ -1,27 +1,23 @@
 package io.mosip.openID4VP.authorizationResponse
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.constants.ResponseType
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
-import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
-import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenFactory
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenArray
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenElement
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.common.FormatType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
-import io.mosip.openID4VP.networkManager.CONTENT_TYPES
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 import okhttp3.internal.toImmutableMap
 
 private val className = AuthorizationResponseHandler::class.java.simpleName
@@ -37,7 +33,7 @@ class AuthorizationResponseHandler {
         this.credentialsMap = credentialsMap
         if (credentialsMap.isEmpty()) {
             throw Logger.handleException(
-                exceptionType = "InvalidInput",
+                exceptionType = "EmptyCredentialsList",
                 className = className,
                 message = "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request."
             )
@@ -51,16 +47,15 @@ class AuthorizationResponseHandler {
         vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
         responseUri: String,
     ): String {
-        val authorizationResponse: Map<String, String> = createAuthorizationResponse(
+        val authorizationResponse: Map<String, Any> = createAuthorizationResponse(
             authorizationRequest = authorizationRequest,
             vpResponsesMetadata = vpResponsesMetadata
         )
 
-        println("output")
-
         return sendAuthorizationResponse(
             authorizationResponse = authorizationResponse,
-            responseUri = responseUri
+            responseUri = responseUri,
+            authorizationRequest = authorizationRequest
         )
     }
 
@@ -68,7 +63,7 @@ class AuthorizationResponseHandler {
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
         vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
-    ): Map<String, String> {
+    ): Map<String, Any> {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
                 val credentialFormatIndex: MutableMap<FormatType, Int> = mutableMapOf()
@@ -82,10 +77,10 @@ class AuthorizationResponseHandler {
                     credentialFormatIndex = credentialFormatIndex
                 )
                 return buildMap {
-                    put("vp_token", jacksonObjectMapper().writeValueAsString(vpToken))
+                    put("vp_token", vpToken)
                     put(
                         "presentation_submission",
-                        jacksonObjectMapper().writeValueAsString(presentationSubmission)
+                        presentationSubmission
                     )
                     authorizationRequest.state?.let { put("state", it) }
                 }.toImmutableMap()
@@ -101,16 +96,18 @@ class AuthorizationResponseHandler {
 
     //Send authorization response to verifier based on the response_mode parameter in authorization request
     private fun sendAuthorizationResponse(
-        authorizationResponse: Map<String, String>,
+        authorizationResponse: Map<String, Any>,
         responseUri: String,
+        authorizationRequest: AuthorizationRequest,
     ): String {
-        val response = sendHTTPRequest(
-            url = responseUri,
-            method = HTTP_METHOD.POST,
-            bodyParams = authorizationResponse,
-            headers = mapOf("Content-Type" to CONTENT_TYPES.APPLICATION_FORM_URL_ENCODED.value)
-        )
-        return response["body"].toString()
+        return ResponseModeBasedHandlerFactory.get(authorizationRequest.responseMode!!)
+            .sendAuthorizationResponse(
+                vpToken = authorizationResponse["vp_token"] as VPTokenType,
+                authorizationRequest = authorizationRequest,
+                presentationSubmission = authorizationResponse["presentation_submission"] as PresentationSubmission,
+                state = authorizationRequest.state,
+                url = responseUri
+            )
     }
 
     private fun createVPToken(
@@ -148,8 +145,7 @@ class AuthorizationResponseHandler {
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): PresentationSubmission {
         val descriptorMap = createInputDescriptor(credentialsMap, credentialFormatIndex)
-        val presentationDefinitionId =
-            (authorizationRequest.presentationDefinition as PresentationDefinition).id
+        val presentationDefinitionId = authorizationRequest.presentationDefinition.id
 
         return PresentationSubmission(
             id = UUIDGenerator.generateUUID(),

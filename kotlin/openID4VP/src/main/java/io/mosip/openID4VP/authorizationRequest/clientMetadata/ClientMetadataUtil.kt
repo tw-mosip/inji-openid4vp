@@ -1,0 +1,36 @@
+package io.mosip.openID4VP.authorizationRequest.clientMetadata
+
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
+import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
+import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.common.getStringValue
+import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
+
+private val className = ClientMetadata::class.simpleName!!
+fun parseAndValidateClientMetadata(authorizationRequestParameters: MutableMap<String, Any>) {
+    val clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value]?.let {
+        when (it) {
+            is String -> deserializeAndValidate(it, ClientMetadataSerializer)
+            is Map<*, *> -> deserializeAndValidate(
+                it as Map<String, Any>,
+                ClientMetadataSerializer
+            )
+
+            else -> throw Logger.handleException(
+                exceptionType = "InvalidData",
+                message = "client_metadata must be of type String or Map",
+                className = className
+            )
+        }
+    }
+    val responseMode = getStringValue(
+        authorizationRequestParameters,
+        RESPONSE_MODE.value
+    )!!
+    ResponseModeBasedHandlerFactory.get(responseMode).validate(clientMetadata)
+    clientMetadata?.let {
+        authorizationRequestParameters[CLIENT_METADATA.value] = it
+    }
+}

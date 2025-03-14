@@ -2,7 +2,8 @@ package io.mosip.openID4VP.common
 
 import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.jwt.exception.JWTVerificationException
+import io.mosip.openID4VP.jwt.exception.JWEException
+import io.mosip.openID4VP.jwt.exception.JWSException
 import io.mosip.openID4VP.authorizationResponse.exception.AuthorizationResponseExceptions
 
 //TODO: Log - use common logger for android and Java env
@@ -17,7 +18,7 @@ object Logger {
         return "INJI-OpenID4VP : class name - $className | traceID - ${this.traceabilityId ?: ""}"
     }
 
-    fun error(logTag: String, exception: Exception) {
+    fun error(logTag: String, exception: Exception, className: String? = "") {
         Log.e(logTag, exception.message!!)
     }
 
@@ -26,7 +27,7 @@ object Logger {
         message: String? = null,
         fieldPath: List<String>? = null,
         className: String,
-        fieldType: Any? = null,
+        fieldType: Any? = null
     ): Exception {
         var fieldPathAsString = ""
         fieldPath?.let {
@@ -38,57 +39,38 @@ object Logger {
                 fieldPath = fieldPathAsString,
                 fieldType = fieldType
             )
-
             "DeserializationFailure" -> AuthorizationRequestExceptions.DeserializationFailure(
                 fieldPath = fieldPathAsString,
                 message = message ?: ""
             )
-
             "JsonEncodingFailed" -> AuthorizationRequestExceptions.JsonEncodingFailed(
                 fieldPath = fieldPathAsString, message = message ?: ""
             )
-
             "MissingInput" -> AuthorizationRequestExceptions.MissingInput(fieldPath = fieldPathAsString)
 
             "InvalidInputPattern" -> AuthorizationRequestExceptions.InvalidInputPattern(fieldPath = fieldPathAsString)
 
-            "InvalidQueryParams" -> AuthorizationRequestExceptions.InvalidQueryParams(
-                message = message ?: ""
-            )
+            "InvalidQueryParams" -> AuthorizationRequestExceptions.InvalidQueryParams(message = message ?: "")
 
-            "InvalidVerifierRedirectUri" -> AuthorizationRequestExceptions.InvalidVerifierRedirectUri(
-                message = message ?: ""
-            )
-
-            "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier(
-                message = message ?: ""
-            )
+            "InvalidVerifier" -> AuthorizationRequestExceptions.InvalidVerifier(message = message ?: "")
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
 
-            "InvalidClientIdScheme" -> AuthorizationRequestExceptions.InvalidClientIdScheme(
-                message = message ?: ""
-            )
-
-            "InvalidResponseMode" -> AuthorizationRequestExceptions.InvalidResponseMode(
-                message = message ?: ""
-            )
-
             "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
 
-            "PublicKeyResolutionFailed" -> JWTVerificationException.PublicKeyResolutionFailed(
-                message = message ?: ""
-            )
+            "PublicKeyResolutionFailed" -> JWSException.PublicKeyResolutionFailed(message = message ?: "")
 
-            "KidExtractionFailed" -> JWTVerificationException.KidExtractionFailed(
-                message = message ?: ""
-            )
+            "KidExtractionFailed" -> JWSException.KidExtractionFailed(message = message ?: "")
 
-            "PublicKeyExtractionFailed" -> JWTVerificationException.PublicKeyExtractionFailed(
-                message = message ?: ""
-            )
+            "PublicKeyExtractionFailed" -> JWSException.PublicKeyExtractionFailed(message = message ?: "")
 
-            "InvalidSignature" -> JWTVerificationException.InvalidSignature(message = message ?: "")
+            "InvalidSignature" -> JWSException.InvalidSignature(message = message ?: "")
+
+            //JWK Algorithm Exceptions
+
+            "UnsupportedKeyExchangeAlgorithm" ->  JWEException.UnsupportedKeyExchangeAlgorithm()
+
+            "JweEncryptionFailure" ->  JWEException.JweEncryptionFailure()
 
             "UnsupportedFormatOfLibrary" ->
                 AuthorizationResponseExceptions.UnsupportedCredentialFormat(

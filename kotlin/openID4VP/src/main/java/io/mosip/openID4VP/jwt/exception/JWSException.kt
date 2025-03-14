@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.jwt.exception
 
-sealed class JWTVerificationException {
+sealed class JWSException {
 
     class PublicKeyExtractionFailed(message: String) : Exception(message)
 

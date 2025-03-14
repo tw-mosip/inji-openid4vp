@@ -12,7 +12,7 @@ class LdpVPTokenBuilder(
 ) : VPTokenBuilder {
     override fun build(): VPToken {
         ldpVPResponseMetadata.validate()
-        val proof = Proof.constructProof(
+        val proof = Proof.construct(
             ldpVPResponseMetadata, challenge = nonce
         )
 

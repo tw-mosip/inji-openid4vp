@@ -69,7 +69,7 @@ enum class HTTP_METHOD {
 	POST, GET
 }
 
-enum class CONTENT_TYPES(val value: String) {
+enum class CONTENT_TYPE(val value: String) {
 	APPLICATION_JSON("application/json"),
 	APPLICATION_JWT("application/oauth-authz-req+jwt"),
 	APPLICATION_FORM_URL_ENCODED("application/x-www-form-urlencoded")

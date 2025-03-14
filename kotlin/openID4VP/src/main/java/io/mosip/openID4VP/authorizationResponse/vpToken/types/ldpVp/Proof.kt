@@ -15,7 +15,7 @@ class Proof(
     val verificationMethod: String
 ) {
     companion object {
-        fun constructProof(
+        fun construct(
             ldpVpResponseMetadata: LdpVPResponseMetadata,
             challenge: String,
         ): Proof {
