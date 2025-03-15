@@ -22,10 +22,10 @@ import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidInput
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidVerifier
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.MissingInput
-import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.common.ClientIdScheme.DID
-import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.DID
+import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.testData.clientIdOfPreRegistered
@@ -74,7 +74,7 @@ class AuthorizationRequestTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "https://mock-verifier.com/verifier/get-presentation-definition",
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         } returns mapOf("body" to presentationDefinitionString)
     }

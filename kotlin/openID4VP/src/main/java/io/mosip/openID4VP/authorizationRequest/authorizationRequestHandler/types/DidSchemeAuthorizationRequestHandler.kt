@@ -10,7 +10,7 @@ import io.mosip.openID4VP.common.isJWS
 import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.PAYLOAD
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
-import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JWT
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_JWT
 import okhttp3.Headers
 
 private val className = DidSchemeAuthorizationRequestHandler::class.simpleName!!

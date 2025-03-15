@@ -1,16 +1,34 @@
 package io.mosip.openID4VP.testData
 
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_ID
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.NONCE
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.REDIRECT_URI
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.REQUEST_URI
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.REQUEST_URI_METHOD
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_TYPE
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_URI
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.STATE
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
+import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
+import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
-import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
-import io.mosip.openID4VP.common.FormatType
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
@@ -37,9 +55,9 @@ val vpResponsesMetadata: Map<FormatType, VPResponseMetadata> = mapOf(FormatType.
 
 val ldpVpTokenForSigning : LdpVPTokenForSigning = LdpVPTokenForSigning(
     context = listOf("https://www.w3.org/2018/credentials/v1"),
-    type = listOf("VerifiableCredential"),
-    verifiableCredential = listOf("credential1"),
-    id = "id",
+    type = listOf("VerifiablePresentation"),
+    verifiableCredential = listOf("credential1","credential2","credential3"),
+    id = "649d581c-f291-4969-9cd5-2c27385a348f",
     holder = "",
 )
 
@@ -320,4 +338,45 @@ val authorizationRequest = AuthorizationRequest(
     clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer),
     clientIdScheme = "redirect_uri",
     redirectUri = null
+)
+
+val vpToken = VPTokenType.VPTokenElement(
+    LdpVPToken(
+        context = listOf("context"),
+        type = listOf("type"),
+        verifiableCredential = listOf("VC1"),
+        id = "id",
+        holder = "holder",
+        proof = Proof(
+            type = "type",
+            created = "time",
+            challenge = "challenge",
+            domain = "domain",
+            jws = "eryy....ewr",
+            proofPurpose = "authentication",
+            verificationMethod = "did:example:holder#key-1"
+        )
+    )
+)
+
+val presentationSubmission = PresentationSubmission(
+    id = "ps_id",
+    definitionId = "client_id",
+    descriptorMap = listOf(
+        DescriptorMap(
+            id = "input_descriptor_1",
+            format = "ldp_vp",
+            path = "$",
+            pathNested = PathNested(
+                id = "input_descriptor_1",
+                format = "ldp_vp",
+                path = "$.verifiableCredential[0]"
+            )
+        )
+    )
+)
+val authorizationResponse = AuthorizationResponse(
+    presentationSubmission = presentationSubmission,
+    vpToken = vpToken,
+    state = "state"
 )

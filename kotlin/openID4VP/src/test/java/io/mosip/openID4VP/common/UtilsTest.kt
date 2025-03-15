@@ -2,7 +2,7 @@ package io.mosip.openID4VP.common
 
 import org.junit.Test
 import org.junit.Assert.*
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.HttpMethod
 
 class UtilsTest {
 
@@ -55,21 +55,14 @@ class UtilsTest {
 
     @Test
     fun `determineHttpMethod should return correct HTTP method`() {
-        assertEquals(HTTP_METHOD.GET, determineHttpMethod("get"))
-        assertEquals(HTTP_METHOD.POST, determineHttpMethod("post"))
+        assertEquals(HttpMethod.GET, determineHttpMethod("get"))
+        assertEquals(HttpMethod.POST, determineHttpMethod("post"))
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `determineHttpMethod should throw exception for unsupported method`() {
         determineHttpMethod("put")
     }
-
-//    @Test
-//    fun `makeBase64Standard should standardize base64 string`() {
-//        val input = "dGVzdA"
-//        val expected = "dGVzdA=="
-//        assertEquals(expected, makeBase64Standard(input))
-//    }
 
     @Test
     fun `getStringValue should return correct string value from map`() {

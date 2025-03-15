@@ -15,5 +15,3 @@ data class PathNested(
     val format: String,
     val path: String,
 )
-
-//fun createDescriptorMap()

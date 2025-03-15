@@ -14,7 +14,7 @@ class NetworkManagerClient {
 	companion object {
 		fun sendHTTPRequest(
 			url: String,
-			method: HTTP_METHOD,
+			method: HttpMethod,
 			bodyParams: Map<String, String>? = null,
 			headers: Map<String, String>? = null
 		): Map<String, Any> {
@@ -22,7 +22,7 @@ class NetworkManagerClient {
 				val client = OkHttpClient.Builder().build()
 				val request: Request
 				when (method) {
-					HTTP_METHOD.POST -> {
+					HttpMethod.POST -> {
 						val requestBodyBuilder = FormBody.Builder()
 						bodyParams?.forEach { (key, value) ->
 							requestBodyBuilder.add(key, value)
@@ -35,7 +35,7 @@ class NetworkManagerClient {
 						request = requestBuilder.build()
 					}
 
-					HTTP_METHOD.GET -> request = Request.Builder().url(url).get().build()
+					HttpMethod.GET -> request = Request.Builder().url(url).get().build()
 				}
 				val response: Response = client.newCall(request).execute()
 
@@ -63,14 +63,4 @@ class NetworkManagerClient {
 			}
 		}
 	}
-}
-
-enum class HTTP_METHOD {
-	POST, GET
-}
-
-enum class CONTENT_TYPE(val value: String) {
-	APPLICATION_JSON("application/json"),
-	APPLICATION_JWT("application/oauth-authz-req+jwt"),
-	APPLICATION_FORM_URL_ENCODED("application/x-www-form-urlencoded")
 }

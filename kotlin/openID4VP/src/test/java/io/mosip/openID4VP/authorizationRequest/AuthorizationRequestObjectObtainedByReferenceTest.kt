@@ -9,10 +9,10 @@ import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
-import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.common.ClientIdScheme.*
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.*
 import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import io.mosip.openID4VP.testData.*
@@ -36,13 +36,13 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "https://mock-verifier.com/verifier/get-presentation-definition",
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         } returns mapOf("body" to presentationDefinitionString)
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "https://resolver.identity.foundation/1.0/identifiers/did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         } returns mapOf("body" to didResponse)
 
@@ -131,7 +131,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         } throws NetworkManagerClientExceptions.NetworkRequestTimeout()
 
@@ -204,7 +204,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         }
     }
@@ -255,7 +255,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         }
 
@@ -288,7 +288,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         }
 
@@ -335,7 +335,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
@@ -363,7 +363,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),
@@ -391,7 +391,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                HttpMethod.GET
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt").build(),

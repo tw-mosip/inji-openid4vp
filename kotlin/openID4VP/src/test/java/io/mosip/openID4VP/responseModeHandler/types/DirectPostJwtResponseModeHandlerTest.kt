@@ -11,13 +11,13 @@ import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.MissingInput
 import io.mosip.openID4VP.testData.clientMetadataString
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
 
-class DirectPostJwtResponseModeHandlerTest{
+class DirectPostJwtResponseModeHandlerTest {
 
     @Before
     fun setUp() {
@@ -41,8 +41,10 @@ class DirectPostJwtResponseModeHandlerTest{
         clearAllMocks()
     }
 
+    /** validation of client metadata **/
+
     @Test
-    fun `should validate the mandatory fields of clientMetadata` (){
+    fun `should validate the mandatory fields of clientMetadata`() {
         val clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
         assertDoesNotThrow{
             DirectPostJwtResponseModeHandler().validate(clientMetadata)
@@ -54,11 +56,11 @@ class DirectPostJwtResponseModeHandlerTest{
         val clientMetadataStr = "{\"client_name\":\"Requestername\",\"logo_uri\":\"<logo_uri>\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\"]}}}"
         val clientMetadata = deserializeAndValidate(clientMetadataStr, ClientMetadataSerializer)
 
-        val expectionMessage = "Missing Input: client_metadata->jwks param is required"
+        val exceptionMessage = "Missing Input: client_metadata->jwks param is required"
         val exception =assertThrows<MissingInput>{
             DirectPostJwtResponseModeHandler().validate(clientMetadata)
         }
-        assertEquals(expectionMessage, exception.message)
+        assertEquals(exceptionMessage, exception.message)
     }
 
     @Test
@@ -66,11 +68,11 @@ class DirectPostJwtResponseModeHandlerTest{
         val clientMetadataStr = "{\"client_name\":\"Requestername\",\"logo_uri\":\"<logo_uri>\",\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"vp_formats\":{\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\"]}}}"
         val clientMetadata = deserializeAndValidate(clientMetadataStr, ClientMetadataSerializer)
 
-        val expectionMessage = "Missing Input: client_metadata->authorization_encrypted_response_enc param is required"
+        val exceptionMessage = "Missing Input: client_metadata->authorization_encrypted_response_enc param is required"
         val exception =assertThrows<MissingInput>{
             DirectPostJwtResponseModeHandler().validate(clientMetadata)
         }
-        assertEquals(expectionMessage, exception.message)
+        assertEquals(exceptionMessage, exception.message)
     }
 
     @Test
@@ -78,11 +80,12 @@ class DirectPostJwtResponseModeHandlerTest{
         val clientMetadataStr = "{\"client_name\":\"Requestername\",\"logo_uri\":\"<logo_uri>\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\"]}}}"
         val clientMetadata = deserializeAndValidate(clientMetadataStr, ClientMetadataSerializer)
 
-        val expectionMessage = "Missing Input: client_metadata->authorization_encrypted_response_alg param is required"
-        val exception =assertThrows<MissingInput>{
+        val exceptionMessage =
+            "Missing Input: client_metadata->authorization_encrypted_response_alg param is required"
+        val exception = assertThrows<MissingInput> {
             DirectPostJwtResponseModeHandler().validate(clientMetadata)
         }
-        assertEquals(expectionMessage, exception.message)
+        assertEquals(exceptionMessage, exception.message)
     }
 
     @Test

@@ -7,7 +7,7 @@ import io.mosip.openID4VP.authorizationRequest.presentationDefinition.Presentati
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer.descriptor
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.HttpMethod
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encodeToString
@@ -30,10 +30,10 @@ fun isJWS(input: String): Boolean {
     return input.split(".").size == 3
 }
 
-fun determineHttpMethod(method: String): HTTP_METHOD {
+fun determineHttpMethod(method: String): HttpMethod {
     return when (method.lowercase()) {
-        "get" -> HTTP_METHOD.GET
-        "post" -> HTTP_METHOD.POST
+        "get" -> HttpMethod.GET
+        "post" -> HttpMethod.POST
         else -> throw IllegalArgumentException("Unsupported HTTP method: $method")
     }
 }

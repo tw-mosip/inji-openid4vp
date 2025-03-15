@@ -3,8 +3,8 @@ package io.mosip.openID4VP.authorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.*
-import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.validate

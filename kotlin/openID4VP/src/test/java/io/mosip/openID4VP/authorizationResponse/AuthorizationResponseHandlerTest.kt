@@ -12,10 +12,10 @@ import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExc
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.common.DateUtil
-import io.mosip.openID4VP.common.FormatType
+import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.authorizationRequest
 import io.mosip.openID4VP.testData.clientMetadataMap
@@ -80,7 +80,7 @@ class AuthorizationResponseHandlerTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "https://mock-verifier.com",
-                HTTP_METHOD.POST,
+                HttpMethod.POST,
                 any(),
                 any()
             )
@@ -101,7 +101,7 @@ class AuthorizationResponseHandlerTest {
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 url = authorizationRequest.responseUri!!,
-                method = HTTP_METHOD.POST,
+                method = HttpMethod.POST,
                 bodyParams = expectedBodyWithAuthResponseParams,
                 headers = expectedHeaders
             )
@@ -128,7 +128,7 @@ class AuthorizationResponseHandlerTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "https://mock-verifier.com",
-                HTTP_METHOD.POST,
+                HttpMethod.POST,
                 any(),
                 any()
             )
@@ -148,7 +148,7 @@ class AuthorizationResponseHandlerTest {
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 url = authorizationRequest.responseUri!!,
-                method = HTTP_METHOD.POST,
+                method = HttpMethod.POST,
                 bodyParams = expectedBodyWithAuthResponseParams,
                 headers = expectedHeaders
             )
@@ -200,6 +200,28 @@ class AuthorizationResponseHandlerTest {
 
         Assert.assertEquals(
             "Provided response_type - code is not supported",
+            actualException.message
+        )
+    }
+
+    @Test
+    fun `should throw error when a credential format entry is not available in vpTokensForSigning but available in vpResponsesMetadata`() {
+        setField(
+            authorizationResponseHandler,
+            "vpTokensForSigning",
+            emptyMap<FormatType, VPTokenForSigning>()
+        )
+        val actualException =
+            assertThrows(Exceptions.InvalidData::class.java) {
+                authorizationResponseHandler.shareVP(
+                    authorizationRequest = authorizationRequest,
+                    vpResponsesMetadata = vpResponsesMetadata,
+                    responseUri = authorizationRequest.responseUri!!
+                )
+            }
+
+        Assert.assertEquals(
+            "unable to find the related credential format - LDP_VC in the vpTokensForSigning map",
             actualException.message
         )
     }

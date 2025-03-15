@@ -9,6 +9,8 @@ import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_FORM_URL_ENCOD
 import io.mosip.openID4VP.networkManager.HTTP_METHOD
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_FORM_URL_ENCODED
+import io.mosip.openID4VP.constants.HttpMethod
 
 private val className = DirectPostResponseModeHandler::class.simpleName!!
 
@@ -41,7 +43,7 @@ class DirectPostResponseModeHandler: ResponseModeBasedHandler() {
         }
         val response = sendHTTPRequest(
             url = url,
-            method = HTTP_METHOD.POST,
+            method = HttpMethod.POST,
             bodyParams = bodyParams,
             headers = mapOf("Content-Type" to APPLICATION_FORM_URL_ENCODED.value)
         )

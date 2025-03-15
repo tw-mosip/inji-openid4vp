@@ -7,7 +7,8 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.toJson
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val logTag = Logger.getLogTag(OpenID4VP::class.simpleName!!)
@@ -75,7 +76,7 @@ class OpenID4VP(private val traceabilityId: String) {
         responseUri?.let {
             try {
                 sendHTTPRequest(
-                    url = it, method = HTTP_METHOD.POST, mapOf("error" to exception.message!!)
+                    url = it, method = HttpMethod.POST, mapOf("error" to exception.message!!)
                 )
             } catch (exception: Exception) {
                 Logger.error(

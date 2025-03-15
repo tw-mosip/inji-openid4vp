@@ -8,8 +8,8 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST
+import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST_JWT
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.testData.clientMetadataString
 import org.junit.After

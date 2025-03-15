@@ -82,7 +82,7 @@ class Constraints(
 			}
 
 			limitDisclosure?.let {
-				LimitDisclosure.values().firstOrNull { it.value == limitDisclosure }
+				LimitDisclosure.entries.firstOrNull { it.value == limitDisclosure }
 					?: throw Logger.handleException(
 						exceptionType = "InvalidLimitDisclosure",
 						className = className

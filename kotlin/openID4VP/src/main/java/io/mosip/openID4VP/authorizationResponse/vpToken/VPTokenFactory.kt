@@ -3,7 +3,7 @@ package io.mosip.openID4VP.authorizationResponse.vpToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPTokenBuilder
-import io.mosip.openID4VP.common.FormatType
+import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 

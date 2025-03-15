@@ -7,7 +7,7 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JSON
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_JSON
 import okhttp3.Headers
 
 private val className = PreRegisteredSchemeAuthorizationRequestHandler::class.simpleName!!

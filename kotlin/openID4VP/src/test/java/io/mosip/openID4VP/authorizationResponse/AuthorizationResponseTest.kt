@@ -34,6 +34,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import io.mosip.openID4VP.constants.FormatType
 
 class AuthorizationResponseTest {
     private lateinit var openID4VP: OpenID4VP
@@ -185,44 +186,6 @@ class AuthorizationResponseTest {
 
     @Test
     fun `should create encodedJsonMap successfully`() {
-        val authorizationResponse = AuthorizationResponse(
-            presentationSubmission = PresentationSubmission(
-                id = "ps_id",
-                definitionId = "client_id",
-                descriptorMap = listOf(
-                    DescriptorMap(
-                        id = "input_descriptor_1",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "input_descriptor_1",
-                            format = "ldp_vp",
-                            path = "$.verifiableCredential[0]"
-                        )
-                    )
-                )
-            ),
-            vpToken = VPTokenType.VPTokenElement(
-                LdpVPToken(
-                    context = listOf("context"),
-                    type = listOf("type"),
-                    verifiableCredential = listOf("VC1"),
-                    id = "id",
-                    holder = "holder",
-                    proof = Proof(
-                        type = "type",
-                        created = "time",
-                        challenge = "challenge",
-                        domain = "domain",
-                        jws = "eryy....ewr",
-                        proofPurpose = "authentication",
-                        verificationMethod = "did:example:holder#key-1"
-                    )
-                )
-            ),
-            state = "state"
-        )
-
         val encodedJsonMap = authorizationResponse.toJsonEncodedMap()
 
         assertEquals(
@@ -238,40 +201,8 @@ class AuthorizationResponseTest {
     @Test
     fun `should create encodedJsonMap with no nullable fields`() {
         val authorizationResponse = AuthorizationResponse(
-            presentationSubmission = PresentationSubmission(
-                id = "ps_id",
-                definitionId = "client_id",
-                descriptorMap = listOf(
-                    DescriptorMap(
-                        id = "input_descriptor_1",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "input_descriptor_1",
-                            format = "ldp_vp",
-                            path = "$.verifiableCredential[0]"
-                        )
-                    )
-                )
-            ),
-            vpToken = VPTokenType.VPTokenElement(
-                LdpVPToken(
-                    context = listOf("context"),
-                    type = listOf("type"),
-                    verifiableCredential = listOf("VC1"),
-                    id = "id",
-                    holder = "holder",
-                    proof = Proof(
-                        type = "type",
-                        created = "time",
-                        challenge = "challenge",
-                        domain = "domain",
-                        jws = "eryy....ewr",
-                        proofPurpose = "authentication",
-                        verificationMethod = "did:example:holder#key-1"
-                    )
-                )
-            ),
+            presentationSubmission = presentationSubmission,
+            vpToken = vpToken,
             state = null
         )
 

@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.constants.ResponseType
+import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
@@ -13,7 +13,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenArray
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenElement
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
-import io.mosip.openID4VP.common.FormatType
+import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
@@ -28,7 +28,7 @@ internal class AuthorizationResponseHandler {
 
     fun constructVPTokenForSigning(
         credentialsMap: Map<String, Map<FormatType, List<String>>>,
-        holder: String
+        holder: String,
     ): Map<FormatType, VPTokenForSigning> {
         this.credentialsMap = credentialsMap
         if (credentialsMap.isEmpty()) {
@@ -198,7 +198,7 @@ internal class AuthorizationResponseHandler {
 
     private fun createVPTokenForSigning(
         credentialsMap: Map<String, Map<FormatType, List<String>>>,
-        holder: String
+        holder: String,
     ): Map<FormatType, VPTokenForSigning> {
         val groupedVcs: Map<FormatType, List<String>> = credentialsMap.toSortedMap().values
             .flatMap { it.entries }

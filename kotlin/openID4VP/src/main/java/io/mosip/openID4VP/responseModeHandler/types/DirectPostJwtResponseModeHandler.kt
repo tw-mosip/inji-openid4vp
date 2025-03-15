@@ -6,8 +6,8 @@ import io.mosip.openID4VP.authorizationResponse.presentationSubmission.Presentat
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
-import io.mosip.openID4VP.networkManager.CONTENT_TYPE
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.ContentType
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
 
@@ -76,9 +76,9 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
 
         val response = sendHTTPRequest(
             url = url,
-            method = HTTP_METHOD.POST,
+            method = HttpMethod.POST,
             bodyParams = encryptedBodyParams,
-            headers = mapOf("Content-Type" to CONTENT_TYPE.APPLICATION_FORM_URL_ENCODED.value)
+            headers = mapOf("Content-Type" to ContentType.APPLICATION_FORM_URL_ENCODED.value)
         )
         return response["body"].toString()
     }
