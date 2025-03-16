@@ -16,7 +16,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
-import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponsesMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponsesMetadata
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
 private val className = AuthorizationResponseHandler::class.java.simpleName

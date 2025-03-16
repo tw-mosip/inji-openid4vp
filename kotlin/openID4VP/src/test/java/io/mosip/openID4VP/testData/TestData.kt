@@ -26,8 +26,8 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponsesMetadata
-import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponsesMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"

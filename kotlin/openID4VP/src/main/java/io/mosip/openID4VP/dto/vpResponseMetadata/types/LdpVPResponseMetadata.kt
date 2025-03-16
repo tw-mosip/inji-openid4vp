@@ -1,8 +1,8 @@
-package io.mosip.openID4VP.dto.VPResponseMetadata.types
+package io.mosip.openID4VP.dto.vpResponseMetadata.types
 
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
-import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
 
 private val className = LdpVPResponseMetadata::class.simpleName!!
 

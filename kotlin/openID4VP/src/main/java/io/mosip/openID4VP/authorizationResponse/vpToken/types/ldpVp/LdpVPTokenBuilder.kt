@@ -3,7 +3,7 @@ package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenBuilder
-import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 
 class LdpVPTokenBuilder(
     val ldpVPResponseMetadata: LdpVPResponseMetadata,

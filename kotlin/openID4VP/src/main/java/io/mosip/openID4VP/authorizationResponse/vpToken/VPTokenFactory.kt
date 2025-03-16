@@ -4,8 +4,8 @@ import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPToken
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPTokenBuilder
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
-import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 
 class VPTokenFactory(
     private val vpResponseMetadata: VPResponseMetadata,
