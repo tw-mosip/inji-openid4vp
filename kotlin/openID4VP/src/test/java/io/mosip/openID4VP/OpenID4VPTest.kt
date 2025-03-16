@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.verify
 import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.setField
 import org.junit.Before
@@ -28,7 +28,7 @@ class OpenID4VPTest {
         every {
             NetworkManagerClient.sendHTTPRequest(
                 "https://mock-verifier.com/response-uri",
-                HTTP_METHOD.POST,
+                HttpMethod.POST,
                 any()
             )
         } returns mapOf("body" to "VP share success")
@@ -38,7 +38,7 @@ class OpenID4VPTest {
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 url = "https://mock-verifier.com/response-uri",
-                method = HTTP_METHOD.POST,
+                method = HttpMethod.POST,
                 bodyParams = mapOf("error" to "Unsupported response_mode"),
             )
         }

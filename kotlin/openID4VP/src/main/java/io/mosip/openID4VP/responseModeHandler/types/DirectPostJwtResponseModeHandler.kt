@@ -2,8 +2,8 @@ package io.mosip.openID4VP.responseModeHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
-import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
+import io.mosip.openID4VP.authorizationResponse.toJsonEncodedMap
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.constants.ContentType
@@ -49,18 +49,11 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
     }
 
     override fun sendAuthorizationResponse(
-        vpToken: VPTokenType,
         authorizationRequest: AuthorizationRequest,
-        presentationSubmission: PresentationSubmission,
-        state: String?,
-        url: String
+        url: String,
+        authorizationResponse: AuthorizationResponse
     ): String {
-        val bodyParams = mapOf(
-            "vp_token" to vpToken,
-            "presentation_submission" to presentationSubmission,
-        ).let { baseParams ->
-            state?.let { baseParams + mapOf("state" to it) } ?: baseParams
-        }
+        val bodyParams = authorizationResponse.toJsonEncodedMap()
         val clientMetadata = authorizationRequest.clientMetadata!!
 
         val jwk =

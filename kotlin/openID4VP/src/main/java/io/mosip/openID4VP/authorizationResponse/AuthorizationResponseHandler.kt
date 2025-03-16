@@ -18,7 +18,6 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
-import okhttp3.internal.toImmutableMap
 
 private val className = AuthorizationResponseHandler::class.java.simpleName
 
@@ -47,7 +46,7 @@ internal class AuthorizationResponseHandler {
         vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
         responseUri: String,
     ): String {
-        val authorizationResponse: Map<String, Any> = createAuthorizationResponse(
+        val authorizationResponse: AuthorizationResponse = createAuthorizationResponse(
             authorizationRequest = authorizationRequest,
             vpResponsesMetadata = vpResponsesMetadata
         )
@@ -63,7 +62,7 @@ internal class AuthorizationResponseHandler {
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
         vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
-    ): Map<String, Any> {
+    ): AuthorizationResponse {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
                 val credentialFormatIndex: MutableMap<FormatType, Int> = mutableMapOf()
@@ -76,14 +75,11 @@ internal class AuthorizationResponseHandler {
                     authorizationRequest = authorizationRequest,
                     credentialFormatIndex = credentialFormatIndex
                 )
-                return buildMap {
-                    put("vp_token", vpToken)
-                    put(
-                        "presentation_submission",
-                        presentationSubmission
-                    )
-                    authorizationRequest.state?.let { put("state", it) }
-                }.toImmutableMap()
+                return AuthorizationResponse(
+                    presentationSubmission = presentationSubmission,
+                    vpToken = vpToken,
+                    state = authorizationRequest.state
+                )
             }
 
             else -> throw Logger.handleException(
@@ -96,17 +92,15 @@ internal class AuthorizationResponseHandler {
 
     //Send authorization response to verifier based on the response_mode parameter in authorization request
     private fun sendAuthorizationResponse(
-        authorizationResponse: Map<String, Any>,
+        authorizationResponse: AuthorizationResponse,
         responseUri: String,
         authorizationRequest: AuthorizationRequest,
     ): String {
         return ResponseModeBasedHandlerFactory.get(authorizationRequest.responseMode!!)
             .sendAuthorizationResponse(
-                vpToken = authorizationResponse["vp_token"] as VPTokenType,
                 authorizationRequest = authorizationRequest,
-                presentationSubmission = authorizationResponse["presentation_submission"] as PresentationSubmission,
-                state = authorizationRequest.state,
-                url = responseUri
+                url = responseUri,
+                authorizationResponse = authorizationResponse
             )
     }
 
@@ -117,20 +111,20 @@ internal class AuthorizationResponseHandler {
     ): VPTokenType {
         val vpTokens: MutableList<VPToken> = mutableListOf()
 
-        var count = 0
-        for ((credentialFormat, vpResponseMetadata) in vpResponsesMetadata) {
-            val vpToken = VPTokenFactory(
-                vpResponseMetadata = vpResponseMetadata,
-                vpTokenForSigning = vpTokensForSigning[credentialFormat] ?: throw Logger.handleException(
-                    exceptionType = "InvalidData",
-                    className = className
-                ),
-                nonce = authorizationRequest.nonce
-            ).getVPTokenBuilder(credentialFormat).build()
-
-            vpTokens.add(vpToken)
-            credentialFormatIndex[credentialFormat] = count
-            count++
+        vpResponsesMetadata.entries.forEachIndexed { index, (credentialFormat, vpResponseMetadata) ->
+            vpTokens.add(
+                VPTokenFactory(
+                    vpResponseMetadata = vpResponseMetadata,
+                    vpTokenForSigning = vpTokensForSigning[credentialFormat]
+                        ?: throw Logger.handleException(
+                            exceptionType = "InvalidData",
+                            message = "unable to find the related credential format - $credentialFormat in the vpTokensForSigning map",
+                            className = className
+                        ),
+                    nonce = authorizationRequest.nonce
+                ).getVPTokenBuilder(credentialFormat).build()
+            )
+            credentialFormatIndex[credentialFormat] = index
         }
 
         val vpToken: VPTokenType = vpTokens.takeIf { it.size == 1 }

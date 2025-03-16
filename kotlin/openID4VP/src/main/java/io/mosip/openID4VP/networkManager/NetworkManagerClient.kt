@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.networkManager
 
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import okhttp3.FormBody
 import okhttp3.OkHttpClient

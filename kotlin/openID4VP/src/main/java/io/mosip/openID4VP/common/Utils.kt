@@ -2,9 +2,6 @@ package io.mosip.openID4VP.common
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.InputDescriptor
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer.descriptor
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
 import io.mosip.openID4VP.constants.HttpMethod
@@ -76,39 +73,4 @@ inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className:
             className = className
         )
     }
-}
-
-fun Map<*, *>.toJson(): Map<String, String> {
-    val objectMapper = jacksonObjectMapper()
-
-    return this.mapKeys { (key, _) ->
-        when (key) {
-            is Enum<*> -> {
-                key.let {
-                    it::class.members.find { member -> member.name == "value" }
-                        ?.call(it) as? String ?: it.toString()
-                }
-            }
-
-            else -> key?.toString() ?: "null"
-        }
-
-    }.mapValues { (_, value) ->
-        objectMapper.writeValueAsString(value)
-    }
-}
-
-fun Any.toJsonEncodedMap(): Map<String, String> {
-    val objectMapper = jacksonObjectMapper()
-    val jsonString = objectMapper.writeValueAsString(this)
-    val rawMap = objectMapper.readValue(jsonString, Map::class.java) as Map<String, Any>
-
-    return rawMap
-        .filterValues { it != null }
-        .mapValues { (_, value) ->
-            when (value) {
-                is Map<*, *> -> objectMapper.writeValueAsString(value)
-                else -> value.toString()
-            }
-        }
 }

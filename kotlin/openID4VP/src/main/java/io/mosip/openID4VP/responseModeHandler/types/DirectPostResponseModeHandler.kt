@@ -2,11 +2,8 @@ package io.mosip.openID4VP.responseModeHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
-import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
-import io.mosip.openID4VP.common.encodeToJsonString
-import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_FORM_URL_ENCODED
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
+import io.mosip.openID4VP.authorizationResponse.toJsonEncodedMap
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
 import io.mosip.openID4VP.constants.ContentType.APPLICATION_FORM_URL_ENCODED
@@ -21,26 +18,11 @@ class DirectPostResponseModeHandler: ResponseModeBasedHandler() {
     }
 
     override fun sendAuthorizationResponse(
-        vpToken: VPTokenType,
         authorizationRequest: AuthorizationRequest,
-        presentationSubmission: PresentationSubmission,
-        state: String?,
-        url: String
+        url: String,
+        authorizationResponse: AuthorizationResponse
     ): String {
-        val bodyParams: Map<String, String> = mapOf(
-            "vp_token" to encodeToJsonString(
-                vpToken,
-                fieldName = "vp_token",
-                className = className
-            ),
-            "presentation_submission" to encodeToJsonString(
-                presentationSubmission,
-                fieldName = "presentation_submission",
-                className = className
-            ),
-        ).let { baseParams ->
-            state?.let { baseParams + mapOf("state" to it) } ?: baseParams
-        }
+        val bodyParams: Map<String, String> = authorizationResponse.toJsonEncodedMap()
         val response = sendHTTPRequest(
             url = url,
             method = HttpMethod.POST,

@@ -3,9 +3,7 @@ package io.mosip.openID4VP.responseModeHandler
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_URI
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
-import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
-import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
@@ -18,11 +16,9 @@ abstract class ResponseModeBasedHandler {
     abstract fun validate(clientMetadata: ClientMetadata?)
 
     abstract fun sendAuthorizationResponse(
-        vpToken: VPTokenType,
         authorizationRequest: AuthorizationRequest,
-        presentationSubmission: PresentationSubmission,
-        state: String?,
         url: String,
+        authorizationResponse: AuthorizationResponse,
     ): String
 
     fun setResponseUrl(
