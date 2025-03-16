@@ -26,7 +26,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponsesMetadata
 import io.mosip.openID4VP.dto.VPResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 
@@ -51,7 +51,7 @@ val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
     publicKey,
     "https://123",
 )
-val vpResponsesMetadata: Map<FormatType, VPResponseMetadata> = mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
+val vpResponsesMetadata: VPResponsesMetadata = mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
 
 val ldpVpTokenForSigning : LdpVPTokenForSigning = LdpVPTokenForSigning(
     context = listOf("https://www.w3.org/2018/credentials/v1"),

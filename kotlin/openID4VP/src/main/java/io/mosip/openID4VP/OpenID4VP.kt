@@ -5,10 +5,10 @@ import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
 import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokensForSigning
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
+import io.mosip.openID4VP.dto.VPResponseMetadata.VPResponsesMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val logTag = Logger.getLogTag(OpenID4VP::class.simpleName!!)
@@ -59,7 +59,7 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun shareVerifiablePresentation(vpResponsesMetadata: Map<FormatType, VPResponseMetadata>): String {
+    fun shareVerifiablePresentation(vpResponsesMetadata: VPResponsesMetadata): String {
         try {
             return this.authorizationResponseHandler.shareVP(
                 authorizationRequest = this.authorizationRequest,
