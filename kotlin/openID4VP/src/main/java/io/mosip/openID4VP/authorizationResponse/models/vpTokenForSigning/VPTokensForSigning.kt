@@ -5,8 +5,8 @@ import io.mosip.openID4VP.constants.FormatType
 
 typealias VPTokensForSigning = Map<FormatType, VPTokenForSigning>
 
-fun VPTokensForSigning.toJsonString(): String? {
-    val formattedMap = this.mapKeys { (key, _) -> key.value }
+fun toJsonString(input: VPTokensForSigning): String? {
+    val formattedMap = input.mapKeys { (key, _) -> key.value }
     val objectMapper = jacksonObjectMapper()
 
     return objectMapper.writeValueAsString(formattedMap)
