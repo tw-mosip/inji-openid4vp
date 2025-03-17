@@ -69,12 +69,11 @@ class AuthorizationResponseTest {
                 presentationDefinition,
                 PresentationDefinitionSerializer
             ),
+            responseUri = "http://mock-verifier.net/response-uri",
+            redirectUri = null,
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
-            responseUri = "http://mock-verifier.net/response-uri",
-            clientMetadata = deserializeAndValidate(clientMetadata, ClientMetadataSerializer),
-            clientIdScheme = "redirect_uri",
-            redirectUri = null
+            clientMetadata = deserializeAndValidate(clientMetadata, ClientMetadataSerializer)
         )
         setField(
             openID4VP,

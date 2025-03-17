@@ -7,7 +7,6 @@ import io.mosip.openID4VP.dto.Verifier
 
 data class AuthorizationRequest(
     val clientId: String,
-    val clientIdScheme: String,
     val responseType: String,
     val responseMode: String?,
     var presentationDefinition: PresentationDefinition,

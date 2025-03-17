@@ -316,12 +316,11 @@ val authorizationRequestForResponseModeJWT = AuthorizationRequest(
         presentationDefinitionString,
         PresentationDefinitionSerializer
     ),
+    responseUri = "https://mock-verifier.com/response-uri",
+    redirectUri = null,
     nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
     state = "fsnC8ixCs6mWyV+00k23Qg==",
-    responseUri = "https://mock-verifier.com/response-uri",
-    clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer),
-    clientIdScheme = "did",
-    redirectUri = null
+    clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
 )
 
 val authorizationRequest = AuthorizationRequest(
@@ -332,12 +331,11 @@ val authorizationRequest = AuthorizationRequest(
         presentationDefinitionMap,
         PresentationDefinitionSerializer
     ),
+    responseUri = "https://mock-verifier.com",
+    redirectUri = null,
     nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
     state = "fsnC8ixCs6mWyV+00k23Qg==",
-    responseUri = "https://mock-verifier.com",
-    clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer),
-    clientIdScheme = "redirect_uri",
-    redirectUri = null
+    clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer)
 )
 
 val vpToken = VPTokenType.VPTokenElement(

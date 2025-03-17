@@ -118,12 +118,11 @@ class AuthorizationResponseHandlerTest {
                 presentationDefinitionMap,
                 PresentationDefinitionSerializer
             ),
+            responseUri = "https://mock-verifier.com",
+            redirectUri = null,
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = null,
-            responseUri = "https://mock-verifier.com",
-            clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer),
-            clientIdScheme = "redirect_uri",
-            redirectUri = null
+            clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer)
         )
         every {
             NetworkManagerClient.sendHTTPRequest(
@@ -181,12 +180,11 @@ class AuthorizationResponseHandlerTest {
                 presentationDefinitionMap,
                 PresentationDefinitionSerializer
             ),
+            responseUri = "https://mock-verifier.com",
+            redirectUri = null,
             nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
             state = "fsnC8ixCs6mWyV+00k23Qg==",
-            responseUri = "https://mock-verifier.com",
-            clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer),
-            clientIdScheme = "redirect_uri",
-            redirectUri = null
+            clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer)
         )
 
         val actualException =

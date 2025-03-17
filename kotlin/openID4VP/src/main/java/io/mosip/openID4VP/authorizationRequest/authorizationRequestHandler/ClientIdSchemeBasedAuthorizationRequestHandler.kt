@@ -6,7 +6,6 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
-import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.getStringValue
@@ -73,7 +72,6 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     ): AuthorizationRequest {
         return AuthorizationRequest(
             clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!,
-            clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value) ?: PRE_REGISTERED.value,
             responseType = getStringValue(authorizationRequestParameters, RESPONSE_TYPE.value)!!,
             responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value),
             presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value] as PresentationDefinition,
