@@ -74,6 +74,42 @@ class AuthorizationResponseHandlerTest {
         mockkObject(NetworkManagerClient)
     }
 
+//    construction of vpTokens for signing
+
+    @Test
+    fun `should throw error during construction of data for signing when selected Credentials is empty`() {
+        val actualException =
+            assertThrows(Exceptions.InvalidData::class.java) {
+                authorizationResponseHandler.constructVPTokenForSigning(
+                    credentialsMap = mapOf(),
+                    holder = ""
+                )
+            }
+
+        Assert.assertEquals(
+            "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
+            actualException.message
+        )
+    }
+
+    @Test
+    fun `should throw exception when verifiable credentials are not passed as string in case of ldp_vc`() {
+        val verifiableCredentials: List<Any> = listOf(1, "cred", true, 2.12)
+        val actualException =
+            assertThrows(Exceptions.InvalidData::class.java) {
+                authorizationResponseHandler.constructVPTokenForSigning(
+                    credentialsMap = mapOf("input_1" to mapOf(FormatType.LDP_VC to verifiableCredentials)),
+                    holder = ""
+                )
+            }
+
+        Assert.assertEquals(
+            "LDP_VC credentials are not passed in string format",
+            actualException.message
+        )
+    }
+
+    // Sharing of Verifiable Presentation
 
     @Test
     fun `should make network call to verifier responseUri with the vp_token, presentation_submission and state successfully`() {
@@ -152,22 +188,6 @@ class AuthorizationResponseHandlerTest {
                 headers = expectedHeaders
             )
         }
-    }
-
-    @Test
-    fun `should throw error during construction of data for signing when selected Credentials is empty`() {
-        val actualException =
-            assertThrows(Exceptions.InvalidData::class.java) {
-                authorizationResponseHandler.constructVPTokenForSigning(
-                    credentialsMap = mapOf(),
-                    holder = ""
-                )
-            }
-
-        Assert.assertEquals(
-            "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
-            actualException.message
-        )
     }
 
     @Test

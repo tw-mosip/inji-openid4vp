@@ -22,14 +22,13 @@ import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 private val className = AuthorizationResponseHandler::class.java.simpleName
 
 internal class AuthorizationResponseHandler {
-    private lateinit var credentialsMap: Map<String, Map<FormatType, List<String>>>
+    private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
     private lateinit var vpTokensForSigning: Map<FormatType, VPTokenForSigning>
 
     fun constructVPTokenForSigning(
-        credentialsMap: Map<String, Map<FormatType, List<String>>>,
+        credentialsMap: Map<String, Map<FormatType, List<Any>>>,
         holder: String,
     ): Map<FormatType, VPTokenForSigning> {
-        this.credentialsMap = credentialsMap
         if (credentialsMap.isEmpty()) {
             throw Logger.handleException(
                 exceptionType = "InvalidData",
@@ -37,7 +36,8 @@ internal class AuthorizationResponseHandler {
                 message = "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request."
             )
         }
-        this.vpTokensForSigning = createVPTokenForSigning(credentialsMap, holder)
+        this.credentialsMap = credentialsMap
+        this.vpTokensForSigning = createVPTokenForSigning(holder)
         return this.vpTokensForSigning
     }
 
@@ -138,7 +138,7 @@ internal class AuthorizationResponseHandler {
         authorizationRequest: AuthorizationRequest,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): PresentationSubmission {
-        val descriptorMap = createInputDescriptor(credentialsMap, credentialFormatIndex)
+        val descriptorMap = createInputDescriptor(credentialFormatIndex)
         val presentationDefinitionId = authorizationRequest.presentationDefinition.id
 
         return PresentationSubmission(
@@ -148,10 +148,7 @@ internal class AuthorizationResponseHandler {
         )
     }
 
-    private fun createInputDescriptor(
-        credentialsMap: Map<String, Map<FormatType, List<String>>>,
-        credentialFormatIndex: MutableMap<FormatType, Int>,
-    ): List<DescriptorMap> {
+    private fun createInputDescriptor(credentialFormatIndex: MutableMap<FormatType, Int>): List<DescriptorMap> {
         //In case of only single VP, presentation_submission -> path = $, path_nest = $.<credentialPathIdentifier - internalPath>[n]
         //and in case of multiple VPs, presentation_submission -> path = $[i], path_nest = $[i].<credentialPathIdentifier - internalPath>[n]
         val multipleVpTokens: Boolean = credentialFormatIndex.keys.size > 1
@@ -191,10 +188,9 @@ internal class AuthorizationResponseHandler {
     }
 
     private fun createVPTokenForSigning(
-        credentialsMap: Map<String, Map<FormatType, List<String>>>,
         holder: String,
     ): Map<FormatType, VPTokenForSigning> {
-        val groupedVcs: Map<FormatType, List<String>> = credentialsMap.toSortedMap().values
+        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values
             .flatMap { it.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
                 lists.flatten()
@@ -203,11 +199,20 @@ internal class AuthorizationResponseHandler {
         // group all formats together, call specific creator and pass the grouped credentials
         return groupedVcs.mapValues { (format, credentialsArray) ->
             when (format) {
-                FormatType.LDP_VC -> LdpVPTokenForSigning(
-                    verifiableCredential = credentialsArray,
-                    id = UUIDGenerator.generateUUID(),
-                    holder = holder
-                )
+                FormatType.LDP_VC -> {
+                    val verifiableCredentials: List<String> = credentialsArray.map { it as? String ?:
+                        throw Logger.handleException(
+                            exceptionType = "InvalidData",
+                            className = className,
+                            message = "$format credentials are not passed in string format"
+                        )
+                    }
+                    LdpVPTokenForSigning(
+                        verifiableCredential = verifiableCredentials,
+                        id = UUIDGenerator.generateUUID(),
+                        holder = holder
+                    )
+                }
             }
         }
     }
