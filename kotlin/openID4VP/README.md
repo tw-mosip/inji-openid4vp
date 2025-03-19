@@ -90,15 +90,25 @@ val openID4VP = OpenID4VP()
 
 ###### Parameters
 
-| Name                            | Type           | Description                                                                          | Sample                                                                                     |
-|---------------------------------|----------------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
-| urlEncodedAuthorizationRequest  | String         | URL encoded query parameter string containing the Verifier's authorization request   | `"T1BFTklENFZQOi8vYXV0"`                                                                   |
-| trustedVerifiers                | List<Verifier> | A list of trusted Verifier objects each containing a clientId and a responseUri list | `listOf(Verifier("https://verify.env1.net",listOf("https://verify.env1.net/responseUri"))` |
-| shouldValidateClient            | Bool?          | Optional Boolean to toggle client validation for pre-registered client id scheme     | `true`                                                                                     |
+| Name                            | Type           | Description                                                                          |
+|---------------------------------|----------------|--------------------------------------------------------------------------------------|
+| urlEncodedAuthorizationRequest  | String         | URL encoded query parameter string containing the Verifier's authorization request   |
+| trustedVerifiers                | List<Verifier> | A list of trusted Verifier objects each containing a clientId and a responseUri list |
+| shouldValidateClient            | Bool?          | Optional Boolean to toggle client validation for pre-registered client id scheme     |
+
+###### Example usage
+
+```kotlin
+val encodedAuthorizationRequest = ".../authorize?response_type=vp_token&client_id=redirect_uri%3Ahttps%3..."
+val trustedVerifiers = listOf(Verifier("https://verify.env1.net",listOf("https://verify.env1.net/responseUri")))
+val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
+                    urlEncodedAuthorizationRequest = encodedAuthorizationRequest,
+                    trustedVerifiers = trustedVerifiers,
+                    shouldValidateClient = true
+                )
+```
 
 ###### Exceptions
-
-**Exceptions**
 
 1. DecodingException is thrown when there is an issue while decoding the Authorization Request
 2. InvalidQueryParams exception is thrown if
@@ -123,19 +133,35 @@ This method will also notify the Verifier about the error by sending it to the r
 - Creates a vp_token without proof using received input_descriptor IDs and verifiable credentials, then returns its string representation to consumer app(mobile wallet) for signing it.
 
 ```
-    val vpTokenWithoutProof = openID4VP.constructVerifiablePresentation(verifiableCredentials: Map<String, List<String>>)
+    val vpTokenWithoutProof : VPTokensForSigning = openID4VP.constructVerifiablePresentation(Map<String, Map<FormatType, List<Any>>>)
+    
+    //VPTokensForSigning is an alias for Map<FormatType, VPTokenForSigning>
 ```
 
 ###### Parameters
 
-| Name                   | Type                       | Description                                                                                                      | Sample                                   |
-|------------------------|----------------------------|------------------------------------------------------------------------------------------------------------------|------------------------------------------|
-| verifiableCredentials  | Map<String, List<String>>  | A Map which contains input descriptor id as key and corresponding matching Verifiable Credentials list as value. | `mapOf("id_123" to listOf("vc1","vc2"))` |
+| Name                  | Type                                    | Description                                                                                                                                    |
+|-----------------------|-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| verifiableCredentials | Map<String, Map<FormatType, List<Any>>> | A Map which contains input descriptor id as key and value is the map of credential format and the list of user selected verifiable credentials |
 
+###### Example usage
+
+```kotlin
+ val vpTokensForSigning : VPTokensForSigning = openID4VP.constructVerifiablePresentationToken(
+            verifiableCredentials = mapOf(
+                "input_descriptor_id" to mapOf(
+                    FormatType.LDP_VC to listOf(
+                        """credential1""",
+                    )
+                )
+            )
+        )
+```
 
 ###### Exceptions
 
 1. JsonEncodingFailed exception is thrown if there is any issue while serializing the vp_token without proof.
+2. InvalidData exception is thrown if provided verifiable credentials list is empty
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
@@ -144,21 +170,37 @@ This method will also notify the Verifier about the error by sending it to the r
 - Returns the response back to the consumer app(mobile app) saying whether it has received the shared Verifiable Credentials or not.
 
 ```
-    val response = openID4VP.shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata)
+    val response : String = openID4VP.shareVerifiablePresentation(vpResponsesMetadata: VPResponsesMetadata)
+    
+    //VPResponsesMetadata is an alias for Map<FormatType, VPResponseMetadata>
 ```
 
 ###### Parameters
 
-| Name                | Type                | Description                                                                             | Sample                                                                                                                                                             |
-|---------------------|---------------------|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| vpResponseMetadata  | VPResponseMetadata  | This contains domain & proof details such as jws, signatureAlgorithm, publicKey, domain | `VPResponseMetadata(jws = "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",signatureAlgorithm = "RsaSignature2018",publicKey = "publicKey",domain = "https://domain.net")")` |
+| Name                | Type                                                      | Description                                                                                                                                                 |
+|---------------------|-----------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| vpResponsesMetadata | VPResponsesMetadata (Map<FormatType, VPResponseMetadata>) | This will be a map with key as credential format and value as VPResponseMetadata (which is specific to respective credential format's required information) |
 
+
+##### Example usage
+
+```kotlin
+ val ldpVpResponseMetadata = LdpVPResponseMetadata(
+    jws = "ey....qweug",
+    signatureAlgorithm = "RsaSignature2018",
+    publicKey = publicKey,
+    domain = "<domain>"
+)
+val vpResponsesMetadata : VPResponsesMetadata = mapOf(FormatType.LDP_VC to ldpVpResponseMetadata)
+val response : String = openID4VP.shareVerifiablePresentation(vpResponsesMetadata = vpResponsesMetadata)
+```
 
 ###### Exceptions
 
 1. JsonEncodingFailed exception is thrown if there is any issue while serializing the generating vp_token or presentation_submission class instances.
 2. InterruptedIOException is thrown if the connection is timed out when network call is made.
 3. NetworkRequestFailed exception is thrown when there is any other exception occurred when sending the response over http post request.
+4. InvalidData exception is thrown if the response_type in the authorization request is not supported
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
@@ -171,10 +213,15 @@ This method will also notify the Verifier about the error by sending it to the r
 
 ###### Parameters
 
-| Name      | Type      | Description                        | Sample                           |
-|-----------|-----------|------------------------------------|----------------------------------|
-| exception | Exception | This contains the exception object | `new Exception("exception message")` |
+| Name      | Type      | Description                        |
+|-----------|-----------|------------------------------------|
+| exception | Exception | This contains the exception object |
 
+###### Example usage
+
+```kotlin
+openID4VP.sendErrorToVerifier(Exception("User did not give consent to share the requested Credentials with the Verifier."))
+```
 
 ###### Exceptions
 
