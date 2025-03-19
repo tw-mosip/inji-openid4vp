@@ -1,6 +1,18 @@
-# INJI-OpenID4VP
+# INJI-OpenID4VP  
 
-Description: Implementation of OpenID for Verifiable Presentations - draft 21 specifications in Kotlin
+inji-openid4vp is an implementation of OpenID for Verifiable Presentations written in kotlin
+
+**Table of Contents**
+
+- [Supported features](#supported-features)
+- [Specifications supported](#specifications-supported)
+- [Functionalities](#functionalities)
+- [Installation](#installation)
+- [APIs](#apis)
+  - [authenticateVerifier](#authenticateverifier)
+  - [constructVerifiablePresentation](#constructverifiablepresentation)
+  - [shareVerifiablePresentation](#shareverifiablepresentation)
+  - [sendErrorToVerifier](#senderrortoverifier)
 
 # Supported features
 
@@ -9,17 +21,15 @@ Description: Implementation of OpenID for Verifiable Presentations - draft 21 sp
 | Device flow                                                | cross device flow                                                                                                                                                                                                                                                                                                                                                  |
 | Client id scheme                                           | `pre-registered`, `redirect_uri`, `did`                                                                                                                                                                                                                                                                                                                            |
 | Signed authorization request verification algorithms       | Ed25519                                                                                                                                                                                                                                                                                                                                                            |
-| Obtaining authorization request                            | By value, By reference ( via `request_uri` method) <br> _[Note: Authorization request by value is not supported for the did client ID scheme, as it requires a signed request. Instead, a Request URI should be used to fetch the signed authorization request ([reference](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html#section-3.2))]_ |
+| Obtaining authorization request                            | By value, By reference ( via `request_uri` method) <br> _[Note: Authorization request by value is not supported for the did client ID scheme, as it requires a signed request. Instead, a Request URI should be used to fetch the signed authorization request ([reference](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html#section-3.2))]_ |
 | Obtaining presentation definition in authorization request | By value, By reference (via `presentation_definition_uri`)                                                                                                                                                                                                                                                                                                         |
 |  Authorization Response content encryption algorithms      | `A256GCM`                                                                                                                                                                                                                                                                                                                                                          |
 | Authorization Response key encryption algorithms           | `ECDH-ES`                                                                                                                                                                                                                                                                                                                                                          |
 | Authorization Response mode                                | `direct_post`, `direct_post.jwt` (with encrypted & unsigned responses)                                                                                                                                                                                                                                                                                             |
 | Authorization Response type                                | `vp_token`                                                                                                                                                                                                                                                                                                                                                         |
 
-
-
 ## Specifications supported
-- The implementation follows OpenID for Verifiable Presentations - draft 21. [Specification](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html).
+- The implementation follows OpenID for Verifiable Presentations - draft 23. [Specification](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html).
 - Below are the fields we expect in the authorization request based on the client id scheme,
     - Client_id_scheme is **_pre-registered_**
         * client_id
