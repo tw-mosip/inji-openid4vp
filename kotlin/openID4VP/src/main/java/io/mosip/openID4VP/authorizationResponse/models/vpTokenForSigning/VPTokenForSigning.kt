@@ -1,3 +1,0 @@
-package io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning
-
-interface VPTokenForSigning

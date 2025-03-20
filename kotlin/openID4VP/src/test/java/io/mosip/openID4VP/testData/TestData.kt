@@ -17,7 +17,7 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSeri
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
-import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
+import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
@@ -54,7 +54,7 @@ val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
 val vpResponsesMetadata: Map<FormatType, VPResponseMetadata> =
     mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
 
-val ldpVpTokenForSigning: LdpVPTokenForSigning = LdpVPTokenForSigning(
+val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
     context = listOf("https://www.w3.org/2018/credentials/v1"),
     type = listOf("VerifiablePresentation"),
     verifiableCredential = listOf("credential1", "credential2", "credential3"),
@@ -62,7 +62,7 @@ val ldpVpTokenForSigning: LdpVPTokenForSigning = LdpVPTokenForSigning(
     holder = "",
 )
 
-val vpTokensForSigning = mapOf(FormatType.LDP_VC to ldpVpTokenForSigning)
+val unsignedVPTokens = mapOf(FormatType.LDP_VC to unsignedLdpVPToken)
 
 val clientMetadataMap = mapOf(
     "client_name" to "Requester name",

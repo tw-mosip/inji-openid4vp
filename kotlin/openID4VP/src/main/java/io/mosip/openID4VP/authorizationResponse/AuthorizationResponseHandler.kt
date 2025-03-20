@@ -2,8 +2,8 @@ package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.constants.ResponseType
-import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
-import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types.LdpVPTokenForSigning
+import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
+import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
@@ -23,11 +23,11 @@ private val className = AuthorizationResponseHandler::class.java.simpleName
 
 internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
-    private lateinit var vpTokensForSigning: Map<FormatType, VPTokenForSigning>
+    private lateinit var unsignedVPTokens: Map<FormatType, UnsignedVPToken>
 
-    fun constructVPTokenForSigning(
+    fun constructUnsignedVPTokens(
         credentialsMap: Map<String, Map<FormatType, List<Any>>>,
-    ): Map<FormatType, VPTokenForSigning> {
+    ): Map<FormatType, UnsignedVPToken> {
         if (credentialsMap.isEmpty()) {
             throw Logger.handleException(
                 exceptionType = "InvalidData",
@@ -36,8 +36,8 @@ internal class AuthorizationResponseHandler {
             )
         }
         this.credentialsMap = credentialsMap
-        this.vpTokensForSigning = createVPTokenForSigning()
-        return this.vpTokensForSigning
+        this.unsignedVPTokens = createUnsignedVPTokens()
+        return this.unsignedVPTokens
     }
 
     fun shareVP(
@@ -114,10 +114,10 @@ internal class AuthorizationResponseHandler {
             vpTokens.add(
                 VPTokenFactory(
                     vpResponseMetadata = vpResponseMetadata,
-                    vpTokenForSigning = vpTokensForSigning[credentialFormat]
+                    unsignedVpToken = unsignedVPTokens[credentialFormat]
                         ?: throw Logger.handleException(
                             exceptionType = "InvalidData",
-                            message = "unable to find the related credential format - $credentialFormat in the vpTokensForSigning map",
+                            message = "unable to find the related credential format - $credentialFormat in the unsignedVPTokens map",
                             className = className
                         ),
                     nonce = authorizationRequest.nonce
@@ -186,7 +186,7 @@ internal class AuthorizationResponseHandler {
         return descriptorMappings.flatten()
     }
 
-    private fun createVPTokenForSigning(): Map<FormatType, VPTokenForSigning> {
+    private fun createUnsignedVPTokens(): Map<FormatType, UnsignedVPToken> {
         val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values
             .flatMap { it.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
@@ -204,7 +204,7 @@ internal class AuthorizationResponseHandler {
                             message = "$format credentials are not passed in string format"
                         )
                     }
-                    LdpVPTokenForSigning(
+                    UnsignedLdpVPToken(
                         verifiableCredential = verifiableCredentials,
                         id = UUIDGenerator.generateUUID(),
                         holder = ""

@@ -143,9 +143,7 @@ This method will also notify the Verifier about the error by sending it to the r
 - Creates a vp_token without proof using received input_descriptor IDs and verifiable credentials, then returns its string representation to consumer app(mobile wallet) for signing it.
 
 ```
-    val vpTokenWithoutProof : VPTokensForSigning = openID4VP.constructVerifiablePresentation(Map<String, Map<FormatType, List<Any>>>)
-    
-    //VPTokensForSigning is an alias for Map<FormatType, VPTokenForSigning>
+    val vpTokenWithoutProof : Map<FormatType, UnsignedVPToken> = openID4VP.constructVerifiablePresentation(Map<String, Map<FormatType, List<Any>>>)    
 ```
 
 ###### Parameters
@@ -157,7 +155,7 @@ This method will also notify the Verifier about the error by sending it to the r
 ###### Example usage
 
 ```kotlin
- val vpTokensForSigning : VPTokensForSigning = openID4VP.constructVerifiablePresentationToken(
+ val unsignedVPTokens : Map<FormatType, UnsignedVPToken> = openID4VP.constructVerifiablePresentationToken(
             verifiableCredentials = mapOf(
                 "input_descriptor_id" to mapOf(
                     FormatType.LDP_VC to listOf(

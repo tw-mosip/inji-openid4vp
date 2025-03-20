@@ -1,10 +1,10 @@
-package io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.types
+package io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRawValue
-import io.mosip.openID4VP.authorizationResponse.models.vpTokenForSigning.VPTokenForSigning
+import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
 
-data class LdpVPTokenForSigning(
+data class UnsignedLdpVPToken(
     @JsonProperty("@context")
     val context: List<String> = listOf("https://www.w3.org/2018/credentials/v1"),
     val type: List<String> = listOf("VerifiablePresentation"),
@@ -12,4 +12,4 @@ data class LdpVPTokenForSigning(
     val verifiableCredential: List<String>,
     val id: String,
     val holder: String,
-): VPTokenForSigning
+): UnsignedVPToken

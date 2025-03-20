@@ -22,7 +22,7 @@ import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.vpResponsesMetadata
 import io.mosip.openID4VP.testData.vpToken
-import io.mosip.openID4VP.testData.vpTokensForSigning
+import io.mosip.openID4VP.testData.unsignedVPTokens
 import okhttp3.Headers
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -105,11 +105,11 @@ class AuthorizationResponseTest {
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
-        val actualValue = openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
+        val actualUnsignedVPTokens = openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
 
-        val expectedVPTokenForSigning = vpTokensForSigning
+        val expectedUnsignedVPTokens = unsignedVPTokens
         assertEquals(
-            expectedVPTokenForSigning, actualValue
+            expectedUnsignedVPTokens, actualUnsignedVPTokens
         )
     }
 
