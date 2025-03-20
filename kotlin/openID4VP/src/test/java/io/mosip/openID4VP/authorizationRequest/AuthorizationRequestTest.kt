@@ -97,7 +97,9 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(MissingInput::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    urlEncodedAuthorizationRequest = encodedAuthorizationRequest,
+                    trustedVerifiers = trustedVerifiers,
+                    shouldValidateClient = shouldValidateClient
                 )
             }
 

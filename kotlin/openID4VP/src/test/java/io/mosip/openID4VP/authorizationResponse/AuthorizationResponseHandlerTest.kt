@@ -26,6 +26,7 @@ import org.junit.Assert
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
 
 class AuthorizationResponseHandlerTest {
     private val selectedCredentialsList = mapOf(
@@ -241,6 +242,17 @@ class AuthorizationResponseHandlerTest {
         Assert.assertEquals(
             "unable to find the related credential format - LDP_VC in the vpTokensForSigning map",
             actualException.message
+        )
+    }
+
+    @Test
+    fun `should convert the vpTokensForSigning to JSON successfully`() {
+        val vpTokensForSigning: Map<FormatType, VPTokenForSigning> =
+            io.mosip.openID4VP.testData.vpTokensForSigning
+
+        assertEquals(
+            "{\"ldp_vc\":{\"@context\":[\"https://www.w3.org/2018/credentials/v1\"],\"type\":[\"VerifiablePresentation\"],\"verifiableCredential\":[credential1, credential2, credential3],\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"holder\":\"\"}}",
+            vpTokensForSigning.toJsonString()
         )
     }
 }

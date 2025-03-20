@@ -26,9 +26,9 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponsesMetadata
 import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
@@ -51,12 +51,13 @@ val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
     publicKey,
     "https://123",
 )
-val vpResponsesMetadata: VPResponsesMetadata = mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
+val vpResponsesMetadata: Map<FormatType, VPResponseMetadata> =
+    mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
 
-val ldpVpTokenForSigning : LdpVPTokenForSigning = LdpVPTokenForSigning(
+val ldpVpTokenForSigning: LdpVPTokenForSigning = LdpVPTokenForSigning(
     context = listOf("https://www.w3.org/2018/credentials/v1"),
     type = listOf("VerifiablePresentation"),
-    verifiableCredential = listOf("credential1","credential2","credential3"),
+    verifiableCredential = listOf("credential1", "credential2", "credential3"),
     id = "649d581c-f291-4969-9cd5-2c27385a348f",
     holder = "",
 )

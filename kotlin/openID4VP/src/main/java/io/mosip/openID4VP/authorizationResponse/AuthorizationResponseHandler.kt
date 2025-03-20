@@ -16,7 +16,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
-import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponsesMetadata
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
 private val className = AuthorizationResponseHandler::class.java.simpleName
@@ -43,7 +43,7 @@ internal class AuthorizationResponseHandler {
 
     fun shareVP(
         authorizationRequest: AuthorizationRequest,
-        vpResponsesMetadata: VPResponsesMetadata,
+        vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
         responseUri: String,
     ): String {
         val authorizationResponse: AuthorizationResponse = createAuthorizationResponse(
@@ -61,7 +61,7 @@ internal class AuthorizationResponseHandler {
     //Create authorization response based on the response_type parameter in authorization response
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
-        vpResponsesMetadata: VPResponsesMetadata,
+        vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
     ): AuthorizationResponse {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
@@ -105,7 +105,7 @@ internal class AuthorizationResponseHandler {
     }
 
     private fun createVPToken(
-        vpResponsesMetadata: VPResponsesMetadata,
+        vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
         authorizationRequest: AuthorizationRequest,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): VPTokenType {

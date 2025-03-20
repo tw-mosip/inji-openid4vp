@@ -58,7 +58,8 @@ class AuthorizationResponseTest {
         openID4VP = OpenID4VP("test-OpenID4VP")
         presentationDefinition =
             """{"id":"649d581c-f891-4969-9cd5-2c27385a348f","input_descriptors":[{"id":"id_123","format":{"ldp_vc":{"proof_type":["Ed25519Signature2018"]}},"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
-        clientMetadata = "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
+        clientMetadata =
+            "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\",\"vp_formats\":{\"mso_mdoc\":{\"alg\":[\"ES256\",\"EdDSA\"]},\"ldp_vp\":{\"proof_type\":[\"Ed25519Signature2018\",\"Ed25519Signature2020\",\"RsaSignature2018\"]}}}"
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
         openID4VP.authorizationRequest = AuthorizationRequest(
@@ -118,7 +119,8 @@ class AuthorizationResponseTest {
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
         val vpResponsesMetadata = mapOf(FormatType.LDP_VC to ldpVpResponseMetadata)
-        expectedExceptionMessage = "Invalid Input: vp_response_metadata->domain value cannot be an empty string, null, or an integer"
+        expectedExceptionMessage =
+            "Invalid Input: vp_response_metadata->domain value cannot be an empty string, null, or an integer"
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
                 openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
@@ -130,9 +132,15 @@ class AuthorizationResponseTest {
     @Test
     fun `should throw exception if Authorization Response request call returns the response with http status other than 200`() {
         every {
-            NetworkManagerClient.sendHTTPRequest("https://mock-verifier.com/response-uri", any(), any(), any())
-        }  throws NetworkRequestFailed("Unknown error encountered")
-        expectedExceptionMessage = "Network request failed with error response - Unknown error encountered"
+            NetworkManagerClient.sendHTTPRequest(
+                "https://mock-verifier.com/response-uri",
+                any(),
+                any(),
+                any()
+            )
+        } throws NetworkRequestFailed("Unknown error encountered")
+        expectedExceptionMessage =
+            "Network request failed with error response - Unknown error encountered"
 
         actualException =
             assertThrows(NetworkRequestFailed::class.java) {
@@ -145,8 +153,13 @@ class AuthorizationResponseTest {
     @Test
     fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
         every {
-            NetworkManagerClient.sendHTTPRequest("https://mock-verifier.com/response-uri", any(), any(), any())
-        }  throws NetworkRequestTimeout()
+            NetworkManagerClient.sendHTTPRequest(
+                "https://mock-verifier.com/response-uri",
+                any(),
+                any(),
+                any()
+            )
+        } throws NetworkRequestTimeout()
         expectedExceptionMessage = "VP sharing failed due to connection timeout"
 
         actualException =
