@@ -27,7 +27,6 @@ internal class AuthorizationResponseHandler {
 
     fun constructVPTokenForSigning(
         credentialsMap: Map<String, Map<FormatType, List<Any>>>,
-        holder: String,
     ): Map<FormatType, VPTokenForSigning> {
         if (credentialsMap.isEmpty()) {
             throw Logger.handleException(
@@ -37,7 +36,7 @@ internal class AuthorizationResponseHandler {
             )
         }
         this.credentialsMap = credentialsMap
-        this.vpTokensForSigning = createVPTokenForSigning(holder)
+        this.vpTokensForSigning = createVPTokenForSigning()
         return this.vpTokensForSigning
     }
 
@@ -187,9 +186,7 @@ internal class AuthorizationResponseHandler {
         return descriptorMappings.flatten()
     }
 
-    private fun createVPTokenForSigning(
-        holder: String,
-    ): Map<FormatType, VPTokenForSigning> {
+    private fun createVPTokenForSigning(): Map<FormatType, VPTokenForSigning> {
         val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values
             .flatMap { it.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
@@ -200,8 +197,8 @@ internal class AuthorizationResponseHandler {
         return groupedVcs.mapValues { (format, credentialsArray) ->
             when (format) {
                 FormatType.LDP_VC -> {
-                    val verifiableCredentials: List<String> = credentialsArray.map { it as? String ?:
-                        throw Logger.handleException(
+                    val verifiableCredentials: List<String> = credentialsArray.map {
+                        it as? String ?: throw Logger.handleException(
                             exceptionType = "InvalidData",
                             className = className,
                             message = "$format credentials are not passed in string format"
@@ -210,7 +207,7 @@ internal class AuthorizationResponseHandler {
                     LdpVPTokenForSigning(
                         verifiableCredential = verifiableCredentials,
                         id = UUIDGenerator.generateUUID(),
-                        holder = holder
+                        holder = ""
                     )
                 }
             }
