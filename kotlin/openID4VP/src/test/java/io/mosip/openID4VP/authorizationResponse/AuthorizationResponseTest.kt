@@ -91,7 +91,7 @@ class AuthorizationResponseTest {
             0
         }
 
-        openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
+        openID4VP.constructUnsignedVPToken(selectedCredentialsList)
     }
 
     @After
@@ -105,7 +105,7 @@ class AuthorizationResponseTest {
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
-        val actualUnsignedVPTokens = openID4VP.constructVerifiablePresentationToken(selectedCredentialsList)
+        val actualUnsignedVPTokens = openID4VP.constructUnsignedVPToken(selectedCredentialsList)
 
         val expectedUnsignedVPTokens = unsignedVPTokens
         assertEquals(

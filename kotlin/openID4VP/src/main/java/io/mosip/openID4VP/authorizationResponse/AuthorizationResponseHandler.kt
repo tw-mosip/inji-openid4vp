@@ -25,7 +25,7 @@ internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
     private lateinit var unsignedVPTokens: Map<FormatType, UnsignedVPToken>
 
-    fun constructUnsignedVPTokens(
+    fun constructUnsignedVPToken(
         credentialsMap: Map<String, Map<FormatType, List<Any>>>,
     ): Map<FormatType, UnsignedVPToken> {
         if (credentialsMap.isEmpty()) {

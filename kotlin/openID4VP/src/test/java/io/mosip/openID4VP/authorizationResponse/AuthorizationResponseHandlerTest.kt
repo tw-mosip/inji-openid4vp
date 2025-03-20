@@ -81,7 +81,7 @@ class AuthorizationResponseHandlerTest {
     fun `should throw error during construction of data for signing when selected Credentials is empty`() {
         val actualException =
             assertThrows(Exceptions.InvalidData::class.java) {
-                authorizationResponseHandler.constructUnsignedVPTokens(
+                authorizationResponseHandler.constructUnsignedVPToken(
                     credentialsMap = mapOf()
                 )
             }
@@ -97,7 +97,7 @@ class AuthorizationResponseHandlerTest {
         val verifiableCredentials: List<Any> = listOf(1, "cred", true, 2.12)
         val actualException =
             assertThrows(Exceptions.InvalidData::class.java) {
-                authorizationResponseHandler.constructUnsignedVPTokens(
+                authorizationResponseHandler.constructUnsignedVPToken(
                     credentialsMap = mapOf("input_1" to mapOf(FormatType.LDP_VC to verifiableCredentials))
                 )
             }

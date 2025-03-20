@@ -43,9 +43,9 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, Map<FormatType, List<Any>>>): Map<FormatType, UnsignedVPToken> {
+    fun constructUnsignedVPToken(verifiableCredentials: Map<String, Map<FormatType, List<Any>>>): Map<FormatType, UnsignedVPToken> {
         try {
-            return authorizationResponseHandler.constructUnsignedVPTokens(
+            return authorizationResponseHandler.constructUnsignedVPToken(
                 credentialsMap = verifiableCredentials
             )
         } catch (exception: Exception) {

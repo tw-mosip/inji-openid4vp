@@ -155,7 +155,7 @@ This method will also notify the Verifier about the error by sending it to the r
 ###### Example usage
 
 ```kotlin
- val unsignedVPTokens : Map<FormatType, UnsignedVPToken> = openID4VP.constructVerifiablePresentationToken(
+ val unsignedVPTokens : Map<FormatType, UnsignedVPToken> = openID4VP.constructUnsignedVPToken(
             verifiableCredentials = mapOf(
                 "input_descriptor_id" to mapOf(
                     FormatType.LDP_VC to listOf(
