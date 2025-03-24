@@ -28,7 +28,7 @@ To combat the issue, we will be restructuring the exposed public methods and int
 constructVerifiablePresentationToken(verifiableCredentials: Map<String, List<String>>): String
 ```
 - accepts an input of type `Map<String, List<String>>` where the key is the input_descriptor id and the value is the list of user selected verifiable credentials 
-- returns a string which is the JSON representation of the VPTokenForSigning
+- returns a string which is the JSON representation of the UnsignedVPToken
 - Issues
   - Unable to find the credential format of the verifiable credential to construct the vp_token specific to the credential format
 
@@ -41,20 +41,20 @@ constructVerifiablePresentationToken(verifiableCredentials: Map<String, Map<Form
 - returns an instance of VPTokensForSigning which contains required details to sign to be signed by the user for the creation of vp_token
 - This overcomes the issue of finding the credential format of the verifiable credential to construct the vp_token specific to the credential format
 - Code design changes introduced
-  - Introduced a new interface `VPTokenForSigning` which will be implemented by the format specific `VPTokenForSigning` classes for instance `LdpVPTokenForSigning` (diagram mentioned below)
+  - Introduced a new interface `UnsignedVPToken` which will be implemented by the format specific `UnsignedVPToken` classes for instance `UnsignedLdpVPToken` (diagram mentioned below)
 ```mermaid
 ---
 title: Class diagram for format specific VPTokensForSigning
 ---
 classDiagram
-    class VPTokenForSigning
-    <<interface>> VPTokenForSigning
+    class UnsignedVPToken
+    <<interface>> UnsignedVPToken
 
-    class LdpVPTokenForSigning {
-        - //properties specific to vpTokenForSigning of ldp_vp
+    class UnsignedLdpVPToken {
+        - //properties specific to UnsignedVPToken of ldp_vp
     }
 
-    VPTokenForSigning <|-- LdpVPTokenForSigning : implements
+    UnsignedVPToken <|-- UnsignedLdpVPToken : implements
 ```
 
 2. shareVerifiablePresentation method
@@ -121,7 +121,7 @@ title: Class diagram - Format specific VPTokens creation
 classDiagram
     class VPTokenFactory {
         - VPResponseMetadata vpResponseMetadata
-        - VPTokenForSigning vpTokenForSigning
+        - UnsignedVPToken unsignedVPToken
         - String nonce
         + getVerifiablePresentationTokenBuilder(VerifiableCredentialFormatType credentialFormat) VerifiablePresentationTokenBuilder
     }
@@ -142,7 +142,7 @@ classDiagram
 
     class LdpVPTokenBuilder {
         - LdpVerifiablePresentationResponseMetadata ldpVPResponseMetadata
-        - LdpVerifiablePresentationTokenForSigning ldpVPTokenForSigning
+        - UnsignedLdpVPToken unsignedLdpVPToken
         - String nonce
         + build() LdpVPToken
     }
@@ -158,7 +158,7 @@ VPToken <|.. LdpVPToken : implements
 
 ### Pros
 - Extensibility to support multiple credential formats for vp_token creation is easier relatively
-- Any new credential format can be supported by implementing the `VPTokenForSigning` and `VPResponseMetadata` interfaces
+- Any new credential format can be supported by implementing the `UnsignedVPToken` and `VPResponseMetadata` interfaces
 
 ### Cons
 - Consumers will be required to adapt the new changes as it will be included as a breaking change
