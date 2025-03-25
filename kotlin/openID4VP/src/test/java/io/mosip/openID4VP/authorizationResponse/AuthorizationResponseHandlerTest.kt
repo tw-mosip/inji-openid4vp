@@ -246,7 +246,7 @@ class AuthorizationResponseHandlerTest {
     @Test
     fun `should convert the unsignedVPTokens to JSON successfully`() {
         assertEquals(
-            "{\"ldp_vc\":{\"@context\":[\"https://www.w3.org/2018/credentials/v1\"],\"type\":[\"VerifiablePresentation\"],\"verifiableCredential\":[VC1, VC2, VC3],\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"holder\":\"\"}}",
+            "{\"ldp_vc\":{\"@context\":[\"https://www.w3.org/2018/credentials/v1\"],\"type\":[\"VerifiablePresentation\"],\"verifiableCredential\":[\"VC1\",\"VC2\",\"VC3\"],\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"holder\":\"\"}}",
             unsignedVPTokens.toJsonString()
         )
     }
