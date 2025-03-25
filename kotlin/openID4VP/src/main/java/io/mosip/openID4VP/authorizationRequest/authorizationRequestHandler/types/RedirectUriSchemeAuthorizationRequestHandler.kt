@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JSON
@@ -15,10 +16,13 @@ private val className = RedirectUriSchemeAuthorizationRequestHandler::class.simp
 
 class RedirectUriSchemeAuthorizationRequestHandler(
     authorizationRequestParameters: MutableMap<String, Any>,
+    walletMetadata: WalletMetadata?,
     setResponseUri: (String) -> Unit
-) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
+) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters,walletMetadata, setResponseUri) {
 
-    override fun validateRequestUriResponse() {
+    override fun validateRequestUriResponse(
+        requestUriResponse: Map<String, Any>
+    ) {
         authorizationRequestParameters = if (requestUriResponse.isEmpty())
             authorizationRequestParameters
         else {
@@ -40,6 +44,12 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 )
             }
         }
+    }
+
+    override fun process(walletMetadata: WalletMetadata): WalletMetadata {
+        val updatedWalletMetadata = walletMetadata
+        updatedWalletMetadata.requestObjectSigningAlgValuesSupported = null
+        return updatedWalletMetadata
     }
 
     override fun validateAndParseRequestFields(){

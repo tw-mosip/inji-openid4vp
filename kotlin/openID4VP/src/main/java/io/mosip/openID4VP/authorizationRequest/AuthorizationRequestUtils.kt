@@ -16,6 +16,7 @@ private val className = AuthorizationRequest::class.simpleName!!
 fun getAuthorizationRequestHandler(
     authorizationRequestParameters: MutableMap<String, Any>,
     trustedVerifiers: List<Verifier>,
+    walletMetadata: WalletMetadata?,
     setResponseUri: (String) -> Unit,
     shouldValidateClient: Boolean
 ): ClientIdSchemeBasedAuthorizationRequestHandler {
@@ -25,15 +26,18 @@ fun getAuthorizationRequestHandler(
         PRE_REGISTERED.value -> PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers,
             authorizationRequestParameters,
+            walletMetadata,
             shouldValidateClient,
             setResponseUri
         )
         ClientIdScheme.REDIRECT_URI.value -> RedirectUriSchemeAuthorizationRequestHandler(
             authorizationRequestParameters,
+            walletMetadata,
             setResponseUri
         )
         ClientIdScheme.DID.value -> DidSchemeAuthorizationRequestHandler(
             authorizationRequestParameters,
+            walletMetadata,
             setResponseUri
         )
         else -> throw Logger.handleException(

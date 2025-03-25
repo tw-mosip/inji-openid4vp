@@ -2,6 +2,7 @@ package io.mosip.openID4VP.responseModeHandler
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_URI
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
@@ -14,7 +15,11 @@ private val className = ResponseModeBasedHandler::class.simpleName!!
 
 abstract class ResponseModeBasedHandler {
 
-    abstract fun validate(clientMetadata: ClientMetadata?)
+    abstract fun validate(
+        clientMetadata: ClientMetadata?,
+        walletMetadata: WalletMetadata?,
+        shouldValidateWithWalletMetadata: Boolean
+    )
 
     abstract fun sendAuthorizationResponse(
         vpToken: VPToken,

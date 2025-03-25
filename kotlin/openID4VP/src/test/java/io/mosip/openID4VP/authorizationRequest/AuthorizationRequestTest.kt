@@ -78,7 +78,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(MissingInput::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null, shouldValidateClient
                 )
             }
 
@@ -98,7 +98,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null, shouldValidateClient
                 )
             }
 
@@ -119,7 +119,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(InvalidInput::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
                 )
             }
 
@@ -145,7 +145,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
                 )
             }
 
@@ -177,7 +177,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
                 )
             }
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -196,7 +196,7 @@ class AuthorizationRequestTest {
 
 
         val authorizationRequest = openID4VP.authenticateVerifier(
-            encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+            encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
         )
 
         assertEquals(ClientIdScheme.PRE_REGISTERED.value, authorizationRequest.clientIdScheme)
@@ -217,7 +217,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(InvalidVerifier::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
                 )
             }
 
@@ -235,7 +235,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidQueryParams::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
                 )
             }
 
@@ -259,7 +259,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
                 )
             }
 
@@ -273,7 +273,7 @@ class AuthorizationRequestTest {
             createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.PRE_REGISTERED)
 
         val actualValue =
-            openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient)
+            openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient)
         assertTrue(actualValue is AuthorizationRequest)
     }
 
@@ -304,7 +304,7 @@ class AuthorizationRequestTest {
         actualException =
         assertThrows(MissingInput::class.java) {
             openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
             )
         }
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -324,7 +324,7 @@ class AuthorizationRequestTest {
         actualException =
             assertThrows(InvalidData::class.java) {
                 openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient
+                    encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient
                 )
             }
 
@@ -354,7 +354,7 @@ class AuthorizationRequestTest {
             )
 
         val actualValue =
-            openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient)
+            openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, null,shouldValidateClient)
         assertTrue(actualValue is AuthorizationRequest)
     }
 
@@ -379,7 +379,7 @@ class AuthorizationRequestTest {
 
         actualException =
             assertThrows(InvalidData::class.java) {
-                openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, false)
+                openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, null,false)
             }
 
         assertEquals("presentation_definition_uri data is not valid",actualException.message)
@@ -394,7 +394,7 @@ class AuthorizationRequestTest {
             )
 
         val actualValue =
-            openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, false)
+            openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, null,false)
         assertTrue(actualValue is AuthorizationRequest)
     }
 

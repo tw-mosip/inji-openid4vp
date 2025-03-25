@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.responseModeHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.VPToken
@@ -14,7 +15,11 @@ private val className = DirectPostResponseModeHandler::class.simpleName!!
 
 
 class DirectPostResponseModeHandler: ResponseModeBasedHandler() {
-    override fun validate(clientMetadata: ClientMetadata?) {
+    override fun validate(
+        clientMetadata: ClientMetadata?,
+        walletMetadata: WalletMetadata?,
+        shouldValidateWithWalletMetadata: Boolean
+    ) {
         return
     }
 

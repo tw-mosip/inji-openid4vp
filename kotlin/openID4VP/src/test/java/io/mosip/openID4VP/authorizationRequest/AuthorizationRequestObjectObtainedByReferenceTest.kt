@@ -1,6 +1,8 @@
 package io.mosip.openID4VP.authorizationRequest
 
 import android.util.Log
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
@@ -23,9 +25,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class AuthorizationRequestObjectObtainedByReference {
     private lateinit var openID4VP: OpenID4VP
+
 
     @Before
     fun setUp() {
@@ -65,6 +70,130 @@ class AuthorizationRequestObjectObtainedByReference {
         clearAllMocks()
     }
 
+    @Test
+    fun `should send wallet metadata to the verifier only when the request_uri_method is post`() {
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid + mapOf(
+            "request_uri_method" to "post"
+        )
+        val requestBody = mapOf(
+            "wallet_metadata" to URLEncoder.encode(
+                jacksonObjectMapper()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .writeValueAsString(walletMetadata),
+                StandardCharsets.UTF_8.toString()
+            )
+        )
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                HTTP_METHOD.POST,
+                requestBody,
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
+                .build(),
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
+        )
+
+
+
+        val encodedAuthorizationRequest = createUrlEncodedData(
+            authorizationRequestParamsMap,
+            true,
+            DID
+        )
+
+        openID4VP.authenticateVerifier(
+            encodedAuthorizationRequest,
+            trustedVerifiers,
+            walletMetadata,
+            shouldValidateClient = true
+        )
+
+        verify {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                HTTP_METHOD.POST,
+                requestBody,
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `should validate and throw error if the client id scheme is not supported by wallet when the request_uri_method is post`() {
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid + mapOf(
+            "request_uri_method" to "post"
+        )
+        val walletMetadata = WalletMetadata(
+            presentationDefinitionURISupported = true,
+            vpFormatsSupported = emptyMap(),
+            clientIdSchemesSupported = listOf(ClientIdScheme.REDIRECT_URI.value, PRE_REGISTERED.value),
+            requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
+            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
+            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+        )
+
+        val encodedAuthorizationRequest = createUrlEncodedData(
+            authorizationRequestParamsMap,
+            true,
+            DID
+        )
+
+        val exception = assertThrows<InvalidData> {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                walletMetadata,
+                shouldValidateClient = true
+            )
+        }
+        assertEquals("client_id_scheme is not support by wallet", exception.message)
+    }
+
+    @Test
+    fun `should validate and throw error if the signing algorithm is not supported by wallet when the request_uri_method is post`() {
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfDid + mapOf(
+            "request_uri_method" to "post"
+        )
+        val walletMetadata = WalletMetadata(
+            presentationDefinitionURISupported = true,
+            vpFormatsSupported = emptyMap(),
+            clientIdSchemesSupported = listOf(DID.value, PRE_REGISTERED.value),
+            requestObjectSigningAlgValuesSupported = listOf("RSA"),
+            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
+            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+        )
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                HTTP_METHOD.POST,
+                any(),
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
+                .build(),
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
+        )
+
+        val encodedAuthorizationRequest = createUrlEncodedData(
+            authorizationRequestParamsMap,
+            true,
+            DID
+        )
+
+        val exception = assertThrows<InvalidData> {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                walletMetadata,
+                shouldValidateClient = true
+            )
+        }
+        assertEquals("request_object_signing_alg is not support by wallet", exception.message)
+    }
     //Client Id scheme - DID
     @Test
     fun `should return Authorization Request if it has request uri and it is a valid authorization request in did client id scheme`() {
@@ -90,6 +219,7 @@ class AuthorizationRequestObjectObtainedByReference {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
+                null,
                 shouldValidateClient = true
             )
         }
@@ -143,6 +273,7 @@ class AuthorizationRequestObjectObtainedByReference {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
+                walletMetadata,
                 { _: String -> },
                 false
             )
@@ -166,6 +297,7 @@ class AuthorizationRequestObjectObtainedByReference {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
+                walletMetadata,
                 { _: String -> },
                 false
             )
@@ -390,11 +522,13 @@ class AuthorizationRequestObjectObtainedByReference {
     @Test
     fun `should return back authorization request successfully when authorization request is obtained by reference in pre-registered client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered
+        val authorizationRequestParamsMap = requestParams + clientIdAndSchemeOfPreRegistered + mapOf(REQUEST_URI_METHOD.value to "post")
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
-                HTTP_METHOD.GET
+                any(),
+                any(),
+                any()
             )
         } returns mapOf(
             "header" to Headers.Builder().add("content-type", "application/json").build(),
@@ -402,13 +536,14 @@ class AuthorizationRequestObjectObtainedByReference {
         )
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,true , DID)
+            createUrlEncodedData(authorizationRequestParamsMap,true , PRE_REGISTERED)
 
 
         assertDoesNotThrow {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
+                walletMetadata,
                 { _: String -> },
                 false
             )
@@ -437,6 +572,7 @@ class AuthorizationRequestObjectObtainedByReference {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
+                walletMetadata,
                 { _: String -> },
                 false
             )
@@ -465,6 +601,7 @@ class AuthorizationRequestObjectObtainedByReference {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
+                walletMetadata,
                 { _: String -> },
                 false
             )

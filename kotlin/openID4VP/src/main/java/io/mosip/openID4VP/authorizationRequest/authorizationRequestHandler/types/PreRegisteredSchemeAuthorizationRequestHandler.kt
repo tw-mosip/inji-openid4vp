@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.common.Logger
@@ -15,9 +16,10 @@ private val className = PreRegisteredSchemeAuthorizationRequestHandler::class.si
 class PreRegisteredSchemeAuthorizationRequestHandler(
     private val trustedVerifiers: List<Verifier>,
     authorizationRequestParameters: MutableMap<String, Any>,
+    walletMetadata: WalletMetadata?,
     private val shouldValidateClient: Boolean,
     setResponseUri: (String) -> Unit
-) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
+) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, walletMetadata, setResponseUri) {
     override fun validateClientId() {
         super.validateClientId()
         if (!shouldValidateClient) return
@@ -33,7 +35,9 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         }
     }
 
-    override fun validateRequestUriResponse() {
+    override fun validateRequestUriResponse(
+        requestUriResponse: Map<String, Any>
+    ) {
 
         authorizationRequestParameters = if (requestUriResponse.isEmpty())
             authorizationRequestParameters
@@ -56,6 +60,12 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
                 )
             }
         }
+    }
+
+    override fun process(walletMetadata: WalletMetadata): WalletMetadata {
+        val updatedWalletMetadata = walletMetadata.copy()
+        updatedWalletMetadata.requestObjectSigningAlgValuesSupported = null
+        return updatedWalletMetadata
     }
 
     override fun validateAndParseRequestFields() {
