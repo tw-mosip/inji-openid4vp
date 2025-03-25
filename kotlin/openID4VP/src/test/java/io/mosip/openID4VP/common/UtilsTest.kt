@@ -1,8 +1,12 @@
 package io.mosip.openID4VP.common
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import org.junit.Test
 import org.junit.Assert.*
 import io.mosip.openID4VP.constants.HttpMethod
+import org.json.JSONPropertyName
 
 class UtilsTest {
 
@@ -69,5 +73,55 @@ class UtilsTest {
         val map = mapOf("key" to "value")
         assertEquals("value", getStringValue(map, "key"))
         assertNull(getStringValue(map, "nonexistent"))
+    }
+
+    internal data class MockDataClass(
+        val key: String,
+        @JsonProperty("key_with_more_than_one_word")
+        val keyWithMoreThanOneWord: String,
+        @JsonProperty("nullable_field")
+        val nullableField: String? = null,
+    )
+
+    @Test
+
+    fun `should serialize data class instance to JSON with all properties specified`() {
+        val mockDataClass = MockDataClass(
+            key = "id_credential",
+            keyWithMoreThanOneWord = "ldp_vp",
+            nullableField = "value",
+        )
+
+        val descriptorMapJson = encodeToJsonString<MockDataClass>(
+            mockDataClass,
+            "mockDataClass",
+            "UtilsTest"
+        )
+        "{\"key\":\"id_credential\",\"number\":1,\"key_with_more_than_one_word\":\"ldp_vp\"}"
+
+        assertEquals(
+            "{\"key\":\"id_credential\",\"key_with_more_than_one_word\":\"ldp_vp\",\"nullable_field\":\"value\"}",
+            descriptorMapJson
+        )
+    }
+
+
+    @Test
+    fun `should serialize data class without nullable fields to JSON successfully`() {
+        val mockDataClass = MockDataClass(
+            key = "id_credential",
+            keyWithMoreThanOneWord = "ldp_vp",
+        )
+
+        val descriptorMapJson = encodeToJsonString<MockDataClass>(
+            mockDataClass,
+            "mockDataClass",
+            "UtilsTest"
+        )
+
+        assertEquals(
+            "{\"key\":\"id_credential\",\"key_with_more_than_one_word\":\"ldp_vp\"}",
+            descriptorMapJson
+        )
     }
 }

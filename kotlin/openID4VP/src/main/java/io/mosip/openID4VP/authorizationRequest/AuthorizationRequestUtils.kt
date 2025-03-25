@@ -70,14 +70,6 @@ fun validateAuthorizationRequestObjectAndParameters(
             message = "Client Id mismatch in Authorization Request parameter and the Request Object",
             className = className
         )
-
-    }
-    if (params[CLIENT_ID_SCHEME.value] != null && params[CLIENT_ID_SCHEME.value] != authorizationRequestObject[CLIENT_ID_SCHEME.value]) {
-        throw Logger.handleException(
-            exceptionType = "InvalidData",
-            message = "Client Id Scheme mismatch in Authorization Request parameter and the Request Object",
-            className = className
-        )
     }
 }
 
