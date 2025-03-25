@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.common
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
@@ -59,7 +60,7 @@ fun validate(
 
 inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className: String): String {
     try {
-        val objectMapper = jacksonObjectMapper()
+        val objectMapper = jacksonObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
         return objectMapper.writeValueAsString(data)
     } catch (exception: Exception) {
         throw Logger.handleException(

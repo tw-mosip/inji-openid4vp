@@ -7,7 +7,7 @@ data class DescriptorMap(
     val format: String,
     val path: String,
     @JsonProperty("path_nested")
-    val pathNested: PathNested,
+    val pathNested: PathNested? = null,
 )
 
 data class PathNested(

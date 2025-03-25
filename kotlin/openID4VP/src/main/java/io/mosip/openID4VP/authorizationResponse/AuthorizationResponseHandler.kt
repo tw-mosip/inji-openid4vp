@@ -163,13 +163,19 @@ internal class AuthorizationResponseHandler {
                             isMultipleVpTokens -> "$[$vpTokenIndex]"
                             else -> "$"
                         }
-                        val credentialIndex = (formatTypeToCredentialIndex[credentialFormat] ?: -1) + 1
-                        val relativePath:String
+                        val credentialIndex =
+                            (formatTypeToCredentialIndex[credentialFormat] ?: -1) + 1
                         val vpFormat: String
+                        val pathNested: PathNested?
                         when (credentialFormat) {
                             FormatType.LDP_VC -> {
-                                relativePath = "$.${LdpVPToken.INTERNAL_PATH}[$credentialIndex]"
+                                val relativePath = "$.${LdpVPToken.INTERNAL_PATH}[$credentialIndex]"
                                 vpFormat = VPFormatType.LDP_VP.value
+                                pathNested = PathNested(
+                                    id = inputDescriptorId,
+                                    format = credentialFormat.value,
+                                    path = relativePath
+                                )
                             }
                         }
                         formatTypeToCredentialIndex[credentialFormat] = credentialIndex
@@ -178,11 +184,7 @@ internal class AuthorizationResponseHandler {
                             id = inputDescriptorId,
                             format = vpFormat,
                             path = rootLevelPath,
-                            pathNested = PathNested(
-                                id = inputDescriptorId,
-                                format = credentialFormat.value,
-                                path = relativePath
-                            )
+                            pathNested = pathNested
                         )
                     }
                 }
