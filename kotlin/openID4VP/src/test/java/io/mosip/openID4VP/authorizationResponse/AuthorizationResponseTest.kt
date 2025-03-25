@@ -16,13 +16,7 @@ import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
-import io.mosip.openID4VP.testData.authorizationResponse
-import io.mosip.openID4VP.testData.presentationSubmission
-import io.mosip.openID4VP.testData.publicKey
-import io.mosip.openID4VP.testData.setField
-import io.mosip.openID4VP.testData.vpResponsesMetadata
-import io.mosip.openID4VP.testData.vpToken
-import io.mosip.openID4VP.testData.unsignedVPTokens
+import io.mosip.openID4VP.testData.*
 import okhttp3.Headers
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After

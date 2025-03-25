@@ -3,12 +3,8 @@ package io.mosip.openID4VP.common
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
-import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
 import io.mosip.openID4VP.constants.HttpMethod
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 

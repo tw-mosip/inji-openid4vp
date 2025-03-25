@@ -16,6 +16,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.constants.VPFormatType
 import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
@@ -138,11 +139,10 @@ internal class AuthorizationResponseHandler {
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): PresentationSubmission {
         val descriptorMap = createInputDescriptor(credentialFormatIndex)
-        val presentationDefinitionId = authorizationRequest.presentationDefinition.id
 
         return PresentationSubmission(
             id = UUIDGenerator.generateUUID(),
-            definitionId = presentationDefinitionId,
+            definitionId = authorizationRequest.presentationDefinition.id,
             descriptorMap = descriptorMap,
         )
     }
@@ -150,32 +150,37 @@ internal class AuthorizationResponseHandler {
     private fun createInputDescriptor(credentialFormatIndex: MutableMap<FormatType, Int>): List<DescriptorMap> {
         //In case of only single VP, presentation_submission -> path = $, path_nest = $.<credentialPathIdentifier - internalPath>[n]
         //and in case of multiple VPs, presentation_submission -> path = $[i], path_nest = $[i].<credentialPathIdentifier - internalPath>[n]
-        val multipleVpTokens: Boolean = credentialFormatIndex.keys.size > 1
+        val isMultipleVpTokens: Boolean = credentialFormatIndex.keys.size > 1
         val formatTypeToCredentialIndex: MutableMap<FormatType, Int> = mutableMapOf()
 
         val descriptorMappings =
             credentialsMap.toSortedMap().map { (inputDescriptorId, formatMap) ->
-                formatMap.flatMap { (format, credentials) ->
-                    val vpTokenIndex = credentialFormatIndex[format]
+                formatMap.flatMap { (credentialFormat, credentials) ->
+                    val vpTokenIndex = credentialFormatIndex[credentialFormat]
 
                     credentials.map {
                         val rootLevelPath = when {
-                            multipleVpTokens -> "$[$vpTokenIndex]"
+                            isMultipleVpTokens -> "$[$vpTokenIndex]"
                             else -> "$"
                         }
-                        val credentialIndex = (formatTypeToCredentialIndex[format] ?: -1) + 1
-                        val relativePath = when (format) {
-                            FormatType.LDP_VC -> "$.${LdpVPToken.INTERNAL_PATH}[$credentialIndex]"
+                        val credentialIndex = (formatTypeToCredentialIndex[credentialFormat] ?: -1) + 1
+                        val relativePath:String
+                        val vpFormat: String
+                        when (credentialFormat) {
+                            FormatType.LDP_VC -> {
+                                relativePath = "$.${LdpVPToken.INTERNAL_PATH}[$credentialIndex]"
+                                vpFormat = VPFormatType.LDP_VP.value
+                            }
                         }
-                        formatTypeToCredentialIndex[format] = credentialIndex
+                        formatTypeToCredentialIndex[credentialFormat] = credentialIndex
 
                         DescriptorMap(
                             id = inputDescriptorId,
-                            format = format.value,
+                            format = vpFormat,
                             path = rootLevelPath,
                             pathNested = PathNested(
                                 id = inputDescriptorId,
-                                format = format.value,
+                                format = credentialFormat.value,
                                 path = relativePath
                             )
                         )
