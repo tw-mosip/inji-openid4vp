@@ -2,11 +2,18 @@ package io.mosip.openID4VP.testData
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
-import io.mosip.openID4VP.common.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.testData.JWSUtil.Companion.createJWS
 import kotlinx.serialization.json.JsonObject
+import java.lang.reflect.Field
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+
+fun setField(instance: Any, fieldName: String, value: Any?) {
+    val field: Field = instance::class.java.getDeclaredField(fieldName)
+    field.isAccessible = true
+    field.set(instance, value)
+}
 
 fun createUrlEncodedData(
     requestParams: Map<String, String?>,

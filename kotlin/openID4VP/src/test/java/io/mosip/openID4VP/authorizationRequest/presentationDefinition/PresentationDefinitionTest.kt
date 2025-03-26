@@ -9,10 +9,11 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidData
-import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.exceptions.Exceptions
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals

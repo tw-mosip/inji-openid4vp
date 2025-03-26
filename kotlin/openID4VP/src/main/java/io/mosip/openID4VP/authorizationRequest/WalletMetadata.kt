@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.mosip.openID4VP.common.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme
 
 data class WalletMetadata(
     @JsonProperty("presentation_definition_uri_supported") val presentationDefinitionURISupported: Boolean = true,

@@ -4,7 +4,9 @@ import android.util.Log
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.jwt.exception.JWEException
 import io.mosip.openID4VP.jwt.exception.JWSException
+import io.mosip.openID4VP.exceptions.Exceptions
 
+//TODO: Log - use common logger for android and Java env
 object Logger {
     private var traceabilityId: String? = null
 
@@ -54,7 +56,7 @@ object Logger {
 
             "InvalidLimitDisclosure" -> AuthorizationRequestExceptions.InvalidLimitDisclosure()
 
-            "InvalidData" -> AuthorizationRequestExceptions.InvalidData(message = message ?: "")
+            "InvalidData" -> Exceptions.InvalidData(message = message ?: "")
 
             "PublicKeyResolutionFailed" -> JWSException.PublicKeyResolutionFailed(message = message ?: "")
 

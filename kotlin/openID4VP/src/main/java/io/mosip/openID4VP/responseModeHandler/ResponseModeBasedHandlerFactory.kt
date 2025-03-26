@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.responseModeHandler
 
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.ResponseMode.*
+import io.mosip.openID4VP.constants.ResponseMode.*
 import io.mosip.openID4VP.responseModeHandler.types.DirectPostJwtResponseModeHandler
 import io.mosip.openID4VP.responseModeHandler.types.DirectPostResponseModeHandler
 

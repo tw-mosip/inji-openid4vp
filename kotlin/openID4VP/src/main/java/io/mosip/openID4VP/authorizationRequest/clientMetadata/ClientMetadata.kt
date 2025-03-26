@@ -130,5 +130,6 @@ class ClientMetadata(
 	@SerialName("jwks") val jwks: Jwks?,
 ) : Validatable {
 	override fun validate() {
+		return
 	}
 }

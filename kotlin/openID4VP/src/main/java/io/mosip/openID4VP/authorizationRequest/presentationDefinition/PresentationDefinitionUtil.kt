@@ -8,7 +8,7 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val className = PresentationDefinition::class.simpleName!!
@@ -62,7 +62,7 @@ fun parseAndValidatePresentationDefinition(
             val response =
                 sendHTTPRequest(
                     url = presentationDefinitionUri,
-                    method = HTTP_METHOD.GET
+                    method = HttpMethod.GET
                 )
             presentationDefinition = response["body"].toString()
         }

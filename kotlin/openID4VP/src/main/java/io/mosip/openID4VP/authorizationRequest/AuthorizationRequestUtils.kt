@@ -3,10 +3,11 @@ package io.mosip.openID4VP.authorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types.*
-import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
+import io.mosip.openID4VP.common.validate
 import io.mosip.openID4VP.dto.Verifier
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -20,8 +21,9 @@ fun getAuthorizationRequestHandler(
     setResponseUri: (String) -> Unit,
     shouldValidateClient: Boolean
 ): ClientIdSchemeBasedAuthorizationRequestHandler {
-    val clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value)
-        ?: PRE_REGISTERED.value
+    val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)
+    validate(CLIENT_ID.value, clientId, className)
+    val clientIdScheme = extractClientIdScheme(getStringValue(authorizationRequestParameters,CLIENT_ID.value)!!)
     return when (clientIdScheme) {
         PRE_REGISTERED.value -> PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers,
@@ -72,16 +74,33 @@ fun validateAuthorizationRequestObjectAndParameters(
             message = "Client Id mismatch in Authorization Request parameter and the Request Object",
             className = className
         )
-
     }
-    if (params[CLIENT_ID_SCHEME.value] != null && params[CLIENT_ID_SCHEME.value] != authorizationRequestObject[CLIENT_ID_SCHEME.value]) {
-        throw Logger.handleException(
-            exceptionType = "InvalidData",
-            message = "Client Id Scheme mismatch in Authorization Request parameter and the Request Object",
-            className = className
-        )
+}
+
+fun extractClientIdScheme(clientId: String): String {
+    val components = clientId.split(":", limit = 2)
+
+    return if (components.size > 1) {
+        components[0]
+    } else {
+        // Fallback client_id_scheme pre-registered; pre-registered clients MUST NOT contain a : character in their Client Identifier
+        ClientIdScheme.PRE_REGISTERED.value
     }
 }
 
 
-
+fun extractClientIdentifier(clientId: String): String {
+    val components = clientId.split(":", limit = 2)
+    return if (components.size > 1) {
+        val clientIdScheme = components[0]
+        // DID client ID scheme will have the client id itself with did prefix, example - did:example:123#1. So there will not be additional prefix stating client_id_scheme
+        if (clientIdScheme == ClientIdScheme.DID.value) {
+            clientId
+        } else {
+            components[1]
+        }
+    } else {
+        // client_id_scheme is optional (Fallback client_id_scheme - pre-registered) i.e., a : character is not present in the Client Identifier
+        clientId
+    }
+}

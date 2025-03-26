@@ -11,11 +11,10 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwks
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
-import io.mosip.openID4VP.common.ClientIdScheme
-import io.mosip.openID4VP.common.ClientIdScheme.DID
-import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.*
+import io.mosip.openID4VP.constants.ResponseMode.*
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.walletMetadata
 import kotlinx.serialization.json.Json

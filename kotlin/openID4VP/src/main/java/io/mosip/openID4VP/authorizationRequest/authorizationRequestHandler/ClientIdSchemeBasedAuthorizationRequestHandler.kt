@@ -8,14 +8,14 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
-import io.mosip.openID4VP.common.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
+import io.mosip.openID4VP.authorizationRequest.extractClientIdScheme
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 import java.net.URLEncoder
@@ -31,8 +31,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     protected var shouldValidateWithWalletMetadata = false
 
     open fun validateClientId() {
-        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)
-        validate(CLIENT_ID.value, clientId, className)
+        return
     }
 
     fun fetchAuthorizationRequest() {
@@ -52,7 +51,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
             var headers: Map<String, String>? = null
 
 
-            if (httpMethod == HTTP_METHOD.POST) {
+            if (httpMethod == HttpMethod.POST) {
                 walletMetadata?.let { walletMetadata ->
                     isClientIdSchemeSupported(walletMetadata)
                     val processedWalletMetadata = process(walletMetadata)
@@ -108,8 +107,8 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     }
 
     private fun isClientIdSchemeSupported(walletMetadata: WalletMetadata) {
-        val clientIdScheme =
-            getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value)
+        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+        val clientIdScheme = extractClientIdScheme(clientId)
         if (!walletMetadata.clientIdSchemesSupported.contains(clientIdScheme))
             throw Logger.handleException(
                 exceptionType = "InvalidData",
@@ -122,8 +121,6 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     fun createAuthorizationRequest(): AuthorizationRequest {
         return AuthorizationRequest(
             clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!,
-            clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value)
-                ?: PRE_REGISTERED.value,
             responseType = getStringValue(authorizationRequestParameters, RESPONSE_TYPE.value)!!,
             responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value),
             presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value] as PresentationDefinition,
