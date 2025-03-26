@@ -10,7 +10,7 @@ import io.mosip.openID4VP.common.isJWS
 import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.PAYLOAD
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
-import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JWT
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_JWT
 import okhttp3.Headers
 
 private val className = DidSchemeAuthorizationRequestHandler::class.simpleName!!
@@ -19,16 +19,6 @@ class DidSchemeAuthorizationRequestHandler(
     authorizationRequestParameters: MutableMap<String, Any>,
     setResponseUri: (String) -> Unit
 ) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
-    override fun validateClientId(){
-        super.validateClientId()
-        if(!getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!.startsWith("did"))
-            throw Logger.handleException(
-                exceptionType =  "InvalidVerifier",
-                className = className,
-                message = "Client ID should start with did prefix if client_id_scheme is did"
-            )
-    }
-
     override fun validateRequestUriResponse() {
         if(requestUriResponse.isNotEmpty()){
             val headers = requestUriResponse["header"] as Headers

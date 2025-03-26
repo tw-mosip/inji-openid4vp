@@ -2,10 +2,11 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.type
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
+import io.mosip.openID4VP.authorizationRequest.extractClientIdentifier
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
-import io.mosip.openID4VP.networkManager.CONTENT_TYPE.APPLICATION_JSON
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_JSON
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.ResponseMode.*
+import io.mosip.openID4VP.constants.ResponseMode.*
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.validate
@@ -84,7 +85,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 validate(validAttribute,data, className)
             }
         }
-        if(authRequestParam[validAttribute] != authRequestParam[CLIENT_ID.value])
+        if(authRequestParam[validAttribute] != extractClientIdentifier(getStringValue(authRequestParam, CLIENT_ID.value)!!))
             throw Logger.handleException(
                 exceptionType = "InvalidData",
                 className = className,

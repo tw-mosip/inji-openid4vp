@@ -1,0 +1,3 @@
+package io.mosip.openID4VP.dto.vpResponseMetadata
+
+interface VPResponseMetadata

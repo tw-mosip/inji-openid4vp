@@ -8,9 +8,9 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
-import io.mosip.openID4VP.common.ResponseMode
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST
-import io.mosip.openID4VP.common.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST
+import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.testData.clientMetadataString
 import org.junit.After
 import org.junit.Assert
@@ -172,7 +172,7 @@ class ClientMetadataTest {
 			"No jwk matching the specified algorithm found"
 
 		actualException =
-			Assert.assertThrows(InvalidData::class.java) {
+			Assert.assertThrows(Exceptions.InvalidData::class.java) {
 				parseAndValidateClientMetadata(authorizationRequestParam)
 			}
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -189,7 +189,7 @@ class ClientMetadataTest {
 			"client_metadata must be of type String or Map"
 
 		actualException =
-			Assert.assertThrows(InvalidData::class.java) {
+			Assert.assertThrows(Exceptions.InvalidData::class.java) {
 				parseAndValidateClientMetadata(authorizationRequestParam)
 			}
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -204,7 +204,7 @@ class ClientMetadataTest {
 			"client_metadata must be present for given response mode"
 
 		actualException =
-			Assert.assertThrows(InvalidData::class.java) {
+			Assert.assertThrows(Exceptions.InvalidData::class.java) {
 				parseAndValidateClientMetadata(authorizationRequestParam)
 			}
 		Assert.assertEquals(expectedExceptionMessage, actualException.message)

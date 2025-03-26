@@ -1,12 +1,11 @@
 package io.mosip.openID4VP.common
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
+import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 
@@ -25,10 +24,10 @@ fun isJWS(input: String): Boolean {
     return input.split(".").size == 3
 }
 
-fun determineHttpMethod(method: String): HTTP_METHOD {
+fun determineHttpMethod(method: String): HttpMethod {
     return when (method.lowercase()) {
-        "get" -> HTTP_METHOD.GET
-        "post" -> HTTP_METHOD.POST
+        "get" -> HttpMethod.GET
+        "post" -> HttpMethod.POST
         else -> throw IllegalArgumentException("Unsupported HTTP method: $method")
     }
 }
@@ -61,7 +60,8 @@ fun validate(
 
 inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className: String): String {
     try {
-        return Json.encodeToString(data)
+        val objectMapper = jacksonObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        return objectMapper.writeValueAsString(data)
     } catch (exception: Exception) {
         throw Logger.handleException(
             exceptionType = "JsonEncodingFailed",
@@ -71,4 +71,3 @@ inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className:
         )
     }
 }
-

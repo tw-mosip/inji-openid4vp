@@ -1,14 +1,57 @@
 package io.mosip.openID4VP.testData
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
+import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
+import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedLdpVPToken
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.common.ClientIdScheme
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
+
+const val publicKey = """-----BEGIN RSA PUBLIC KEY-----
+        MIICCgKCAgEA0IEd3E5CvLAbGvr/ysYT2TLE7WDrPBHGk8pwGqVvlrrFtZJ9wT8E
+        lDNkSfHIgBijphkgSXpVMduwWKidiFFtbqQHgKdr4vdiMKzTy8g0aTpD8T5xPImM
+        CC6CUVgp4EZZHkFK3S2guLZAanXLju3WBD4FuBQTl08vP5MlsiseIIanOnTulUDR
+        baGIYhONq2kN9UnLIXcv8QPIgroP/n76Ir39EwRd20E4jsNfEriZFthBZKQLNbTz
+        GrsVMtpUbHPUlvACrTzXm5RQ1THHDYUa46KmxZfTCKWM2EppaoJlUj1psf3LdlOU
+        MBAarn+3QUxYOMLu9vTLvqsk606WNbeuiHarY6lBAec1E6RXMIcVLKBqMy6NjMCK
+        Va3ZFvn6/G9JI0U+S8Nn3XpH5nLnyAwim7+l9ZnmqeKTTcnE8oxEuGdP7+VvpyHE
+        AF8jilspP0PuBLMNV4eNthKPKPfMvBbFtzLcizqXmSLPx8cOtrEOu+cEU6ckavAS
+        XwPgM27JUjeBwwnAhS8lrN3SiJLYCCi1wXjgqFgESNTBhHq+/H5Mb2wxliJQmfzd
+        BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU
+        IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==
+        -----END RSA PUBLIC KEY-----"""
+val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
+    "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
+    "RsaSignature2018",
+    publicKey,
+    "https://123",
+)
+val vpResponsesMetadata: Map<FormatType, VPResponseMetadata> =
+    mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
+
+val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
+    context = listOf("https://www.w3.org/2018/credentials/v1"),
+    type = listOf("VerifiablePresentation"),
+    verifiableCredential = listOf("credential1", "credential2", "credential3"),
+    id = "649d581c-f291-4969-9cd5-2c27385a348f",
+    holder = "",
+)
+
+val unsignedVPTokens = mapOf(FormatType.LDP_VC to unsignedLdpVPToken)
 
 val clientMetadataMap = mapOf(
     "client_name" to "Requester name",
@@ -168,11 +211,11 @@ val didResponse = """
 
 val trustedVerifiers: List<Verifier> = listOf(
     Verifier(
-        "https://verifier.env1.net", listOf(
+        "mock-client", listOf(
             "https://mock-verifier.net/responseUri", "https://verifier.env2.net/responseUri"
         )
     ), Verifier(
-        "https://verifier.env2.net", listOf(
+        "mock-client2", listOf(
             "https://verifier.env3.net/responseUri", "https://verifier.env2.net/responseUri"
         )
     )
@@ -180,14 +223,12 @@ val trustedVerifiers: List<Verifier> = listOf(
 
 val authRequestParamsByReference = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     REQUEST_URI.value,
     REQUEST_URI_METHOD.value
 )
 
 val authRequestWithRedirectUriByValue = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     RESPONSE_URI.value,
     RESPONSE_MODE.value,
     PRESENTATION_DEFINITION.value,
@@ -199,7 +240,6 @@ val authRequestWithRedirectUriByValue = listOf(
 
 val authRequestWithPreRegisteredByValue = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     RESPONSE_MODE.value,
     RESPONSE_URI.value,
     PRESENTATION_DEFINITION.value,
@@ -211,7 +251,6 @@ val authRequestWithPreRegisteredByValue = listOf(
 
 val authRequestWithDidByValue = listOf(
     CLIENT_ID.value,
-    CLIENT_ID_SCHEME.value,
     RESPONSE_MODE.value,
     RESPONSE_URI.value,
     PRESENTATION_DEFINITION.value,
@@ -222,8 +261,6 @@ val authRequestWithDidByValue = listOf(
 )
 
 val requestParams: Map<String, String> = mapOf(
-    CLIENT_ID.value to "https://mock-verifier.com",
-    CLIENT_ID_SCHEME.value to "pre-registered",
     REDIRECT_URI.value to "https://mock-verifier.com",
     RESPONSE_URI.value to "https://mock-verifier.net/responseUri",
     REQUEST_URI.value to requestUrl,
@@ -243,19 +280,16 @@ val authorisationRequestListToClientIdSchemeMap = mapOf(
     ClientIdScheme.PRE_REGISTERED to authRequestWithPreRegisteredByValue
 )
 
-val clientIdAndSchemeOfDid = mapOf(
+val clientIdOfDid = mapOf(
     CLIENT_ID.value to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
-    CLIENT_ID_SCHEME.value to ClientIdScheme.DID.value
 )
 
-val clientIdAndSchemeOfPreRegistered = mapOf(
-    CLIENT_ID.value to "https://verifier.env1.net",
-    CLIENT_ID_SCHEME.value to ClientIdScheme.PRE_REGISTERED.value
+val clientIdOfPreRegistered = mapOf(
+    CLIENT_ID.value to "mock-client",
 )
 
-val clientIdAndSchemeOfReDirectUri = mapOf(
-    CLIENT_ID.value to "https://mock-verifier.net/responseUri",
-    CLIENT_ID_SCHEME.value to REDIRECT_URI.value,
+val clientIdOfReDirectUri = mapOf(
+    CLIENT_ID.value to "${REDIRECT_URI.value}:https://mock-verifier.net/responseUri",
 )
 
 val clientMetadataPresentationDefinitionMap = mapOf(
@@ -272,10 +306,65 @@ val authorizationRequestForResponseModeJWT = AuthorizationRequest(
         presentationDefinitionString,
         PresentationDefinitionSerializer
     ),
+    responseUri = "https://mock-verifier.com/response-uri",
+    redirectUri = null,
     nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
     state = "fsnC8ixCs6mWyV+00k23Qg==",
-    responseUri = "https://mock-verifier.com/response-uri",
-    clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer),
-    clientIdScheme = "did",
-    redirectUri = null
+    clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
+)
+
+val authorizationRequest = AuthorizationRequest(
+    clientId = "https://mock-verifier.com",
+    responseType = "vp_token",
+    responseMode = "direct_post",
+    presentationDefinition = deserializeAndValidate(
+        presentationDefinitionMap,
+        PresentationDefinitionSerializer
+    ),
+    responseUri = "https://mock-verifier.com",
+    redirectUri = null,
+    nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    state = "fsnC8ixCs6mWyV+00k23Qg==",
+    clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer)
+)
+
+val vpToken = VPTokenType.VPTokenElement(
+    LdpVPToken(
+        context = listOf("context"),
+        type = listOf("type"),
+        verifiableCredential = listOf("VC1"),
+        id = "id",
+        holder = "holder",
+        proof = Proof(
+            type = "type",
+            created = "time",
+            challenge = "challenge",
+            domain = "domain",
+            jws = "eryy....ewr",
+            proofPurpose = "authentication",
+            verificationMethod = "did:example:holder#key-1"
+        )
+    )
+)
+
+val presentationSubmission = PresentationSubmission(
+    id = "ps_id",
+    definitionId = "client_id",
+    descriptorMap = listOf(
+        DescriptorMap(
+            id = "input_descriptor_1",
+            format = "ldp_vp",
+            path = "$",
+            pathNested = PathNested(
+                id = "input_descriptor_1",
+                format = "ldp_vp",
+                path = "$.verifiableCredential[0]"
+            )
+        )
+    )
+)
+val authorizationResponse = AuthorizationResponse(
+    presentationSubmission = presentationSubmission,
+    vpToken = vpToken,
+    state = "state"
 )

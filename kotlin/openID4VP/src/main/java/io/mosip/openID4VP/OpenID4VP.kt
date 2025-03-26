@@ -1,16 +1,21 @@
 package io.mosip.openID4VP
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
+import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
+import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.dto.VPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.networkManager.HTTP_METHOD
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.HttpMethod
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
-private val logTag = Logger.getLogTag(AuthorizationResponse::class.simpleName!!)
+private val logTag = Logger.getLogTag(OpenID4VP::class.simpleName!!)
+
 class OpenID4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
+    private var authorizationResponseHandler: AuthorizationResponseHandler =
+        AuthorizationResponseHandler()
     private var responseUri: String? = null
 
     private fun setResponseUri(responseUri: String) {
@@ -21,12 +26,15 @@ class OpenID4VP(private val traceabilityId: String) {
     fun authenticateVerifier(
         urlEncodedAuthorizationRequest: String,
         trustedVerifiers: List<Verifier>,
-        shouldValidateClient: Boolean = false
+        shouldValidateClient: Boolean = false,
     ): AuthorizationRequest {
         try {
             Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndCreateAuthorizationRequest(
-                urlEncodedAuthorizationRequest, trustedVerifiers, ::setResponseUri,shouldValidateClient
+                urlEncodedAuthorizationRequest,
+                trustedVerifiers,
+                ::setResponseUri,
+                shouldValidateClient
             )
             return this.authorizationRequest
         } catch (exception: Exception) {
@@ -35,10 +43,10 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, List<String>>): String {
+    fun constructUnsignedVPToken(verifiableCredentials: Map<String, Map<FormatType, List<Any>>>): Map<FormatType, UnsignedVPToken> {
         try {
-            return AuthorizationResponse.constructVPTokenForSigning(
-                verifiableCredentials
+            return authorizationResponseHandler.constructUnsignedVPToken(
+                credentialsMap = verifiableCredentials
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
@@ -46,12 +54,12 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
+    fun shareVerifiablePresentation(vpResponsesMetadata: Map<FormatType, VPResponseMetadata>): String {
         try {
-            return AuthorizationResponse.shareVP(
-                vpResponseMetadata,
-                authorizationRequest,
-                responseUri!!
+            return this.authorizationResponseHandler.shareVP(
+                authorizationRequest = this.authorizationRequest,
+                vpResponsesMetadata = vpResponsesMetadata,
+                responseUri = this.responseUri!!
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
@@ -63,7 +71,7 @@ class OpenID4VP(private val traceabilityId: String) {
         responseUri?.let {
             try {
                 sendHTTPRequest(
-                    url = it, method = HTTP_METHOD.POST,mapOf("error" to exception.message!!)
+                    url = it, method = HttpMethod.POST, mapOf("error" to exception.message!!)
                 )
             } catch (exception: Exception) {
                 Logger.error(

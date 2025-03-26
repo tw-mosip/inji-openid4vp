@@ -111,5 +111,6 @@ class ClientMetadata(
 ) : Validatable {
 
 	override fun validate() {
+		return
 	}
 }
