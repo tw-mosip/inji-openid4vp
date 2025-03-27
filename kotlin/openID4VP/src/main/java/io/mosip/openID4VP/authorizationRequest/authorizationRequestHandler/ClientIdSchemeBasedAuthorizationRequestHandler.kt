@@ -12,9 +12,11 @@ import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.extractClientIdScheme
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.determineHttpMethod
+import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
+import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -56,16 +58,13 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                     isClientIdSchemeSupported(walletMetadata)
                     val processedWalletMetadata = process(walletMetadata)
                     body = mapOf(
-                        "wallet_metadata" to URLEncoder.encode(
-                            jacksonObjectMapper()
-                                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                                .writeValueAsString(processedWalletMetadata),
-                            StandardCharsets.UTF_8.toString()
-                        )
+                        "wallet_metadata" to
+                            encodeToJsonString<WalletMetadata>(processedWalletMetadata, "wallet_metadata", className),
+
                     )
                     headers = mapOf(
-                        "content-type" to "application/x-www-form-urlencoded",
-                        "accept" to "application/oauth-authz-req+jwt"
+                        "content-type" to ContentType.APPLICATION_FORM_URL_ENCODED.value,
+                        "accept" to ContentType.APPLICATION_JWT.value
                     )
                     shouldValidateWithWalletMetadata = true
                 }

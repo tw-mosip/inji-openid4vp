@@ -4,10 +4,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
-import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.convertJsonToMap
-import io.mosip.openID4VP.common.extractDataJsonFromJws
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isJWS
 import io.mosip.openID4VP.jwt.jws.JWSHandler
@@ -33,16 +30,15 @@ class DidSchemeAuthorizationRequestHandler(
             val responseBody = requestUriResponse["body"].toString()
 
             if(isValidContentType(headers) &&  isJWS(responseBody)){
-                validateAuthorizationRequestSigningAlgorithm(responseBody)
+                val jwsHandler = JWSHandler()
+
+                val header = jwsHandler.extractDataJsonFromJws(responseBody, HEADER)
+                validateAuthorizationRequestSigningAlgorithm(header)
+
                 val didUrl = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
-                JWSHandler(
-                    responseBody,
-                    DidPublicKeyResolver(didUrl)
-                ).verify()
-                val authorizationRequestObject = extractDataJsonFromJws(
-                    responseBody,
-                    PAYLOAD
-                )
+                jwsHandler.verify(responseBody, DidPublicKeyResolver(didUrl))
+
+                val authorizationRequestObject = jwsHandler.extractDataJsonFromJws(responseBody, PAYLOAD)
 
                 validateAuthorizationRequestObjectAndParameters(
                     authorizationRequestParameters,
@@ -71,13 +67,9 @@ class DidSchemeAuthorizationRequestHandler(
     private fun isValidContentType(headers: Headers): Boolean =
         headers["content-type"]?.contains(APPLICATION_JWT.value, ignoreCase = true) == true
 
-    private fun validateAuthorizationRequestSigningAlgorithm(jws: String) {
+    private fun validateAuthorizationRequestSigningAlgorithm(headers: MutableMap<String, Any>) {
         if (shouldValidateWithWalletMetadata) {
-            val parts = jws.split(".")
-            val header = parts[HEADER.number]
-            val decodedData = Decoder.decodeBase64Data(header)
-            val headerJson = convertJsonToMap(String(decodedData, Charsets.UTF_8))
-            val alg = headerJson["alg"]
+            val alg = headers["alg"]
             walletMetadata?.let {
                 if (!it.requestObjectSigningAlgValuesSupported!!.contains(alg))
                     throw Logger.handleException(

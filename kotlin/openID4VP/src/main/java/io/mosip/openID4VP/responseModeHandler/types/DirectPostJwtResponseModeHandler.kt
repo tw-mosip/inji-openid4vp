@@ -27,6 +27,13 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
                 className = className
             )
         }
+        validateMandatoryField(clientMetadata)
+
+        if (shouldValidateWithWalletMetadata)
+            validateDataWithWalletMetadata(clientMetadata, walletMetadata)
+    }
+
+    private fun validateMandatoryField(clientMetadata: ClientMetadata) {
         val alg = clientMetadata.authorizationEncryptedResponseAlg ?: throwMissingInputException(
             "authorization_encrypted_response_alg"
         )
@@ -38,23 +45,27 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
         if (jwks.keys.none { it.alg == alg }) {
             throwInvalidDataException("No jwk matching the specified algorithm found")
         }
+    }
 
-        if (shouldValidateWithWalletMetadata) {
-            if (walletMetadata == null) {
-                throwInvalidDataException("wallet_metadata must be present")
+    private fun validateDataWithWalletMetadata(
+        clientMetadata: ClientMetadata,
+        walletMetadata: WalletMetadata?,
+
+        ) {
+        if (walletMetadata == null)
+            throwInvalidDataException("wallet_metadata must be present")
+
+        walletMetadata.authorizationEncryptionEncValuesSupported?.let { encSupported ->
+            if (!encSupported.contains(clientMetadata.authorizationEncryptedResponseEnc)) {
+                throwInvalidDataException("authorization_encrypted_response_enc is not supported")
             }
-            walletMetadata.authorizationEncryptionEncValuesSupported?.let { encSupported ->
-                if (!encSupported.contains(enc)) {
-                    throwInvalidDataException("authorization_encrypted_response_enc is not supported")
-                }
-            }?: throwInvalidDataException("authorization_encryption_enc_values_supported must be present in wallet_metadata")
+        } ?: throwInvalidDataException("authorization_encryption_enc_values_supported must be present in wallet_metadata")
 
-            walletMetadata.authorizationEncryptionAlgValuesSupported?.let { algSupported ->
-                if (!algSupported.contains(alg)) {
-                    throwInvalidDataException("authorization_encrypted_response_alg is not supported")
-                }
-            } ?: throwInvalidDataException("authorization_encryption_alg_values_supported must be present in wallet_metadata")
-        }
+        walletMetadata.authorizationEncryptionAlgValuesSupported?.let { algSupported ->
+            if (!algSupported.contains(clientMetadata.authorizationEncryptedResponseAlg)) {
+                throwInvalidDataException("authorization_encrypted_response_alg is not supported")
+            }
+        } ?: throwInvalidDataException("authorization_encryption_alg_values_supported must be present in wallet_metadata")
     }
 
     private fun throwMissingInputException(fieldName: String): Nothing {

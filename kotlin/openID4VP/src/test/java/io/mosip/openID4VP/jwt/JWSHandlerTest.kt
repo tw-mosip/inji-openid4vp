@@ -50,9 +50,7 @@ class JWSHandlerTest {
         val jwt =JWSUtil.createJWS(jwtPayload, true, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwsHandler = JWSHandler(jwt, publicKeyResolver)
-
-        assertDoesNotThrow { jwsHandler.verify() }
+        assertDoesNotThrow { JWSHandler().verify(jwt, publicKeyResolver) }
     }
 
     @Test
@@ -61,9 +59,8 @@ class JWSHandlerTest {
         val jwt =JWSUtil.createJWS(jwtPayload, true, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwsHandler = JWSHandler(jwt, publicKeyResolver)
 
-        val exception = assertThrows(Exception::class.java) { jwsHandler.verify() }
+        val exception = assertThrows(Exception::class.java) { JWSHandler().verify(jwt, publicKeyResolver) }
 
         assertEquals(
             "An unexpected exception occurred: exception type: VerificationFailure",
@@ -77,9 +74,7 @@ class JWSHandlerTest {
         val jwt =JWSUtil.createJWS(jwtPayload, false, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val jwsHandler = JWSHandler(jwt, publicKeyResolver)
-
-        val exception = assertThrows(Exception::class.java) { jwsHandler.verify() }
+        val exception = assertThrows(Exception::class.java) { JWSHandler().verify(jwt, publicKeyResolver) }
 
         assertEquals(
             "JWS signature verification failed",

@@ -14,11 +14,13 @@ private val className = ResponseModeBasedHandler::class.simpleName!!
 
 abstract class ResponseModeBasedHandler {
 
-    abstract fun validate(
+    open fun validate(
         clientMetadata: ClientMetadata?,
         walletMetadata: WalletMetadata?,
         shouldValidateWithWalletMetadata: Boolean
-    )
+    ){
+        return
+    }
 
     abstract fun sendAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,

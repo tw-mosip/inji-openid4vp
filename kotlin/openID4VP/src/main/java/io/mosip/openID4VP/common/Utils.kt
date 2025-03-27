@@ -32,13 +32,6 @@ fun determineHttpMethod(method: String): HttpMethod {
     }
 }
 
-fun extractDataJsonFromJws(jws: String, part: JwsPart): MutableMap<String, Any> {
-    val components = jws.split(".")
-    val payload = components[part.number]
-    val decodedString = decodeBase64Data(payload)
-    return convertJsonToMap(String(decodedString,Charsets.UTF_8))
-}
-
 fun getStringValue(params: Map<String, Any>, key: String): String? {
     return params[key]?.toString()
 }
