@@ -10,7 +10,7 @@ inji-openid4vp is an implementation of OpenID for Verifiable Presentations writt
 - [Installation](#installation)
 - [APIs](#apis)
   - [authenticateVerifier](#authenticateverifier)
-  - [constructVerifiablePresentation](#constructverifiablepresentation)
+  - [constructUnsignedVPToken](#constructUnsignedVPToken)
   - [shareVerifiablePresentation](#shareverifiablepresentation)
   - [sendErrorToVerifier](#senderrortoverifier)
 
@@ -138,12 +138,12 @@ val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it. 
 
-### constructVerifiablePresentation
+### constructUnsignedVPToken
 - Receives a map of input_descriptor id & list of verifiable credentials for each input_descriptor that are selected by the end-user.
 - Creates a vp_token without proof using received input_descriptor IDs and verifiable credentials, then returns its string representation to consumer app(mobile wallet) for signing it.
 
 ```
-    val vpTokenWithoutProof : Map<FormatType, UnsignedVPToken> = openID4VP.constructVerifiablePresentation(Map<String, Map<FormatType, List<Any>>>)    
+    val unsignedVPTokens : Map<FormatType, UnsignedVPToken> = openID4VP.constructUnsignedVPToken(Map<String, Map<FormatType, List<Any>>>)    
 ```
 
 ###### Parameters
