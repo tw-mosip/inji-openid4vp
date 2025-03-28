@@ -11,8 +11,8 @@ import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 private val className = ClientMetadata::class.simpleName!!
 fun parseAndValidateClientMetadata(
     authorizationRequestParameters: MutableMap<String, Any>,
-    walletMetadata: WalletMetadata?,
-    shouldValidateWithWalletMetadata: Boolean
+    shouldValidateWithWalletMetadata: Boolean,
+    walletMetadata: WalletMetadata?
 ) {
     val clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value]?.let {
         when (it) {

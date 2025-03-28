@@ -53,7 +53,7 @@ class ClientMetadataTest {
             RESPONSE_MODE.value to DIRECT_POST_JWT.value
         )
         assertDoesNotThrow {
-            parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+            parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
         }
     }
 
@@ -71,7 +71,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(InvalidInput::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
 
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -92,7 +92,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(InvalidInput::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
 
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -114,7 +114,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(InvalidInput::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
 
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -135,7 +135,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(InvalidInput::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
 
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -154,7 +154,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(MissingInput::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
 
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
@@ -173,7 +173,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(MissingInput::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
     }
@@ -191,7 +191,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(MissingInput::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
     }
@@ -209,7 +209,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(InvalidData::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
     }
@@ -226,7 +226,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(InvalidData::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
     }
@@ -241,7 +241,7 @@ class ClientMetadataTest {
 
         actualException =
             Assert.assertThrows(InvalidData::class.java) {
-                parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
             }
         Assert.assertEquals(expectedExceptionMessage, actualException.message)
     }
@@ -252,7 +252,7 @@ class ClientMetadataTest {
             RESPONSE_MODE.value to DIRECT_POST.value
         )
         assertDoesNotThrow {
-            parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, false)
+            parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
         }
     }
 
@@ -262,7 +262,7 @@ class ClientMetadataTest {
             CLIENT_METADATA.value to clientMetadataString,
             RESPONSE_MODE.value to DIRECT_POST_JWT.value
         )
-        parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, true)
+        parseAndValidateClientMetadata(authorizationRequestParam, true, walletMetadata)
     }
 
     @Test
@@ -278,7 +278,7 @@ class ClientMetadataTest {
             "authorization_encrypted_response_alg is not supported"
 
         val exception = assertThrows<InvalidData> {
-            parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, true)
+            parseAndValidateClientMetadata(authorizationRequestParam, true,walletMetadata)
         }
 
         assertEquals(expectedExceptionMessage, exception.message)
@@ -307,7 +307,7 @@ class ClientMetadataTest {
             "authorization_encryption_alg_values_supported must be present in wallet_metadata"
 
         val exception = assertThrows<InvalidData> {
-            parseAndValidateClientMetadata(authorizationRequestParam, invalidWalletMetadata, true)
+            parseAndValidateClientMetadata(authorizationRequestParam, true, invalidWalletMetadata)
         }
 
         assertEquals(expectedExceptionMessage, exception.message)
@@ -326,7 +326,7 @@ class ClientMetadataTest {
             "authorization_encrypted_response_enc is not supported"
 
         val exception = assertThrows<InvalidData> {
-            parseAndValidateClientMetadata(authorizationRequestParam, walletMetadata, true)
+            parseAndValidateClientMetadata(authorizationRequestParam, true, walletMetadata)
         }
 
         assertEquals(expectedExceptionMessage, exception.message)
@@ -355,7 +355,7 @@ class ClientMetadataTest {
             "authorization_encryption_enc_values_supported must be present in wallet_metadata"
 
         val exception = assertThrows<InvalidData> {
-            parseAndValidateClientMetadata(authorizationRequestParam, invalidWalletMetadata, true)
+            parseAndValidateClientMetadata(authorizationRequestParam,true, invalidWalletMetadata)
         }
 
         assertEquals(expectedExceptionMessage, exception.message)

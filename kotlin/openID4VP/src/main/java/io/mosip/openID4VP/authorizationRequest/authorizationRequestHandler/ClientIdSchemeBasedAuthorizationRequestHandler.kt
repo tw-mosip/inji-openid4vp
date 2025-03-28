@@ -97,7 +97,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
         state?.let {
             validate(STATE.value, state, className)
         }
-        parseAndValidateClientMetadata(authorizationRequestParameters, walletMetadata, shouldValidateWithWalletMetadata)
+        parseAndValidateClientMetadata(authorizationRequestParameters, shouldValidateWithWalletMetadata, walletMetadata)
         val presentationDefinitionUriSupported = !shouldValidateWithWalletMetadata ||
                 walletMetadata?.presentationDefinitionURISupported ?: true
         parseAndValidatePresentationDefinition(authorizationRequestParameters, presentationDefinitionUriSupported)
