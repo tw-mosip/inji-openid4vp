@@ -80,7 +80,10 @@ private val vpFormatsMap = mapOf(
 
 val walletMetadata = WalletMetadata(
     presentationDefinitionURISupported = true,
-    vpFormatsSupported = vpFormatsMap,
+    vpFormatsSupported = mapOf(
+        "ldp_vc" to VPFormatSupported(
+            algValuesSupported = listOf("Ed25519Signature2018", "Ed25519Signature2020")
+        ),
     clientIdSchemesSupported = listOf(ClientIdScheme.REDIRECT_URI.value, DID.value, PRE_REGISTERED.value),
     requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
     authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
