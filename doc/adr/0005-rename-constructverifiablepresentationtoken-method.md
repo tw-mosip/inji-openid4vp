@@ -8,12 +8,11 @@ Accepted
 
 ## Context
 
-The function constructVerifiablePresentationToken is responsible for handling a pre-requisite step (signing) before the actual creation of a VPToken. However, the current name implies that the function constructs a complete VPToken, which is misleading.
+The function `constructVerifiablePresentationToken` is responsible for handling a pre-requisite step (signing) before the actual creation of a VPToken. However, the current name implies that the function constructs a complete VPToken, which is misleading.
 
 ## Decision
 
-The function constructVerifiablePresentationToken is responsible for handling a pre-requisite step (signing) before the actual creation of a VPToken. However, the current name implies that the function constructs a complete VPToken, which is misleading.
-
+To better align with the actual functionality, the function will be renamed from `constructVerifiablePresentationToken` to `constructUnsignedVPToken`. This new name clearly indicates that the function prepares an unsigned VPToken rather than generating a fully formed and signed token.
 ## Consequences
 
 **Pros:**
