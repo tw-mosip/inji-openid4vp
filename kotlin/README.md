@@ -97,6 +97,8 @@ val openID4VP = OpenID4VP()
 - Takes an optional boolean to toggle the client validation.
 - Returns the validated Authorization request object.
 
+Note: Wallet can send the entire metadata, library will customize it as per authorization request client_id_scheme. Eg - in case pre-registered, library modifies wallet metadata to be sent without request object signing info properties as specified in the specification.
+
 ```
  val authenticationResponse = openID4VP.authenticateVerifier(encodedAuthenticationRequest: String, trustedVerifierJSON: List<Verifier>,
  walletMetadata: WalletMetadata, shouldValidateClient: Bool)
