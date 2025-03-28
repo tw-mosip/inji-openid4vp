@@ -2,7 +2,6 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
-import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
@@ -14,14 +13,13 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTP
 private val className = PresentationDefinition::class.simpleName!!
 fun parseAndValidatePresentationDefinition(
     authorizationRequestParameters: MutableMap<String, Any>,
-    walletMetadata: WalletMetadata?,
-    shouldValidateWithWalletMetadata: Boolean
+    isPresentationDefinitionUriSupported: Boolean
 ) {
     val hasPresentationDefinition =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
     val hasPresentationDefinitionUri =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION_URI.value)
-    val presentationDefinition : Any?
+    val presentationDefinition: Any?
 
     when {
         hasPresentationDefinition && hasPresentationDefinitionUri -> {
@@ -31,22 +29,21 @@ fun parseAndValidatePresentationDefinition(
                 className = className
             )
         }
+
         hasPresentationDefinition -> {
             presentationDefinition = authorizationRequestParameters[PRESENTATION_DEFINITION.value]
             validate(PRESENTATION_DEFINITION.value, presentationDefinition?.toString(), className)
         }
+
         hasPresentationDefinitionUri -> {
-            if(shouldValidateWithWalletMetadata){
-                walletMetadata?.let {
-                    if(!it.presentationDefinitionURISupported){
-                        throw Logger.handleException(
-                            exceptionType = "InvalidData",
-                            className = className,
-                            message = "presentation_definition_uri is not support"
-                        )
-                    }
-                }
+            if (!isPresentationDefinitionUriSupported) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidData",
+                    className = className,
+                    message = "presentation_definition_uri is not support"
+                )
             }
+
             val presentationDefinitionUri = getStringValue(
                 authorizationRequestParameters,
                 PRESENTATION_DEFINITION_URI.value
@@ -66,6 +63,7 @@ fun parseAndValidatePresentationDefinition(
                 )
             presentationDefinition = response["body"].toString()
         }
+
         else -> {
             throw Logger.handleException(
                 exceptionType = "InvalidData",
@@ -76,8 +74,16 @@ fun parseAndValidatePresentationDefinition(
     }
 
     val presentationDefinitionObj = when (presentationDefinition) {
-        is String -> deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-        is Map<*, *> -> deserializeAndValidate (presentationDefinition as Map<String, Any>, PresentationDefinitionSerializer)
+        is String -> deserializeAndValidate(
+            presentationDefinition,
+            PresentationDefinitionSerializer
+        )
+
+        is Map<*, *> -> deserializeAndValidate(
+            presentationDefinition as Map<String, Any>,
+            PresentationDefinitionSerializer
+        )
+
         else -> throw Logger.handleException(
             exceptionType = "InvalidData",
             message = "presentation_definition must be of type String or Map ",

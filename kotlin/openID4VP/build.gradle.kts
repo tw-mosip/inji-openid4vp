@@ -111,7 +111,7 @@ tasks {
 tasks.build {
     finalizedBy("jacocoTestReport")
 }
-
+tasks.register("prepareKotlinBuildScriptModel"){}
 sonarqube {
     properties {
         property( "sonar.java.binaries", "build/intermediates/javac/debug")

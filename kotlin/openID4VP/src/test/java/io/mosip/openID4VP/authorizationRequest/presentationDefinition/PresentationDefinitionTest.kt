@@ -127,23 +127,11 @@ class PresentationDefinitionTest {
             RESPONSE_MODE.value to DIRECT_POST_JWT.value
         )
 
-        val walletMetadata = WalletMetadata(
-            presentationDefinitionURISupported = false,
-            vpFormatsSupported = emptyMap(),
-            clientIdSchemesSupported = listOf(
-                ClientIdScheme.REDIRECT_URI.value,
-                PRE_REGISTERED.value
-            ),
-            requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
-        )
-
         val expectedExceptionMessage =
             "presentation_definition_uri is not support"
 
         val exception = assertThrows<InvalidData> {
-            parseAndValidatePresentationDefinition(authorizationRequestParam, walletMetadata, true)
+            parseAndValidatePresentationDefinition(authorizationRequestParam, false)
         }
 
         Assertions.assertEquals(expectedExceptionMessage, exception.message)

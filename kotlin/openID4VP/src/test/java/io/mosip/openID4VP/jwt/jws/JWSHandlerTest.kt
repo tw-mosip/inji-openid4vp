@@ -1,11 +1,10 @@
-package io.mosip.openID4VP.jwt
+package io.mosip.openID4VP.jwt.jws
 
 import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import io.mosip.openID4VP.testData.JWSUtil
 import io.mosip.openID4VP.testData.JWSUtil.Companion.jwtHeader
@@ -15,7 +14,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
+import java.util.Base64
 
 
 class JWSHandlerTest {
@@ -81,5 +83,32 @@ class JWSHandlerTest {
             exception.message
         )
     }
+
+    @Test
+    fun `should extract header successfully`() {
+        val mockJws = createMockJws()
+        val result = JWSHandler().extractDataJsonFromJws(mockJws, JWSHandler.JwsPart.HEADER)
+        assertNotNull(result)
+        assertTrue(result.isNotEmpty())
+    }
+
+    @Test
+    fun `should extract payload successfully`() {
+        val mockJws = createMockJws()
+        val result = JWSHandler().extractDataJsonFromJws(mockJws, JWSHandler.JwsPart.PAYLOAD)
+        assertNotNull(result)
+        assertTrue(result.isNotEmpty())
+    }
+}
+
+private fun createMockJws(): String {
+    val header = Base64.getUrlEncoder().encodeToString(
+        """{"alg":"EdDSA","typ":"JWT"}""".toByteArray()
+    )
+    val payload = Base64.getUrlEncoder().encodeToString(
+        """{"sub":"1234567890","name":"John Doe"}""".toByteArray()
+    )
+    val signature = Base64.getUrlEncoder().encodeToString("mockSignature".toByteArray())
+    return "$header.$payload.$signature"
 }
 

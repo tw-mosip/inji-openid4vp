@@ -1,7 +1,5 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
@@ -20,8 +18,6 @@ import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 private val className = ClientIdSchemeBasedAuthorizationRequestHandler::class.simpleName!!
 
@@ -102,7 +98,9 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
             validate(STATE.value, state, className)
         }
         parseAndValidateClientMetadata(authorizationRequestParameters, walletMetadata, shouldValidateWithWalletMetadata)
-        parseAndValidatePresentationDefinition(authorizationRequestParameters, walletMetadata, shouldValidateWithWalletMetadata)
+        val presentationDefinitionUriSupported = !shouldValidateWithWalletMetadata ||
+                walletMetadata?.presentationDefinitionURISupported ?: true
+        parseAndValidatePresentationDefinition(authorizationRequestParameters, presentationDefinitionUriSupported)
     }
 
     private fun isClientIdSchemeSupported(walletMetadata: WalletMetadata) {
