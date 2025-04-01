@@ -14,7 +14,6 @@ import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
-import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -58,10 +57,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
                             encodeToJsonString<WalletMetadata>(processedWalletMetadata, "wallet_metadata", className),
 
                     )
-                    headers = mapOf(
-                        "content-type" to ContentType.APPLICATION_FORM_URL_ENCODED.value,
-                        "accept" to ContentType.APPLICATION_JWT.value
-                    )
+                    headers = getHeadersForAuthorizationRequestUri()
                     shouldValidateWithWalletMetadata = true
                 }
             }
@@ -76,6 +72,8 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     )
 
     abstract fun process(walletMetadata: WalletMetadata): WalletMetadata
+
+    abstract  fun getHeadersForAuthorizationRequestUri(): Map<String, String>
 
     fun setResponseUrl() {
         val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value)

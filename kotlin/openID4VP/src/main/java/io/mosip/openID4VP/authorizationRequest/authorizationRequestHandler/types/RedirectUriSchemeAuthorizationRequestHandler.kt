@@ -11,6 +11,8 @@ import io.mosip.openID4VP.constants.ResponseMode.*
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.validate
+import io.mosip.openID4VP.constants.ContentType
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_FORM_URL_ENCODED
 import okhttp3.Headers
 
 private val className = RedirectUriSchemeAuthorizationRequestHandler::class.simpleName!!
@@ -51,6 +53,13 @@ class RedirectUriSchemeAuthorizationRequestHandler(
         val updatedWalletMetadata = walletMetadata
         updatedWalletMetadata.requestObjectSigningAlgValuesSupported = null
         return updatedWalletMetadata
+    }
+
+    override fun getHeadersForAuthorizationRequestUri(): Map<String, String> {
+        return mapOf(
+            "content-type" to APPLICATION_FORM_URL_ENCODED.value,
+            "accept" to APPLICATION_JSON.value
+        )
     }
 
     override fun validateAndParseRequestFields(){

@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets
 
 private val className = JWSHandler::class.simpleName!!
 
-class JWSHandler {
+class JWSHandler(private val jws: String, private val publicKeyResolver: PublicKeyResolver) {
 
     enum class JwsPart(val number: Int) {
         HEADER(0),
@@ -20,14 +20,14 @@ class JWSHandler {
         SIGNATURE(2)
     }
 
-    fun verify(jws: String, publicKeyResolver: PublicKeyResolver) {
+    fun verify() {
         val verificationResult : Boolean
         try {
             val parts = jws.split(".")
             val header = parts[HEADER.number]
             val payload = parts[PAYLOAD.number]
             val signature = decodeBase64Data(parts[SIGNATURE.number])
-            val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJws(jws, HEADER))
+            val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJws(HEADER))
             val publicKeyBytes = Base64.decode(publicKey)
             val publicKeyParams = Ed25519PublicKeyParameters(publicKeyBytes, 0)
             val signer = Ed25519Signer()
@@ -51,7 +51,7 @@ class JWSHandler {
             )
     }
 
-    fun extractDataJsonFromJws(jws: String, part: JwsPart): MutableMap<String, Any> {
+    fun extractDataJsonFromJws(part: JwsPart): MutableMap<String, Any> {
         val components = jws.split(".")
         val payload = components[part.number]
         val decodedString = decodeBase64Data(payload)

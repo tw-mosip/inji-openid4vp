@@ -7,6 +7,7 @@ import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjec
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isJWS
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_FORM_URL_ENCODED
 import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.HEADER
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.PAYLOAD
@@ -30,15 +31,15 @@ class DidSchemeAuthorizationRequestHandler(
             val responseBody = requestUriResponse["body"].toString()
 
             if(isValidContentType(headers) &&  isJWS(responseBody)){
-                val jwsHandler = JWSHandler()
+                val didUrl = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+                val jwsHandler = JWSHandler(responseBody, DidPublicKeyResolver(didUrl))
 
-                val header = jwsHandler.extractDataJsonFromJws(responseBody, HEADER)
+                val header = jwsHandler.extractDataJsonFromJws(HEADER)
                 validateAuthorizationRequestSigningAlgorithm(header)
 
-                val didUrl = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
-                jwsHandler.verify(responseBody, DidPublicKeyResolver(didUrl))
+                jwsHandler.verify()
 
-                val authorizationRequestObject = jwsHandler.extractDataJsonFromJws(responseBody, PAYLOAD)
+                val authorizationRequestObject = jwsHandler.extractDataJsonFromJws(PAYLOAD)
 
                 validateAuthorizationRequestObjectAndParameters(
                     authorizationRequestParameters,
@@ -62,6 +63,13 @@ class DidSchemeAuthorizationRequestHandler(
 
     override fun process(walletMetadata: WalletMetadata): WalletMetadata {
         return walletMetadata
+    }
+
+    override fun getHeadersForAuthorizationRequestUri(): Map<String, String> {
+        return mapOf(
+            "content-type" to APPLICATION_FORM_URL_ENCODED.value,
+            "accept" to APPLICATION_JWT.value
+        )
     }
 
     private fun isValidContentType(headers: Headers): Boolean =
