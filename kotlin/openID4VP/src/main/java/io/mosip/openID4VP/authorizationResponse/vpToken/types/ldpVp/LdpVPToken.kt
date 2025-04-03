@@ -13,6 +13,6 @@ data class LdpVPToken(
     val proof: Proof,
 ) : VPToken {
     companion object {
-        const val INTERNAL_PATH: String = "VerifiableCredential"
+        const val INTERNAL_PATH: String = "verifiableCredential"
     }
 }
