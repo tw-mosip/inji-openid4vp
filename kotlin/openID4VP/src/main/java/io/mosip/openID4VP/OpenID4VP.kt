@@ -3,6 +3,7 @@ package io.mosip.openID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.constants.FormatType
@@ -26,15 +27,13 @@ class OpenID4VP(private val traceabilityId: String) {
     fun authenticateVerifier(
         urlEncodedAuthorizationRequest: String,
         trustedVerifiers: List<Verifier>,
-        shouldValidateClient: Boolean = false,
+        walletMetadata: WalletMetadata? = null,
+        shouldValidateClient: Boolean = false
     ): AuthorizationRequest {
         try {
             Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndCreateAuthorizationRequest(
-                urlEncodedAuthorizationRequest,
-                trustedVerifiers,
-                ::setResponseUri,
-                shouldValidateClient
+                urlEncodedAuthorizationRequest, trustedVerifiers, walletMetadata, ::setResponseUri,shouldValidateClient
             )
             return this.authorizationRequest
         } catch (exception: Exception) {

@@ -1,7 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.clientMetadata
 
 import Generated
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.FieldsSerializer
 import io.mosip.openID4VP.common.FieldDeserializer
 import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
@@ -86,15 +85,15 @@ object JwkSerializer : KSerializer<Jwk> {
 
     @Generated
     override fun serialize(encoder: Encoder, value: Jwk) {
-        val builtInEncoder = encoder.beginStructure(FieldsSerializer.descriptor)
-        builtInEncoder.encodeStringElement(FieldsSerializer.descriptor, 0, value.kty)
-        builtInEncoder.encodeStringElement(FieldsSerializer.descriptor, 1, value.use)
-        builtInEncoder.encodeStringElement(FieldsSerializer.descriptor, 2, value.crv)
-        builtInEncoder.encodeStringElement(FieldsSerializer.descriptor, 3, value.x)
-        builtInEncoder.encodeStringElement(FieldsSerializer.descriptor, 4, value.alg)
-        builtInEncoder.encodeStringElement(FieldsSerializer.descriptor, 5, value.kid)
-        value.y?.let { builtInEncoder.encodeStringElement(FieldsSerializer.descriptor, 6, it) }
-        builtInEncoder.endStructure(FieldsSerializer.descriptor)
+        val builtInEncoder = encoder.beginStructure(descriptor)
+        builtInEncoder.encodeStringElement(descriptor, 0, value.kty)
+        builtInEncoder.encodeStringElement(descriptor, 1, value.use)
+        builtInEncoder.encodeStringElement(descriptor, 2, value.crv)
+        builtInEncoder.encodeStringElement(descriptor, 3, value.x)
+        builtInEncoder.encodeStringElement(descriptor, 4, value.alg)
+        builtInEncoder.encodeStringElement(descriptor, 5, value.kid)
+        value.y?.let { builtInEncoder.encodeStringElement(descriptor, 6, it) }
+        builtInEncoder.endStructure(descriptor)
     }
 }
 

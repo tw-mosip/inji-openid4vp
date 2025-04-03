@@ -22,6 +22,7 @@ data class AuthorizationRequest(
         fun validateAndCreateAuthorizationRequest(
             urlEncodedAuthorizationRequest: String,
             trustedVerifiers: List<Verifier>,
+            walletMetadata: WalletMetadata?,
             setResponseUri: (String) -> Unit,
             shouldValidateClient: Boolean
         ): AuthorizationRequest {
@@ -34,6 +35,7 @@ data class AuthorizationRequest(
             return getAuthorizationRequest(
                 queryParameter,
                 trustedVerifiers,
+                walletMetadata,
                 shouldValidateClient,
                 setResponseUri
             )
@@ -42,12 +44,14 @@ data class AuthorizationRequest(
         private fun getAuthorizationRequest(
             params: MutableMap<String, Any>,
             trustedVerifiers: List<Verifier>,
+            walletMetadata: WalletMetadata?,
             shouldValidateClient: Boolean,
             setResponseUri: (String) -> Unit
         ): AuthorizationRequest {
             val authorizationRequestHandler = getAuthorizationRequestHandler(
                 params,
                 trustedVerifiers,
+                walletMetadata,
                 setResponseUri,
                 shouldValidateClient
             )

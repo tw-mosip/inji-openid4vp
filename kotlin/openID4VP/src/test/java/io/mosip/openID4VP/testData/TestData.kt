@@ -18,6 +18,10 @@ import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
+import io.mosip.openID4VP.constants.ClientIdScheme.DID
+import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 
@@ -59,17 +63,28 @@ val clientMetadataMap = mapOf(
     "authorization_encrypted_response_alg" to "ECDH-ES",
     "authorization_encrypted_response_enc" to "A256GCM",
     "vp_formats" to mapOf(
-        "mso_mdoc" to mapOf(
-            "alg" to listOf("ES256", "EdDSA")
-        ),
-        "ldp_vp" to mapOf(
+        "ldp_vc" to mapOf(
             "proof_type" to listOf(
                 "Ed25519Signature2018",
-                "Ed25519Signature2020",
-                "RsaSignature2018"
+                "Ed25519Signature2020"
             )
         )
     )
+)
+
+private val vpFormatsMap = mapOf(
+    "ldp_vc" to VPFormatSupported(
+        algValuesSupported = listOf("Ed25519Signature2018", "Ed25519Signature2020")
+    )
+)
+
+val walletMetadata = WalletMetadata(
+    presentationDefinitionURISupported = true,
+    vpFormatsSupported = vpFormatsMap,
+    clientIdSchemesSupported = listOf(ClientIdScheme.REDIRECT_URI.value, DID.value, PRE_REGISTERED.value),
+    requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
+    authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
+    authorizationEncryptionEncValuesSupported = listOf("A256GCM")
 )
 
 val clientMetadataString = """{
@@ -90,19 +105,12 @@ val clientMetadataString = """{
     ]
   },
   "vp_formats": {
-    "mso_mdoc": {
-      "alg": [
-        "ES256",
-        "EdDSA"
-      ]
-    },
-    "ldp_vp": {
-      "proof_type": [
-        "Ed25519Signature2018",
-        "Ed25519Signature2020",
-        "RsaSignature2018"
-      ]
-    }
+      "ldp_vc": {
+          "proof_type": [
+          "Ed25519Signature2018",
+          "Ed25519Signature2020"
+          ]
+      }
   }
 }
 """.trimIndent()

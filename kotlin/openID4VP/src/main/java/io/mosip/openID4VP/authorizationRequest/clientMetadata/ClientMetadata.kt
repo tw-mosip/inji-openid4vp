@@ -10,6 +10,9 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.Validatable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -22,7 +25,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ClientMetadata") {
 		element<String>("client_name", isOptional = true)
 		element<String>("logo_uri", isOptional = true)
-		element<Map<String,String>>("vp_formats", isOptional = false)
+		element<Map<String, Map<String, List<String>>>>("vp_formats", isOptional = false)
 		element<String>("authorization_encrypted_response_alg", isOptional = true)
 		element<String>("authorization_encrypted_response_enc", isOptional = true)
 		element<Jwks>("jwks", isOptional = true)
@@ -50,8 +53,8 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 			deserializer.deserializeField(key = "client_name", fieldType = "String")
 		val logoUri: String? =
 			deserializer.deserializeField(key = "logo_uri", fieldType = "String")
-		val vpFormats: Map<String, String> =
-			deserializer.deserializeField<Map<String, String>>(
+		val vpFormats: Map<String, Map<String, List<String>>> =
+			deserializer.deserializeField<Map<String, Map<String, List<String>>>>(
 				key = "vp_formats",
 				fieldType = "Map"
 			) ?: throw Logger.handleException(
@@ -95,6 +98,23 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 			)
 		}
 		value.logoUri?.let { builtInEncoder.encodeStringElement(descriptor, 1, it) }
+		builtInEncoder.encodeSerializableElement(
+			descriptor,
+			2,
+			MapSerializer(
+				String.serializer(),
+				MapSerializer(
+					String.serializer(),
+					ListSerializer(String.serializer())
+				)
+			),
+			value.vpFormats
+		)
+		value.authorizationEncryptedResponseAlg?.let { builtInEncoder.encodeStringElement(descriptor, 3, it) }
+		value.authorizationEncryptedResponseEnc?.let { builtInEncoder.encodeStringElement(descriptor, 4, it) }
+		value.jwks?.let { builtInEncoder.encodeSerializableElement(
+			descriptor, 5, Jwks.serializer(), value.jwks
+		) }
 		builtInEncoder.endStructure(descriptor)
 	}
 }
@@ -104,12 +124,11 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 class ClientMetadata(
 	@SerialName("client_name") val clientName: String?,
 	@SerialName("logo_uri") val logoUri: String?,
-	@SerialName("vp_formats") val vpFormats: Map<String, String>,
+	@SerialName("vp_formats") val vpFormats: Map<String, Map<String, List<String>>>,
 	@SerialName("authorization_encrypted_response_alg") val authorizationEncryptedResponseAlg: String?,
 	@SerialName("authorization_encrypted_response_enc") val authorizationEncryptedResponseEnc: String?,
 	@SerialName("jwks") val jwks: Jwks?,
 ) : Validatable {
-
 	override fun validate() {
 		return
 	}

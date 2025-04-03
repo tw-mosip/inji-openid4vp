@@ -4,13 +4,25 @@ import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST_JWT
+import io.mosip.openID4VP.exceptions.Exceptions
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.assertThrows
+import org.assertj.core.api.Assertions.assertThat
 
 class PresentationDefinitionTest {
 
@@ -19,7 +31,7 @@ class PresentationDefinitionTest {
 
 
     @Before
-    fun setUp(){
+    fun setUp() {
         mockkStatic(Log::class)
         every { Log.e(any(), any()) } answers {
             val tag = arg<String>(0)
@@ -35,7 +47,7 @@ class PresentationDefinitionTest {
     }
 
     @Test
-    fun `should throw missing input exception if id param is missing`(){
+    fun `should throw missing input exception if id param is missing`() {
         presentationDefinition =
             """{"input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         expectedExceptionMessage = "Missing Input: presentation_definition->id param is required"
@@ -48,40 +60,57 @@ class PresentationDefinitionTest {
                 )
             }
 
-        assertEquals(expectedExceptionMessage,actualException.message)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
-    fun `should throw missing input exception if input_descriptors param is missing`(){
+    fun `should throw missing input exception if input_descriptors param is missing`() {
         presentationDefinition = """{"id":"pd_123"}"""
-        expectedExceptionMessage = "Missing Input: presentation_definition->input_descriptors param is required"
+        expectedExceptionMessage =
+            "Missing Input: presentation_definition->input_descriptors param is required"
 
         val actualException =
             assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
-        assertEquals(expectedExceptionMessage,actualException.message)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
-    fun `should throw invalid input exception if id param value is empty`(){
+    fun `should throw invalid input exception if id param value is empty`() {
         presentationDefinition =
             """{"id":"","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"]}]}}]}"""
-        expectedExceptionMessage = "Invalid Input: presentation_definition->id value cannot be an empty string, null, or an integer"
+        expectedExceptionMessage =
+            "Invalid Input: presentation_definition->id value cannot be an empty string, null, or an integer"
 
         val actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
-        assertEquals(expectedExceptionMessage,actualException.message)
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     @Test
-    fun `should throw invalid input exception if input_descriptor param value is empty`(){
+    fun `should throw invalid input exception if input_descriptor param value is empty`() {
         presentationDefinition = """{"id":"pd_123","input_descriptors":[]}"""
-        expectedExceptionMessage = "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
+        expectedExceptionMessage =
+            "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
+
+        val actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
+    fun `should throw invalid input exception if input_descriptor param value is present but it's value is null`() {
+        presentationDefinition = """{"id":"pd_123","input_descriptors":null}"""
+        expectedExceptionMessage =
+            "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
 
         val actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
@@ -92,15 +121,56 @@ class PresentationDefinitionTest {
     }
 
     @Test
-    fun `should throw invalid input exception if input_descriptor param value is present but it's value is null`(){
-        presentationDefinition = """{"id":"pd_123","input_descriptors":null}"""
-        expectedExceptionMessage = "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
+    fun `should throw error if presentation definition uri is not supported by wallet`() {
+        val authorizationRequestParam: MutableMap<String, Any> = mutableMapOf(
+            PRESENTATION_DEFINITION_URI.value to "https://mock-verifier.com/verifier/get-presentation-definition",
+            RESPONSE_MODE.value to DIRECT_POST_JWT.value
+        )
 
-        val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-            }
+        val expectedExceptionMessage =
+            "presentation_definition_uri is not support"
 
-        assertEquals(expectedExceptionMessage,actualException.message)
+        val exception = assertThrows<InvalidData> {
+            parseAndValidatePresentationDefinition(authorizationRequestParam, false)
+        }
+
+        Assertions.assertEquals(expectedExceptionMessage, exception.message)
+
+    }
+
+    @Test
+    fun `should serialize PresentationDefinition correctly with all fields`() {
+        val presentationDefinition = PresentationDefinition(
+            id = "test-id",
+            inputDescriptors = listOf(
+                InputDescriptor(
+                    id = "descriptor-id",
+                    name = "Test Descriptor",
+                    purpose = "Testing",
+                    constraints = Constraints(
+                        fields = listOf(
+                            Fields(
+                                id = "id",
+                                path = listOf("${'$'}.type"),
+                                filter = Filter(type = "type", pattern = "pattern")
+                            )
+                        )
+                    )
+                )
+            ),
+            name = "Test Definition",
+            purpose = "Unit Testing",
+            format = mapOf(
+                "mso_mdoc" to mapOf("alg" to listOf("EC")),
+                "ldp_vc" to mapOf("proof_type" to listOf("Ed25519Signature2018"))
+            )
+        )
+
+        val json = Json.encodeToString(PresentationDefinitionSerializer, presentationDefinition)
+        val decodedPresentationDefinition = Json.decodeFromString(PresentationDefinitionSerializer, json)
+
+        assertThat(decodedPresentationDefinition)
+            .usingRecursiveComparison()
+            .isEqualTo(presentationDefinition)
     }
 }

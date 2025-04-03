@@ -4,9 +4,11 @@ import Generated
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.FieldDeserializer
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.credentialFormatTypes.Format
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
@@ -21,7 +23,7 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		element<String>("id")
 		element<String>("name", isOptional = true)
 		element<String>("purpose", isOptional = true)
-		element<Format>("format", isOptional = true)
+		element<Map<String, Map<String,List<String>>>>("format", isOptional = true)
 		element<Constraints>("constraints")
 	}
 
@@ -49,11 +51,10 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 			deserializer.deserializeField(key = "name", fieldType = "String")
 		val purpose: String? =
 			deserializer.deserializeField(key = "purpose", fieldType = "String")
-		val format: Format? =
+		val format: Map<String, Map<String,List<String>>>? =
 			deserializer.deserializeField(
 				key = "format",
-				fieldType = "Format",
-				deserializer = Format.serializer()
+				fieldType = "Map"
 			)
 		val constraints: Constraints? =
 			deserializer.deserializeField(
@@ -78,9 +79,17 @@ object InputDescriptorSerializer : KSerializer<InputDescriptor> {
 		builtInEncoder.encodeStringElement(descriptor, 0, value.id)
 		value.name?.let { builtInEncoder.encodeStringElement(descriptor, 1, it) }
 		value.purpose?.let { builtInEncoder.encodeStringElement(descriptor, 2, it) }
-		builtInEncoder.encodeSerializableElement(
-			descriptor, 3, Constraints.serializer(), value.constraints
-		)
+		value.format?.let {
+			builtInEncoder.encodeSerializableElement(
+				descriptor, 3, MapSerializer(
+					String.serializer(),
+					MapSerializer(
+						String.serializer(),
+						ListSerializer(String.serializer())
+					)
+				), it
+			)
+		}
 		builtInEncoder.encodeSerializableElement(
 			descriptor, 4, Constraints.serializer(), value.constraints
 		)
@@ -93,7 +102,7 @@ class InputDescriptor(
 	val id: String,
 	val name: String? = null,
 	val purpose: String? = null,
-	val format: Format? = null,
+	val format: Map<String, Map<String,List<String>>>? = null,
 	val constraints: Constraints
 ) {
 	fun validate() {

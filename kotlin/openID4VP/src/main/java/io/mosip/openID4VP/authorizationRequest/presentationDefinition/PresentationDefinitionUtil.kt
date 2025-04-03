@@ -11,12 +11,15 @@ import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val className = PresentationDefinition::class.simpleName!!
-fun parseAndValidatePresentationDefinition(authorizationRequestParameters: MutableMap<String, Any>) {
+fun parseAndValidatePresentationDefinition(
+    authorizationRequestParameters: MutableMap<String, Any>,
+    isPresentationDefinitionUriSupported: Boolean
+) {
     val hasPresentationDefinition =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
     val hasPresentationDefinitionUri =
         authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION_URI.value)
-    val presentationDefinition : Any?
+    val presentationDefinition: Any?
 
     when {
         hasPresentationDefinition && hasPresentationDefinitionUri -> {
@@ -33,12 +36,19 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
         }
 
         hasPresentationDefinitionUri -> {
+            if (!isPresentationDefinitionUriSupported) {
+                throw Logger.handleException(
+                    exceptionType = "InvalidData",
+                    className = className,
+                    message = "presentation_definition_uri is not support"
+                )
+            }
+
             val presentationDefinitionUri = getStringValue(
                 authorizationRequestParameters,
                 PRESENTATION_DEFINITION_URI.value
             )
             validate(PRESENTATION_DEFINITION_URI.value, presentationDefinitionUri, className)
-
             if (!isValidUrl(presentationDefinitionUri!!)) {
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
@@ -53,6 +63,7 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
                 )
             presentationDefinition = response["body"].toString()
         }
+
         else -> {
             throw Logger.handleException(
                 exceptionType = "InvalidData",
@@ -63,8 +74,16 @@ fun parseAndValidatePresentationDefinition(authorizationRequestParameters: Mutab
     }
 
     val presentationDefinitionObj = when (presentationDefinition) {
-        is String -> deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-        is Map<*, *> -> deserializeAndValidate (presentationDefinition as Map<String, Any>, PresentationDefinitionSerializer)
+        is String -> deserializeAndValidate(
+            presentationDefinition,
+            PresentationDefinitionSerializer
+        )
+
+        is Map<*, *> -> deserializeAndValidate(
+            presentationDefinition as Map<String, Any>,
+            PresentationDefinitionSerializer
+        )
+
         else -> throw Logger.handleException(
             exceptionType = "InvalidData",
             message = "presentation_definition must be of type String or Map ",

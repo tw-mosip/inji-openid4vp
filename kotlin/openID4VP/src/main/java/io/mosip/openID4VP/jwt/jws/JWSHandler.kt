@@ -1,8 +1,8 @@
 package io.mosip.openID4VP.jwt.jws
 
-import io.mosip.openID4VP.common.Decoder
+import io.mosip.openID4VP.common.Decoder.decodeBase64Data
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.extractDataJsonFromJws
+import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.*
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
@@ -26,8 +26,8 @@ class JWSHandler(private val jws: String, private val publicKeyResolver: PublicK
             val parts = jws.split(".")
             val header = parts[HEADER.number]
             val payload = parts[PAYLOAD.number]
-            val signature = Decoder.decodeBase64Data(parts[SIGNATURE.number])
-            val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJws(jws, HEADER))
+            val signature = decodeBase64Data(parts[SIGNATURE.number])
+            val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJws(HEADER))
             val publicKeyBytes = Base64.decode(publicKey)
             val publicKeyParams = Ed25519PublicKeyParameters(publicKeyBytes, 0)
             val signer = Ed25519Signer()
@@ -51,5 +51,10 @@ class JWSHandler(private val jws: String, private val publicKeyResolver: PublicK
             )
     }
 
-
+    fun extractDataJsonFromJws(part: JwsPart): MutableMap<String, Any> {
+        val components = jws.split(".")
+        val payload = components[part.number]
+        val decodedString = decodeBase64Data(payload)
+        return convertJsonToMap(String(decodedString,Charsets.UTF_8))
+    }
 }

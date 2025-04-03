@@ -51,7 +51,7 @@ object JwksSerializer : KSerializer<Jwks> {
         val builtInEncoder = encoder.beginStructure(FieldsSerializer.descriptor)
         builtInEncoder.encodeSerializableElement(
             descriptor,
-            1,
+            0,
             ListSerializer(Jwk.serializer()),
             value.keys
         )

@@ -72,6 +72,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     testImplementation(libs.jupiter.junit)
+    testImplementation(libs.assertj)
 }
 
 tasks {
@@ -110,7 +111,7 @@ tasks {
 tasks.build {
     finalizedBy("jacocoTestReport")
 }
-
+tasks.register("prepareKotlinBuildScriptModel"){}
 sonarqube {
     properties {
         property( "sonar.java.binaries", "build/intermediates/javac/debug")

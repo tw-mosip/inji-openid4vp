@@ -1,11 +1,14 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjectAndParameters
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
+import io.mosip.openID4VP.constants.ContentType
+import io.mosip.openID4VP.constants.ContentType.APPLICATION_FORM_URL_ENCODED
 import io.mosip.openID4VP.dto.Verifier
 import io.mosip.openID4VP.constants.ContentType.APPLICATION_JSON
 import okhttp3.Headers
@@ -15,9 +18,10 @@ private val className = PreRegisteredSchemeAuthorizationRequestHandler::class.si
 class PreRegisteredSchemeAuthorizationRequestHandler(
     private val trustedVerifiers: List<Verifier>,
     authorizationRequestParameters: MutableMap<String, Any>,
+    walletMetadata: WalletMetadata?,
     private val shouldValidateClient: Boolean,
     setResponseUri: (String) -> Unit
-) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, setResponseUri) {
+) : ClientIdSchemeBasedAuthorizationRequestHandler(authorizationRequestParameters, walletMetadata, setResponseUri) {
     override fun validateClientId() {
         if (!shouldValidateClient) return
 
@@ -32,7 +36,9 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
         }
     }
 
-    override fun validateRequestUriResponse() {
+    override fun validateRequestUriResponse(
+        requestUriResponse: Map<String, Any>
+    ) {
 
         authorizationRequestParameters = if (requestUriResponse.isEmpty())
             authorizationRequestParameters
@@ -55,6 +61,19 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
                 )
             }
         }
+    }
+
+    override fun process(walletMetadata: WalletMetadata): WalletMetadata {
+        val updatedWalletMetadata = walletMetadata.copy()
+        updatedWalletMetadata.requestObjectSigningAlgValuesSupported = null
+        return updatedWalletMetadata
+    }
+
+    override fun getHeadersForAuthorizationRequestUri(): Map<String, String> {
+        return mapOf(
+            "content-type" to APPLICATION_FORM_URL_ENCODED.value,
+            "accept" to APPLICATION_JSON.value
+        )
     }
 
     override fun validateAndParseRequestFields() {
