@@ -8,24 +8,24 @@ import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
+import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.MissingInput
-import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
+import io.mosip.openID4VP.constants.ClientIdScheme.*
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
+import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.authorizationRequestForResponseModeJWT
 import io.mosip.openID4VP.testData.authorizationResponse
-import io.mosip.openID4VP.constants.ClientIdScheme.*
 import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.walletMetadata
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
@@ -170,14 +170,18 @@ class DirectPostJwtResponseModeHandlerTest {
             DirectPostJwtResponseModeHandler().validate(clientMetadata, walletMetadata, true)
         }
 
-        Assertions.assertEquals(expectedExceptionMessage, exception.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
     fun `should throw error if the key exchange algorithm supported list is not provided by wallet and response mode is direct_post_jwt`() {
         val invalidWalletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = emptyMap(),
+            vpFormatsSupported = mapOf(
+                "ldp_vc" to VPFormatSupported(
+                    algValuesSupported = listOf("RSA")
+                )
+            ),
             clientIdSchemesSupported = listOf(
                 REDIRECT_URI.value,
                 DID.value,
@@ -195,7 +199,7 @@ class DirectPostJwtResponseModeHandlerTest {
             DirectPostJwtResponseModeHandler().validate(clientMetadata, invalidWalletMetadata, true)
         }
 
-        Assertions.assertEquals(expectedExceptionMessage, exception.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
@@ -212,7 +216,7 @@ class DirectPostJwtResponseModeHandlerTest {
             DirectPostJwtResponseModeHandler().validate(clientMetadata, walletMetadata, true)
         }
 
-        Assertions.assertEquals(expectedExceptionMessage, exception.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
@@ -220,7 +224,11 @@ class DirectPostJwtResponseModeHandlerTest {
         val clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
         val invalidWalletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = emptyMap(),
+            vpFormatsSupported = mapOf(
+                "ldp_vc" to VPFormatSupported(
+                    algValuesSupported = listOf("RSA")
+                )
+            ),
             clientIdSchemesSupported = listOf(
                 REDIRECT_URI.value,
                 DID.value,
@@ -237,7 +245,7 @@ class DirectPostJwtResponseModeHandlerTest {
             DirectPostJwtResponseModeHandler().validate(clientMetadata, invalidWalletMetadata, true)
         }
 
-        Assertions.assertEquals(expectedExceptionMessage, exception.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
 

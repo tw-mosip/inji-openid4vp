@@ -28,8 +28,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 class AuthorizationRequestObjectObtainedByReferenceTest {
     private lateinit var openID4VP: OpenID4VP
@@ -130,7 +128,11 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         )
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = emptyMap(),
+            vpFormatsSupported = mapOf(
+                "ldp_vc" to VPFormatSupported(
+                    algValuesSupported = listOf("RSA")
+                )
+            ),
             clientIdSchemesSupported = listOf(
                 ClientIdScheme.REDIRECT_URI.value,
                 PRE_REGISTERED.value
@@ -164,7 +166,11 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         )
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = emptyMap(),
+            vpFormatsSupported = mapOf(
+                "ldp_vc" to VPFormatSupported(
+                    algValuesSupported = listOf("RSA")
+                )
+            ),
             clientIdSchemesSupported = listOf(DID.value, PRE_REGISTERED.value),
             requestObjectSigningAlgValuesSupported = listOf("RSA"),
             authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
@@ -198,6 +204,53 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             )
         }
         assertEquals("request_object_signing_alg is not support by wallet", exception.message)
+    }
+
+    @Test
+    fun `should validate and throw error if the signing algorithm supported  by wallet is empty or null when the client id scheme is did and request uri method is post`() {
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid + mapOf(
+            "request_uri_method" to "post"
+        )
+        val walletMetadata = WalletMetadata(
+            presentationDefinitionURISupported = true,
+            vpFormatsSupported = mapOf(
+                "ldp_vc" to VPFormatSupported(
+                    algValuesSupported = listOf("RSA")
+                )
+            ),
+            clientIdSchemesSupported = listOf(DID.value, PRE_REGISTERED.value),
+            requestObjectSigningAlgValuesSupported = null,
+            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
+            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+        )
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                HttpMethod.POST,
+                any(),
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
+                .build(),
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
+        )
+
+        val encodedAuthorizationRequest = createUrlEncodedData(
+            authorizationRequestParamsMap,
+            true,
+            DID
+        )
+
+        val exception = assertThrows<InvalidData> {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                walletMetadata,
+                shouldValidateClient = true
+            )
+        }
+        assertEquals("request_object_signing_alg_values_supported is not present in wallet metadata", exception.message)
     }
 
     //Client Id scheme - DID
@@ -365,7 +418,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap, true, ClientIdScheme.REDIRECT_URI)
 
 
-        val exception = assertThrows<Exceptions.InvalidData> {
+        val exception = assertThrows<InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -467,7 +520,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap, true, DID)
 
 
-        val exception = assertThrows(Exceptions.InvalidData::class.java) {
+        val exception = assertThrows(InvalidData::class.java) {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,

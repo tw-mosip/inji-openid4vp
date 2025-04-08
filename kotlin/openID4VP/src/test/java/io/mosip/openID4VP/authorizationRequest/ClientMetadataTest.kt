@@ -293,7 +293,11 @@ class ClientMetadataTest {
 
         val invalidWalletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = emptyMap(),
+            vpFormatsSupported = mapOf(
+                "ldp_vc" to VPFormatSupported(
+                    algValuesSupported = listOf("RSA")
+                )
+            ),
             clientIdSchemesSupported = listOf(
                 ClientIdScheme.REDIRECT_URI.value,
                 DID.value,
@@ -341,7 +345,11 @@ class ClientMetadataTest {
 
         val invalidWalletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = emptyMap(),
+            vpFormatsSupported = mapOf(
+                "ldp_vc" to VPFormatSupported(
+                    algValuesSupported = listOf("RSA")
+                )
+            ),
             clientIdSchemesSupported = listOf(
                 ClientIdScheme.REDIRECT_URI.value,
                 DID.value,
