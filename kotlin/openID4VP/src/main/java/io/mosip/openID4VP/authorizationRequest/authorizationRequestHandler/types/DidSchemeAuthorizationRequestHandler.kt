@@ -62,6 +62,12 @@ class DidSchemeAuthorizationRequestHandler(
     }
 
     override fun process(walletMetadata: WalletMetadata): WalletMetadata {
+        if(walletMetadata.requestObjectSigningAlgValuesSupported.isNullOrEmpty())
+            throw Logger.handleException(
+                exceptionType = "InvalidData",
+                className = className,
+                message = "request_object_signing_alg_values_supported is not present in wallet metadata"
+            )
         return walletMetadata
     }
 
