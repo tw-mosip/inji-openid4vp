@@ -20,52 +20,54 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
         walletMetadata: WalletMetadata?,
         shouldValidateWithWalletMetadata: Boolean
     ) {
-        if (clientMetadata == null) {
-            throw Logger.handleException(
-                exceptionType = "InvalidData",
-                message = "client_metadata must be present for given response mode",
-                className = className
+        requireNotNull(clientMetadata) {
+            throwInvalidDataException("client_metadata must be present for given response mode")
+        }
+
+        val alg = clientMetadata.authorizationEncryptedResponseAlg
+            ?: throwMissingInputException("authorization_encrypted_response_alg")
+
+        val enc = clientMetadata.authorizationEncryptedResponseEnc
+            ?: throwMissingInputException("authorization_encrypted_response_enc")
+
+        val jwks = clientMetadata.jwks
+            ?: throwMissingInputException("jwks")
+
+        if (shouldValidateWithWalletMetadata) {
+            validateWithWalletMetadata(
+                clientAlg = alg,
+                clientEnc = enc,
+                walletMetadata = walletMetadata
             )
         }
-        validateMandatoryField(clientMetadata)
-
-        if (shouldValidateWithWalletMetadata)
-            validateDataWithWalletMetadata(clientMetadata, walletMetadata)
-    }
-
-    private fun validateMandatoryField(clientMetadata: ClientMetadata) {
-        val alg = clientMetadata.authorizationEncryptedResponseAlg ?: throwMissingInputException(
-            "authorization_encrypted_response_alg"
-        )
-        val enc = clientMetadata.authorizationEncryptedResponseEnc ?: throwMissingInputException(
-            "authorization_encrypted_response_enc"
-        )
-        val jwks = clientMetadata.jwks ?: throwMissingInputException("jwks")
 
         if (jwks.keys.none { it.alg == alg }) {
             throwInvalidDataException("No jwk matching the specified algorithm found")
         }
     }
 
-    private fun validateDataWithWalletMetadata(
-        clientMetadata: ClientMetadata,
-        walletMetadata: WalletMetadata?,
-
-        ) {
-        if (walletMetadata == null)
+    private fun validateWithWalletMetadata(
+        clientAlg: String,
+        clientEnc: String,
+        walletMetadata: WalletMetadata?
+    ) {
+        requireNotNull(walletMetadata) {
             throwInvalidDataException("wallet_metadata must be present")
+        }
 
-        walletMetadata.authorizationEncryptionEncValuesSupported?.let { encSupported ->
-            if (!encSupported.contains(clientMetadata.authorizationEncryptedResponseEnc)) {
-                throwInvalidDataException("authorization_encrypted_response_enc is not supported")
-            }
-        } ?: throwInvalidDataException("authorization_encryption_enc_values_supported must be present in wallet_metadata")
+        val supportedAlgs = walletMetadata.authorizationEncryptionAlgValuesSupported
+            ?: throwInvalidDataException("authorization_encryption_alg_values_supported must be present in wallet_metadata")
 
-        walletMetadata.authorizationEncryptionAlgValuesSupported?.let { algSupported ->
-            if (!algSupported.contains(clientMetadata.authorizationEncryptedResponseAlg)) {
-                throwInvalidDataException("authorization_encrypted_response_alg is not supported")
-            }
-        } ?: throwInvalidDataException("authorization_encryption_alg_values_supported must be present in wallet_metadata")
+        if (clientAlg !in supportedAlgs) {
+            throwInvalidDataException("authorization_encrypted_response_alg is not supported")
+        }
+
+        val supportedEncs = walletMetadata.authorizationEncryptionEncValuesSupported
+            ?: throwInvalidDataException("authorization_encryption_enc_values_supported must be present in wallet_metadata")
+
+        if (clientEnc !in supportedEncs) {
+            throwInvalidDataException("authorization_encrypted_response_enc is not supported")
+        }
     }
 
     private fun throwMissingInputException(fieldName: String): Nothing {
