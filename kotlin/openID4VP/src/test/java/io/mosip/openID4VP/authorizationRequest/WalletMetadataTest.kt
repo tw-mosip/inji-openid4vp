@@ -84,7 +84,7 @@ class WalletMetadataTest {
     }
 
     @Test
-    fun `should throw error if vp_formats_supported is empty map`(): Unit {
+    fun `should throw error if vp_formats_supported is empty map`() {
         val exception = assertThrows<InvalidData> {
             WalletMetadata(
                 presentationDefinitionURISupported = true,
@@ -100,6 +100,54 @@ class WalletMetadataTest {
         }
         assertEquals(
             "vp_formats_supported should at least have one supported vp_format",
+            exception.message
+        )
+    }
+    @Test
+    fun `should throw error if vp_formats_supported has empty key`() {
+        val exception = assertThrows<InvalidData> {
+            WalletMetadata(
+                presentationDefinitionURISupported = true,
+                vpFormatsSupported = mapOf(
+                    ""  to VPFormatSupported(
+                        algValuesSupported = null
+                    )
+                ),
+                clientIdSchemesSupported = listOf(
+                    ClientIdScheme.REDIRECT_URI.value,
+                    PRE_REGISTERED.value
+                ),
+                requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
+                authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
+                authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+            )
+        }
+        assertEquals(
+            "vp_formats_supported cannot have empty keys",
+            exception.message
+        )
+    }
+    @Test
+    fun `should throw error if vp_formats_supported has just empty space`() {
+        val exception = assertThrows<InvalidData> {
+            WalletMetadata(
+                presentationDefinitionURISupported = true,
+                vpFormatsSupported = mapOf(
+                    " "  to VPFormatSupported(
+                        algValuesSupported = null
+                    )
+                ),
+                clientIdSchemesSupported = listOf(
+                    ClientIdScheme.REDIRECT_URI.value,
+                    PRE_REGISTERED.value
+                ),
+                requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
+                authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
+                authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+            )
+        }
+        assertEquals(
+            "vp_formats_supported cannot have empty keys",
             exception.message
         )
     }

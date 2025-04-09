@@ -24,6 +24,13 @@ data class WalletMetadata(
                 message = "vp_formats_supported should at least have one supported vp_format"
             )
         }
+        require(vpFormatsSupported.keys.all { it.trim().isNotEmpty() }) {
+            throw Logger.handleException(
+                exceptionType = "InvalidData",
+                className = className,
+                message = "vp_formats_supported cannot have empty keys"
+            )
+        }
     }
     constructor(
         presentationDefinitionURISupported: Boolean?,
