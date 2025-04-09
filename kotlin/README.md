@@ -99,6 +99,19 @@ val openID4VP = OpenID4VP()
 
 Note: Wallet can send the entire metadata, library will customize it as per authorization request client_id_scheme. Eg - in case pre-registered, library modifies wallet metadata to be sent without request object signing info properties as specified in the specification.
 
+#### WalletMetadata Parameters
+
+| Parameter                                 | Type                        | Required   | Default Value      | Description                                                                                      |
+|-------------------------------------------|-----------------------------|------------|--------------------|--------------------------------------------------------------------------------------------------|
+| presentationDefinitionURISupported        | Bool                        | No         | true               | Indicates whether the wallet supports `presentation_definition_uri`.                             |
+| vpFormatsSupported                        | [String: VPFormatSupported] | Yes        | N/A                | A dictionary specifying the supported verifiable presentation formats and their algorithms.      |
+| clientIdSchemesSupported                  | List<String>                | No         | ["pre-registered"] | A list of supported client ID schemes.                                                           |
+| requestObjectSigningAlgValuesSupported    | List<String>?               | No         | null               | A list of supported algorithms for signing request objects.                                      |
+| authorizationEncryptionAlgValuesSupported | List<String>?               | No         | null               | A list of supported algorithms for encrypting authorization responses.                           |
+| authorizationEncryptionEncValuesSupported | List<String>?               | No         | null               | A list of supported encryption methods for authorization responses.                              |
+
+
+
 ```
  val authenticationResponse = openID4VP.authenticateVerifier(encodedAuthenticationRequest: String, trustedVerifierJSON: List<Verifier>,
  walletMetadata: WalletMetadata, shouldValidateClient: Bool)
