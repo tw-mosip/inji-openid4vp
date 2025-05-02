@@ -15,6 +15,7 @@ import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.*
 import io.mosip.openID4VP.constants.ResponseMode.*
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
+import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.walletMetadata
 import kotlinx.serialization.json.Json
@@ -61,6 +62,25 @@ class ClientMetadataTest {
     fun `should throw invalid input exception if vp_formats field is not available`() {
         val invalidClientMetadata =
             "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\"}"
+
+        val authorizationRequestParam: MutableMap<String, Any> = mutableMapOf(
+            CLIENT_METADATA.value to invalidClientMetadata,
+            RESPONSE_MODE.value to DIRECT_POST.value
+        )
+        val expectedExceptionMessage =
+            "Invalid Input: client_metadata->vp_formats value cannot be empty or null"
+
+        actualException =
+            Assert.assertThrows(InvalidInput::class.java) {
+                parseAndValidateClientMetadata(authorizationRequestParam, false, walletMetadata)
+            }
+
+        Assert.assertEquals(expectedExceptionMessage, actualException.message)
+    }
+    @Test
+    fun `should throw invalid input exception if vp_formats field is empty map`() {
+        val invalidClientMetadata =
+            "{\"authorization_encrypted_response_alg\":\"ECDH-ES\",\"authorization_encrypted_response_enc\":\"A256GCM\", \"vp_formats\":{}}"
 
         val authorizationRequestParam: MutableMap<String, Any> = mutableMapOf(
             CLIENT_METADATA.value to invalidClientMetadata,
