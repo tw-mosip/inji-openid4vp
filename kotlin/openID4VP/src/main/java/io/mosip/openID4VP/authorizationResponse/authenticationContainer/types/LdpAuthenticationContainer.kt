@@ -1,17 +1,17 @@
-package io.mosip.openID4VP.dto.vpResponseMetadata.types
+package io.mosip.openID4VP.authorizationResponse.authenticationContainer.types
 
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
-import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
 
-private val className = LdpVPResponseMetadata::class.simpleName!!
+private val className = LdpAuthenticationContainer::class.simpleName!!
 
-data class LdpVPResponseMetadata(
+data class LdpAuthenticationContainer(
     val jws: String,
     val signatureAlgorithm: String,
     val publicKey: String,
     val domain: String,
-) : VPResponseMetadata {
+) : AuthenticationContainer {
     fun validate() {
         val requiredParams = mapOf(
             "jws" to this.jws,

@@ -9,8 +9,8 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedLdpVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedLdpVPToken
 import io.mosip.openID4VP.common.DateUtil
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.UUIDGenerator
@@ -21,7 +21,7 @@ import io.mosip.openID4VP.testData.authorizationRequest
 import io.mosip.openID4VP.testData.clientMetadataMap
 import io.mosip.openID4VP.testData.presentationDefinitionMap
 import io.mosip.openID4VP.testData.setField
-import io.mosip.openID4VP.testData.vpResponsesMetadata
+import io.mosip.openID4VP.testData.authenticationContainerMap
 import org.junit.Assert
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -133,7 +133,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequest,
-            vpResponsesMetadata = vpResponsesMetadata,
+            authenticationContainerMap = authenticationContainerMap,
             responseUri = authorizationRequest.responseUri!!
         )
 
@@ -179,7 +179,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequestWithoutStateProperty,
-            vpResponsesMetadata = vpResponsesMetadata,
+            authenticationContainerMap = authenticationContainerMap,
             responseUri = authorizationRequest.responseUri!!
         )
 
@@ -214,7 +214,7 @@ class AuthorizationResponseHandlerTest {
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.shareVP(
                     authorizationRequest = authorizationRequestWithNonVPTokenResponseType,
-                    vpResponsesMetadata = vpResponsesMetadata,
+                    authenticationContainerMap = authenticationContainerMap,
                     responseUri = authorizationRequest.responseUri!!
                 )
             }
@@ -226,7 +226,7 @@ class AuthorizationResponseHandlerTest {
     }
 
     @Test
-    fun `should throw error when a credential format entry is not available in unsignedVPTokens but available in vpResponsesMetadata`() {
+    fun `should throw error when a credential format entry is not available in unsignedVPTokens but available in authenticationContainerMap`() {
         setField(
             authorizationResponseHandler,
             "unsignedVPTokens",
@@ -236,7 +236,7 @@ class AuthorizationResponseHandlerTest {
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.shareVP(
                     authorizationRequest = authorizationRequest,
-                    vpResponsesMetadata = vpResponsesMetadata,
+                    authenticationContainerMap = authenticationContainerMap,
                     responseUri = authorizationRequest.responseUri!!
                 )
             }

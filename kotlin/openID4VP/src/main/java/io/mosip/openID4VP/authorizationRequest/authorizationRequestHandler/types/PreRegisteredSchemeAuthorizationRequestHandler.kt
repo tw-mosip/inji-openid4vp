@@ -7,9 +7,8 @@ import io.mosip.openID4VP.authorizationRequest.validateAuthorizationRequestObjec
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
-import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.ContentType.APPLICATION_FORM_URL_ENCODED
-import io.mosip.openID4VP.dto.Verifier
+import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.constants.ContentType.APPLICATION_JSON
 import okhttp3.Headers
 

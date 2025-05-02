@@ -1,30 +1,8 @@
 package io.mosip.openID4VP.authorizationResponse
 
-import android.util.Log
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mosip.openID4VP.OpenID4VP
-import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
-import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
-import io.mosip.openID4VP.common.UUIDGenerator
-import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
-import io.mosip.openID4VP.networkManager.NetworkManagerClient
-import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
-import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
 import io.mosip.openID4VP.testData.*
-import okhttp3.Headers
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
-import org.junit.Before
 import org.junit.Test
-import io.mosip.openID4VP.constants.FormatType
 
 class AuthorizationResponseTest {
     @Test

@@ -6,7 +6,7 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSeri
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedLdpVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
@@ -15,9 +15,9 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
-import io.mosip.openID4VP.dto.Verifier
-import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationRequest.Verifier
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.constants.ClientIdScheme.DID
@@ -40,14 +40,14 @@ const val publicKey = """-----BEGIN RSA PUBLIC KEY-----
         BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU
         IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==
         -----END RSA PUBLIC KEY-----"""
-val ldpVPResponseMetadata: LdpVPResponseMetadata = LdpVPResponseMetadata(
+val ldpAuthenticationContainer: LdpAuthenticationContainer = LdpAuthenticationContainer(
     "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
     "RsaSignature2018",
     publicKey,
     "https://123",
 )
-val vpResponsesMetadata: Map<FormatType, VPResponseMetadata> =
-    mapOf(FormatType.LDP_VC to ldpVPResponseMetadata)
+val authenticationContainerMap: Map<FormatType, AuthenticationContainer> =
+    mapOf(FormatType.LDP_VC to ldpAuthenticationContainer)
 
 val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
     context = listOf("https://www.w3.org/2018/credentials/v1"),

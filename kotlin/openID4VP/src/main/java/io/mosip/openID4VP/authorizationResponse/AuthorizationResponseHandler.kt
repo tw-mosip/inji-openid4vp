@@ -1,9 +1,9 @@
 package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedLdpVPToken
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedMdocVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedLdpVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedMdocVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
@@ -19,7 +19,7 @@ import io.mosip.openID4VP.common.getNonce
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.constants.VPFormatType
-import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
 private val className = AuthorizationResponseHandler::class.java.simpleName
@@ -58,12 +58,12 @@ internal class AuthorizationResponseHandler {
 
     fun shareVP(
         authorizationRequest: AuthorizationRequest,
-        vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
+        authenticationContainerMap: Map<FormatType, AuthenticationContainer>,
         responseUri: String,
     ): String {
         val authorizationResponse: AuthorizationResponse = createAuthorizationResponse(
             authorizationRequest = authorizationRequest,
-            vpResponsesMetadata = vpResponsesMetadata
+            authenticationContainerMap = authenticationContainerMap
         )
 
         return sendAuthorizationResponse(
@@ -76,13 +76,13 @@ internal class AuthorizationResponseHandler {
     //Create authorization response based on the response_type parameter in authorization response
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
-        vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
+        authenticationContainerMap: Map<FormatType, AuthenticationContainer>,
     ): AuthorizationResponse {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
                 val credentialFormatIndex: MutableMap<FormatType, Int> = mutableMapOf()
                 val vpToken = createVPToken(
-                    vpResponsesMetadata,
+                    authenticationContainerMap,
                     authorizationRequest,
                     credentialFormatIndex
                 )
@@ -121,22 +121,22 @@ internal class AuthorizationResponseHandler {
     }
 
     private fun createVPToken(
-        vpResponsesMetadata: Map<FormatType, VPResponseMetadata>,
+        authenticationContainerMap: Map<FormatType, AuthenticationContainer>,
         authorizationRequest: AuthorizationRequest,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): VPTokenType {
         val vpTokens: MutableList<VPToken> = mutableListOf()
 
-        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values // TODO: removing sorting logic
+        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.values
             .flatMap { it.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
                 lists.flatten()
             }
 
-        vpResponsesMetadata.entries.forEachIndexed { index, (credentialFormat, vpResponseMetadata) ->
+        authenticationContainerMap.entries.forEachIndexed { index, (credentialFormat, authenticationContainer) ->
             vpTokens.add(
                 VPTokenFactory(
-                    vpResponseMetadata = vpResponseMetadata,
+                    authenticationContainer = authenticationContainer,
                     unsignedVpToken = unsignedVPTokens[credentialFormat]
                         ?: throw Logger.handleException(
                             exceptionType = "InvalidData",

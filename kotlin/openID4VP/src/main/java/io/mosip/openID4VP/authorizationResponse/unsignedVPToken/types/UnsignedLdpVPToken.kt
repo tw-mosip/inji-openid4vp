@@ -1,8 +1,8 @@
-package io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types
+package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRawValue
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 
 data class UnsignedLdpVPToken(
     @JsonProperty("@context")

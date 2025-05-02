@@ -16,19 +16,19 @@ import io.mosip.openID4VP.common.encodeCbor
 import io.mosip.openID4VP.common.getMdocDocType
 import io.mosip.openID4VP.common.mapSigningAlgorithmToProtectedAlg
 import io.mosip.openID4VP.common.tagEncodedCbor
-import io.mosip.openID4VP.dto.vpResponseMetadata.types.MdocVPResponseMetadata
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.MdocAuthenticationContainer
 
 private val className = MdocVPTokenBuilder::class.java.simpleName
 
 class MdocVPTokenBuilder(
-    private val mdocVPResponseMetadata: MdocVPResponseMetadata,
+    private val mdocAuthenticationContainer: MdocAuthenticationContainer,
     private val mdocCredentials: List<String>,
 ) : VPTokenBuilder {
     override fun build(): MdocVPToken {
         val documents = mdocCredentials.map { credential ->
             val credentialDocType = getMdocDocType(credential) //TODO: Extract the decoding logic here to be reused
 
-            val deviceAuthSignature = mdocVPResponseMetadata.deviceAuthenticationSignature[credentialDocType]
+            val deviceAuthSignature = mdocAuthenticationContainer.deviceAuthenticationSignature[credentialDocType]
                 ?: throwMissingInput("Device authentication signature not found for mdoc credential docType $credentialDocType")
 
             val signature = deviceAuthSignature.signature

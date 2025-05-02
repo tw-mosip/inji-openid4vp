@@ -8,7 +8,6 @@ import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.validate
-import io.mosip.openID4VP.dto.Verifier
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 

@@ -1,0 +1,3 @@
+package io.mosip.openID4VP.authorizationResponse.authenticationContainer
+
+interface AuthenticationContainer

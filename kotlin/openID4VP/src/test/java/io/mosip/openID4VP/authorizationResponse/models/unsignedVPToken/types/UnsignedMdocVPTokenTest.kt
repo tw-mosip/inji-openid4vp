@@ -4,6 +4,7 @@ import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedMdocVPToken
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.testData.mdocCredential
 import io.mosip.openID4VP.testData.responseUrl

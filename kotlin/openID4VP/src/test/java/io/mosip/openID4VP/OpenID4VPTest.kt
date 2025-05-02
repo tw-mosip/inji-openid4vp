@@ -11,7 +11,7 @@ import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.LdpAuthenticationContainer
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
@@ -19,7 +19,7 @@ import io.mosip.openID4VP.testData.authorizationRequest
 import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.unsignedVPTokens
-import io.mosip.openID4VP.testData.vpResponsesMetadata
+import io.mosip.openID4VP.testData.authenticationContainerMap
 import okhttp3.Headers
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -92,16 +92,16 @@ class OpenID4VPTest {
     }
 
     @Test
-    fun `should throw invalid input exception if any input param of VPResponseMetadata class is empty`() {
-        val ldpVpResponseMetadata = LdpVPResponseMetadata(
+    fun `should throw invalid input exception if any input param of AuthenticationContainer class is empty`() {
+        val ldpAuthenticationContainer = LdpAuthenticationContainer(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
-        val vpResponsesMetadata = mapOf(FormatType.LDP_VC to ldpVpResponseMetadata)
+        val authenticationContainerMap = mapOf(FormatType.LDP_VC to ldpAuthenticationContainer)
         expectedExceptionMessage =
             "Invalid Input: vp_response_metadata->domain value cannot be an empty string, null, or an integer"
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
-                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+                openID4VP.shareVerifiablePresentation(authenticationContainerMap)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -122,7 +122,7 @@ class OpenID4VPTest {
 
         actualException =
             assertThrows(NetworkRequestFailed::class.java) {
-                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+                openID4VP.shareVerifiablePresentation(authenticationContainerMap)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -142,7 +142,7 @@ class OpenID4VPTest {
 
         actualException =
             assertThrows(NetworkRequestTimeout::class.java) {
-                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+                openID4VP.shareVerifiablePresentation(authenticationContainerMap)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -163,7 +163,7 @@ class OpenID4VPTest {
         )
         val expectedValue = "Verifiable Presentation is shared successfully"
 
-        val actualResponse = openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+        val actualResponse = openID4VP.shareVerifiablePresentation(authenticationContainerMap)
 
         assertEquals(expectedValue, actualResponse)
     }
