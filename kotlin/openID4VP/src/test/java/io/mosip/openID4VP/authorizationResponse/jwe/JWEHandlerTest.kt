@@ -27,7 +27,10 @@ class JWEHandlerTest {
         jweHandler = JWEHandler(
             clientMetadata.authorizationEncryptedResponseAlg!!,
             clientMetadata.authorizationEncryptedResponseEnc!!,
-            clientMetadata.jwks!!.keys[0])
+            clientMetadata.jwks!!.keys[0],
+            "walletNonce",
+            "nonce"
+        )
         mockkStatic(Log::class)
         every { Log.e(any(), any()) } answers {
             val tag = arg<String>(0)

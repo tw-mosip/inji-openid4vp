@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.common.Decoder.decodeBase64Data
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
+import java.security.SecureRandom
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 
@@ -36,6 +37,18 @@ fun getStringValue(params: Map<String, Any>, key: String): String? {
     return params[key]?.toString()
 }
 
+fun getNonce(minEntropy: Int): String {
+    val secureRandom = SecureRandom()
+    val nonce = CharArray(minEntropy) {
+        when (val randomChar = secureRandom.nextInt(62)) { // 26 (A-Z) + 26 (a-z) + 10 (0-9)
+            in 0..25 -> 'A' + randomChar
+            in 26..51 -> 'a' + (randomChar - 26)
+            else -> '0' + (randomChar - 52)
+        }
+    }
+    return String(nonce)
+}
+
 fun validate(
     key: String,
     value: String?,
@@ -63,4 +76,12 @@ inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className:
             className = className
         )
     }
+}
+
+fun ByteArray.toHex(): String{
+    return this.joinToString("") { "%02x".format(it) }
+}
+
+fun Int.isNegative(): Boolean {
+    return this < 0
 }

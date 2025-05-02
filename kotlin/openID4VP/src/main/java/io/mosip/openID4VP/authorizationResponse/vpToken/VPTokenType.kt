@@ -13,10 +13,10 @@ sealed class VPTokenType {
 }
 
 class VPTokenTypeSerializer : JsonSerializer<VPTokenType>() {
-    override fun serialize(value: VPTokenType, gen: JsonGenerator, serializers: SerializerProvider) {
+    override fun serialize(value: VPTokenType, jsonGenerator: JsonGenerator, serializers: SerializerProvider) {
         when (value) {
-            is VPTokenType.VPTokenArray -> gen.writeObject(value.value)
-            is VPTokenType.VPTokenElement -> gen.writeObject(value.value)
+            is VPTokenType.VPTokenArray -> jsonGenerator.writeObject(value.value)
+            is VPTokenType.VPTokenElement -> jsonGenerator.writeObject(value.value)
         }
     }
 }

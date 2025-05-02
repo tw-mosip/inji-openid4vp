@@ -12,7 +12,9 @@ private val className = JWEHandler::class.simpleName!!
 class JWEHandler(
     private val keyEncryptionAlg: String,
     private val contentEncryptionAlg: String,
-    private val publicKey: Jwk
+    private val publicKey: Jwk,
+    private val walletNonce: String,
+    private val verifierNonce: String
 ) {
 
     fun generateEncryptedResponse(payload: Map<String, Any>): String {
@@ -22,7 +24,9 @@ class JWEHandler(
         val headerMap = mapOf(
             "alg" to keyEncryptionAlg,
             "enc" to contentEncryptionAlg,
-            "kid" to publicKey.kid
+            "kid" to publicKey.kid,
+            "apu" to walletNonce,
+            "apv" to verifierNonce
         )
         val header = JWEHeader.parse(headerMap)
 

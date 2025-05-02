@@ -1,12 +1,9 @@
 package io.mosip.openID4VP.common
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import org.junit.Test
 import org.junit.Assert.*
 import io.mosip.openID4VP.constants.HttpMethod
-import org.json.JSONPropertyName
 
 class UtilsTest {
 

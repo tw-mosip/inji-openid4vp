@@ -1,9 +1,9 @@
 package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedLdpVPToken
+import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.types.UnsignedMdocVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
@@ -13,9 +13,11 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenArray
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenElement
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
-import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.common.getNonce
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.constants.VPFormatType
 import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -25,9 +27,22 @@ private val className = AuthorizationResponseHandler::class.java.simpleName
 internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
     private lateinit var unsignedVPTokens: Map<FormatType, UnsignedVPToken>
+    private val walletNonce = getNonce(16)
 
+    /*
+    id1: {
+    ldp_vc:list<ldp_vc>,
+    mdoc:list<mdoc>
+    },
+    id2:{
+    ldp_vc:list<ldp_vc>,
+    mdoc:list<mdoc>
+    }
+     */
     fun constructUnsignedVPToken(
         credentialsMap: Map<String, Map<FormatType, List<Any>>>,
+        authorizationRequest: AuthorizationRequest,
+        responseUri: String,
     ): Map<FormatType, UnsignedVPToken> {
         if (credentialsMap.isEmpty()) {
             throw Logger.handleException(
@@ -37,7 +52,7 @@ internal class AuthorizationResponseHandler {
             )
         }
         this.credentialsMap = credentialsMap
-        this.unsignedVPTokens = createUnsignedVPTokens()
+        this.unsignedVPTokens = createUnsignedVPTokens(authorizationRequest, responseUri)
         return this.unsignedVPTokens
     }
 
@@ -100,7 +115,8 @@ internal class AuthorizationResponseHandler {
             .sendAuthorizationResponse(
                 authorizationRequest = authorizationRequest,
                 url = responseUri,
-                authorizationResponse = authorizationResponse
+                authorizationResponse = authorizationResponse,
+                walletNonce = walletNonce,
             )
     }
 
@@ -110,6 +126,12 @@ internal class AuthorizationResponseHandler {
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): VPTokenType {
         val vpTokens: MutableList<VPToken> = mutableListOf()
+
+        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values // TODO: removing sorting logic
+            .flatMap { it.entries }
+            .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
+                lists.flatten()
+            }
 
         vpResponsesMetadata.entries.forEachIndexed { index, (credentialFormat, vpResponseMetadata) ->
             vpTokens.add(
@@ -121,6 +143,7 @@ internal class AuthorizationResponseHandler {
                             message = "unable to find the related credential format - $credentialFormat in the unsignedVPTokens map",
                             className = className
                         ),
+                    credentials = groupedVcs[credentialFormat],
                     nonce = authorizationRequest.nonce
                 ).getVPTokenBuilder(credentialFormat).build()
             )
@@ -166,7 +189,7 @@ internal class AuthorizationResponseHandler {
                         val credentialIndex =
                             (formatTypeToCredentialIndex[credentialFormat] ?: -1) + 1
                         val vpFormat: String
-                        val pathNested: PathNested?
+                        var pathNested: PathNested? = null
                         when (credentialFormat) {
                             FormatType.LDP_VC -> {
                                 val relativePath = "$.${LdpVPToken.INTERNAL_PATH}[$credentialIndex]"
@@ -176,6 +199,9 @@ internal class AuthorizationResponseHandler {
                                     format = credentialFormat.value,
                                     path = relativePath
                                 )
+                            }
+                            FormatType.MSO_MDOC -> {
+                                vpFormat = VPFormatType.MSO_MDOC.value
                             }
                         }
                         formatTypeToCredentialIndex[credentialFormat] = credentialIndex
@@ -193,7 +219,10 @@ internal class AuthorizationResponseHandler {
         return descriptorMappings.flatten()
     }
 
-    private fun createUnsignedVPTokens(): Map<FormatType, UnsignedVPToken> {
+    private fun createUnsignedVPTokens(
+        authorizationRequest: AuthorizationRequest,
+        responseUri: String
+    ): Map<FormatType, UnsignedVPToken> {
         val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values
             .flatMap { it.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
@@ -215,6 +244,24 @@ internal class AuthorizationResponseHandler {
                         verifiableCredential = verifiableCredentials,
                         id = UUIDGenerator.generateUUID(),
                         holder = ""
+                    )
+                }
+
+                FormatType.MSO_MDOC -> {
+                    val verifiableCredentials: List<String> = credentialsArray.map {
+                        it as? String ?: throw Logger.handleException(
+                            exceptionType = "InvalidData",
+                            className = className,
+                            message = "$format credentials are not passed in string format"
+                        )
+                    }
+
+                    UnsignedMdocVPToken.build(
+                        mdocCredentials = verifiableCredentials,
+                        clientId = authorizationRequest.clientId,
+                        responseUri = responseUri,
+                        verifierNonce = authorizationRequest.nonce,
+                        mdocGeneratedNonce = walletNonce
                     )
                 }
             }

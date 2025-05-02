@@ -82,7 +82,9 @@ class AuthorizationResponseHandlerTest {
         val actualException =
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.constructUnsignedVPToken(
-                    credentialsMap = mapOf()
+                    credentialsMap = mapOf(),
+                    authorizationRequest = authorizationRequest,
+                    responseUri = "https://mock-verifier.com",
                 )
             }
 
@@ -98,7 +100,9 @@ class AuthorizationResponseHandlerTest {
         val actualException =
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.constructUnsignedVPToken(
-                    credentialsMap = mapOf("input_1" to mapOf(FormatType.LDP_VC to verifiableCredentials))
+                    credentialsMap = mapOf("input_1" to mapOf(FormatType.LDP_VC to verifiableCredentials)),
+                    authorizationRequest = authorizationRequest,
+                    responseUri = "https://mock-verifier.com",
                 )
             }
 

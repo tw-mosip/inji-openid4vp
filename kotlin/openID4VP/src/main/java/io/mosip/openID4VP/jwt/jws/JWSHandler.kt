@@ -41,6 +41,8 @@ class JWSHandler(private val jws: String, private val publicKeyResolver: PublicK
             throw Logger.handleException(
                 exceptionType = "VerificationFailure",
                 className = className,
+                message = "An unexpected exception occurred during verification: ${ex.message}",
+
             )
         }
         if (!verificationResult)

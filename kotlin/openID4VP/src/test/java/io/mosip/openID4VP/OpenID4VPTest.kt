@@ -1,26 +1,171 @@
 package io.mosip.openID4VP
 
+import android.util.Log
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.mockkStatic
 import io.mockk.verify
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.constants.HttpMethod
+import io.mosip.openID4VP.dto.vpResponseMetadata.types.LdpVPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
+import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
+import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
+import io.mosip.openID4VP.testData.authorizationRequest
+import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.setField
+import io.mosip.openID4VP.testData.unsignedVPTokens
+import io.mosip.openID4VP.testData.vpResponsesMetadata
+import okhttp3.Headers
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
 class OpenID4VPTest {
-    val openID4VP = OpenID4VP(traceabilityId = "OpenID4VPTest")
+
+    private lateinit var openID4VP: OpenID4VP
+    private val selectedCredentialsList = mapOf(
+        "456" to mapOf(
+            FormatType.LDP_VC to listOf(
+                """credential1""",
+                """credential2"""
+            )
+        ), "789" to mapOf(
+            FormatType.LDP_VC to listOf(
+                """credential3"""
+            )
+        )
+    )
+    private lateinit var mockWebServer: MockWebServer
+    private lateinit var actualException: Exception
+    private lateinit var expectedExceptionMessage: String
 
     @Before
     fun setUp() {
         mockkObject(NetworkManagerClient)
+        openID4VP = OpenID4VP("test-OpenID4VP")
+        mockWebServer = MockWebServer()
+        mockWebServer.start(8080)
+        openID4VP.authorizationRequest = authorizationRequest
         setField(
             openID4VP,
             "responseUri",
             "https://mock-verifier.com/response-uri"
         )
+
+        mockkStatic(Log::class)
+        every { Log.e(any(), any()) } answers {
+            val tag = arg<String>(0)
+            val msg = arg<String>(1)
+            println("Error: logTag: $tag | Message: $msg")
+            0
+        }
+
+        openID4VP.constructUnsignedVPToken(selectedCredentialsList)
+    }
+
+    @After
+    fun tearDown() {
+        clearAllMocks()
+        mockWebServer.shutdown()
+    }
+
+    //Test name and body does not match
+    @Test
+    fun `should construct VPToken using received selected verifiable credentials`() {
+        mockkObject(UUIDGenerator)
+        every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
+
+        val actualUnsignedVPTokens = openID4VP.constructUnsignedVPToken(selectedCredentialsList)
+
+        val expectedUnsignedVPTokens = unsignedVPTokens
+        assertEquals(
+            expectedUnsignedVPTokens, actualUnsignedVPTokens
+        )
+    }
+
+    @Test
+    fun `should throw invalid input exception if any input param of VPResponseMetadata class is empty`() {
+        val ldpVpResponseMetadata = LdpVPResponseMetadata(
+            "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
+        )
+        val vpResponsesMetadata = mapOf(FormatType.LDP_VC to ldpVpResponseMetadata)
+        expectedExceptionMessage =
+            "Invalid Input: vp_response_metadata->domain value cannot be an empty string, null, or an integer"
+        actualException =
+            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
+    fun `should throw exception if Authorization Response request call returns the response with http status other than 200`() {
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                "https://mock-verifier.com/response-uri",
+                any(),
+                any(),
+                any()
+            )
+        } throws NetworkRequestFailed("Unknown error encountered")
+        expectedExceptionMessage =
+            "Network request failed with error response - Unknown error encountered"
+
+        actualException =
+            assertThrows(NetworkRequestFailed::class.java) {
+                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
+    fun `should throw exception if Authorization Response request call takes more time to return response than specified time`() {
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                "https://mock-verifier.com/response-uri",
+                any(),
+                any(),
+                any()
+            )
+        } throws NetworkRequestTimeout()
+        expectedExceptionMessage = "VP sharing failed due to connection timeout"
+
+        actualException =
+            assertThrows(NetworkRequestTimeout::class.java) {
+                openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+            }
+
+        assertEquals(expectedExceptionMessage, actualException.message)
+    }
+
+    @Test
+    fun `should get response if Verifiable Presentation is shared successfully to the Verifier`() {
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                "https://mock-verifier.com/response-uri",
+                any(),
+                any(),
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/json").build(),
+            "body" to "Verifiable Presentation is shared successfully"
+        )
+        val expectedValue = "Verifiable Presentation is shared successfully"
+
+        val actualResponse = openID4VP.shareVerifiablePresentation(vpResponsesMetadata)
+
+        assertEquals(expectedValue, actualResponse)
     }
 
     @Test

@@ -46,7 +46,7 @@ object Logger {
             "JsonEncodingFailed" -> AuthorizationRequestExceptions.JsonEncodingFailed(
                 fieldPath = fieldPathAsString, message = message ?: ""
             )
-            "MissingInput" -> AuthorizationRequestExceptions.MissingInput(fieldPath = fieldPathAsString)
+            "MissingInput" -> Exceptions.MissingInput(fieldPath = fieldPathAsString, message = message ?: "")
 
             "InvalidInputPattern" -> AuthorizationRequestExceptions.InvalidInputPattern(fieldPath = fieldPathAsString)
 
@@ -65,6 +65,8 @@ object Logger {
             "PublicKeyExtractionFailed" -> JWSException.PublicKeyExtractionFailed(message = message ?: "")
 
             "InvalidSignature" -> JWSException.InvalidSignature(message = message ?: "")
+
+            "VerificationFailure" -> JWSException.VerificationFailure(message = message ?: "")
 
             //JWK Algorithm Exceptions
 

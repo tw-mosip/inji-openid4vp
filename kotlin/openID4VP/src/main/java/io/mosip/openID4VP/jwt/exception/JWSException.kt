@@ -9,4 +9,6 @@ sealed class JWSException {
     class PublicKeyResolutionFailed(message: String) : Exception(message)
 
     class InvalidSignature(message: String) : Exception(message)
+
+    class VerificationFailure(message: String) : Exception(message)
 }

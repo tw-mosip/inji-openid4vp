@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -38,7 +39,7 @@ class InputDescriptorTest {
         expectedExceptionMessage = "Missing Input: input_descriptor->id param is required"
 
         val actualException =
-            Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
+            Assert.assertThrows(MissingInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
@@ -52,7 +53,7 @@ class InputDescriptorTest {
         expectedExceptionMessage = "Missing Input: input_descriptor->constraints param is required"
 
         val actualException =
-            Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
+            Assert.assertThrows(MissingInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 

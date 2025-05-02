@@ -6,6 +6,8 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -53,7 +55,7 @@ class FieldsTest {
 		expectedExceptionMessage = "Missing Input: fields->path param is required"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
+			Assert.assertThrows(MissingInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
