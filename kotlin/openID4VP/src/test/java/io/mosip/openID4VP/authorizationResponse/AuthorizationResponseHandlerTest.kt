@@ -10,7 +10,7 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSeri
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedLdpVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.common.DateUtil
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.UUIDGenerator
@@ -90,24 +90,6 @@ class AuthorizationResponseHandlerTest {
 
         Assert.assertEquals(
             "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
-            actualException.message
-        )
-    }
-
-    @Test
-    fun `should throw exception when verifiable credentials are not passed as string in case of ldp_vc`() {
-        val verifiableCredentials: List<Any> = listOf(1, "cred", true, 2.12)
-        val actualException =
-            assertThrows(Exceptions.InvalidData::class.java) {
-                authorizationResponseHandler.constructUnsignedVPToken(
-                    credentialsMap = mapOf("input_1" to mapOf(FormatType.LDP_VC to verifiableCredentials)),
-                    authorizationRequest = authorizationRequest,
-                    responseUri = "https://mock-verifier.com",
-                )
-            }
-
-        Assert.assertEquals(
-            "LDP_VC credentials are not passed in string format",
             actualException.message
         )
     }

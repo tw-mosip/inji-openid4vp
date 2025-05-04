@@ -6,13 +6,13 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSeri
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedLdpVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
-import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.LdpVPToken
-import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldpVp.Proof
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.Proof
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.LdpAuthenticationContainer

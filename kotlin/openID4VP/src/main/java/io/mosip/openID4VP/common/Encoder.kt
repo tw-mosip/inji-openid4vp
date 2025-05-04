@@ -24,7 +24,7 @@ object Encoder {
 
     @SuppressLint("NewApi")
     private fun javaBase64UrlEncode(data: ByteArray): String =
-        getUrlEncoder().withoutPadding().encodeToString(data)
+        getUrlEncoder().encodeToString(data)
 
     private fun androidBase64UrlEncode(data: ByteArray): String {
         val base64 = encodeToString(data, NO_PADDING)
