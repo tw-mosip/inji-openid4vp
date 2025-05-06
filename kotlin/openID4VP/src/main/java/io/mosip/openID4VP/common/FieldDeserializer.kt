@@ -90,9 +90,8 @@ class FieldDeserializer(
 
 	private fun parseDynamicValue(value: JsonElement): Any {
 		return when (value) {
-			is JsonPrimitive -> value.contentOrNull ?: value.booleanOrNull ?: value.intOrNull
-			?: value.floatOrNull ?: value.doubleOrNull ?: value
-
+			is JsonPrimitive -> value.booleanOrNull ?: value.intOrNull
+			?: value.floatOrNull ?: value.doubleOrNull ?: value.contentOrNull ?: value
 			is JsonArray -> value.map { parseDynamicValue(it) }
 			is JsonObject -> value.mapValues { parseDynamicValue(it.value) }
 			else -> value
@@ -108,7 +107,7 @@ class FieldDeserializer(
 	) {
 		if (data !is JsonPrimitive || when (fieldType) {
 				"String" -> !data.isString
-				"Boolean" -> !data.boolean
+				"Boolean" -> (data.booleanOrNull) == null
 				else -> true
 			}
 		) {
