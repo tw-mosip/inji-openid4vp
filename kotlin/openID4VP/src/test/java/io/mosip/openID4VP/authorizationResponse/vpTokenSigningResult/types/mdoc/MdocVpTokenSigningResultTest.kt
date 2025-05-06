@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.mdoc
+package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 
 import android.util.Log
 import io.mockk.clearAllMocks
@@ -11,7 +11,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 
-class MdocAuthenticationContainerTest {
+class MdocVpTokenSigningResultTest {
 
     private lateinit var mockDeviceAuthentication1: DeviceAuthentication
     private lateinit var mockDeviceAuthentication2: DeviceAuthentication
@@ -41,8 +41,8 @@ class MdocAuthenticationContainerTest {
 
     @Test
     fun `should call validate on each device authentication in map`() {
-        val mdocAuthenticationContainer = MdocAuthenticationContainer(deviceAuthenticationMap)
-        mdocAuthenticationContainer.validate()
+        val mdocVpTokenSigningResult = MdocVpTokenSigningResult(deviceAuthenticationMap)
+        mdocVpTokenSigningResult.validate()
         verify { mockDeviceAuthentication1.validate() }
         verify { mockDeviceAuthentication2.validate() }
     }
@@ -50,8 +50,8 @@ class MdocAuthenticationContainerTest {
     @Test
     fun `should handle empty map`() {
         val emptyMap = emptyMap<String, DeviceAuthentication>()
-        val mdocAuthenticationContainer = MdocAuthenticationContainer(emptyMap)
-        assertDoesNotThrow { mdocAuthenticationContainer.validate() }
+        val mdocVpTokenSigningResult = MdocVpTokenSigningResult(emptyMap)
+        assertDoesNotThrow { mdocVpTokenSigningResult.validate() }
     }
 
 }

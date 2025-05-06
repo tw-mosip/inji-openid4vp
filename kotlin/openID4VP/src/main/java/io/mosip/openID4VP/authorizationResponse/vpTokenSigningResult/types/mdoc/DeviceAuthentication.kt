@@ -1,4 +1,4 @@
-package io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.mdoc
+package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
@@ -15,7 +15,7 @@ data class DeviceAuthentication(
             require(value != "null" && validateField(value, "String")) {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
-                    fieldPath = listOf("mdoc_authentication_container","device_authentication", key),
+                    fieldPath = listOf("mdoc_vp_token_signing_result","device_authentication", key),
                     className = className,
                     fieldType = key
                 )

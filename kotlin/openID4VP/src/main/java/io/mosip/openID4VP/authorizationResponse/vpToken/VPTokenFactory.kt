@@ -5,12 +5,12 @@ import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.Unsign
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.mdoc.MdocAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVpTokenSigningResult
 
 class VPTokenFactory(
-    private val authenticationContainer: AuthenticationContainer,
+    private val vpTokenSigningResult: VpTokenSigningResult,
     private val unsignedVpToken: UnsignedVPToken? =  null,
     private val credentials: List<Any>? =  null,
     private val nonce: String
@@ -19,12 +19,12 @@ class VPTokenFactory(
     fun getVPTokenBuilder(credentialFormat: FormatType): VPTokenBuilder {
         return when (credentialFormat) {
             FormatType.LDP_VC -> LdpVPTokenBuilder(
-                ldpAuthenticationContainer = authenticationContainer as LdpAuthenticationContainer,
+                ldpVpTokenSigningResult = vpTokenSigningResult as LdpVpTokenSigningResult,
                 unsignedLdpVPToken = unsignedVpToken as UnsignedLdpVPToken,
                 nonce = nonce
             )
             FormatType.MSO_MDOC -> MdocVPTokenBuilder(
-                mdocAuthenticationContainer = authenticationContainer as MdocAuthenticationContainer,
+                mdocVpTokenSigningResult = vpTokenSigningResult as MdocVpTokenSigningResult,
                 mdocCredentials = credentials as List<String>,
             )
         }

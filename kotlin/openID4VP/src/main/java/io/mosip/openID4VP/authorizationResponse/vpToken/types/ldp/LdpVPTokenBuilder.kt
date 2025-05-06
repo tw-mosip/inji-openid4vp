@@ -2,17 +2,17 @@ package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenBuilder
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVpTokenSigningResult
 
 class LdpVPTokenBuilder(
-    val ldpAuthenticationContainer: LdpAuthenticationContainer,
+    val ldpVpTokenSigningResult: LdpVpTokenSigningResult,
     val unsignedLdpVPToken: UnsignedLdpVPToken,
     val nonce: String
 ) : VPTokenBuilder {
     override fun build(): LdpVPToken {
-        ldpAuthenticationContainer.validate()
+        ldpVpTokenSigningResult.validate()
         val proof = Proof.construct(
-            ldpAuthenticationContainer, challenge = nonce
+            ldpVpTokenSigningResult, challenge = nonce
         )
 
         return LdpVPToken(

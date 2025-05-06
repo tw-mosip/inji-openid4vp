@@ -3,9 +3,7 @@ package io.mosip.openID4VP.common
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mosip.openID4VP.common.Decoder.decodeBase64Data
 import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart
 import java.security.SecureRandom
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
@@ -37,7 +35,7 @@ fun getStringValue(params: Map<String, Any>, key: String): String? {
     return params[key]?.toString()
 }
 
-fun getNonce(minEntropy: Int): String {
+fun generateNonce(minEntropy: Int): String {
     val secureRandom = SecureRandom()
     val nonce = CharArray(minEntropy) {
         when (val randomChar = secureRandom.nextInt(62)) { // 26 (A-Z) + 26 (a-z) + 10 (0-9)

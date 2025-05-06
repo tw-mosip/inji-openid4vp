@@ -14,7 +14,6 @@ import io.mosip.openID4VP.authorizationRequest.presentationDefinition.Presentati
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
@@ -30,11 +29,11 @@ import io.mosip.openID4VP.testData.authorizationRequestForResponseModeJWT
 import io.mosip.openID4VP.testData.clientMetadataMap
 import io.mosip.openID4VP.testData.presentationDefinitionMap
 import io.mosip.openID4VP.testData.setField
-import io.mosip.openID4VP.testData.ldpAuthenticationContainerMap
+import io.mosip.openID4VP.testData.ldpVpTokenSigningResultMap
 import io.mosip.openID4VP.testData.ldpCredential1
 import io.mosip.openID4VP.testData.ldpCredential2
 import io.mosip.openID4VP.testData.ldpVPToken
-import io.mosip.openID4VP.testData.mdocAuthenticationContainerMap
+import io.mosip.openID4VP.testData.mdocVpTokenSigningResultMap
 import io.mosip.openID4VP.testData.mdocCredential
 import io.mosip.openID4VP.testData.mdocVPToken
 import io.mosip.openID4VP.testData.unsignedLdpVPToken
@@ -179,7 +178,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequest,
-            authenticationContainerMap = ldpAuthenticationContainerMap,
+            vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
             responseUri = authorizationRequest.responseUri!!
         )
 
@@ -224,7 +223,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequestForResponseModeJWT,
-            authenticationContainerMap = ldpAuthenticationContainerMap + mdocAuthenticationContainerMap,
+            vpTokenSigningResultMap = ldpVpTokenSigningResultMap + mdocVpTokenSigningResultMap,
             responseUri = authorizationRequestForResponseModeJWT.responseUri!!
         )
 
@@ -270,7 +269,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequestWithoutStateProperty,
-            authenticationContainerMap = ldpAuthenticationContainerMap,
+            vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
             responseUri = authorizationRequest.responseUri!!
         )
 
@@ -305,7 +304,7 @@ class AuthorizationResponseHandlerTest {
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.shareVP(
                     authorizationRequest = authorizationRequestWithNonVPTokenResponseType,
-                    authenticationContainerMap = ldpAuthenticationContainerMap,
+                    vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
                     responseUri = authorizationRequest.responseUri!!
                 )
             }
@@ -317,7 +316,7 @@ class AuthorizationResponseHandlerTest {
     }
 
     @Test
-    fun `should throw error when a credential format entry is not available in unsignedVPTokens but available in authenticationContainerMap`() {
+    fun `should throw error when a credential format entry is not available in unsignedVPTokens but available in vpTokenSigningResultMap`() {
         setField(
             authorizationResponseHandler,
             "unsignedVPTokens",
@@ -327,7 +326,7 @@ class AuthorizationResponseHandlerTest {
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.shareVP(
                     authorizationRequest = authorizationRequest,
-                    authenticationContainerMap = ldpAuthenticationContainerMap,
+                    vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
                     responseUri = authorizationRequest.responseUri!!
                 )
             }

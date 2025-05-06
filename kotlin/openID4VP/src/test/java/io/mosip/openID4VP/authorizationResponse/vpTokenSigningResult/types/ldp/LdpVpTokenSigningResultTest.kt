@@ -1,10 +1,9 @@
-package io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp
+package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 
 import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
-import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
 import org.junit.After
 import org.junit.Before
@@ -12,7 +11,7 @@ import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
 
-class LdpAuthenticationContainerTest {
+class LdpVpTokenSigningResultTest {
 
     @Before
     fun setUp() {
@@ -31,25 +30,25 @@ class LdpAuthenticationContainerTest {
     }
 
     @Test
-    fun `should create container with valid parameters`() {
-        val container = LdpAuthenticationContainer(
+    fun `should create LdpVpTokenSigningResult with valid parameters`() {
+        val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
             jws = "eyJhbGciOiJ..MDIyfQ",
             signatureAlgorithm = "ES256",
             publicKey = "-----BEGIN PUBLIC KEY-----\nMFk...dT9POxg==\n-----END PUBLIC KEY-----",
             domain = "example.com"
         )
 
-        assertEquals("eyJhbGciOiJ..MDIyfQ", container.jws)
-        assertEquals("ES256", container.signatureAlgorithm)
-        assertTrue(container.publicKey.startsWith("-----BEGIN PUBLIC KEY-----"))
-        assertEquals("example.com", container.domain)
+        assertEquals("eyJhbGciOiJ..MDIyfQ", ldpVpTokenSigningResult.jws)
+        assertEquals("ES256", ldpVpTokenSigningResult.signatureAlgorithm)
+        assertTrue(ldpVpTokenSigningResult.publicKey.startsWith("-----BEGIN PUBLIC KEY-----"))
+        assertEquals("example.com", ldpVpTokenSigningResult.domain)
 
-        assertDoesNotThrow { container.validate() }
+        assertDoesNotThrow { ldpVpTokenSigningResult.validate() }
     }
 
     @Test
     fun `should throw exception when jws is invalid`() {
-        val container = LdpAuthenticationContainer(
+        val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
             jws = "null",
             signatureAlgorithm = "ES256",
             publicKey = "valid-key",
@@ -57,15 +56,15 @@ class LdpAuthenticationContainerTest {
         )
 
         val exception = assertThrows<InvalidInput> {
-            container.validate()
+            ldpVpTokenSigningResult.validate()
         }
 
-        assertEquals("Invalid Input: ldp_authentication_container->jws value cannot be an empty string, null, or an integer", exception.message)
+        assertEquals("Invalid Input: ldp_vp_token_signing_result->jws value cannot be an empty string, null, or an integer", exception.message)
     }
 
     @Test
     fun `should throw exception when signatureAlgorithm is invalid`() {
-        val container = LdpAuthenticationContainer(
+        val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
             jws = "valid-jws",
             signatureAlgorithm = "null",
             publicKey = "valid-key",
@@ -73,16 +72,16 @@ class LdpAuthenticationContainerTest {
         )
 
         val exception = assertThrows<InvalidInput> {
-            container.validate()
+            ldpVpTokenSigningResult.validate()
         }
 
-        assertEquals("Invalid Input: ldp_authentication_container->signatureAlgorithm value cannot be an empty string, null, or an integer", exception.message)
+        assertEquals("Invalid Input: ldp_vp_token_signing_result->signatureAlgorithm value cannot be an empty string, null, or an integer", exception.message)
 
     }
 
     @Test
     fun `should throw exception when publicKey is invalid`() {
-        val container = LdpAuthenticationContainer(
+        val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
             jws = "valid-jws",
             signatureAlgorithm = "ES256",
             publicKey = "null",
@@ -90,15 +89,15 @@ class LdpAuthenticationContainerTest {
         )
 
         val exception = assertThrows<InvalidInput> {
-            container.validate()
+            ldpVpTokenSigningResult.validate()
         }
 
-        assertEquals("Invalid Input: ldp_authentication_container->publicKey value cannot be an empty string, null, or an integer", exception.message)
+        assertEquals("Invalid Input: ldp_vp_token_signing_result->publicKey value cannot be an empty string, null, or an integer", exception.message)
     }
 
     @Test
     fun `should throw exception when domain is invalid`() {
-        val container = LdpAuthenticationContainer(
+        val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
             jws = "valid-jws",
             signatureAlgorithm = "ES256",
             publicKey = "valid-key",
@@ -106,9 +105,9 @@ class LdpAuthenticationContainerTest {
         )
 
         val exception = assertThrows<InvalidInput> {
-            container.validate()
+            ldpVpTokenSigningResult.validate()
         }
 
-        assertEquals("Invalid Input: ldp_authentication_container->domain value cannot be an empty string, null, or an integer", exception.message)
+        assertEquals("Invalid Input: ldp_vp_token_signing_result->domain value cannot be an empty string, null, or an integer", exception.message)
     }
 }

@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
 import io.mosip.openID4VP.common.DateUtil.formattedCurrentDateTime
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVpTokenSigningResult
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -16,19 +16,19 @@ class Proof(
 ) {
     companion object {
         fun construct(
-            ldpAuthenticationContainer: LdpAuthenticationContainer,
+            ldpVpTokenSigningResult: LdpVpTokenSigningResult,
             challenge: String,
         ): Proof {
 
             val createdDateAndTime = formattedCurrentDateTime()
 
             return Proof(
-                type = ldpAuthenticationContainer.signatureAlgorithm,
+                type = ldpVpTokenSigningResult.signatureAlgorithm,
                 created = createdDateAndTime,
                 challenge = challenge,
-                domain = ldpAuthenticationContainer.domain,
-                jws = ldpAuthenticationContainer.jws,
-                verificationMethod = ldpAuthenticationContainer.publicKey
+                domain = ldpVpTokenSigningResult.domain,
+                jws = ldpVpTokenSigningResult.jws,
+                verificationMethod = ldpVpTokenSigningResult.publicKey
             )
         }
     }

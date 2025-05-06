@@ -13,11 +13,11 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenEleme
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
-import io.mosip.openID4VP.common.getNonce
+import io.mosip.openID4VP.common.generateNonce
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.constants.VPFormatType
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VpTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -27,7 +27,7 @@ private val className = AuthorizationResponseHandler::class.java.simpleName
 internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<String>>>
     private lateinit var unsignedVPTokens: Map<FormatType, UnsignedVPToken>
-    private val walletNonce = getNonce(16)
+    private val walletNonce = generateNonce(16)
 
     fun constructUnsignedVPToken(
         credentialsMap: Map<String, Map<FormatType, List<String>>>,
@@ -48,12 +48,12 @@ internal class AuthorizationResponseHandler {
 
     fun shareVP(
         authorizationRequest: AuthorizationRequest,
-        authenticationContainerMap: Map<FormatType, AuthenticationContainer>,
+        vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>,
         responseUri: String,
     ): String {
         val authorizationResponse: AuthorizationResponse = createAuthorizationResponse(
             authorizationRequest = authorizationRequest,
-            authenticationContainerMap = authenticationContainerMap
+            vpTokenSigningResultMap = vpTokenSigningResultMap
         )
 
         return sendAuthorizationResponse(
@@ -66,13 +66,13 @@ internal class AuthorizationResponseHandler {
     //Create authorization response based on the response_type parameter in authorization response
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
-        authenticationContainerMap: Map<FormatType, AuthenticationContainer>,
+        vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>,
     ): AuthorizationResponse {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
                 val credentialFormatIndex: MutableMap<FormatType, Int> = mutableMapOf()
                 val vpToken = createVPToken(
-                    authenticationContainerMap,
+                    vpTokenSigningResultMap,
                     authorizationRequest,
                     credentialFormatIndex
                 )
@@ -111,7 +111,7 @@ internal class AuthorizationResponseHandler {
     }
 
     private fun createVPToken(
-        authenticationContainerMap: Map<FormatType, AuthenticationContainer>,
+        vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>,
         authorizationRequest: AuthorizationRequest,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): VPTokenType {
@@ -123,10 +123,10 @@ internal class AuthorizationResponseHandler {
                 lists.flatten()
             }
 
-        authenticationContainerMap.entries.forEachIndexed { index, (credentialFormat, authenticationContainer) ->
+        vpTokenSigningResultMap.entries.forEachIndexed { index, (credentialFormat, vpTokenSigningResult) ->
             vpTokens.add(
                 VPTokenFactory(
-                    authenticationContainer = authenticationContainer,
+                    vpTokenSigningResult = vpTokenSigningResult,
                     unsignedVpToken = unsignedVPTokens[credentialFormat]
                         ?: throw Logger.handleException(
                             exceptionType = "InvalidData",

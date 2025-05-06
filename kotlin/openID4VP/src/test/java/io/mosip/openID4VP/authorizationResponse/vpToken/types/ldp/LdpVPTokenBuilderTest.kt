@@ -1,18 +1,16 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
-import io.mockk.mockkClass
+import io.mockk.mockk
 import io.mockk.verify
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVpTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
-import io.mosip.openID4VP.testData.ldpCredential1
-import io.mosip.openID4VP.testData.ldpCredential2
 import io.mosip.openID4VP.testData.unsignedLdpVPToken
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 
 
 class LdpVPTokenBuilderTest {
-    private val mockAuthContainer = io.mockk.mockk<LdpAuthenticationContainer>(relaxed = true)
+    private val mockLdpVpTokenSigningResult = mockk<LdpVpTokenSigningResult>(relaxed = true)
 
 
     @Test
@@ -20,7 +18,7 @@ class LdpVPTokenBuilderTest {
         val nonce = "test-nonce-value"
 
 
-        val result = LdpVPTokenBuilder(mockAuthContainer, unsignedLdpVPToken, nonce).build()
+        val result = LdpVPTokenBuilder(mockLdpVpTokenSigningResult, unsignedLdpVPToken, nonce).build()
 
         assertEquals(unsignedLdpVPToken.context, result.context)
         assertEquals(unsignedLdpVPToken.type, result.type)
@@ -41,14 +39,13 @@ class LdpVPTokenBuilderTest {
         )
         val nonce = "specific-test-nonce"
 
-        val result = LdpVPTokenBuilder(mockAuthContainer, unsignedToken, nonce).build()
+        val result = LdpVPTokenBuilder(mockLdpVpTokenSigningResult, unsignedToken, nonce).build()
 
         assertEquals(nonce, result.proof.challenge)
     }
 
     @Test
-    fun `should validate ldpAuthenticationContainer when building token`() {
-        val mockAuthContainer = io.mockk.mockk<LdpAuthenticationContainer>(relaxed = true)
+    fun `should validate LdpVpTokenSigningResult when building token`() {
         val unsignedToken = UnsignedLdpVPToken(
             context = listOf("https://www.w3.org/2018/credentials/v1"),
             type = listOf("VerifiablePresentation"),
@@ -56,9 +53,9 @@ class LdpVPTokenBuilderTest {
             id = "test-id",
             holder = "test-holder"
         )
-        LdpVPTokenBuilder(mockAuthContainer, unsignedToken, "nonce").build()
+        LdpVPTokenBuilder(mockLdpVpTokenSigningResult, unsignedToken, "nonce").build()
         verify {
-            mockAuthContainer.validate()
+            mockLdpVpTokenSigningResult.validate()
         }
     }
 }
