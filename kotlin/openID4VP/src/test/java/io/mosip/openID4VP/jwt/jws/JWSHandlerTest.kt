@@ -60,14 +60,9 @@ class JWSHandlerTest {
         val publicKey = "invalidPublicKeyBase64"
         val jwt =JWSUtil.createJWS(jwtPayload, true, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
-
-
-        val exception = assertThrows(Exception::class.java) { JWSHandler(jwt, publicKeyResolver).verify() }
-
-        assertEquals(
-            "An unexpected exception occurred: exception type: VerificationFailure",
-            exception.message
-        )
+        val exception =
+            assertThrows(Exception::class.java) { JWSHandler(jwt, publicKeyResolver).verify() }
+        assertTrue(exception.message!!.contains("An unexpected exception occurred during verification"))
     }
 
     @Test
@@ -76,7 +71,8 @@ class JWSHandlerTest {
         val jwt =JWSUtil.createJWS(jwtPayload, false, jwtHeader)
         every { publicKeyResolver.resolveKey(any()) } returns publicKey
 
-        val exception = assertThrows(Exception::class.java) { JWSHandler(jwt, publicKeyResolver).verify() }
+        val exception =
+            assertThrows(Exception::class.java) { JWSHandler(jwt, publicKeyResolver).verify() }
 
         assertEquals(
             "JWS signature verification failed",
@@ -87,7 +83,8 @@ class JWSHandlerTest {
     @Test
     fun `should extract header successfully`() {
         val mockJws = createMockJws()
-        val result = JWSHandler(mockJws, publicKeyResolver ).extractDataJsonFromJws(JWSHandler.JwsPart.HEADER)
+        val result =
+            JWSHandler(mockJws, publicKeyResolver).extractDataJsonFromJws(JWSHandler.JwsPart.HEADER)
         assertNotNull(result)
         assertTrue(result.isNotEmpty())
     }
@@ -95,7 +92,10 @@ class JWSHandlerTest {
     @Test
     fun `should extract payload successfully`() {
         val mockJws = createMockJws()
-        val result = JWSHandler(mockJws, publicKeyResolver).extractDataJsonFromJws(JWSHandler.JwsPart.PAYLOAD)
+        val result = JWSHandler(
+            mockJws,
+            publicKeyResolver
+        ).extractDataJsonFromJws(JWSHandler.JwsPart.PAYLOAD)
         assertNotNull(result)
         assertTrue(result.isNotEmpty())
     }

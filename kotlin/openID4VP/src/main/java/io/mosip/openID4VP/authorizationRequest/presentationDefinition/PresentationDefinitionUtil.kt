@@ -2,12 +2,14 @@ package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
 import io.mosip.openID4VP.constants.HttpMethod
+import io.mosip.openID4VP.constants.ResponseMode
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val className = PresentationDefinition::class.simpleName!!
@@ -90,5 +92,28 @@ fun parseAndValidatePresentationDefinition(
             className = className
         )
     }
+
     authorizationRequestParameters[PRESENTATION_DEFINITION.value] = presentationDefinitionObj
+
+    val responseMode = getStringValue(
+        authorizationRequestParameters,
+        RESPONSE_MODE.value
+    )!!
+
+    validateResponseModeForMsoMdocFormat(presentationDefinitionObj, responseMode)
+}
+
+fun validateResponseModeForMsoMdocFormat(presentationDefinitionObj: PresentationDefinition, responseMode: String) {
+    val hasMsoMdocFormat = presentationDefinitionObj.format?.containsKey("mso_mdoc") ?: false ||
+            presentationDefinitionObj.inputDescriptors.any {
+                it.format?.containsKey("mso_mdoc") ?: false
+            }
+
+    if (hasMsoMdocFormat && responseMode != ResponseMode.DIRECT_POST_JWT.value) {
+        throw Logger.handleException(
+            exceptionType = "InvalidData",
+            className = className,
+            message = "When mso_mdoc format is present in presentation definition, response_mode must be direct_post.jwt"
+        )
+    }
 }

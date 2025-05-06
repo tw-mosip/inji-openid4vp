@@ -26,6 +26,7 @@ abstract class ResponseModeBasedHandler {
         authorizationRequest: AuthorizationRequest,
         url: String,
         authorizationResponse: AuthorizationResponse,
+        walletNonce: String,
     ): String
 
     fun setResponseUrl(

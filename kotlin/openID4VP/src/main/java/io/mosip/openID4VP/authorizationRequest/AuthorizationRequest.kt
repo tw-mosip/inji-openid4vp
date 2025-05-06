@@ -3,7 +3,6 @@ package io.mosip.openID4VP.authorizationRequest
 import io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.ClientIdSchemeBasedAuthorizationRequestHandler
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinition
-import io.mosip.openID4VP.dto.Verifier
 
 data class AuthorizationRequest(
     val clientId: String,

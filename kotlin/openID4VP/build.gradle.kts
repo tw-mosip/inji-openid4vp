@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.vcverifier)
     implementation(libs.bcpkix)
     implementation(libs.google.tink)
+    implementation("com.augustcellars.cose:cose-java:1.1.0")
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

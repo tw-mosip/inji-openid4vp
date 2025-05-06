@@ -6,6 +6,9 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.exceptions.Exceptions
+import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -38,7 +41,7 @@ class FilterTest {
 		expectedExceptionMessage = "Missing Input: filter->type param is required"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
+			Assert.assertThrows(MissingInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -52,7 +55,7 @@ class FilterTest {
 		expectedExceptionMessage = "Missing Input: filter->pattern param is required"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
+			Assert.assertThrows(MissingInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -66,7 +69,7 @@ class FilterTest {
 		expectedExceptionMessage = "Invalid Input: filter->type value cannot be an empty string, null, or an integer"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -80,7 +83,7 @@ class FilterTest {
 		expectedExceptionMessage = "Invalid Input: filter->pattern value cannot be an empty string, null, or an integer"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -94,7 +97,7 @@ class FilterTest {
 		expectedExceptionMessage = "Invalid Input: filter->pattern value cannot be an empty string, null, or an integer"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 

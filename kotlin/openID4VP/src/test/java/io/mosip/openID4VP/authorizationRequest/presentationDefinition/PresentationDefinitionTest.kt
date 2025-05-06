@@ -6,15 +6,13 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
-import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.constants.ClientIdScheme
-import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST_JWT
-import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
+import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import kotlinx.serialization.json.Json
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -22,7 +20,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.assertThrows
-import org.assertj.core.api.Assertions.assertThat
 
 class PresentationDefinitionTest {
 
@@ -53,7 +50,7 @@ class PresentationDefinitionTest {
         expectedExceptionMessage = "Missing Input: presentation_definition->id param is required"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
+            assertThrows(MissingInput::class.java) {
                 deserializeAndValidate(
                     presentationDefinition,
                     PresentationDefinitionSerializer
@@ -70,7 +67,7 @@ class PresentationDefinitionTest {
             "Missing Input: presentation_definition->input_descriptors param is required"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.MissingInput::class.java) {
+            assertThrows(MissingInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
@@ -85,7 +82,7 @@ class PresentationDefinitionTest {
             "Invalid Input: presentation_definition->id value cannot be an empty string, null, or an integer"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            assertThrows(InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
@@ -99,7 +96,7 @@ class PresentationDefinitionTest {
             "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            assertThrows(InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
@@ -113,7 +110,7 @@ class PresentationDefinitionTest {
             "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            assertThrows(InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 

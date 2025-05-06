@@ -25,7 +25,8 @@ class DirectPostResponseModeHandler: ResponseModeBasedHandler() {
     override fun sendAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
         url: String,
-        authorizationResponse: AuthorizationResponse
+        authorizationResponse: AuthorizationResponse,
+        walletNonce: String
     ): String {
         val bodyParams: Map<String, String> = authorizationResponse.toJsonEncodedMap()
         val response = sendHTTPRequest(

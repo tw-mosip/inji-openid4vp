@@ -2,13 +2,13 @@ package io.mosip.openID4VP
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
-import io.mosip.openID4VP.authorizationResponse.models.unsignedVPToken.UnsignedVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.dto.Verifier
+import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VpTokenSigningResult
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val logTag = Logger.getLogTag(OpenID4VP::class.simpleName!!)
@@ -42,10 +42,12 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun constructUnsignedVPToken(verifiableCredentials: Map<String, Map<FormatType, List<Any>>>): Map<FormatType, UnsignedVPToken> {
+    fun constructUnsignedVPToken(verifiableCredentials: Map<String, Map<FormatType, List<String>>>, ): Map<FormatType, UnsignedVPToken> {
         try {
             return authorizationResponseHandler.constructUnsignedVPToken(
-                credentialsMap = verifiableCredentials
+                credentialsMap = verifiableCredentials,
+                authorizationRequest = this.authorizationRequest,
+                responseUri = this.responseUri!!
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
@@ -53,11 +55,11 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun shareVerifiablePresentation(vpResponsesMetadata: Map<FormatType, VPResponseMetadata>): String {
+    fun shareVerifiablePresentation(vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>): String {
         try {
             return this.authorizationResponseHandler.shareVP(
                 authorizationRequest = this.authorizationRequest,
-                vpResponsesMetadata = vpResponsesMetadata,
+                vpTokenSigningResultMap = vpTokenSigningResultMap,
                 responseUri = this.responseUri!!
             )
         } catch (exception: Exception) {

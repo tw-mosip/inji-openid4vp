@@ -130,6 +130,14 @@ class ClientMetadata(
 	@SerialName("jwks") val jwks: Jwks?,
 ) : Validatable {
 	override fun validate() {
+		if(vpFormats.isEmpty())	{
+			throw Logger.handleException(
+				exceptionType = "InvalidInput",
+				fieldPath = listOf(CLIENT_METADATA.value, "vp_formats"),
+				className = className,
+				fieldType = "map"
+			)
+		}
 		return
 	}
 }
