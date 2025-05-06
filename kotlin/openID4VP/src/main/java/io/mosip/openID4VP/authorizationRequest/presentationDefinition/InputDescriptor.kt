@@ -1,10 +1,9 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import Generated
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidInput
 import io.mosip.openID4VP.common.FieldDeserializer
 import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.exceptions.Exceptions
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -109,7 +108,7 @@ class InputDescriptor(
 	fun validate() {
 		try {
 			constraints.validate()
-		} catch (exception: InvalidInput) {
+		} catch (exception: Exceptions.InvalidInput) {
 			throw exception
 		}
 	}

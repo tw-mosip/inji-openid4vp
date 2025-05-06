@@ -10,8 +10,8 @@ import io.mosip.openID4VP.common.Decoder
 import io.mosip.openID4VP.common.Encoder
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.encodeCbor
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.DeviceAuthentication
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.MdocAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.mdoc.DeviceAuthentication
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.mdoc.MdocAuthenticationContainer
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import io.mosip.openID4VP.testData.mdocCredential
 import org.junit.Assert.assertEquals

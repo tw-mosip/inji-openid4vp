@@ -115,42 +115,8 @@ class DirectPostJwtResponseModeHandlerTest {
         assertEquals(exceptionMessage, exception.message)
     }
 
-    /** sending of authorization response **/
-
     @Test
-    fun `should send the authorization response with JWE in requestBody successfully`() {
-        val responseUri = "https://mock-verifier.com/response"
-        val vpShareSuccessResponse = "VP shared successfully"
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                responseUri,
-                HttpMethod.POST,
-                any(),
-                any()
-            )
-        } returns mapOf("body" to vpShareSuccessResponse)
-        every { anyConstructed<JWEHandler>().generateEncryptedResponse(any()) } returns "eytyiewr.....jewjr"
-
-        val actualResponse =
-            DirectPostJwtResponseModeHandler().sendAuthorizationResponse(
-                authorizationRequestForResponseModeJWT, responseUri,
-                authorizationResponse,
-                "walletNonce"
-            )
-
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                url = responseUri,
-                method = HttpMethod.POST,
-                bodyParams = mapOf("response" to "eytyiewr.....jewjr"),
-                headers = mapOf("Content-Type" to ContentType.APPLICATION_FORM_URL_ENCODED.value)
-            )
-        }
-        assertEquals(vpShareSuccessResponse, actualResponse)
-    }
-
-    @Test
-    fun `should validate the fields with walletMetadata` (){
+    fun `should validate the fields of clientMetadata with walletMetadata` (){
         val clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
         assertDoesNotThrow{
             DirectPostJwtResponseModeHandler().validate(clientMetadata, walletMetadata, true)
@@ -249,5 +215,36 @@ class DirectPostJwtResponseModeHandlerTest {
         assertEquals(expectedExceptionMessage, exception.message)
     }
 
+    /** sending of authorization response **/
+    @Test
+    fun `should send the authorization response with JWE in requestBody successfully`() {
+        val responseUri = "https://mock-verifier.com/response"
+        val vpShareSuccessResponse = "VP shared successfully"
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                responseUri,
+                HttpMethod.POST,
+                any(),
+                any()
+            )
+        } returns mapOf("body" to vpShareSuccessResponse)
+        every { anyConstructed<JWEHandler>().generateEncryptedResponse(any()) } returns "eytyiewr.....jewjr"
 
+        val actualResponse =
+            DirectPostJwtResponseModeHandler().sendAuthorizationResponse(
+                authorizationRequestForResponseModeJWT, responseUri,
+                authorizationResponse,
+                "walletNonce"
+            )
+
+        verify {
+            NetworkManagerClient.sendHTTPRequest(
+                url = responseUri,
+                method = HttpMethod.POST,
+                bodyParams = mapOf("response" to "eytyiewr.....jewjr"),
+                headers = mapOf("Content-Type" to ContentType.APPLICATION_FORM_URL_ENCODED.value)
+            )
+        }
+        assertEquals(vpShareSuccessResponse, actualResponse)
+    }
 }

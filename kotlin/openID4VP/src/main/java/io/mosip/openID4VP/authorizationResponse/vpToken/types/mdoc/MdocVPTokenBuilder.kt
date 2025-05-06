@@ -16,7 +16,7 @@ import io.mosip.openID4VP.common.encodeCbor
 import io.mosip.openID4VP.common.getMdocDocType
 import io.mosip.openID4VP.common.mapSigningAlgorithmToProtectedAlg
 import io.mosip.openID4VP.common.tagEncodedCbor
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.MdocAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.mdoc.MdocAuthenticationContainer
 
 private val className = MdocVPTokenBuilder::class.java.simpleName
 
@@ -25,6 +25,7 @@ class MdocVPTokenBuilder(
     private val mdocCredentials: List<String>,
 ) : VPTokenBuilder {
     override fun build(): MdocVPToken {
+        mdocAuthenticationContainer.validate()
         val documents = mdocCredentials.map { credential ->
             val credentialDocType = getMdocDocType(credential) //TODO: Extract the decoding logic here to be reused
 

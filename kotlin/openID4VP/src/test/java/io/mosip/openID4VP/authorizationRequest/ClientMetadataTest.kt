@@ -10,11 +10,11 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSeri
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwks
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.*
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.*
 import io.mosip.openID4VP.constants.ResponseMode.*
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.walletMetadata

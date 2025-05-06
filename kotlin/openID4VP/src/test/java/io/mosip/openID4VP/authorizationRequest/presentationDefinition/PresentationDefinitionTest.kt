@@ -7,9 +7,9 @@ import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST_JWT
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
+import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
@@ -82,7 +82,7 @@ class PresentationDefinitionTest {
             "Invalid Input: presentation_definition->id value cannot be an empty string, null, or an integer"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            assertThrows(InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
@@ -96,7 +96,7 @@ class PresentationDefinitionTest {
             "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            assertThrows(InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
@@ -110,7 +110,7 @@ class PresentationDefinitionTest {
             "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
 
         val actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            assertThrows(InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 

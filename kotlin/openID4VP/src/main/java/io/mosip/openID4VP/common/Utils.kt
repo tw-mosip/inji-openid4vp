@@ -81,7 +81,3 @@ inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className:
 fun ByteArray.toHex(): String{
     return this.joinToString("") { "%02x".format(it) }
 }
-
-fun Int.isNegative(): Boolean {
-    return this < 0
-}

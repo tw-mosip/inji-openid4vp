@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
 import io.mosip.openID4VP.common.DateUtil.formattedCurrentDateTime
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
 import kotlinx.serialization.Serializable
 
 @Serializable

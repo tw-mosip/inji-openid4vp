@@ -3,6 +3,7 @@ package io.mosip.openID4VP
 import android.util.Log
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
@@ -11,7 +12,9 @@ import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
@@ -19,7 +22,12 @@ import io.mosip.openID4VP.testData.authorizationRequest
 import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.unsignedVPTokens
-import io.mosip.openID4VP.testData.authenticationContainerMap
+import io.mosip.openID4VP.testData.ldpAuthenticationContainerMap
+import io.mosip.openID4VP.testData.ldpCredential1
+import io.mosip.openID4VP.testData.ldpCredential2
+import io.mosip.openID4VP.testData.mdocCredential
+import io.mosip.openID4VP.testData.unsignedLdpVPToken
+import io.mosip.openID4VP.testData.unsignedMdocVPToken
 import okhttp3.Headers
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -31,18 +39,27 @@ import org.junit.Test
 class OpenID4VPTest {
 
     private lateinit var openID4VP: OpenID4VP
-    private val selectedCredentialsList = mapOf(
+
+
+    private val selectedLdpCredentialsList = mapOf(
         "456" to mapOf(
             FormatType.LDP_VC to listOf(
-                """credential1""",
-                """credential2"""
+                ldpCredential1,
+                ldpCredential2
             )
         ), "789" to mapOf(
             FormatType.LDP_VC to listOf(
-                """credential3"""
+                ldpCredential2
             )
         )
     )
+
+    private val selectedMdocCredentialsList = mapOf(
+        "123" to mapOf(
+            FormatType.MSO_MDOC to listOf(mdocCredential)
+        )
+    )
+
     private lateinit var mockWebServer: MockWebServer
     private lateinit var actualException: Exception
     private lateinit var expectedExceptionMessage: String
@@ -68,7 +85,7 @@ class OpenID4VPTest {
             0
         }
 
-        openID4VP.constructUnsignedVPToken(selectedCredentialsList)
+        openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList )
     }
 
     @After
@@ -83,12 +100,18 @@ class OpenID4VPTest {
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
-        val actualUnsignedVPTokens = openID4VP.constructUnsignedVPToken(selectedCredentialsList)
+        mockkConstructor(UnsignedLdpVPTokenBuilder::class)
+        every { anyConstructed<UnsignedLdpVPTokenBuilder>().build() } returns unsignedLdpVPToken
+
+        mockkConstructor(UnsignedMdocVPTokenBuilder::class)
+        every { anyConstructed<UnsignedMdocVPTokenBuilder>().build() } returns unsignedMdocVPToken
+
+
+        val actualUnsignedVPTokens = openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList + selectedMdocCredentialsList)
 
         val expectedUnsignedVPTokens = unsignedVPTokens
-        assertEquals(
-            expectedUnsignedVPTokens, actualUnsignedVPTokens
-        )
+        assertEquals(expectedUnsignedVPTokens[FormatType.LDP_VC], actualUnsignedVPTokens[FormatType.LDP_VC])
+        assertEquals(expectedUnsignedVPTokens[FormatType.MSO_MDOC], actualUnsignedVPTokens[FormatType.MSO_MDOC])
     }
 
     @Test
@@ -98,9 +121,9 @@ class OpenID4VPTest {
         )
         val authenticationContainerMap = mapOf(FormatType.LDP_VC to ldpAuthenticationContainer)
         expectedExceptionMessage =
-            "Invalid Input: vp_response_metadata->domain value cannot be an empty string, null, or an integer"
+            "Invalid Input: ldp_authentication_container->domain value cannot be an empty string, null, or an integer"
         actualException =
-            assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            assertThrows(Exceptions.InvalidInput::class.java) {
                 openID4VP.shareVerifiablePresentation(authenticationContainerMap)
             }
 
@@ -122,7 +145,7 @@ class OpenID4VPTest {
 
         actualException =
             assertThrows(NetworkRequestFailed::class.java) {
-                openID4VP.shareVerifiablePresentation(authenticationContainerMap)
+                openID4VP.shareVerifiablePresentation(ldpAuthenticationContainerMap)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -142,7 +165,7 @@ class OpenID4VPTest {
 
         actualException =
             assertThrows(NetworkRequestTimeout::class.java) {
-                openID4VP.shareVerifiablePresentation(authenticationContainerMap)
+                openID4VP.shareVerifiablePresentation(ldpAuthenticationContainerMap)
             }
 
         assertEquals(expectedExceptionMessage, actualException.message)
@@ -163,7 +186,7 @@ class OpenID4VPTest {
         )
         val expectedValue = "Verifiable Presentation is shared successfully"
 
-        val actualResponse = openID4VP.shareVerifiablePresentation(authenticationContainerMap)
+        val actualResponse = openID4VP.shareVerifiablePresentation(ldpAuthenticationContainerMap)
 
         assertEquals(expectedValue, actualResponse)
     }

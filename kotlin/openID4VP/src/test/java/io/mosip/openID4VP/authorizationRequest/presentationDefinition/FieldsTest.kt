@@ -5,7 +5,8 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidInputPattern
+import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 
 import org.junit.After
@@ -41,7 +42,7 @@ class FieldsTest {
 			"Invalid Input Pattern: fields->path pattern is not matching with OpenId4VP specification"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInputPattern::class.java) {
+			Assert.assertThrows(InvalidInputPattern::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -69,7 +70,7 @@ class FieldsTest {
 		expectedExceptionMessage = "Invalid Input: fields->path value cannot be empty or null"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -83,7 +84,7 @@ class FieldsTest {
 		expectedExceptionMessage = "Invalid Input: fields->path value cannot be empty or null"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 

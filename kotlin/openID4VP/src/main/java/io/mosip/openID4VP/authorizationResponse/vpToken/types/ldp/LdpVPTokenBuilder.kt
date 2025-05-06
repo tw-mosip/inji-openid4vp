@@ -2,7 +2,7 @@ package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenBuilder
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
 
 class LdpVPTokenBuilder(
     val ldpAuthenticationContainer: LdpAuthenticationContainer,

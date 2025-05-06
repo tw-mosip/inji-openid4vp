@@ -35,7 +35,7 @@ object Logger {
         }
         val exception: Exception = when (exceptionType) {
 
-            "InvalidInput" -> AuthorizationRequestExceptions.InvalidInput(
+            "InvalidInput" -> Exceptions.InvalidInput(
                 fieldPath = fieldPathAsString,
                 fieldType = fieldType
             )

@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import org.junit.After
 import org.junit.Assert
@@ -67,7 +68,7 @@ class InputDescriptorTest {
         expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be an empty string, null, or an integer"
 
         val actualException =
-            Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            Assert.assertThrows(Exceptions.InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 
@@ -81,7 +82,7 @@ class InputDescriptorTest {
         expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be an empty string, null, or an integer"
 
         val actualException =
-            Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+            Assert.assertThrows(Exceptions.InvalidInput::class.java) {
                 deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
             }
 

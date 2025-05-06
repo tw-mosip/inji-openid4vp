@@ -1,8 +1,8 @@
-package io.mosip.openID4VP.authorizationResponse.authenticationContainer.types
+package io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp
 
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
 
 private val className = LdpAuthenticationContainer::class.simpleName!!
 
@@ -24,7 +24,7 @@ data class LdpAuthenticationContainer(
             require(value != "null" && validateField(value, "String")) {
                 throw Logger.handleException(
                     exceptionType = "InvalidInput",
-                    fieldPath = listOf("vp_response_metadata",key),
+                    fieldPath = listOf("ldp_authentication_container", key),
                     className = className,
                     fieldType = key::class.simpleName
                 )

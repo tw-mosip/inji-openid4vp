@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
+import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 
 import org.junit.After
@@ -68,7 +69,7 @@ class FilterTest {
 		expectedExceptionMessage = "Invalid Input: filter->type value cannot be an empty string, null, or an integer"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -82,7 +83,7 @@ class FilterTest {
 		expectedExceptionMessage = "Invalid Input: filter->pattern value cannot be an empty string, null, or an integer"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 
@@ -96,7 +97,7 @@ class FilterTest {
 		expectedExceptionMessage = "Invalid Input: filter->pattern value cannot be an empty string, null, or an integer"
 
 		val actualException =
-			Assert.assertThrows(AuthorizationRequestExceptions.InvalidInput::class.java) {
+			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
 				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 			}
 

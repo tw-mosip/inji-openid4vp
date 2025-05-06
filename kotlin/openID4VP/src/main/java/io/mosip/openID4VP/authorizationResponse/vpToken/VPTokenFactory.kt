@@ -6,8 +6,8 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPTokenBuil
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.authorizationResponse.authenticationContainer.AuthenticationContainer
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.LdpAuthenticationContainer
-import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.MdocAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.ldp.LdpAuthenticationContainer
+import io.mosip.openID4VP.authorizationResponse.authenticationContainer.types.mdoc.MdocAuthenticationContainer
 
 class VPTokenFactory(
     private val authenticationContainer: AuthenticationContainer,

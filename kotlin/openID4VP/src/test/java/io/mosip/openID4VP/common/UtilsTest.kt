@@ -121,4 +121,34 @@ class UtilsTest {
             descriptorMapJson
         )
     }
+
+    @Test
+    fun toHex_emptyByteArray_returnsEmptyString() {
+        val emptyArray = ByteArray(0)
+        assertEquals("", emptyArray.toHex())
+    }
+
+    @Test
+    fun toHex_simpleByteArray_returnsCorrectHexString() {
+        val bytes = byteArrayOf(10, 20, 30, 40, 50)
+        assertEquals("0a141e2832", bytes.toHex())
+    }
+
+    @Test
+    fun toHex_byteArrayWithSmallValues_includesLeadingZeros() {
+        val bytes = byteArrayOf(0, 1, 15)
+        assertEquals("00010f", bytes.toHex())
+    }
+
+    @Test
+    fun toHex_byteArrayWithNegativeValues_handlesCorrectly() {
+        val bytes = byteArrayOf(-1, -128)
+        assertEquals("ff80", bytes.toHex())
+    }
+
+    @Test
+    fun toHex_byteArrayWithMixedValues_convertsCorrectly() {
+        val bytes = byteArrayOf(0, 15, 16, 127, -128, -1)
+        assertEquals("000f107f80ff", bytes.toHex())
+    }
 }
