@@ -13,7 +13,7 @@ import io.mosip.openID4VP.common.cborArrayOf
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.decodeCbor
 import io.mosip.openID4VP.common.encodeCbor
-import io.mosip.openID4VP.common.getMdocDocType
+import io.mosip.openID4VP.common.getDecodedMdocCredential
 import io.mosip.openID4VP.common.mapSigningAlgorithmToProtectedAlg
 import io.mosip.openID4VP.common.tagEncodedCbor
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVpTokenSigningResult
@@ -27,7 +27,8 @@ class MdocVPTokenBuilder(
     override fun build(): MdocVPToken {
         mdocVpTokenSigningResult.validate()
         val documents = mdocCredentials.map { credential ->
-            val credentialDocType = getMdocDocType(credential) //TODO: Extract the decoding logic here to be reused
+            val document = getDecodedMdocCredential(credential)
+            val credentialDocType =  document.get(UnicodeString("docType")).toString()
 
             val deviceAuthSignature = mdocVpTokenSigningResult.deviceAuthenticationSignature[credentialDocType]
                 ?: throwMissingInput("Device authentication signature not found for mdoc credential docType $credentialDocType")
@@ -43,11 +44,6 @@ class MdocVPTokenBuilder(
                 "deviceAuth" to deviceAuth,
                 "nameSpaces" to deviceNamespacesBytes
             )
-
-
-            val document = decodeCbor(
-                Decoder.decodeBase64Data(credential)
-            ) as Map
 
             document.put(UnicodeString("deviceSigned"), deviceSigned)
             document

@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc
 
 import co.nstant.`in`.cbor.model.DataItem
+import co.nstant.`in`.cbor.model.UnicodeString
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedVPTokenBuilder
 import io.mosip.openID4VP.common.Logger
@@ -8,7 +9,7 @@ import io.mosip.openID4VP.common.cborArrayOf
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.createHashedDataItem
 import io.mosip.openID4VP.common.encodeCbor
-import io.mosip.openID4VP.common.getMdocDocType
+import io.mosip.openID4VP.common.getDecodedMdocCredential
 import io.mosip.openID4VP.common.tagEncodedCbor
 import io.mosip.openID4VP.common.toHex
 
@@ -35,7 +36,9 @@ class UnsignedMdocVPTokenBuilder(
         val deviceNameSpacesBytes = tagEncodedCbor(deviceNamespaces)
 
         mdocCredentials.map { mdocCredential ->
-            val docType = getMdocDocType(mdocCredential)
+            val decodedMdocCredential = getDecodedMdocCredential(mdocCredential)
+            val docType = decodedMdocCredential.get(UnicodeString("docType")).toString()
+
             val deviceAuthentication: DataItem = cborArrayOf(
                 "DeviceAuthentication",
                 sessionTranscript,

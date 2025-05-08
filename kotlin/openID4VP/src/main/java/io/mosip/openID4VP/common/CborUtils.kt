@@ -99,10 +99,9 @@ fun generateHash(input: DataItem): ByteArray {
     return hashBytes
 }
 
-fun getMdocDocType(mdocCredential: String): String {
+fun getDecodedMdocCredential(mdocCredential: String): Map {
     val base64DecodedMdocCredential = Decoder.decodeBase64Data(mdocCredential)
-    val decodedMdocCredential = decodeCbor(base64DecodedMdocCredential)
-    return (decodedMdocCredential as Map).get(UnicodeString("docType")).toString()
+    return decodeCbor(base64DecodedMdocCredential) as Map
 }
 
 fun mapSigningAlgorithmToProtectedAlg(algorithm: String): Long {
