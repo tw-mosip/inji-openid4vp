@@ -1,6 +1,10 @@
 # INJI-OpenID4VP  
 
-inji-openid4vp is an implementation of OpenID for Verifiable Presentations written in kotlin
+inji-openid4vp is an implementation of OpenID for Verifiable Presentations written in kotlin. It supports sharing of verifiable credentials with verifiers using the OpenID4VP protocol. 
+Formats supported:  
+- LDP_VC : Implemented using [OpenId4VP Specification Draft 23](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html)
+- MSO_MDOC_VC: Implemented Using [ISO/IEC 18013-5:2021](https://www.iso.org/standard/69084.html) and [ISO/IEC TS 18013-7](https://www.iso.org/standard/82772.html)
+
 
 **Table of Contents**
 
@@ -17,7 +21,7 @@ inji-openid4vp is an implementation of OpenID for Verifiable Presentations writt
 Snapshot builds are available - 
 
 ```
-implementation "io.mosip:inji-openid4vp:0.2.0-SNAPSHOT"
+implementation "io.mosip:inji-openid4vp:0.3.0-SNAPSHOT"
 ```
 
 ## Create instance of OpenID4VP library to invoke it's methods
@@ -38,7 +42,9 @@ val openID4VP = OpenID4VP(traceabilityId = "sample-id")
 - Takes an optional boolean to toggle the client validation.
 - Returns the validated Authorization request object.
 
-Note: Wallet can send the entire metadata, library will customize it as per authorization request client_id_scheme. Eg - in case pre-registered, library modifies wallet metadata to be sent without request object signing info properties as specified in the specification.
+**Note 1:** Wallet can send the entire metadata, library will customize it as per authorization request client_id_scheme. Eg - in case pre-registered, library modifies wallet metadata to be sent without request object signing info properties as specified in the specification.
+
+**Note 2:** Currently the library does not support limit disclosure for any format of VC. It will throw an error if the request contains `presentation_definition` or `presentation_definition_uri` with `input_descriptors` and `limit_disclosure` set to required. 
 
 #### WalletMetadata Parameters
 
@@ -77,6 +83,9 @@ val walletMetadata = WalletMetadata(
     vpFormatsSupported = mapOf(
         "ldp_vc" to VPFormatSupported(
             algValuesSupported = listOf("Ed25519Signature2018", "Ed25519Signature2020")
+        ),
+        "mso_mdoc" to VPFormatSupported(
+            algValuesSupported = listOf("ES256")
         )
     ),
     clientIdSchemesSupported = listOf("redirect_uri", "did", "pre-registered"),
@@ -135,6 +144,11 @@ This method will also notify the Verifier about the error by sending it to the r
                     FormatType.LDP_VC to listOf(
                         """credential1""",
                     )
+                ),
+                "input_descriptor_id" to mapOf(
+                    FormatType.MSO_MDOC to listOf(
+                        "credential2",
+                    )
                 )
             )
         )
@@ -148,31 +162,45 @@ This method will also notify the Verifier about the error by sending it to the r
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
 ### shareVerifiablePresentation
-- This function constructs a vp_token with proof using received VPResponseMetadata, then sends it and the presentation_submission to the Verifier via a HTTP POST request.
+- This function constructs a vp_token with proof using received VpTokenSigningResult, then sends it and the presentation_submission to the Verifier via a HTTP POST request.
 - Returns the response back to the consumer app(mobile app) saying whether it has received the shared Verifiable Credentials or not.
 
+**Note 1:** For MSO_MDOC credential, if multiple credentials are shared it is left on the verfier to map each credential to the corresponding input descriptor. The library does not provide this mapping as the ISO standard does not specify any such mapping.
+
+
 ```kotlin
-    val response : String = openID4VP.shareVerifiablePresentation(vpResponsesMetadata: Map<FormatType, VPResponseMetadata>) 
+    val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>) 
 ```
 
 ###### Parameters
 
-| Name                | Type                                | Description                                                                                                                                                 |
-|---------------------|-------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| vpResponsesMetadata | Map<FormatType, VPResponseMetadata> | This will be a map with key as credential format and value as VPResponseMetadata (which is specific to respective credential format's required information) |
+| Name                    | Type                                  | Description                                                                                                                                                   |
+|-------------------------|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| vpTokenSigningResultMap | Map<FormatType, VpTokenSigningResult> | This will be a map with key as credential format and value as VpTokenSigningResult (which is specific to respective credential format's required information) |
 
 
 ##### Example usage
 
 ```kotlin
- val ldpVpResponseMetadata = LdpVPResponseMetadata(
+ val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
     jws = "ey....qweug",
     signatureAlgorithm = "RsaSignature2018",
     publicKey = publicKey,
     domain = "<domain>"
 )
-val vpResponsesMetadata : Map<FormatType, VPResponseMetadata> = mapOf(FormatType.LDP_VC to ldpVpResponseMetadata)
-val response : String = openID4VP.shareVerifiablePresentation(vpResponsesMetadata = vpResponsesMetadata)
+val mdocVpTokenSigningResult = MdocVpTokenSigningResult(
+    deviceAuthenticationSignature = mapOf(
+        "<mdoc-docType>" to DeviceAuthentication(
+            signatue = "ey....qweug",
+            algorithm = "ES256",
+        )
+    )
+)
+val vpTokenSigningResultMap : Map<FormatType, VpTokenSigningResult> = mapOf(
+    FormatType.LDP_VC to ldpVpTokenSigningResult,
+    FormatType.MSO_MDOC to mdocVpTokenSigningResult
+)
+val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResultMap = vpTokenSigningResultMap)
 ```
 
 ###### Exceptions
