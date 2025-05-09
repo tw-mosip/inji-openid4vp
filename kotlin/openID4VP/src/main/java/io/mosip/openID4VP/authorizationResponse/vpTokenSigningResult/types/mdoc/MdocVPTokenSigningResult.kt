@@ -3,10 +3,10 @@ package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 
 class MdocVPTokenSigningResult(
-    val deviceAuthenticationSignature: Map<String, DeviceAuthentication>
+    val docTypeToDeviceAuthentication: Map<String, DeviceAuthentication>
 ) : VPTokenSigningResult {
     fun validate() {
-        deviceAuthenticationSignature.map { (_, deviceAuthentication) ->
+        docTypeToDeviceAuthentication.map { (_, deviceAuthentication) ->
             deviceAuthentication.validate()
         }
     }
