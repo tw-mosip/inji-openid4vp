@@ -11,7 +11,7 @@ import io.mosip.openID4VP.common.Encoder
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.encodeCbor
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import io.mosip.openID4VP.testData.mdocCredential
 import org.junit.Assert.assertEquals
@@ -24,7 +24,7 @@ import co.nstant.`in`.cbor.model.Map as CborMap
 
 class MdocVPTokenBuilderTest {
 
-    private lateinit var mdocVpTokenSigningResult: MdocVpTokenSigningResult
+    private lateinit var mdocVPTokenSigningResult: MdocVPTokenSigningResult
     private lateinit var mdocCredentials: List<String>
     private lateinit var deviceAuthentication: DeviceAuthentication
 
@@ -34,7 +34,7 @@ class MdocVPTokenBuilderTest {
             signature = "c2lnbmF0dXJlX2RhdGE=",
             algorithm = "ES256"
         )
-        mdocVpTokenSigningResult = MdocVpTokenSigningResult(
+        mdocVPTokenSigningResult = MdocVPTokenSigningResult(
             deviceAuthenticationSignature = mapOf(
                 "org.iso.18013.5.1.mDL" to deviceAuthentication
             )
@@ -58,7 +58,7 @@ class MdocVPTokenBuilderTest {
 
     @Test
     fun `should return valid MdocVPToken with expected structure`() {
-        val result = MdocVPTokenBuilder(mdocVpTokenSigningResult, mdocCredentials).build()
+        val result = MdocVPTokenBuilder(mdocVPTokenSigningResult, mdocCredentials).build()
 
         assertNotNull(result)
         val decodedResult = Decoder.decodeBase64Data(result.base64EncodedDeviceResponse)
@@ -77,7 +77,7 @@ class MdocVPTokenBuilderTest {
                 "issuerSigned" to cborMapOf()
             )
         )
-        mdocVpTokenSigningResult = MdocVpTokenSigningResult(
+        mdocVPTokenSigningResult = MdocVPTokenSigningResult(
             deviceAuthenticationSignature = mapOf(
                 "org.iso.18013.5.1.mDL" to deviceAuthentication,
                 "org.iso.18013.5.1.elc" to deviceAuthentication
@@ -85,7 +85,7 @@ class MdocVPTokenBuilderTest {
         )
         val multipleCredentials = mdocCredentials + Encoder.encodeToBase64Url(mdocCredential2)
 
-        val result = MdocVPTokenBuilder(mdocVpTokenSigningResult, multipleCredentials).build()
+        val result = MdocVPTokenBuilder(mdocVPTokenSigningResult, multipleCredentials).build()
 
         assertNotNull(result)
         val decodedResult = Decoder.decodeBase64Data(result.base64EncodedDeviceResponse)
@@ -98,7 +98,7 @@ class MdocVPTokenBuilderTest {
 
     @Test
     fun `should throw exception when device authentication signature is missing`() {
-        val emptyMetadata = MdocVpTokenSigningResult(deviceAuthenticationSignature = mapOf())
+        val emptyMetadata = MdocVPTokenSigningResult(deviceAuthenticationSignature = mapOf())
 
         val exception = assertThrows(MissingInput::class.java) {
             MdocVPTokenBuilder(emptyMetadata, mdocCredentials).build()

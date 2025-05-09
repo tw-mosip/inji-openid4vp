@@ -15,13 +15,13 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.Proof
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.authorizationRequest.Verifier
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPToken
 import io.mosip.openID4VP.constants.ClientIdScheme.DID
@@ -50,13 +50,13 @@ const val publicKey = """-----BEGIN RSA PUBLIC KEY-----
         BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU
         IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==
         -----END RSA PUBLIC KEY-----"""
-val ldpVpTokenSigningResult: LdpVpTokenSigningResult = LdpVpTokenSigningResult(
+val ldpVPTokenSigningResult: LdpVPTokenSigningResult = LdpVPTokenSigningResult(
     "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ",
     "RsaSignature2018",
     publicKey,
     "https://123",
 )
-val mdocVpTokenSigningResult: MdocVpTokenSigningResult = MdocVpTokenSigningResult(
+val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResult(
     deviceAuthenticationSignature = mapOf(
         "org.iso.18013.5.1.mDL" to DeviceAuthentication(
             signature = "mdocsignature",
@@ -64,11 +64,11 @@ val mdocVpTokenSigningResult: MdocVpTokenSigningResult = MdocVpTokenSigningResul
         )
     )
 )
-val ldpVpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult> =
-    mapOf(FormatType.LDP_VC to ldpVpTokenSigningResult)
+val ldpvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
+    mapOf(FormatType.LDP_VC to ldpVPTokenSigningResult)
 
-val mdocVpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult> =
-    mapOf(FormatType.MSO_MDOC to mdocVpTokenSigningResult)
+val mdocvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
+    mapOf(FormatType.MSO_MDOC to mdocVPTokenSigningResult)
 
 val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
     context = listOf("https://www.w3.org/2018/credentials/v1"),
@@ -78,7 +78,7 @@ val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
     holder = "",
 )
 val unsignedMdocVPToken: UnsignedMdocVPToken = UnsignedMdocVPToken(
-    unsignedDeviceAuth = mapOf(
+    docTypeToDeviceAuthenticationBytes = mapOf(
         "org.iso.18013.5.1.mDL" to "d8185892847444657669636541757468656e7469636174696f6e83f6f6835820ed084cf67d819fdc2ab6711e1a36053719358b46bfbf51a523c690f9cb6b1e5d5820ed084cf67d819fdc2ab6711e1a36053719358b46bfbf51a523c690f9cb6b1e5d7818624d487658314847686268387a716c5357662f6675513d3d756f72672e69736f2e31383031332e352e312e6d444cd81841a0"
     )
 )

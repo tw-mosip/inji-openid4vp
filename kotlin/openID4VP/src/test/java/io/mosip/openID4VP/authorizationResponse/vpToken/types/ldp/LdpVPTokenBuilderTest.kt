@@ -2,7 +2,7 @@ package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
 import io.mockk.mockk
 import io.mockk.verify
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.testData.unsignedLdpVPToken
 import org.junit.Test
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 
 
 class LdpVPTokenBuilderTest {
-    private val mockLdpVpTokenSigningResult = mockk<LdpVpTokenSigningResult>(relaxed = true)
+    private val mockLdpVPTokenSigningResult = mockk<LdpVPTokenSigningResult>(relaxed = true)
 
 
     @Test
@@ -18,7 +18,7 @@ class LdpVPTokenBuilderTest {
         val nonce = "test-nonce-value"
 
 
-        val result = LdpVPTokenBuilder(mockLdpVpTokenSigningResult, unsignedLdpVPToken, nonce).build()
+        val result = LdpVPTokenBuilder(mockLdpVPTokenSigningResult, unsignedLdpVPToken, nonce).build()
 
         assertEquals(unsignedLdpVPToken.context, result.context)
         assertEquals(unsignedLdpVPToken.type, result.type)
@@ -39,13 +39,13 @@ class LdpVPTokenBuilderTest {
         )
         val nonce = "specific-test-nonce"
 
-        val result = LdpVPTokenBuilder(mockLdpVpTokenSigningResult, unsignedToken, nonce).build()
+        val result = LdpVPTokenBuilder(mockLdpVPTokenSigningResult, unsignedToken, nonce).build()
 
         assertEquals(nonce, result.proof.challenge)
     }
 
     @Test
-    fun `should validate LdpVpTokenSigningResult when building token`() {
+    fun `should validate LdpVPTokenSigningResult when building token`() {
         val unsignedToken = UnsignedLdpVPToken(
             context = listOf("https://www.w3.org/2018/credentials/v1"),
             type = listOf("VerifiablePresentation"),
@@ -53,9 +53,9 @@ class LdpVPTokenBuilderTest {
             id = "test-id",
             holder = "test-holder"
         )
-        LdpVPTokenBuilder(mockLdpVpTokenSigningResult, unsignedToken, "nonce").build()
+        LdpVPTokenBuilder(mockLdpVPTokenSigningResult, unsignedToken, "nonce").build()
         verify {
-            mockLdpVpTokenSigningResult.validate()
+            mockLdpVPTokenSigningResult.validate()
         }
     }
 }

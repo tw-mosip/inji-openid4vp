@@ -103,7 +103,9 @@ fun parseAndValidatePresentationDefinition(
     validateResponseModeForMsoMdocFormat(presentationDefinitionObj, responseMode)
 }
 
-fun validateResponseModeForMsoMdocFormat(presentationDefinitionObj: PresentationDefinition, responseMode: String) {
+
+
+private fun validateResponseModeForMsoMdocFormat(presentationDefinitionObj: PresentationDefinition, responseMode: String) {
     val hasMsoMdocFormat = presentationDefinitionObj.format?.containsKey("mso_mdoc") ?: false ||
             presentationDefinitionObj.inputDescriptors.any {
                 it.format?.containsKey("mso_mdoc") ?: false

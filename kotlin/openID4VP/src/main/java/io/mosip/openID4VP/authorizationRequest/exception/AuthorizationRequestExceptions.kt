@@ -15,7 +15,7 @@ sealed class AuthorizationRequestExceptions {
         Exception("Deserializing for $fieldPath failed due to this error: $message")
 
     class InvalidLimitDisclosure :
-        Exception("Invalid Input: constraints->limit_disclosure value should be either required or preferred")
+        Exception("Invalid Input: constraints->limit_disclosure value should be preferred")
 
     class InvalidQueryParams(message: String) : Exception(message)
 

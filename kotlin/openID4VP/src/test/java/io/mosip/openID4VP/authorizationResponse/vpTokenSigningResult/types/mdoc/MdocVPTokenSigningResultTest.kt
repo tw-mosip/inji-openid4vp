@@ -11,7 +11,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 
-class MdocVpTokenSigningResultTest {
+class MdocVPTokenSigningResultTest {
 
     private lateinit var mockDeviceAuthentication1: DeviceAuthentication
     private lateinit var mockDeviceAuthentication2: DeviceAuthentication
@@ -41,8 +41,8 @@ class MdocVpTokenSigningResultTest {
 
     @Test
     fun `should call validate on each device authentication in map`() {
-        val mdocVpTokenSigningResult = MdocVpTokenSigningResult(deviceAuthenticationMap)
-        mdocVpTokenSigningResult.validate()
+        val mdocVPTokenSigningResult = MdocVPTokenSigningResult(deviceAuthenticationMap)
+        mdocVPTokenSigningResult.validate()
         verify { mockDeviceAuthentication1.validate() }
         verify { mockDeviceAuthentication2.validate() }
     }
@@ -50,8 +50,8 @@ class MdocVpTokenSigningResultTest {
     @Test
     fun `should handle empty map`() {
         val emptyMap = emptyMap<String, DeviceAuthentication>()
-        val mdocVpTokenSigningResult = MdocVpTokenSigningResult(emptyMap)
-        assertDoesNotThrow { mdocVpTokenSigningResult.validate() }
+        val mdocVPTokenSigningResult = MdocVPTokenSigningResult(emptyMap)
+        assertDoesNotThrow { mdocVPTokenSigningResult.validate() }
     }
 
 }

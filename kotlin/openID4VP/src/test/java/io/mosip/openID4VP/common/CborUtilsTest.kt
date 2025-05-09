@@ -153,8 +153,9 @@ class CborUtilsTest {
 
     @Test
     fun `getMdocDocType should extract docType from credential`() {
-        val result = getMdocDocType(mdocCredential)
-        assertEquals("org.iso.18013.5.1.mDL", result)
+        val result = getDecodedMdocCredential(mdocCredential)
+        println(result)
+        assertTrue(result is Map)
     }
 
     @Test

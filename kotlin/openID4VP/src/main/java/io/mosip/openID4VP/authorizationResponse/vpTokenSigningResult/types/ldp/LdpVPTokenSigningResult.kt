@@ -1,17 +1,17 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
 
-private val className = LdpVpTokenSigningResult::class.simpleName!!
+private val className = LdpVPTokenSigningResult::class.simpleName!!
 
-data class LdpVpTokenSigningResult(
+data class LdpVPTokenSigningResult(
     val jws: String,
     val signatureAlgorithm: String,
     val publicKey: String,
     val domain: String,
-) : VpTokenSigningResult {
+) : VPTokenSigningResult {
     fun validate() {
         val requiredParams = mapOf(
             "jws" to this.jws,

@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc
 
 import co.nstant.`in`.cbor.model.DataItem
+import co.nstant.`in`.cbor.model.UnicodeString
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedVPTokenBuilder
 import io.mosip.openID4VP.common.Logger
@@ -8,7 +9,7 @@ import io.mosip.openID4VP.common.cborArrayOf
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.createHashedDataItem
 import io.mosip.openID4VP.common.encodeCbor
-import io.mosip.openID4VP.common.getMdocDocType
+import io.mosip.openID4VP.common.getDecodedMdocCredential
 import io.mosip.openID4VP.common.tagEncodedCbor
 import io.mosip.openID4VP.common.toHex
 
@@ -21,7 +22,7 @@ class UnsignedMdocVPTokenBuilder(
     private val mdocGeneratedNonce: String
 ): UnsignedVPTokenBuilder {
     override fun build(): UnsignedVPToken {
-        val unsignedDeviceAuth = mutableMapOf<String, String>()
+        val docTypeToDeviceAuthenticationBytes = mutableMapOf<String, String>()
 
         val clientIdHash = createHashedDataItem(clientId, mdocGeneratedNonce)
         val responseUriHash = createHashedDataItem(responseUri, mdocGeneratedNonce)
@@ -35,7 +36,9 @@ class UnsignedMdocVPTokenBuilder(
         val deviceNameSpacesBytes = tagEncodedCbor(deviceNamespaces)
 
         mdocCredentials.map { mdocCredential ->
-            val docType = getMdocDocType(mdocCredential)
+            val decodedMdocCredential = getDecodedMdocCredential(mdocCredential)
+            val docType = decodedMdocCredential.get(UnicodeString("docType")).toString()
+
             val deviceAuthentication: DataItem = cborArrayOf(
                 "DeviceAuthentication",
                 sessionTranscript,
@@ -43,18 +46,18 @@ class UnsignedMdocVPTokenBuilder(
                 deviceNameSpacesBytes
             )
             val deviceAuthenticationBytes = tagEncodedCbor(deviceAuthentication)
-            if (unsignedDeviceAuth.containsKey(docType)) {
+            if (docTypeToDeviceAuthenticationBytes.containsKey(docType)) {
                 throw Logger.handleException(
                     exceptionType = "InvalidData",
                     message = "Duplicate Mdoc Credentials with same doctype found",
                     className = classname
                 )
             }
-            unsignedDeviceAuth[docType] = encodeCbor(deviceAuthenticationBytes).toHex()
+            docTypeToDeviceAuthenticationBytes[docType] = encodeCbor(deviceAuthenticationBytes).toHex()
 
         }
         return UnsignedMdocVPToken(
-            unsignedDeviceAuth = unsignedDeviceAuth
+            docTypeToDeviceAuthenticationBytes = docTypeToDeviceAuthenticationBytes
         )
     }
 }

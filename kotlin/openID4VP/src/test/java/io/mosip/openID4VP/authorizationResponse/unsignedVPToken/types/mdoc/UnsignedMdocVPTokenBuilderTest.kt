@@ -59,8 +59,8 @@ class UnsignedMdocVPTokenBuilderTest {
         ).build() as UnsignedMdocVPToken
 
         assertNotNull(result)
-        assertTrue(result.unsignedDeviceAuth.isNotEmpty())
-        assertEquals(1, result.unsignedDeviceAuth.size)
+        assertTrue(result.docTypeToDeviceAuthenticationBytes.isNotEmpty())
+        assertEquals(1, result.docTypeToDeviceAuthenticationBytes.size)
     }
 
     @Test
@@ -93,7 +93,7 @@ class UnsignedMdocVPTokenBuilderTest {
         ).build() as UnsignedMdocVPToken
 
         assertNotNull(result)
-        assertTrue(result.unsignedDeviceAuth.isEmpty())
+        assertTrue(result.docTypeToDeviceAuthenticationBytes.isEmpty())
     }
 
     @Test
@@ -108,8 +108,8 @@ class UnsignedMdocVPTokenBuilderTest {
             walletNonce
         ).build() as UnsignedMdocVPToken
 
-        val docType = result.unsignedDeviceAuth.keys.first()
-        val authData = result.unsignedDeviceAuth[docType]
+        val docType = result.docTypeToDeviceAuthenticationBytes.keys.first()
+        val authData = result.docTypeToDeviceAuthenticationBytes[docType]
 
         assertNotNull(docType)
         assertFalse(docType.isEmpty())

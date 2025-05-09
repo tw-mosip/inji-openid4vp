@@ -1,3 +1,3 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult
 
-interface VpTokenSigningResult
+interface VPTokenSigningResult
