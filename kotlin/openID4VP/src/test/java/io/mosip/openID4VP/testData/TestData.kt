@@ -64,10 +64,10 @@ val mdocVpTokenSigningResult: MdocVpTokenSigningResult = MdocVpTokenSigningResul
         )
     )
 )
-val ldpVpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult> =
+val ldpvpTokenSigningResults: Map<FormatType, VpTokenSigningResult> =
     mapOf(FormatType.LDP_VC to ldpVpTokenSigningResult)
 
-val mdocVpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult> =
+val mdocvpTokenSigningResults: Map<FormatType, VpTokenSigningResult> =
     mapOf(FormatType.MSO_MDOC to mdocVpTokenSigningResult)
 
 val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
@@ -78,7 +78,7 @@ val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
     holder = "",
 )
 val unsignedMdocVPToken: UnsignedMdocVPToken = UnsignedMdocVPToken(
-    unsignedDeviceAuth = mapOf(
+    docTypeToDeviceAuthenticationBytes = mapOf(
         "org.iso.18013.5.1.mDL" to "d8185892847444657669636541757468656e7469636174696f6e83f6f6835820ed084cf67d819fdc2ab6711e1a36053719358b46bfbf51a523c690f9cb6b1e5d5820ed084cf67d819fdc2ab6711e1a36053719358b46bfbf51a523c690f9cb6b1e5d7818624d487658314847686268387a716c5357662f6675513d3d756f72672e69736f2e31383031332e352e312e6d444cd81841a0"
     )
 )

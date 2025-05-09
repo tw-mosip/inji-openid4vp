@@ -55,11 +55,11 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun shareVerifiablePresentation(vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>): String {
+    fun shareVerifiablePresentation(vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>): String {
         try {
             return this.authorizationResponseHandler.shareVP(
                 authorizationRequest = this.authorizationRequest,
-                vpTokenSigningResultMap = vpTokenSigningResultMap,
+                vpTokenSigningResults = vpTokenSigningResults,
                 responseUri = this.responseUri!!
             )
         } catch (exception: Exception) {

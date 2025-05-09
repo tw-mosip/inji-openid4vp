@@ -169,14 +169,14 @@ This method will also notify the Verifier about the error by sending it to the r
 
 
 ```kotlin
-    val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>) 
+    val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>) 
 ```
 
 ###### Parameters
 
 | Name                    | Type                                  | Description                                                                                                                                                   |
 |-------------------------|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| vpTokenSigningResultMap | Map<FormatType, VpTokenSigningResult> | This will be a map with key as credential format and value as VpTokenSigningResult (which is specific to respective credential format's required information) |
+| vpTokenSigningResults | Map<FormatType, VpTokenSigningResult> | This will be a map with key as credential format and value as VpTokenSigningResult (which is specific to respective credential format's required information) |
 
 
 ##### Example usage
@@ -196,11 +196,11 @@ val mdocVpTokenSigningResult = MdocVpTokenSigningResult(
         )
     )
 )
-val vpTokenSigningResultMap : Map<FormatType, VpTokenSigningResult> = mapOf(
+val vpTokenSigningResults : Map<FormatType, VpTokenSigningResult> = mapOf(
     FormatType.LDP_VC to ldpVpTokenSigningResult,
     FormatType.MSO_MDOC to mdocVpTokenSigningResult
 )
-val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResultMap = vpTokenSigningResultMap)
+val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResults = vpTokenSigningResults)
 ```
 
 ###### Exceptions

@@ -29,11 +29,11 @@ import io.mosip.openID4VP.testData.authorizationRequestForResponseModeJWT
 import io.mosip.openID4VP.testData.clientMetadataMap
 import io.mosip.openID4VP.testData.presentationDefinitionMap
 import io.mosip.openID4VP.testData.setField
-import io.mosip.openID4VP.testData.ldpVpTokenSigningResultMap
+import io.mosip.openID4VP.testData.ldpvpTokenSigningResults
 import io.mosip.openID4VP.testData.ldpCredential1
 import io.mosip.openID4VP.testData.ldpCredential2
 import io.mosip.openID4VP.testData.ldpVPToken
-import io.mosip.openID4VP.testData.mdocVpTokenSigningResultMap
+import io.mosip.openID4VP.testData.mdocvpTokenSigningResults
 import io.mosip.openID4VP.testData.mdocCredential
 import io.mosip.openID4VP.testData.mdocVPToken
 import io.mosip.openID4VP.testData.unsignedLdpVPToken
@@ -178,7 +178,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequest,
-            vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
+            vpTokenSigningResults = ldpvpTokenSigningResults,
             responseUri = authorizationRequest.responseUri!!
         )
 
@@ -223,7 +223,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequestForResponseModeJWT,
-            vpTokenSigningResultMap = ldpVpTokenSigningResultMap + mdocVpTokenSigningResultMap,
+            vpTokenSigningResults = ldpvpTokenSigningResults + mdocvpTokenSigningResults,
             responseUri = authorizationRequestForResponseModeJWT.responseUri!!
         )
 
@@ -269,7 +269,7 @@ class AuthorizationResponseHandlerTest {
 
         authorizationResponseHandler.shareVP(
             authorizationRequest = authorizationRequestWithoutStateProperty,
-            vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
+            vpTokenSigningResults = ldpvpTokenSigningResults,
             responseUri = authorizationRequest.responseUri!!
         )
 
@@ -304,7 +304,7 @@ class AuthorizationResponseHandlerTest {
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.shareVP(
                     authorizationRequest = authorizationRequestWithNonVPTokenResponseType,
-                    vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
+                    vpTokenSigningResults = ldpvpTokenSigningResults,
                     responseUri = authorizationRequest.responseUri!!
                 )
             }
@@ -316,7 +316,7 @@ class AuthorizationResponseHandlerTest {
     }
 
     @Test
-    fun `should throw error when a credential format entry is not available in unsignedVPTokens but available in vpTokenSigningResultMap`() {
+    fun `should throw error when a credential format entry is not available in unsignedVPTokens but available in vpTokenSigningResults`() {
         setField(
             authorizationResponseHandler,
             "unsignedVPTokens",
@@ -326,7 +326,7 @@ class AuthorizationResponseHandlerTest {
             assertThrows(Exceptions.InvalidData::class.java) {
                 authorizationResponseHandler.shareVP(
                     authorizationRequest = authorizationRequest,
-                    vpTokenSigningResultMap = ldpVpTokenSigningResultMap,
+                    vpTokenSigningResults = ldpvpTokenSigningResults,
                     responseUri = authorizationRequest.responseUri!!
                 )
             }

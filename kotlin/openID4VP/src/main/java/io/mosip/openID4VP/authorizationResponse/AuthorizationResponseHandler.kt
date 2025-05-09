@@ -48,12 +48,12 @@ internal class AuthorizationResponseHandler {
 
     fun shareVP(
         authorizationRequest: AuthorizationRequest,
-        vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>,
+        vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>,
         responseUri: String,
     ): String {
         val authorizationResponse: AuthorizationResponse = createAuthorizationResponse(
             authorizationRequest = authorizationRequest,
-            vpTokenSigningResultMap = vpTokenSigningResultMap
+            vpTokenSigningResults = vpTokenSigningResults
         )
 
         return sendAuthorizationResponse(
@@ -66,13 +66,13 @@ internal class AuthorizationResponseHandler {
     //Create authorization response based on the response_type parameter in authorization response
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
-        vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>,
+        vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>,
     ): AuthorizationResponse {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
                 val credentialFormatIndex: MutableMap<FormatType, Int> = mutableMapOf()
                 val vpToken = createVPToken(
-                    vpTokenSigningResultMap,
+                    vpTokenSigningResults,
                     authorizationRequest,
                     credentialFormatIndex
                 )
@@ -111,7 +111,7 @@ internal class AuthorizationResponseHandler {
     }
 
     private fun createVPToken(
-        vpTokenSigningResultMap: Map<FormatType, VpTokenSigningResult>,
+        vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>,
         authorizationRequest: AuthorizationRequest,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): VPTokenType {
@@ -123,7 +123,7 @@ internal class AuthorizationResponseHandler {
                 lists.flatten()
             }
 
-        vpTokenSigningResultMap.entries.forEachIndexed { index, (credentialFormat, vpTokenSigningResult) ->
+        vpTokenSigningResults.entries.forEachIndexed { index, (credentialFormat, vpTokenSigningResult) ->
             vpTokens.add(
                 VPTokenFactory(
                     vpTokenSigningResult = vpTokenSigningResult,
