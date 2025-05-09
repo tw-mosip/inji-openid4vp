@@ -54,28 +54,6 @@ class UnsignedLdpVPTokenBuilderTest {
     }
 
     @Test
-    fun `should add unique context of all vcs to the context array`() {
-        val ldpCredential3 = """{"format":"ldp_vc","verifiableCredential":{"credential":{"issuanceDate":"2024-08-02T16:04:35.304Z","credentialSubject":{"face":"data:image/jpeg;base64,/9j/goKCyuig","dateOfBirth":"2000/01/01","id":"did:jwk:eyJr80435=","UIN":"9012378996","email":"mockuser@gmail.com"},"id":"https://domain.net/credentials/12345-87435","proof":{"type":"RsaSignature2018","created":"2024-04-14T16:04:35Z","proofPurpose":"assertionMethod","verificationMethod":"https://domain.net/.well-known/public-key.json","jws":"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"},"type":["VerifiableCredential"],"@context":["https://www.w3.org/2017/credentials/v1","https://domain.net/.well-known/context.json",{"sec":"https://w3id.org/security#"}],"issuer":"https://domain.net/.well-known/issuer.json"}}}"""
-        val verifiableCredentials = listOf(
-            ldpCredential1,
-            ldpCredential2,
-            ldpCredential3
-        )
-        val result = UnsignedLdpVPTokenBuilder(
-            verifiableCredentials,
-            id,
-            holder
-        ).build() as UnsignedLdpVPToken
-
-        assertNotNull(result)
-        assertEquals(listOf("https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2017/credentials/v1"), result.context)
-        assertEquals(listOf("VerifiablePresentation"), result.type)
-        assertEquals(verifiableCredentials, result.verifiableCredential)
-        assertEquals(id, result.id)
-        assertEquals(holder, result.holder)
-    }
-
-    @Test
     fun `should return correct JSON representation`() {
         val verifiableCredentials = listOf(ldpCredential1)
         val token = UnsignedLdpVPTokenBuilder(

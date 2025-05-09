@@ -22,15 +22,8 @@ class UnsignedLdpVPTokenBuilder(
             )
         }
 
-        val context = verifiableCredential.map { vc ->
-            val verifiableCredentialMap = convertJsonToMap(vc)
-            val credential = (verifiableCredentialMap["verifiableCredential"] as Map<String, Any>)["credential"] as Map<String, Any>
-            ((credential["@context"] as List<*>)[0]).toString()
-        }.toSet()
-
-        println(context)
         return UnsignedLdpVPToken(
-            context = context.toList(),
+            context = listOf("https://www.w3.org/2018/credentials/v1"),
             type = listOf("VerifiablePresentation"),
             verifiableCredential = verifiableCredential,
             id = id,

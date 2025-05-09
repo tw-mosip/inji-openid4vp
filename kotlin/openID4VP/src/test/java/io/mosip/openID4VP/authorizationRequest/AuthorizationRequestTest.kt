@@ -242,7 +242,7 @@ class AuthorizationRequestTest {
             createUrlEncodedData(authorizationRequestParamsMap,false , ClientIdScheme.REDIRECT_URI)
 
         val expectedExceptionMessage =
-            "Invalid Input: constraints->limit_disclosure value should be either required or preferred"
+            "Invalid Input: constraints->limit_disclosure value should be preferred"
 
         actualException =
             assertThrows(AuthorizationRequestExceptions.InvalidLimitDisclosure::class.java) {
