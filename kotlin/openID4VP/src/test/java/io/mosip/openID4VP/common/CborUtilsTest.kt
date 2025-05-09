@@ -154,14 +154,18 @@ class CborUtilsTest {
     @Test
     fun `getMdocDocType should extract docType from credential`() {
         val result = getDecodedMdocCredential(mdocCredential)
-        println(result)
         assertTrue(result is Map)
     }
 
     @Test
-    fun `mapSigningAlgorithmToProtectedAlg should return correct value for ES256`() {
-        val result = mapSigningAlgorithmToProtectedAlg("ES256")
-        assertEquals(-7L, result)
+    fun `mapSigningAlgorithmToProtectedAlg should return correct value for supported algorithm`() {
+        assertEquals(-7L, mapSigningAlgorithmToProtectedAlg("ES256"))
+        assertEquals(-35L, mapSigningAlgorithmToProtectedAlg("ES384"))
+        assertEquals(-36L, mapSigningAlgorithmToProtectedAlg("ES512"))
+        assertEquals(-8L, mapSigningAlgorithmToProtectedAlg("EdDSA"))
+        assertEquals(-37L, mapSigningAlgorithmToProtectedAlg("PS256"))
+        assertEquals(-38L, mapSigningAlgorithmToProtectedAlg("PS384"))
+        assertEquals(-39L, mapSigningAlgorithmToProtectedAlg("PS512"))
     }
 
     @Test
