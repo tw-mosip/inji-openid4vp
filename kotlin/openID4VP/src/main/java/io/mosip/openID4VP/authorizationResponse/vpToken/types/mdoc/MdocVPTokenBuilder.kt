@@ -28,11 +28,11 @@ class MdocVPTokenBuilder(
             val document = getDecodedMdocCredential(credential)
             val credentialDocType =  document.get(UnicodeString("docType")).toString()
 
-            val deviceAuthSignature = mdocVPTokenSigningResult.deviceAuthenticationSignature[credentialDocType]
+            val deviceAuthentication = mdocVPTokenSigningResult.docTypeToDeviceAuthentication[credentialDocType]
                 ?: throwMissingInput("Device authentication signature not found for mdoc credential docType $credentialDocType")
 
-            val signature = deviceAuthSignature.signature
-            val mdocAuthenticationAlgorithm = deviceAuthSignature.algorithm
+            val signature = deviceAuthentication.signature
+            val mdocAuthenticationAlgorithm = deviceAuthentication.algorithm
 
             val deviceSignature = createDeviceSignature(mdocAuthenticationAlgorithm, signature)
 

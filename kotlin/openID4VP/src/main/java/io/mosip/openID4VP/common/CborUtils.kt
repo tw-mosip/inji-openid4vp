@@ -106,7 +106,13 @@ fun getDecodedMdocCredential(mdocCredential: String): Map {
 
 fun mapSigningAlgorithmToProtectedAlg(algorithm: String): Long {
     return when (algorithm) {
-        "ES256" -> -7
+        "ES256" -> -7   // ECDSA w/ SHA-256
+        "ES384" -> -35  // ECDSA w/ SHA-384
+        "ES512" -> -36  // ECDSA w/ SHA-512
+        "EdDSA" -> -8  // EdDSA
+        "PS256" -> -37  // RSASSA-PSS w/ SHA-256
+        "PS384" -> -38  // RSASSA-PSS w/ SHA-384
+        "PS512" -> -39  // RSASSA-PSS w/ SHA-512
         else -> throw IllegalArgumentException("Unsupported signing algorithm: $algorithm")
     }
 }

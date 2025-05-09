@@ -57,7 +57,7 @@ val ldpVPTokenSigningResult: LdpVPTokenSigningResult = LdpVPTokenSigningResult(
     "https://123",
 )
 val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResult(
-    deviceAuthenticationSignature = mapOf(
+    docTypeToDeviceAuthentication = mapOf(
         "org.iso.18013.5.1.mDL" to DeviceAuthentication(
             signature = "mdocsignature",
             algorithm = "ES256"

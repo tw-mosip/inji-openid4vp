@@ -189,7 +189,7 @@ This method will also notify the Verifier about the error by sending it to the r
     domain = "<domain>"
 )
 val mdocVPTokenSigningResult = MdocVPTokenSigningResult(
-    deviceAuthenticationSignature = mapOf(
+    docTypeToDeviceAuthentication = mapOf(
         "<mdoc-docType>" to DeviceAuthentication(
             signatue = "ey....qweug",
             algorithm = "ES256",

@@ -35,7 +35,7 @@ class MdocVPTokenBuilderTest {
             algorithm = "ES256"
         )
         mdocVPTokenSigningResult = MdocVPTokenSigningResult(
-            deviceAuthenticationSignature = mapOf(
+            docTypeToDeviceAuthentication = mapOf(
                 "org.iso.18013.5.1.mDL" to deviceAuthentication
             )
         )
@@ -78,7 +78,7 @@ class MdocVPTokenBuilderTest {
             )
         )
         mdocVPTokenSigningResult = MdocVPTokenSigningResult(
-            deviceAuthenticationSignature = mapOf(
+            docTypeToDeviceAuthentication = mapOf(
                 "org.iso.18013.5.1.mDL" to deviceAuthentication,
                 "org.iso.18013.5.1.elc" to deviceAuthentication
             )
@@ -98,7 +98,7 @@ class MdocVPTokenBuilderTest {
 
     @Test
     fun `should throw exception when device authentication signature is missing`() {
-        val emptyMetadata = MdocVPTokenSigningResult(deviceAuthenticationSignature = mapOf())
+        val emptyMetadata = MdocVPTokenSigningResult(docTypeToDeviceAuthentication = mapOf())
 
         val exception = assertThrows(MissingInput::class.java) {
             MdocVPTokenBuilder(emptyMetadata, mdocCredentials).build()
