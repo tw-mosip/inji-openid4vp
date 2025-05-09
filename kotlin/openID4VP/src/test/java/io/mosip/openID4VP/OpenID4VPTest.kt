@@ -11,7 +11,7 @@ import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
@@ -114,11 +114,11 @@ class OpenID4VPTest {
     }
 
     @Test
-    fun `should throw invalid input exception if any input param of VpTokenSigningResult class is empty`() {
-        val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
+    fun `should throw invalid input exception if any input param of VPTokenSigningResult class is empty`() {
+        val ldpVPTokenSigningResult = LdpVPTokenSigningResult(
             "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ", "RsaSignature2018", publicKey, ""
         )
-        val vpTokenSigningResults = mapOf(FormatType.LDP_VC to ldpVpTokenSigningResult)
+        val vpTokenSigningResults = mapOf(FormatType.LDP_VC to ldpVPTokenSigningResult)
         expectedExceptionMessage =
             "Invalid Input: ldp_vp_token_signing_result->domain value cannot be an empty string, null, or an integer"
         actualException =

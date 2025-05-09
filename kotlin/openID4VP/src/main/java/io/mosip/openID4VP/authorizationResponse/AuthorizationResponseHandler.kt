@@ -17,7 +17,7 @@ import io.mosip.openID4VP.common.generateNonce
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.constants.VPFormatType
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VpTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -48,7 +48,7 @@ internal class AuthorizationResponseHandler {
 
     fun shareVP(
         authorizationRequest: AuthorizationRequest,
-        vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>,
+        vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>,
         responseUri: String,
     ): String {
         val authorizationResponse: AuthorizationResponse = createAuthorizationResponse(
@@ -66,7 +66,7 @@ internal class AuthorizationResponseHandler {
     //Create authorization response based on the response_type parameter in authorization response
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
-        vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>,
+        vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>,
     ): AuthorizationResponse {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
@@ -111,7 +111,7 @@ internal class AuthorizationResponseHandler {
     }
 
     private fun createVPToken(
-        vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>,
+        vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>,
         authorizationRequest: AuthorizationRequest,
         credentialFormatIndex: MutableMap<FormatType, Int>,
     ): VPTokenType {
@@ -127,7 +127,7 @@ internal class AuthorizationResponseHandler {
             vpTokens.add(
                 VPTokenFactory(
                     vpTokenSigningResult = vpTokenSigningResult,
-                    unsignedVpToken = unsignedVPTokens[credentialFormat]
+                    unsignedVPToken = unsignedVPTokens[credentialFormat]
                         ?: throw Logger.handleException(
                             exceptionType = "InvalidData",
                             message = "unable to find the related credential format - $credentialFormat in the unsignedVPTokens map",
@@ -163,7 +163,7 @@ internal class AuthorizationResponseHandler {
     private fun createInputDescriptor(credentialFormatIndex: MutableMap<FormatType, Int>): List<DescriptorMap> {
         //In case of only single VP, presentation_submission -> path = $, path_nest = $.<credentialPathIdentifier - internalPath>[n]
         //and in case of multiple VPs, presentation_submission -> path = $[i], path_nest = $[i].<credentialPathIdentifier - internalPath>[n]
-        val isMultipleVpTokens: Boolean = credentialFormatIndex.keys.size > 1
+        val isMultipleVPTokens: Boolean = credentialFormatIndex.keys.size > 1
         val formatTypeToCredentialIndex: MutableMap<FormatType, Int> = mutableMapOf()
 
         val descriptorMappings =
@@ -173,7 +173,7 @@ internal class AuthorizationResponseHandler {
 
                     credentials.map {
                         val rootLevelPath = when {
-                            isMultipleVpTokens -> "$[$vpTokenIndex]"
+                            isMultipleVPTokens -> "$[$vpTokenIndex]"
                             else -> "$"
                         }
                         val credentialIndex =

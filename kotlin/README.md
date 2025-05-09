@@ -162,33 +162,33 @@ This method will also notify the Verifier about the error by sending it to the r
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
 ### shareVerifiablePresentation
-- This function constructs a vp_token with proof using received VpTokenSigningResult, then sends it and the presentation_submission to the Verifier via a HTTP POST request.
+- This function constructs a vp_token with proof using received VPTokenSigningResult, then sends it and the presentation_submission to the Verifier via a HTTP POST request.
 - Returns the response back to the consumer app(mobile app) saying whether it has received the shared Verifiable Credentials or not.
 
 **Note 1:** For MSO_MDOC credential, if multiple credentials are shared it is left on the verfier to map each credential to the corresponding input descriptor. The library does not provide this mapping as the ISO standard does not specify any such mapping.
 
 
 ```kotlin
-    val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResults: Map<FormatType, VpTokenSigningResult>) 
+    val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>) 
 ```
 
 ###### Parameters
 
 | Name                    | Type                                  | Description                                                                                                                                                   |
 |-------------------------|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| vpTokenSigningResults | Map<FormatType, VpTokenSigningResult> | This will be a map with key as credential format and value as VpTokenSigningResult (which is specific to respective credential format's required information) |
+| vpTokenSigningResults | Map<FormatType, VPTokenSigningResult> | This will be a map with key as credential format and value as VPTokenSigningResult (which is specific to respective credential format's required information) |
 
 
 ##### Example usage
 
 ```kotlin
- val ldpVpTokenSigningResult = LdpVpTokenSigningResult(
+ val ldpVPTokenSigningResult = LdpVPTokenSigningResult(
     jws = "ey....qweug",
     signatureAlgorithm = "RsaSignature2018",
     publicKey = publicKey,
     domain = "<domain>"
 )
-val mdocVpTokenSigningResult = MdocVpTokenSigningResult(
+val mdocVPTokenSigningResult = MdocVPTokenSigningResult(
     deviceAuthenticationSignature = mapOf(
         "<mdoc-docType>" to DeviceAuthentication(
             signatue = "ey....qweug",
@@ -196,9 +196,9 @@ val mdocVpTokenSigningResult = MdocVpTokenSigningResult(
         )
     )
 )
-val vpTokenSigningResults : Map<FormatType, VpTokenSigningResult> = mapOf(
-    FormatType.LDP_VC to ldpVpTokenSigningResult,
-    FormatType.MSO_MDOC to mdocVpTokenSigningResult
+val vpTokenSigningResults : Map<FormatType, VPTokenSigningResult> = mapOf(
+    FormatType.LDP_VC to ldpVPTokenSigningResult,
+    FormatType.MSO_MDOC to mdocVPTokenSigningResult
 )
 val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResults = vpTokenSigningResults)
 ```
