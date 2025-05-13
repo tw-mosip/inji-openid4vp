@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp
 
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedVPTokenBuilder
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPTokenBuilder
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 
