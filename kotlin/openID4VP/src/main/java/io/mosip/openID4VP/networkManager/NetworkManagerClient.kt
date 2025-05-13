@@ -12,56 +12,93 @@ import java.io.InterruptedIOException
 private val logTag = Logger.getLogTag(NetworkManagerClient::class.simpleName!!)
 
 class NetworkManagerClient {
-	companion object {
-		fun sendHTTPRequest(
-			url: String,
-			method: HttpMethod,
-			bodyParams: Map<String, String>? = null,
-			headers: Map<String, String>? = null
-		): Map<String, Any> {
-			try {
-				val client = OkHttpClient.Builder().build()
-				val request: Request
-				when (method) {
-					HttpMethod.POST -> {
-						val requestBodyBuilder = FormBody.Builder()
-						bodyParams?.forEach { (key, value) ->
-							requestBodyBuilder.add(key, value)
-						}
-						val requestBody = requestBodyBuilder.build()
-						val requestBuilder = Request.Builder().url(url).post(requestBody)
-						headers?.forEach { (key, value) ->
-							requestBuilder.addHeader(key, value)
-						}
-						request = requestBuilder.build()
-					}
+    companion object {
+        fun sendHTTPRequest(
+            url: String,
+            method: HttpMethod,
+            bodyParams: Map<String, Any>? = null,
+            headers: Map<String, String>? = null
+        ): Map<String, Any> {
+            try {
+                val client = OkHttpClient.Builder().build()
+                val request: Request
+                when (method) {
+                    HttpMethod.POST -> {
+                        val requestBuilder = Request.Builder().url(url)
+                        if (bodyParams != null) {
+                            val formBodyBuilder = FormBody.Builder()
+                            processFormParams(bodyParams, formBodyBuilder)
+                            val requestBody = formBodyBuilder.build()
+                            requestBuilder.post(requestBody)
+                        } else {
+                            requestBuilder.post(FormBody.Builder().build())
+                        }
+                        headers?.forEach { (key, value) ->
+                            requestBuilder.addHeader(key, value)
+                        }
+                        request = requestBuilder.build()
+                    }
+                    HttpMethod.GET -> request = Request.Builder().url(url).get().build()
+                }
+                val response: Response = client.newCall(request).execute()
 
-					HttpMethod.GET -> request = Request.Builder().url(url).get().build()
-				}
-				val response: Response = client.newCall(request).execute()
+                if (response.isSuccessful) {
+                    val body = response.body?.byteString()?.utf8()
+                        ?: ""
 
-				if (response.isSuccessful) {
-					val body = response.body?.byteStream()?.bufferedReader().use { it?.readText() }
-						?: ""
+                    return mapOf(
+                        "body" to body,
+                        "header" to response.headers
+                    )
+                } else {
+                    throw Exception(response.toString())
+                }
+            } catch (exception: InterruptedIOException) {
+                val specificException =
+                    NetworkManagerClientExceptions.NetworkRequestTimeout()
+                Logger.error(logTag, specificException)
+                throw specificException
+            } catch (exception: Exception) {
+                val specificException =
+                    NetworkManagerClientExceptions.NetworkRequestFailed(
+                        exception.message ?: "Unknown error"
+                    )
+                Logger.error(logTag, specificException)
+                throw specificException
+            }
 
-					return mapOf(
-						"body" to body,
-						"header" to response.headers
-					)
-				} else {
-					throw Exception(response.toString())
-				}
-			} catch (exception: InterruptedIOException) {
-				val specificException =
-					NetworkManagerClientExceptions.NetworkRequestTimeout()
-				Logger.error(logTag, specificException)
-				throw specificException
-			} catch (exception: Exception) {
-				val specificException =
-					NetworkManagerClientExceptions.NetworkRequestFailed(exception.message!!)
-				Logger.error(logTag, specificException)
-				throw specificException
-			}
-		}
-	}
+        }
+
+        private fun processFormParams(
+            params: Map<String, Any>,
+            formBodyBuilder: FormBody.Builder,
+        ) {
+            params.forEach { (key, value) ->
+                when (value) {
+                    is Map<*, *> -> {
+                        processFormParams(value as Map<String, Any>, formBodyBuilder)
+                    }
+
+                    is List<*> -> {
+                        value.forEachIndexed { index, item ->
+                            val listKey = "$key[$index]"
+                            when (item) {
+                                is Map<*, *> -> {
+                                    processFormParams(
+                                        item as Map<String, Any>,
+                                        formBodyBuilder,
+                                    )
+                                }
+
+                                else -> formBodyBuilder.add(listKey, item.toString())
+                            }
+                        }
+                    }
+
+                    else -> formBodyBuilder.add(key, value.toString())
+                }
+            }
+        }
+    }
+
 }

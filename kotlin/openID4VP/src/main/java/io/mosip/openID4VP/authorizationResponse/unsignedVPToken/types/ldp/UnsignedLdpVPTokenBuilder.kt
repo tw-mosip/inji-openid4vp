@@ -8,7 +8,7 @@ import io.mosip.openID4VP.common.convertJsonToMap
 private val className = UnsignedLdpVPToken::class.simpleName!!
 
 class UnsignedLdpVPTokenBuilder(
-    private val verifiableCredential: List<String>,
+    private val verifiableCredential: List<Any>,
     private val id: String,
     private val holder: String,
 ): UnsignedVPTokenBuilder

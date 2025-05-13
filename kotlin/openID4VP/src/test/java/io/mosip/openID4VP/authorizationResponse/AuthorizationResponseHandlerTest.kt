@@ -11,10 +11,15 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
+import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
+import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.common.DateUtil
@@ -36,6 +41,7 @@ import io.mosip.openID4VP.testData.ldpVPToken
 import io.mosip.openID4VP.testData.mdocvpTokenSigningResults
 import io.mosip.openID4VP.testData.mdocCredential
 import io.mosip.openID4VP.testData.mdocVPToken
+import io.mosip.openID4VP.testData.proof
 import io.mosip.openID4VP.testData.unsignedLdpVPToken
 import io.mosip.openID4VP.testData.unsignedMdocVPToken
 import io.mosip.openID4VP.testData.unsignedVPTokens
@@ -169,10 +175,54 @@ class AuthorizationResponseHandlerTest {
                 any()
             )
         } returns mapOf("body" to "VP share success")
-        val expectedBodyWithAuthResponseParams = mapOf(
-            "vp_token" to "{\"@context\":[\"https://www.w3.org/2018/credentials/v1\"],\"type\":[\"VerifiablePresentation\"],\"verifiableCredential\":[\"credential1\",\"credential2\",\"credential3\"],\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"holder\":\"\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-02-13T10:00:00Z\",\"challenge\":\"bMHvX1HGhbh8zqlSWf/fuQ==\",\"domain\":\"https://123\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\",\"proofPurpose\":\"authentication\",\"verificationMethod\":\"-----BEGIN RSA PUBLIC KEY-----\\n        MIICCgKCAgEA0IEd3E5CvLAbGvr/ysYT2TLE7WDrPBHGk8pwGqVvlrrFtZJ9wT8E\\n        lDNkSfHIgBijphkgSXpVMduwWKidiFFtbqQHgKdr4vdiMKzTy8g0aTpD8T5xPImM\\n        CC6CUVgp4EZZHkFK3S2guLZAanXLju3WBD4FuBQTl08vP5MlsiseIIanOnTulUDR\\n        baGIYhONq2kN9UnLIXcv8QPIgroP/n76Ir39EwRd20E4jsNfEriZFthBZKQLNbTz\\n        GrsVMtpUbHPUlvACrTzXm5RQ1THHDYUa46KmxZfTCKWM2EppaoJlUj1psf3LdlOU\\n        MBAarn+3QUxYOMLu9vTLvqsk606WNbeuiHarY6lBAec1E6RXMIcVLKBqMy6NjMCK\\n        Va3ZFvn6/G9JI0U+S8Nn3XpH5nLnyAwim7+l9ZnmqeKTTcnE8oxEuGdP7+VvpyHE\\n        AF8jilspP0PuBLMNV4eNthKPKPfMvBbFtzLcizqXmSLPx8cOtrEOu+cEU6ckavAS\\n        XwPgM27JUjeBwwnAhS8lrN3SiJLYCCi1wXjgqFgESNTBhHq+/H5Mb2wxliJQmfzd\\n        BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU\\n        IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==\\n        -----END RSA PUBLIC KEY-----\"}}",
-            "presentation_submission" to "{\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"definition_id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"descriptor_map\":[{\"id\":\"456\",\"format\":\"ldp_vp\",\"path\":\"\$\",\"path_nested\":{\"id\":\"456\",\"format\":\"ldp_vc\",\"path\":\"\$.VerifiableCredential[0]\"}},{\"id\":\"456\",\"format\":\"ldp_vp\",\"path\":\"\$\",\"path_nested\":{\"id\":\"456\",\"format\":\"ldp_vc\",\"path\":\"\$.VerifiableCredential[1]\"}},{\"id\":\"789\",\"format\":\"ldp_vp\",\"path\":\"\$\",\"path_nested\":{\"id\":\"789\",\"format\":\"ldp_vc\",\"path\":\"\$.VerifiableCredential[2]\"}}]}",
-            "state" to "fsnC8ixCs6mWyV+00k23Qg=="
+        val authorizationResponse = AuthorizationResponse(
+            presentationSubmission = PresentationSubmission(
+                id = "649d581c-f291-4969-9cd5-2c27385a348f",
+                definitionId = "649d581c-f891-4969-9cd5-2c27385a348f",
+                descriptorMap = listOf(
+                    DescriptorMap(
+                        id = "456",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "456",
+                            format = "ldp_vc",
+                            path = "$.VerifiableCredential[0]"
+                        )
+                    ),
+                    DescriptorMap(
+                        id = "456",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "456",
+                            format = "ldp_vc",
+                            path = "$.VerifiableCredential[1]"
+                        )
+                    ),
+                    DescriptorMap(
+                        id = "789",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "789",
+                            format = "ldp_vc",
+                            path = "$.VerifiableCredential[2]"
+                        )
+                    )
+                )
+            ),
+            vpToken = VPTokenType.VPTokenElement(
+                value = LdpVPToken(
+                    context = listOf("https://www.w3.org/2018/credentials/v1"),
+                    type = listOf("VerifiablePresentation"),
+                    verifiableCredential = listOf("credential1", "credential2", "credential3"),
+                    id = "649d581c-f291-4969-9cd5-2c27385a348f",
+                    holder = "",
+                    proof = proof
+                )
+            ),
+            state = "fsnC8ixCs6mWyV+00k23Qg=="
         )
         val expectedHeaders = mapOf("Content-Type" to "application/x-www-form-urlencoded")
 
@@ -186,7 +236,7 @@ class AuthorizationResponseHandlerTest {
             NetworkManagerClient.sendHTTPRequest(
                 url = authorizationRequest.responseUri!!,
                 method = HttpMethod.POST,
-                bodyParams = expectedBodyWithAuthResponseParams,
+                bodyParams = authorizationResponse.toJsonEncodedMap(),
                 headers = expectedHeaders
             )
         }
@@ -261,10 +311,6 @@ class AuthorizationResponseHandlerTest {
                 any()
             )
         } returns mapOf("body" to "VP share success")
-        val expectedBodyWithAuthResponseParams = mapOf(
-            "vp_token" to "{\"@context\":[\"https://www.w3.org/2018/credentials/v1\"],\"type\":[\"VerifiablePresentation\"],\"verifiableCredential\":[\"credential1\",\"credential2\",\"credential3\"],\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"holder\":\"\",\"proof\":{\"type\":\"RsaSignature2018\",\"created\":\"2024-02-13T10:00:00Z\",\"challenge\":\"bMHvX1HGhbh8zqlSWf/fuQ==\",\"domain\":\"https://123\",\"jws\":\"eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ\",\"proofPurpose\":\"authentication\",\"verificationMethod\":\"-----BEGIN RSA PUBLIC KEY-----\\n        MIICCgKCAgEA0IEd3E5CvLAbGvr/ysYT2TLE7WDrPBHGk8pwGqVvlrrFtZJ9wT8E\\n        lDNkSfHIgBijphkgSXpVMduwWKidiFFtbqQHgKdr4vdiMKzTy8g0aTpD8T5xPImM\\n        CC6CUVgp4EZZHkFK3S2guLZAanXLju3WBD4FuBQTl08vP5MlsiseIIanOnTulUDR\\n        baGIYhONq2kN9UnLIXcv8QPIgroP/n76Ir39EwRd20E4jsNfEriZFthBZKQLNbTz\\n        GrsVMtpUbHPUlvACrTzXm5RQ1THHDYUa46KmxZfTCKWM2EppaoJlUj1psf3LdlOU\\n        MBAarn+3QUxYOMLu9vTLvqsk606WNbeuiHarY6lBAec1E6RXMIcVLKBqMy6NjMCK\\n        Va3ZFvn6/G9JI0U+S8Nn3XpH5nLnyAwim7+l9ZnmqeKTTcnE8oxEuGdP7+VvpyHE\\n        AF8jilspP0PuBLMNV4eNthKPKPfMvBbFtzLcizqXmSLPx8cOtrEOu+cEU6ckavAS\\n        XwPgM27JUjeBwwnAhS8lrN3SiJLYCCi1wXjgqFgESNTBhHq+/H5Mb2wxliJQmfzd\\n        BQOI7kr7ICohW8y2ivCBKGR3dB9j7l77C0o/5pzkHElESdR2f3q+nXfHds2NmoRU\\n        IGZojdVF+LrGiwRBRUvZMlSKUdsoYVAxz/a5ISGIrWCOd9PgDO5RNNUCAwEAAQ==\\n        -----END RSA PUBLIC KEY-----\"}}",
-            "presentation_submission" to "{\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"definition_id\":\"649d581c-f891-4969-9cd5-2c27385a348f\",\"descriptor_map\":[{\"id\":\"456\",\"format\":\"ldp_vp\",\"path\":\"\$\",\"path_nested\":{\"id\":\"456\",\"format\":\"ldp_vc\",\"path\":\"\$.VerifiableCredential[0]\"}},{\"id\":\"456\",\"format\":\"ldp_vp\",\"path\":\"\$\",\"path_nested\":{\"id\":\"456\",\"format\":\"ldp_vc\",\"path\":\"\$.VerifiableCredential[1]\"}},{\"id\":\"789\",\"format\":\"ldp_vp\",\"path\":\"\$\",\"path_nested\":{\"id\":\"789\",\"format\":\"ldp_vc\",\"path\":\"\$.VerifiableCredential[2]\"}}]}"
-        )
         val expectedHeaders = mapOf("Content-Type" to "application/x-www-form-urlencoded")
 
         authorizationResponseHandler.shareVP(
@@ -273,11 +319,61 @@ class AuthorizationResponseHandlerTest {
             responseUri = authorizationRequest.responseUri!!
         )
 
+        val authorizationResponse = AuthorizationResponse(
+            presentationSubmission = PresentationSubmission(
+                id = "649d581c-f291-4969-9cd5-2c27385a348f",
+                definitionId = "649d581c-f891-4969-9cd5-2c27385a348f",
+                descriptorMap = listOf(
+                    DescriptorMap(
+                        id = "456",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "456",
+                            format = "ldp_vc",
+                            path = "$.VerifiableCredential[0]"
+                        )
+                    ),
+                    DescriptorMap(
+                        id = "456",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "456",
+                            format = "ldp_vc",
+                            path = "$.VerifiableCredential[1]"
+                        )
+                    ),
+                    DescriptorMap(
+                        id = "789",
+                        format = "ldp_vp",
+                        path = "$",
+                        pathNested = PathNested(
+                            id = "789",
+                            format = "ldp_vc",
+                            path = "$.VerifiableCredential[2]"
+                        )
+                    )
+                )
+            ),
+            vpToken = VPTokenType.VPTokenElement(
+                value = LdpVPToken(
+                    context = listOf("https://www.w3.org/2018/credentials/v1"),
+                    type = listOf("VerifiablePresentation"),
+                    verifiableCredential = listOf("credential1", "credential2", "credential3"),
+                    id = "649d581c-f291-4969-9cd5-2c27385a348f",
+                    holder = "",
+                    proof = proof
+                )
+            ),
+            state = null
+        )
+
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 url = authorizationRequest.responseUri!!,
                 method = HttpMethod.POST,
-                bodyParams = expectedBodyWithAuthResponseParams,
+                bodyParams = authorizationResponse.toJsonEncodedMap(),
                 headers = expectedHeaders
             )
         }

@@ -1,12 +1,12 @@
 package io.mosip.openID4VP.authorizationResponse.presentationSubmission
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
 
 data class DescriptorMap(
     val id: String,
     val format: String,
     val path: String,
-    @JsonProperty("path_nested")
+    @SerializedName("path_nested")
     val pathNested: PathNested? = null,
 )
 

@@ -1,13 +1,13 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
 
 data class LdpVPToken(
-    @JsonProperty("@context")
+    @SerializedName("@context")
     val context: List<String> = listOf("https://www.w3.org/2018/credentials/v1"),
     val type: List<String> = listOf("VerifiablePresentation"),
-    val verifiableCredential: List<String>,
+    val verifiableCredential: List<Any>,
     val id: String,
     val holder: String,
     val proof: Proof,

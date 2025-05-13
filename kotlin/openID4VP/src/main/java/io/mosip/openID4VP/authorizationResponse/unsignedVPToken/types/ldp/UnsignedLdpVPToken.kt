@@ -7,7 +7,7 @@ data class UnsignedLdpVPToken(
     @JsonProperty("@context")
     val context: List<String> ,
     val type: List<String>,
-    val verifiableCredential: List<String>,
+    val verifiableCredential: List<Any>,
     val id: String,
     val holder: String,
 ): UnsignedVPToken
