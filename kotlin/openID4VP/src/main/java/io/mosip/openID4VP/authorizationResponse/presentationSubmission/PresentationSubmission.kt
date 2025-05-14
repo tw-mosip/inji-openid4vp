@@ -1,9 +1,10 @@
 package io.mosip.openID4VP.authorizationResponse.presentationSubmission
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
+
 
 data class PresentationSubmission(
     val id: String,
-    @JsonProperty("definition_id") val definitionId: String,
-    @JsonProperty("descriptor_map") val descriptorMap: List<DescriptorMap>
+    @SerializedName("definition_id") val definitionId: String,
+    @SerializedName("descriptor_map") val descriptorMap: List<DescriptorMap>
 )

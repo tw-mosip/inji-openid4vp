@@ -1,14 +1,14 @@
 package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp
 
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.UnsignedVPTokenBuilder
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPTokenBuilder
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 
 private val className = UnsignedLdpVPToken::class.simpleName!!
 
 class UnsignedLdpVPTokenBuilder(
-    private val verifiableCredential: List<String>,
+    private val verifiableCredential: List<Any>,
     private val id: String,
     private val holder: String,
 ): UnsignedVPTokenBuilder
@@ -22,8 +22,14 @@ class UnsignedLdpVPTokenBuilder(
             )
         }
 
+        val context = verifiableCredential.map { vc ->
+            vc as Map<*, *>
+            val contextArray = vc["@context"] as List<*>
+            (contextArray[0]).toString()
+        }.toSet()
+
         return UnsignedLdpVPToken(
-            context = listOf("https://www.w3.org/2018/credentials/v1"),
+            context = context.toList(),
             type = listOf("VerifiablePresentation"),
             verifiableCredential = verifiableCredential,
             id = id,

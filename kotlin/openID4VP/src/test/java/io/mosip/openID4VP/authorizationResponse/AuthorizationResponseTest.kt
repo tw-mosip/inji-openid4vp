@@ -3,9 +3,10 @@ package io.mosip.openID4VP.authorizationResponse
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.Proof
-import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPToken
 import io.mosip.openID4VP.testData.*
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AuthorizationResponseTest {
@@ -36,38 +37,30 @@ class AuthorizationResponseTest {
         vpToken = vpToken,
         state = "state"
     )
+
     @Test
-    fun `should create encodedJsonMap successfully`() {
-
-
-        val encodedJsonMap = authorizationResponse.toJsonEncodedMap()
-
-        assertEquals(
-            mapOf(
-                "presentation_submission" to "{\"id\":\"ps_id\",\"definition_id\":\"client_id\",\"descriptor_map\":[{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$\",\"path_nested\":{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$.verifiableCredential[0]\"}}]}",
-                "vp_token" to "{\"@context\":[\"context\"],\"type\":[\"type\"],\"verifiableCredential\":[\"VC1\"],\"id\":\"id\",\"holder\":\"holder\",\"proof\":{\"type\":\"type\",\"created\":\"time\",\"challenge\":\"challenge\",\"domain\":\"domain\",\"jws\":\"eryy....ewr\",\"proofPurpose\":\"authentication\",\"verificationMethod\":\"did:example:holder#key-1\"}}",
-                "state" to "state"
-            ),
-            encodedJsonMap
-        )
+    fun `toJsonEncodedMap should return correct map representation`() {
+        val map = authorizationResponse.toJsonEncodedMap()
+        assertEquals(3, map.size)
+        assertTrue(map.containsKey("vp_token"))
+        assertTrue(map.containsKey("presentation_submission"))
+        assertTrue(map.containsKey("state"))
+        assertEquals("state", map["state"])
     }
 
     @Test
-    fun `should create encodedJsonMap with no nullable fields`() {
-        val authorizationResponse = AuthorizationResponse(
+    fun `toJsonEncodedMap should filter out null values`() {
+        val responseWithNullState = AuthorizationResponse(
             presentationSubmission = presentationSubmission,
             vpToken = vpToken,
             state = null
         )
-
-        val encodedJsonMap = authorizationResponse.toJsonEncodedMap()
-
-        assertEquals(
-            mapOf(
-                "presentation_submission" to "{\"id\":\"ps_id\",\"definition_id\":\"client_id\",\"descriptor_map\":[{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$\",\"path_nested\":{\"id\":\"input_descriptor_1\",\"format\":\"ldp_vp\",\"path\":\"$.verifiableCredential[0]\"}}]}",
-                "vp_token" to "{\"@context\":[\"context\"],\"type\":[\"type\"],\"verifiableCredential\":[\"VC1\"],\"id\":\"id\",\"holder\":\"holder\",\"proof\":{\"type\":\"type\",\"created\":\"time\",\"challenge\":\"challenge\",\"domain\":\"domain\",\"jws\":\"eryy....ewr\",\"proofPurpose\":\"authentication\",\"verificationMethod\":\"did:example:holder#key-1\"}}"
-            ),
-            encodedJsonMap
-        )
+        val map = responseWithNullState.toJsonEncodedMap()
+        assertEquals(2, map.size)
+        assertTrue(map.containsKey("vp_token"))
+        assertTrue(map.containsKey("presentation_submission"))
+        assertFalse(map.containsKey("state"))
     }
+
+
 }

@@ -25,12 +25,12 @@ import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 private val className = AuthorizationResponseHandler::class.java.simpleName
 
 internal class AuthorizationResponseHandler {
-    private lateinit var credentialsMap: Map<String, Map<FormatType, List<String>>>
+    private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
     private lateinit var unsignedVPTokens: Map<FormatType, UnsignedVPToken>
     private val walletNonce = generateNonce(16)
 
     fun constructUnsignedVPToken(
-        credentialsMap: Map<String, Map<FormatType, List<String>>>,
+        credentialsMap: Map<String, Map<FormatType, List<Any>>>,
         authorizationRequest: AuthorizationRequest,
         responseUri: String,
     ): Map<FormatType, UnsignedVPToken> {
@@ -117,7 +117,7 @@ internal class AuthorizationResponseHandler {
     ): VPTokenType {
         val vpTokens: MutableList<VPToken> = mutableListOf()
 
-        val groupedVcs: Map<FormatType, List<String>> = credentialsMap.values
+        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.values
             .flatMap { it.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
                 lists.flatten()
@@ -213,7 +213,7 @@ internal class AuthorizationResponseHandler {
         authorizationRequest: AuthorizationRequest,
         responseUri: String
     ): Map<FormatType, UnsignedVPToken> {
-        val groupedVcs: Map<FormatType, List<String>> = credentialsMap.toSortedMap().values
+        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values
             .flatMap { it.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
                 lists.flatten()
@@ -232,7 +232,7 @@ internal class AuthorizationResponseHandler {
 
                 FormatType.MSO_MDOC -> {
                     UnsignedMdocVPTokenBuilder(
-                        mdocCredentials = credentialsArray,
+                        mdocCredentials = credentialsArray as List<String>,
                         clientId = authorizationRequest.clientId,
                         responseUri = responseUri,
                         verifierNonce = authorizationRequest.nonce,

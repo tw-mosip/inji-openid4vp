@@ -28,7 +28,7 @@ class DirectPostResponseModeHandler: ResponseModeBasedHandler() {
         authorizationResponse: AuthorizationResponse,
         walletNonce: String
     ): String {
-        val bodyParams: Map<String, String> = authorizationResponse.toJsonEncodedMap()
+        val bodyParams: Map<String, Any> = authorizationResponse.toJsonEncodedMap()
         val response = sendHTTPRequest(
             url = url,
             method = HttpMethod.POST,
