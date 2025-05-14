@@ -24,7 +24,6 @@ class UnsignedLdpVPTokenBuilder(
 
         val context = verifiableCredential.map { vc ->
             vc as Map<*, *>
-            println("Verifiable Credential: $vc")
             val contextArray = vc["@context"] as List<*>
             (contextArray[0]).toString()
         }.toSet()
