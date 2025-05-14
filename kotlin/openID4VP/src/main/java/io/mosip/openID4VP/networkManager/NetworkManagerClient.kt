@@ -72,21 +72,24 @@ class NetworkManagerClient {
         private fun processFormParams(
             params: Map<String, Any>,
             formBodyBuilder: FormBody.Builder,
+            prefix: String = ""
         ) {
             params.forEach { (key, value) ->
+                val formKey = if (prefix.isNotEmpty()) "$prefix[$key]" else key
                 when (value) {
                     is Map<*, *> -> {
-                        processFormParams(value as Map<String, Any>, formBodyBuilder)
+                        processFormParams(value as Map<String, Any>, formBodyBuilder, formKey)
                     }
 
                     is List<*> -> {
                         value.forEachIndexed { index, item ->
-                            val listKey = "$key[$index]"
+                            val listKey = "$formKey[$index]"
                             when (item) {
                                 is Map<*, *> -> {
                                     processFormParams(
                                         item as Map<String, Any>,
                                         formBodyBuilder,
+                                        listKey
                                     )
                                 }
 
@@ -95,7 +98,7 @@ class NetworkManagerClient {
                         }
                     }
 
-                    else -> formBodyBuilder.add(key, value.toString())
+                    else -> formBodyBuilder.add(formKey, value.toString())
                 }
             }
         }
