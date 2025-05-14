@@ -3,7 +3,7 @@ package io.mosip.openID4VP.authorizationResponse
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.Proof
-import io.mosip.openID4VP.testData.*
+import io.mosip.openID4VP.testData.presentationSubmission
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
