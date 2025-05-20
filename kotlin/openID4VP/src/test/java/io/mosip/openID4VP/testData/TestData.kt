@@ -256,8 +256,14 @@ val trustedVerifiers: List<Verifier> = listOf(
     )
 )
 
-val authRequestParamsByReference = listOf(
+val authRequestParamsByReferenceDraft23 = listOf(
     CLIENT_ID.value,
+    REQUEST_URI.value,
+    REQUEST_URI_METHOD.value
+)
+val authRequestParamsByReferenceDraft21 = listOf(
+    CLIENT_ID.value,
+    CLIENT_ID_SCHEME.value,
     REQUEST_URI.value,
     REQUEST_URI_METHOD.value
 )
