@@ -261,6 +261,7 @@ val authRequestParamsByReferenceDraft23 = listOf(
     REQUEST_URI.value,
     REQUEST_URI_METHOD.value
 )
+
 val authRequestParamsByReferenceDraft21 = listOf(
     CLIENT_ID.value,
     CLIENT_ID_SCHEME.value,
@@ -316,21 +317,28 @@ val requestParams: Map<String, String> = mapOf(
 )
 
 val authorisationRequestListToClientIdSchemeMap = mapOf(
-    ClientIdScheme.DID to authRequestWithDidByValue,
+    DID to authRequestWithDidByValue,
     ClientIdScheme.REDIRECT_URI to authRequestWithRedirectUriByValue,
-    ClientIdScheme.PRE_REGISTERED to authRequestWithPreRegisteredByValue
+    PRE_REGISTERED to authRequestWithPreRegisteredByValue
 )
 
 val clientIdOfDid = mapOf(
     CLIENT_ID.value to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
 )
 
-val clientIdOfPreRegistered = mapOf(
+val clientIdOfPreRegisteredDraft23 = mapOf(
+    CLIENT_ID.value to "${PRE_REGISTERED.value}:mock-client",
+)
+val clientIdOfPreRegisteredDraft21 = mapOf(
     CLIENT_ID.value to "mock-client",
 )
 
-val clientIdOfReDirectUri = mapOf(
+val clientIdOfReDirectUriDraft23 = mapOf(
     CLIENT_ID.value to "${REDIRECT_URI.value}:https://mock-verifier.com/response-uri",
+)
+
+val clientIdOfReDirectUriDraft21 = mapOf(
+    CLIENT_ID.value to "https://mock-verifier.com/response-uri",
 )
 
 val clientMetadataPresentationDefinitionMap = mapOf(

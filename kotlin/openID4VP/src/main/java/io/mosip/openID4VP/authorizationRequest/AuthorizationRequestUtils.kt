@@ -87,12 +87,16 @@ fun extractClientIdScheme(authorizationRequestParameters: Map<String, Any>): Str
         components[0]
     } else {
         // Fallback client_id_scheme pre-registered; pre-registered clients MUST NOT contain a : character in their Client Identifier
-        ClientIdScheme.PRE_REGISTERED.value
+        PRE_REGISTERED.value
     }
 }
 
 
-fun extractClientIdentifier(clientId: String): String {
+fun extractClientIdentifier(authorizationRequestParameters: Map<String, Any>): String {
+    if(authorizationRequestParameters.containsKey(CLIENT_ID_SCHEME.value)) {
+        return  getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+    }
+    val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
     val components = clientId.split(":", limit = 2)
     return if (components.size > 1) {
         val clientIdScheme = components[0]

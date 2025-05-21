@@ -34,7 +34,7 @@ fun createUrlEncodedData(
         else -> applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     }
     val authorizationRequestParam =
-        createAuthorizationRequest(paramList, requestParams) as Map<String, Any>
+        createAuthorizationRequest(paramList, requestParams, draftVersion) as Map<String, Any>
 
     val charset = StandardCharsets.UTF_8.toString()
 
@@ -56,11 +56,8 @@ fun createAuthorizationRequestObject(
     draftVersion: Int = 23,
 ): Any {
     val mapper = jacksonObjectMapper()
-    var paramList = applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
-    if(draftVersion == 21) {
-        paramList = paramList + listOf(CLIENT_ID_SCHEME.value)
-    }
-    return createAuthorizationRequest(paramList, authorizationRequestParams).let { authRequestParam ->
+    val paramList = applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
+    return createAuthorizationRequest(paramList, authorizationRequestParams, draftVersion).let { authRequestParam ->
 
         val param = if(isPresentationDefinitionUriPresent != true)
             authRequestParam + clientMetadataPresentationDefinitionMap
@@ -77,9 +74,14 @@ fun createAuthorizationRequestObject(
 
 private fun createAuthorizationRequest(
     paramList: List<String>,
-    requestParams: Map<String, String?>
+    requestParams: Map<String, String?>,
+    draftVersion: Int = 23
 ): MutableMap<String, String?> {
-    val authorizationRequestParam = paramList
+    var params: List<String> = paramList
+    if(draftVersion == 21) {
+        params = paramList + listOf(CLIENT_ID_SCHEME.value)
+    }
+    val authorizationRequestParam = params
         .filter { requestParams.containsKey(it) }
         .associateWith { requestParams[it] }
         .toMutableMap()

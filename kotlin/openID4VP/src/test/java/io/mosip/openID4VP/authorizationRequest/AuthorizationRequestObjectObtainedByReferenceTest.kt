@@ -23,7 +23,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
@@ -319,7 +318,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
 
     @Test
     fun `should return Authorization Request with populated clientIdScheme(pre-registered) field if the verifier is draft 21 compliant`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered + mapOf(CLIENT_ID_SCHEME.value to PRE_REGISTERED.value)
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegisteredDraft21 + mapOf(CLIENT_ID_SCHEME.value to PRE_REGISTERED.value)
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -531,7 +530,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
 
     @Test
     fun `should return authorization request from redirect uri scheme where request uri is present`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUri
+        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUriDraft23
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -603,7 +602,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
     @Test
     fun `should return back authorization request successfully when authorization request is obtained by reference in pre-registered client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegisteredDraft23
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -637,7 +636,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
     @Test
     fun `should throw error when signed authorization request is obtained by reference in pre-registered client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegisteredDraft23
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -670,7 +669,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
     @Test
     fun `should throw error when signed authorization request is obtained by reference in redirect client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUri
+        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUriDraft23
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -715,7 +714,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             )
         )
 
-        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegisteredDraft23
         val encodedAuthorizationRequest =
             createUrlEncodedData(authorizationRequestParamsMap, true, PRE_REGISTERED)
 
