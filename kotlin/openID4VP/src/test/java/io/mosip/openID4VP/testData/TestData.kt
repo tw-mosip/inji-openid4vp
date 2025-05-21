@@ -326,10 +326,7 @@ val clientIdOfDid = mapOf(
     CLIENT_ID.value to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
 )
 
-val clientIdOfPreRegisteredDraft23 = mapOf(
-    CLIENT_ID.value to "${PRE_REGISTERED.value}:mock-client",
-)
-val clientIdOfPreRegisteredDraft21 = mapOf(
+val clientIdOfPreRegistered = mapOf(
     CLIENT_ID.value to "mock-client",
 )
 

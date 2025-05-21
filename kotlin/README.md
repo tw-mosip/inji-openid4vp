@@ -2,8 +2,12 @@
 
 inji-openid4vp is an implementation of OpenID for Verifiable Presentations written in kotlin. It supports sharing of verifiable credentials with verifiers using the OpenID4VP protocol. 
 Formats supported:  
-- LDP_VC : Implemented using [OpenId4VP Specification Draft 23](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html)
+- LDP_VC : Implemented using [Specification-21](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html) and [Specification-23](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html)
 - MSO_MDOC_VC: Implemented Using [ISO/IEC 18013-5:2021](https://www.iso.org/standard/69084.html) and [ISO/IEC TS 18013-7](https://www.iso.org/standard/82772.html)
+  
+The library validates the client_id and client_id_scheme parameters in the authorization request according to the relevant specification.
+- If the client_id_scheme parameter is included in the authorization request, the request is treated as conforming to Draft 21, and validation is performed accordingly.
+- If the client_id_scheme parameter is not included, the request is interpreted as following Draft 23, and validation is applied based on that specification.
 
 
 **Table of Contents**

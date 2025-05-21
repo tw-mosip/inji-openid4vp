@@ -25,8 +25,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
     override fun validateClientId() {
         if (!shouldValidateClient) return
 
-        val clientId = extractClientIdentifier(authorizationRequestParameters)
-
+        val clientId =  getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
         if (trustedVerifiers.none { it.clientId == clientId }) {
             throw Logger.handleException(
                 exceptionType = "InvalidVerifier",
@@ -81,7 +80,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
 
         if (!shouldValidateClient) return
 
-        val clientId = extractClientIdentifier(authorizationRequestParameters)
+        val clientId =  getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
         val responseUri = getStringValue(authorizationRequestParameters, RESPONSE_URI.value)!!
 
         if (trustedVerifiers.none { it.clientId == clientId && it.responseUris.contains(responseUri) }) {
