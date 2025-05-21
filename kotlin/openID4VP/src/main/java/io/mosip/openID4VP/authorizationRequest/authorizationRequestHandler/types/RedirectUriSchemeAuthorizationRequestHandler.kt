@@ -104,7 +104,7 @@ class RedirectUriSchemeAuthorizationRequestHandler(
                 validate(validAttribute,data, className)
             }
         }
-        if(authRequestParam[validAttribute] != extractClientIdentifier(getStringValue(authRequestParam, CLIENT_ID.value)!!))
+        if(authRequestParam[validAttribute] != extractClientIdentifier(authRequestParam))
             throw Logger.handleException(
                 exceptionType = "InvalidData",
                 className = className,

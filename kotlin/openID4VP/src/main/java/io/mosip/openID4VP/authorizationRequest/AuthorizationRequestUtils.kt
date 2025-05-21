@@ -22,7 +22,7 @@ fun getAuthorizationRequestHandler(
 ): ClientIdSchemeBasedAuthorizationRequestHandler {
     val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)
     validate(CLIENT_ID.value, clientId, className)
-    val clientIdScheme = extractClientIdScheme(getStringValue(authorizationRequestParameters,CLIENT_ID.value)!!)
+    val clientIdScheme = extractClientIdScheme(authorizationRequestParameters)
     return when (clientIdScheme) {
         PRE_REGISTERED.value -> PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers,
@@ -76,19 +76,27 @@ fun validateAuthorizationRequestObjectAndParameters(
     }
 }
 
-fun extractClientIdScheme(clientId: String): String {
+fun extractClientIdScheme(authorizationRequestParameters: Map<String, Any>): String {
+    if(authorizationRequestParameters.containsKey(CLIENT_ID_SCHEME.value)) {
+        return getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value)!!
+    }
+    val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
     val components = clientId.split(":", limit = 2)
 
     return if (components.size > 1) {
         components[0]
     } else {
         // Fallback client_id_scheme pre-registered; pre-registered clients MUST NOT contain a : character in their Client Identifier
-        ClientIdScheme.PRE_REGISTERED.value
+        PRE_REGISTERED.value
     }
 }
 
 
-fun extractClientIdentifier(clientId: String): String {
+fun extractClientIdentifier(authorizationRequestParameters: Map<String, Any>): String {
+    if(authorizationRequestParameters.containsKey(CLIENT_ID_SCHEME.value)) {
+        return  getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+    }
+    val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
     val components = clientId.split(":", limit = 2)
     return if (components.size > 1) {
         val clientIdScheme = components[0]

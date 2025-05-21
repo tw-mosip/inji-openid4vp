@@ -23,7 +23,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
@@ -283,6 +282,73 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         }
     }
 
+    //Client Id scheme - DID
+    @Test
+    fun `should return Authorization Request with populated clientIdScheme(did) field if the verifier is draft 21 compliant`() {
+        val authorizationRequestParamsMap = requestParams + clientIdOfDid + mapOf(CLIENT_ID_SCHEME.value to DID.value)
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
+                .build(),
+            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap, draftVersion = 21)
+        )
+
+        val encodedAuthorizationRequest =
+            createUrlEncodedData(
+                authorizationRequestParamsMap,
+                true,
+                DID,
+                draftVersion = 21
+            )
+
+        val authorizationRequest  = assertDoesNotThrow {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                null,
+                shouldValidateClient = true
+            )
+        }
+        assertEquals(DID.value, authorizationRequest.clientIdScheme)
+    }
+
+    @Test
+    fun `should return Authorization Request with populated clientIdScheme(pre-registered) field if the verifier is draft 21 compliant`() {
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered + mapOf(CLIENT_ID_SCHEME.value to PRE_REGISTERED.value)
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/json")
+                .build(),
+            "body" to createAuthorizationRequestObject(PRE_REGISTERED, authorizationRequestParamsMap, draftVersion = 21)
+        )
+
+        val encodedAuthorizationRequest =
+            createUrlEncodedData(
+                authorizationRequestParamsMap,
+                true,
+                PRE_REGISTERED,
+                draftVersion = 21
+            )
+
+        val authorizationRequest  = assertDoesNotThrow {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                null,
+                shouldValidateClient = true
+            )
+        }
+        assertEquals(PRE_REGISTERED.value, authorizationRequest.clientIdScheme)
+    }
+
     @Test
     fun `should throw error if context type is wrong for request uri response`() {
         val authorizationRequestParamsMap = requestParams + clientIdOfDid
@@ -464,7 +530,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
 
     @Test
     fun `should return authorization request from redirect uri scheme where request uri is present`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUri
+        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUriDraft23
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,
@@ -603,7 +669,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
     @Test
     fun `should throw error when signed authorization request is obtained by reference in redirect client id scheme`() {
 
-        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUri
+        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUriDraft23
         every {
             NetworkManagerClient.sendHTTPRequest(
                 requestUrl,

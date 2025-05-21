@@ -9,6 +9,7 @@ import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.constants.ContentType.APPLICATION_FORM_URL_ENCODED
 import io.mosip.openID4VP.authorizationRequest.Verifier
+import io.mosip.openID4VP.authorizationRequest.extractClientIdentifier
 import io.mosip.openID4VP.constants.ContentType.APPLICATION_JSON
 import okhttp3.Headers
 
@@ -24,8 +25,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
     override fun validateClientId() {
         if (!shouldValidateClient) return
 
-        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
-
+        val clientId =  getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
         if (trustedVerifiers.none { it.clientId == clientId }) {
             throw Logger.handleException(
                 exceptionType = "InvalidVerifier",
@@ -80,7 +80,7 @@ class PreRegisteredSchemeAuthorizationRequestHandler(
 
         if (!shouldValidateClient) return
 
-        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
+        val clientId =  getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
         val responseUri = getStringValue(authorizationRequestParameters, RESPONSE_URI.value)!!
 
         if (trustedVerifiers.none { it.clientId == clientId && it.responseUris.contains(responseUri) }) {
