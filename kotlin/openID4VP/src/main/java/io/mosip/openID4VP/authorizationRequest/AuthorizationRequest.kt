@@ -13,8 +13,9 @@ data class AuthorizationRequest(
     val redirectUri: String?,
     val nonce: String,
     val state: String?,
-    var clientMetadata: ClientMetadata? = null
-) {
+    var clientMetadata: ClientMetadata? = null,
+    val clientIdScheme: String? = null
+)  {
 
     companion object {
 

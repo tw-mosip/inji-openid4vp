@@ -102,8 +102,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     }
 
     private fun isClientIdSchemeSupported(walletMetadata: WalletMetadata) {
-        val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
-        val clientIdScheme = extractClientIdScheme(clientId)
+        val clientIdScheme = extractClientIdScheme(authorizationRequestParameters)
         if (!walletMetadata.clientIdSchemesSupported.contains(clientIdScheme))
             throw Logger.handleException(
                 exceptionType = "InvalidData",
@@ -123,7 +122,8 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
             redirectUri = getStringValue(authorizationRequestParameters, REDIRECT_URI.value),
             nonce = getStringValue(authorizationRequestParameters, NONCE.value)!!,
             state = getStringValue(authorizationRequestParameters, STATE.value),
-            clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value] as? ClientMetadata
+            clientMetadata = authorizationRequestParameters[CLIENT_METADATA.value] as? ClientMetadata,
+            clientIdScheme = getStringValue(authorizationRequestParameters, CLIENT_ID_SCHEME.value)
         )
     }
 
