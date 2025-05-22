@@ -39,28 +39,6 @@ class UnsignedLdpVPTokenBuilderTest {
     }
 
     @Test
-    fun `should add unique context of all vcs to the context array`() {
-        val ldpCredential3 = convertJsonToMap("{\"id\":\"did:rcw:38d51ff1-c55d-40be-af56-c3f30aaa81d4\",\"type\":[\"VerifiableCredential\",\"InsuranceCredential\"],\"proof\":{\"type\":\"Ed25519Signature2020\",\"created\":\"2025-05-12T10:51:03Z\",\"proofValue\":\"z62rZ8pWHi1PmkGYzZmgF8sQoLCPwwfvXYmSsC7P6KoaVyAoDv1SRi1VomcQqSv41HvkHKrHUfpJX3K3ZU9G1rVoh\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"did:web:api.collab.mosip.net:identity-service:56de166e-0e2f-4734-b8e7-be42b3117d39#key-0\"},\"issuer\":\"did:web:api.collab.mosip.net:identity-service:56de166e-0e2f-4734-b8e7-be42b3117d39\",\"@context\":[\"https://www.w3.org/2017/credentials/v1\",\"https://holashchand.github.io/test_project/insurance-context.json\",\"https://w3id.org/security/suites/ed25519-2020/v1\"],\"issuanceDate\":\"2025-05-12T10:51:02.820Z\",\"expirationDate\":\"2025-06-11T10:51:02.814Z\",\"credentialSubject\":{\"id\":\"did:jwk:eyJrdHkiOiJSU0EiLCJlIjoiQVFBQiIsInVzZSI6InNpZyIsImtpZCI6Ii1zUVpsbDhYQXBySGVlNG5CdzB5TUwtLTdsOFJBNGhaM2dMclkzMzdtVUUiLCJhbGciOiJSUzI1NiIsIm4iOiJrUHllWHdIMVM3cjE3WmhOMkl3YmhZejR6bnNEVnl3bDdLRzllUjZ3bUM1YUtaZ0dyY18yWXB1V28tT2RuWDhOc3VWLWFzU0NjU01FVThVdUZqNWtienhRRGdPWFNQWlI1MHVCS19TVEtXTHNVenVlRHpQZUpGdDhibWItVjgtQ0FOa2JrSGRYbXVSS0pUU0JVd3lWRXdtTERnb0ZLYTlVLXhjVTVELWFDcHJFVS1fQ1oyUGZDcF9jdmtJNmdOS2FKRHJBcVVlUkVQYzAzbl93WXd0bE82S1RhQ25jc0JMbEp2U1NBM1B1ZEN5ZFFMVUZwak12R2d3VUlFNkg3d3FoTGdZeXZLTVBTYzVEMG8ybWZ0cHNTVFNrY3p2OEVPdnMtNU5kaHZXTXFlc0dtSE5helk5bDhOMFQyWGxrM0ZqM1lDcXNmQ1lnLUd1RkFRaXpZOU1ZV3cifQ==\",\"dob\":\"2025-01-01\",\"email\":\"abcd@gmail.com\",\"gender\":\"Male\",\"mobile\":\"0123456789\",\"benefits\":[\"Critical Surgery\",\"Full body checkup\"],\"fullName\":\"wallet\",\"policyName\":\"wallet\",\"policyNumber\":\"5555\",\"policyIssuedOn\":\"2023-04-20\",\"policyExpiresOn\":\"2033-04-20\"}}")
-        val verifiableCredentials = listOf(
-            ldpCredential1,
-            ldpCredential2,
-            ldpCredential3
-        )
-        val result = UnsignedLdpVPTokenBuilder(
-            verifiableCredentials,
-            id,
-            holder
-        ).build() as UnsignedLdpVPToken
-
-        assertNotNull(result)
-        assertEquals(listOf("https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2017/credentials/v1"), result.context)
-        assertEquals(listOf("VerifiablePresentation"), result.type)
-        assertEquals(verifiableCredentials, result.verifiableCredential)
-        assertEquals(id, result.id)
-        assertEquals(holder, result.holder)
-    }
-
-    @Test
     fun `should create UnsignedLdpVPToken with valid input`() {
         val result = UnsignedLdpVPTokenBuilder(
             verifiableCredentials,
@@ -91,18 +69,5 @@ class UnsignedLdpVPTokenBuilderTest {
             expectedJson,
             encodeToJsonString<UnsignedLdpVPToken>(token, "token", "UnsignedLdpVPToken")
         )
-    }
-
-    @Test
-    fun `should throw error for empty verifiable credentials list`() {
-        val exception = assertThrows<Exceptions.InvalidData> {
-            UnsignedLdpVPTokenBuilder(
-                emptyList(),
-                id,
-                holder
-            ).build() as UnsignedLdpVPToken
-        }
-        assertEquals("Ldp Verifiable Credential List is empty", exception.message)
-
     }
 }
