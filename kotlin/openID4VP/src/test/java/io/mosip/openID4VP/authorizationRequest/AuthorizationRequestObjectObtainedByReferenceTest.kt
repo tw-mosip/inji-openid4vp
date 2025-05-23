@@ -8,6 +8,7 @@ import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
+import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.REDIRECT_URI
 import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.*
@@ -596,6 +597,50 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             "Client Id mismatch in Authorization Request parameter and the Request Object",
             exception.message
         )
+    }@Test
+
+    fun `should throw exception when the client_id_scheme validation fails while obtaining Authorization request object by reference in redirect_uri client id scheme`() {
+
+        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUriDraft21 + mapOf(CLIENT_ID_SCHEME.value to PRE_REGISTERED.value)
+        val applicableFields = listOf(
+            CLIENT_ID.value,
+            CLIENT_ID_SCHEME.value,
+            PRESENTATION_DEFINITION.value,
+            RESPONSE_TYPE.value,
+            NONCE.value,
+            STATE.value,
+            CLIENT_METADATA.value,
+            RESPONSE_URI.value,
+            RESPONSE_MODE.value
+        )
+        val expectedExceptionMessage = "Client Id Scheme mismatch in Authorization Request parameter and the Request Object"
+
+        val encodedAuthorizationRequest = createUrlEncodedData(
+            authorizationRequestParamsMap +  mapOf(CLIENT_ID_SCHEME.value to ClientIdScheme.REDIRECT_URI.value),
+            true,
+            PRE_REGISTERED,
+            applicableFields,
+            draftVersion = 21
+        )
+
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                requestUrl,
+                any()
+            )
+        } returns mapOf(
+            "header" to Headers.Builder().add("content-type", "application/json")
+                .build(),
+            "body" to createAuthorizationRequestObject(PRE_REGISTERED, authorizationRequestParamsMap, draftVersion = 21)
+        )
+
+        val actualException =
+            assertThrows(InvalidData::class.java) {
+                openID4VP.authenticateVerifier(
+                    encodedAuthorizationRequest, trustedVerifiers, null,true
+                )
+            }
+        assertEquals(expectedExceptionMessage, actualException.message)
     }
 
     //Client Id scheme - Pre-registered

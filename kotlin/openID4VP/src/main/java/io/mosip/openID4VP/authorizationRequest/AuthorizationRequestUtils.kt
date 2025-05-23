@@ -74,6 +74,13 @@ fun validateAuthorizationRequestObjectAndParameters(
             className = className
         )
     }
+    if(params.containsKey(CLIENT_ID_SCHEME.value) && params[CLIENT_ID_SCHEME.value] != authorizationRequestObject[CLIENT_ID_SCHEME.value]) {
+        throw Logger.handleException(
+            exceptionType = "InvalidData",
+            message = "Client Id Scheme mismatch in Authorization Request parameter and the Request Object",
+            className = className
+        )
+    }
 }
 
 fun extractClientIdScheme(authorizationRequestParameters: Map<String, Any>): String {
