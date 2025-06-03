@@ -1,21 +1,22 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken
 
-import com.google.gson.JsonElement
-import com.google.gson.JsonSerializationContext
-import com.google.gson.JsonSerializer
-import java.lang.reflect.Type
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
+@JsonSerialize(using = VPTokenTypeSerializer::class)
 sealed class VPTokenType {
     data class VPTokenArray(val value: List<VPToken>) : VPTokenType()
 
     data class VPTokenElement(val value: VPToken) : VPTokenType()
 }
 
-class VPTokenTypeSerializer : JsonSerializer<VPTokenType> {
-    override fun serialize(src: VPTokenType, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
-        return when (src) {
-            is VPTokenType.VPTokenArray -> context.serialize(src.value)
-            is VPTokenType.VPTokenElement -> context.serialize(src.value)
+class VPTokenTypeSerializer : JsonSerializer<VPTokenType>() {
+    override fun serialize(value: VPTokenType, jsonGenerator: JsonGenerator, serializers: SerializerProvider) {
+        when (value) {
+            is VPTokenType.VPTokenArray -> jsonGenerator.writeObject(value.value)
+            is VPTokenType.VPTokenElement -> jsonGenerator.writeObject(value.value)
         }
     }
 }

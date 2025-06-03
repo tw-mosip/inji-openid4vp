@@ -16,7 +16,7 @@ class NetworkManagerClient {
         fun sendHTTPRequest(
             url: String,
             method: HttpMethod,
-            bodyParams: Map<String, Any>? = null,
+            bodyParams: Map<String, String>? = null,
             headers: Map<String, String>? = null
         ): Map<String, Any> {
             try {
@@ -24,15 +24,12 @@ class NetworkManagerClient {
                 val request: Request
                 when (method) {
                     HttpMethod.POST -> {
-                        val requestBuilder = Request.Builder().url(url)
-                        if (bodyParams != null) {
-                            val formBodyBuilder = FormBody.Builder()
-                            processFormParams(bodyParams, formBodyBuilder)
-                            val requestBody = formBodyBuilder.build()
-                            requestBuilder.post(requestBody)
-                        } else {
-                            requestBuilder.post(FormBody.Builder().build())
+                        val requestBodyBuilder = FormBody.Builder()
+                        bodyParams?.forEach { (key, value) ->
+                            requestBodyBuilder.add(key, value)
                         }
+                        val requestBody = requestBodyBuilder.build()
+                        val requestBuilder = Request.Builder().url(url).post(requestBody)
                         headers?.forEach { (key, value) ->
                             requestBuilder.addHeader(key, value)
                         }
@@ -43,7 +40,7 @@ class NetworkManagerClient {
                 val response: Response = client.newCall(request).execute()
 
                 if (response.isSuccessful) {
-                    val body = response.body?.byteString()?.utf8()
+                    val body = response.body?.byteStream()?.bufferedReader().use { it?.readText() }
                         ?: ""
 
                     return mapOf(
@@ -66,42 +63,6 @@ class NetworkManagerClient {
                 Logger.error(logTag, specificException)
                 throw specificException
             }
-
-        }
-
-        private fun processFormParams(
-            params: Map<String, Any>,
-            formBodyBuilder: FormBody.Builder,
-            prefix: String = ""
-        ) {
-            params.forEach { (key, value) ->
-                val formKey = if (prefix.isNotEmpty()) "$prefix[$key]" else key
-                when (value) {
-                    is Map<*, *> -> {
-                        processFormParams(value as Map<String, Any>, formBodyBuilder, formKey)
-                    }
-
-                    is List<*> -> {
-                        value.forEachIndexed { index, item ->
-                            val listKey = "$formKey[$index]"
-                            when (item) {
-                                is Map<*, *> -> {
-                                    processFormParams(
-                                        item as Map<String, Any>,
-                                        formBodyBuilder,
-                                        listKey
-                                    )
-                                }
-
-                                else -> formBodyBuilder.add(listKey, item.toString())
-                            }
-                        }
-                    }
-
-                    else -> formBodyBuilder.add(formKey, value.toString())
-                }
-            }
         }
     }
-
 }
