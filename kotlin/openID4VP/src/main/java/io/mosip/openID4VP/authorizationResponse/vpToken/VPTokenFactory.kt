@@ -17,6 +17,7 @@ class VPTokenFactory(
 ) {
 
     fun getVPTokenBuilder(credentialFormat: FormatType): VPTokenBuilder {
+        println("VPTokenFactory: getVPTokenBuilder called with credentialFormat: $credentialFormat")
         return when (credentialFormat) {
             FormatType.LDP_VC -> LdpVPTokenBuilder(
                 ldpVPTokenSigningResult = vpTokenSigningResult as LdpVPTokenSigningResult,

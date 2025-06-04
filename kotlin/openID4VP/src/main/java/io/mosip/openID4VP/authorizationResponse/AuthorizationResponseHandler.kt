@@ -123,6 +123,8 @@ internal class AuthorizationResponseHandler {
                 lists.flatten()
             }
 
+        println("Grouped VCs: $groupedVcs")
+
         vpTokenSigningResults.entries.forEachIndexed { index, (credentialFormat, vpTokenSigningResult) ->
             vpTokens.add(
                 VPTokenFactory(
@@ -140,6 +142,7 @@ internal class AuthorizationResponseHandler {
             credentialFormatIndex[credentialFormat] = index
         }
 
+        println("VP Tokens: $vpTokens")
         val vpToken: VPTokenType = vpTokens.takeIf { it.size == 1 }
             ?.let { VPTokenElement(it[0]) }
             ?: VPTokenArray(vpTokens)
@@ -223,11 +226,13 @@ internal class AuthorizationResponseHandler {
         return groupedVcs.mapValues { (format, credentialsArray) ->
             when (format) {
                 FormatType.LDP_VC -> {
-                    UnsignedLdpVPTokenBuilder(
+                    val abc = UnsignedLdpVPTokenBuilder(
                         verifiableCredential = credentialsArray,
                         id = UUIDGenerator.generateUUID(),
                         holder = ""
                     ).build()
+                    println("Unsigned LDP VP Token: $abc")
+                    abc
                 }
 
                 FormatType.MSO_MDOC -> {
