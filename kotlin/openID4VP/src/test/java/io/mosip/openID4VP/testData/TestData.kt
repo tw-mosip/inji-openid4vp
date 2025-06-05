@@ -58,6 +58,7 @@ val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResul
         )
     )
 )
+val holderId = "did:jwk:eyJrdHkiOiJSU0EiLCJlIjoiQVFBQiIsInVzZSI6InNpZyIs"
 val ldpvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
     mapOf(FormatType.LDP_VC to ldpVPTokenSigningResult)
 
@@ -65,11 +66,7 @@ val mdocvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
     mapOf(FormatType.MSO_MDOC to mdocVPTokenSigningResult)
 
 val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
-    context = listOf("https://www.w3.org/2018/credentials/v1"),
-    type = listOf("VerifiablePresentation"),
-    verifiableCredential = listOf(ldpCredential1, ldpCredential2, ldpCredential2),
-    id = "649d581c-f291-4969-9cd5-2c27385a348f",
-    holder = "",
+   dataToSign = "dataToSign"
 )
 val unsignedMdocVPToken: UnsignedMdocVPToken = UnsignedMdocVPToken(
     docTypeToDeviceAuthenticationBytes = mapOf(

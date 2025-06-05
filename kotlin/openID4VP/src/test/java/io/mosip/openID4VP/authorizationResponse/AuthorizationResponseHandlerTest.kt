@@ -32,6 +32,7 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.authorizationRequest
 import io.mosip.openID4VP.testData.authorizationRequestForResponseModeJWT
 import io.mosip.openID4VP.testData.clientMetadataMap
+import io.mosip.openID4VP.testData.holderId
 import io.mosip.openID4VP.testData.presentationDefinitionMap
 import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.ldpvpTokenSigningResults
@@ -83,11 +84,7 @@ class AuthorizationResponseHandlerTest {
         setField(authorizationResponseHandler, "credentialsMap", selectedLdpVcCredentialsList)
 
          val unsignedLdpVPTokenForReflection =  UnsignedLdpVPToken(
-            context = listOf("https://www.w3.org/2018/credentials/v1"),
-            type = listOf("VerifiablePresentation"),
-            verifiableCredential = listOf("credential1", "credential2", "credential3"),
-            id = "649d581c-f291-4969-9cd5-2c27385a348f",
-            holder = "",
+             dataToSign = "dataToSign"
         )
 
         val unsignedVPTokens =
@@ -123,10 +120,10 @@ class AuthorizationResponseHandlerTest {
     fun `should successfully construct unsigned VP tokens for both LDP_VC and MSO_MDOC formats`() {
 
         mockkConstructor(UnsignedLdpVPTokenBuilder::class)
-        every { anyConstructed<UnsignedLdpVPTokenBuilder>().build() } returns unsignedLdpVPToken
+        every { anyConstructed<UnsignedLdpVPTokenBuilder>().build() } returns mapOf("UnsignedLdpVPToken" to unsignedLdpVPToken, "dataToSign" to "dataToSign")
 
         mockkConstructor(UnsignedMdocVPTokenBuilder::class)
-        every { anyConstructed<UnsignedMdocVPTokenBuilder>().build() } returns unsignedMdocVPToken
+        every { anyConstructed<UnsignedMdocVPTokenBuilder>().build() } returns mapOf("UnsignedLdpVPToken" to unsignedMdocVPToken, "dataToSign" to "dataToSign")
 
         val expectedUnsignedVPToken = mapOf(
             FormatType.LDP_VC to unsignedLdpVPToken,
@@ -137,6 +134,7 @@ class AuthorizationResponseHandlerTest {
             credentialsMap =   selectedMdocCredentialsList+selectedLdpVcCredentialsList,
             authorizationRequest = authorizationRequest,
             responseUri = "https://mock-verifier.com",
+            holderId = holderId
         )
 
         assertNotNull(unsignedVPToken)
@@ -154,6 +152,7 @@ class AuthorizationResponseHandlerTest {
                     credentialsMap = mapOf(),
                     authorizationRequest = authorizationRequest,
                     responseUri = "https://mock-verifier.com",
+                    holderId = holderId
                 )
             }
 

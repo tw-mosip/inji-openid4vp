@@ -2,7 +2,6 @@ package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc
 
 import co.nstant.`in`.cbor.model.DataItem
 import co.nstant.`in`.cbor.model.UnicodeString
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPTokenBuilder
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.cborArrayOf
@@ -21,7 +20,7 @@ class UnsignedMdocVPTokenBuilder(
     private val verifierNonce: String,
     private val mdocGeneratedNonce: String
 ): UnsignedVPTokenBuilder {
-    override fun build(): UnsignedVPToken {
+    override fun build(): Map<String, Any> {
         val docTypeToDeviceAuthenticationBytes = mutableMapOf<String, String>()
 
         val clientIdHash = createHashedDataItem(clientId, mdocGeneratedNonce)
@@ -56,8 +55,14 @@ class UnsignedMdocVPTokenBuilder(
             docTypeToDeviceAuthenticationBytes[docType] = encodeCbor(deviceAuthenticationBytes).toHex()
 
         }
-        return UnsignedMdocVPToken(
-            docTypeToDeviceAuthenticationBytes = docTypeToDeviceAuthenticationBytes
-        )
+
+        val result = mapOf("unsignedMdocVPToken" to mdocCredentials, "dataToSign" to docTypeToDeviceAuthenticationBytes)
+
+        println("UnsignedMdocVPTokenBuilder: docTypeToDeviceAuthenticationBytes: $docTypeToDeviceAuthenticationBytes")
+
+        return result
+//        return UnsignedMdocVPToken(
+//            docTypeToDeviceAuthenticationBytes = docTypeToDeviceAuthenticationBytes
+//        )
     }
 }

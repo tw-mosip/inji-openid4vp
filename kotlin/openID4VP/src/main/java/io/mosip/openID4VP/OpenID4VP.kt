@@ -10,7 +10,6 @@ import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandlerV1
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
-import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
@@ -64,12 +63,13 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun constructUnsignedVPToken(verifiableCredentials: Map<String, Map<FormatType, List<Any>>>): Map<FormatType, UnsignedVPToken> {
+    fun constructUnsignedVPToken(verifiableCredentials: Map<String, Map<FormatType, List<Any>>>, holderId: String): Map<FormatType, UnsignedVPToken> {
         try {
             return authorizationResponseHandler.constructUnsignedVPToken(
                 credentialsMap = verifiableCredentials,
                 authorizationRequest = this.authorizationRequest,
-                responseUri = this.responseUri!!
+                responseUri = this.responseUri!!,
+                holderId = holderId
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)

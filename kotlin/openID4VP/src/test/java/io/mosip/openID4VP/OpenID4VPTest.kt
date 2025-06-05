@@ -18,6 +18,7 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
 import io.mosip.openID4VP.testData.authorizationRequest
+import io.mosip.openID4VP.testData.holderId
 import io.mosip.openID4VP.testData.publicKey
 import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.unsignedVPTokens
@@ -53,6 +54,7 @@ class OpenID4VPTest {
         )
     )
 
+
     private val selectedMdocCredentialsList = mapOf(
         "123" to mapOf(
             FormatType.MSO_MDOC to listOf(mdocCredential)
@@ -84,7 +86,7 @@ class OpenID4VPTest {
             0
         }
 
-        openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList )
+        openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList, holderId )
     }
 
     @After
@@ -100,13 +102,13 @@ class OpenID4VPTest {
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
 
         mockkConstructor(UnsignedLdpVPTokenBuilder::class)
-        every { anyConstructed<UnsignedLdpVPTokenBuilder>().build() } returns unsignedLdpVPToken
+        every { anyConstructed<UnsignedLdpVPTokenBuilder>().build() } returns mapOf("UnsignedLdpVPToken" to unsignedLdpVPToken, "dataToSign" to "dataToSign")
 
         mockkConstructor(UnsignedMdocVPTokenBuilder::class)
-        every { anyConstructed<UnsignedMdocVPTokenBuilder>().build() } returns unsignedMdocVPToken
+        every { anyConstructed<UnsignedMdocVPTokenBuilder>().build() } returns mapOf("UnsignedLdpVPToken" to unsignedMdocVPToken, "dataToSign" to "dataToSign")
 
 
-        val actualUnsignedVPTokens = openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList + selectedMdocCredentialsList)
+        val actualUnsignedVPTokens = openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList + selectedMdocCredentialsList, holderId = holderId)
 
         val expectedUnsignedVPTokens = unsignedVPTokens
         assertEquals(expectedUnsignedVPTokens[FormatType.LDP_VC], actualUnsignedVPTokens[FormatType.LDP_VC])

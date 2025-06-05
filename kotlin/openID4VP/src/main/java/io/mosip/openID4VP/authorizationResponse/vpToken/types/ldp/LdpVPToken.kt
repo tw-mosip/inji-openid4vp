@@ -2,6 +2,7 @@ package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPToken
+import kotlinx.serialization.Serializable
 
 data class LdpVPToken(
     @JsonProperty("@context")

@@ -9,11 +9,7 @@ class AuthorizationResponseUtilsTest{
     @Test
     fun `should convert the unsignedVPTokens to JSON successfully`() {
         val unsignedLdpVPToken = UnsignedLdpVPToken(
-            context = listOf("https://www.w3.org/2018/credentials/v1"),
-            type = listOf("VerifiablePresentation"),
-            verifiableCredential = listOf("credential1","credential2","credential3"),
-            id = "649d581c-f291-4969-9cd5-2c27385a348f",
-            holder = "",
+            dataToSign = "dataToSign"
         )
         val unsignedVPTokens = mapOf(FormatType.LDP_VC to unsignedLdpVPToken)
         assertEquals(

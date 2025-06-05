@@ -10,10 +10,11 @@ class Proof(
     val created: String,
     val challenge: String,
     val domain: String,
-    val jws: String,
+    var jws: String = "",
     val proofPurpose: String = "authentication",
     val verificationMethod: String
 ) {
+
     companion object {
         fun construct(
             ldpVPTokenSigningResult: LdpVPTokenSigningResult,
@@ -31,5 +32,9 @@ class Proof(
                 verificationMethod = ldpVPTokenSigningResult.publicKey
             )
         }
+    }
+
+    override fun toString(): String {
+        return "Proof(challenge='$challenge', type='$type', created='$created', domain='$domain', jws='$jws', proofPurpose='$proofPurpose', verificationMethod='$verificationMethod')"
     }
 }

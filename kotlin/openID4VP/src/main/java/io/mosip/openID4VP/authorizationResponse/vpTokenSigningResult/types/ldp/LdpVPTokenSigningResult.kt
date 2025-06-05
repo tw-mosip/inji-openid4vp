@@ -32,3 +32,18 @@ data class LdpVPTokenSigningResult(
         }
     }
 }
+
+//data class LdpVPTokenSigningResult(
+//    val jws: String
+//) : VPTokenSigningResult {
+//    fun validate() {
+//        require(jws != "null" && validateField(jws, "String")) {
+//            throw Logger.handleException(
+//                exceptionType = "InvalidInput",
+//                fieldPath = listOf("ldp_vp_token_signing_result", jws),
+//                className = className,
+//                fieldType = jws::class.simpleName
+//            )
+//        }
+//    }
+//}

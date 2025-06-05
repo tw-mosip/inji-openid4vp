@@ -6,7 +6,7 @@ import java.util.Locale
 
 object DateUtil {
     fun formattedCurrentDateTime(): String {
-        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
         val createdDateAndTime = formatter.format(Date())
         return createdDateAndTime
     }
