@@ -1,9 +1,14 @@
 package io.mosip.openID4VP.common
 
 import android.util.Log
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import foundation.identity.jsonld.JsonLDObject
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -67,5 +72,24 @@ class LoggerTest {
 		)
 
 		assertEquals(expectedExceptionMessage,actualException.message)
+	}
+
+	@Test
+	fun name() {
+
+		val abc= VPResponseMetadata(
+			"test-id",
+			"test-challenge",
+			"test-state",
+			"test-issuer",
+		)
+
+		val unsignedVPTokenMap = jacksonObjectMapper().writeValueAsString(abc)
+		val vcJsonLdObject: JsonLDObject = JsonLDObject.fromJson(unsignedVPTokenMap)
+
+		val message = vcJsonLdObject.toJson()
+		println(message)
+
+		//println(Json.encodeToString(vcJsonLdObject))
 	}
 }

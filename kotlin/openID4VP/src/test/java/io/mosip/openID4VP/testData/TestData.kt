@@ -48,7 +48,7 @@ val ldpVPTokenSigningResult: LdpVPTokenSigningResult = LdpVPTokenSigningResult(
     jws,
     "RsaSignature2018",
     publicKey,
-    "https://123",
+    //"https://123",
 )
 val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResult(
     docTypeToDeviceAuthentication = mapOf(
@@ -58,6 +58,7 @@ val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResul
         )
     )
 )
+val holderId = "did:jwk:eyJrdHkiOiJSU0EiLCJlIjoiQVFBQiIsInVzZSI6InNpZyIs"
 val ldpvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
     mapOf(FormatType.LDP_VC to ldpVPTokenSigningResult)
 
@@ -65,11 +66,7 @@ val mdocvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
     mapOf(FormatType.MSO_MDOC to mdocVPTokenSigningResult)
 
 val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
-    context = listOf("https://www.w3.org/2018/credentials/v1"),
-    type = listOf("VerifiablePresentation"),
-    verifiableCredential = listOf(ldpCredential1, ldpCredential2, ldpCredential2),
-    id = "649d581c-f291-4969-9cd5-2c27385a348f",
-    holder = "",
+   dataToSign = "dataToSign"
 )
 val unsignedMdocVPToken: UnsignedMdocVPToken = UnsignedMdocVPToken(
     docTypeToDeviceAuthenticationBytes = mapOf(
@@ -379,7 +376,7 @@ val proof = Proof(
     created = "2024-02-13T10:00:00Z",
     challenge = "bMHvX1HGhbh8zqlSWf/fuQ==",
     domain = "https://123",
-    jws = jws,
+    proofValue = jws,
     proofPurpose = "authentication",
     verificationMethod = publicKey
 )

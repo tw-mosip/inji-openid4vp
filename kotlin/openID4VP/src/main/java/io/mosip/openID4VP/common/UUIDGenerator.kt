@@ -4,6 +4,6 @@ import java.util.UUID
 
 object UUIDGenerator {
     fun generateUUID(): String {
-        return UUID.randomUUID().toString()
+        return "urn:uuid:${UUID.randomUUID()}"
     }
 }

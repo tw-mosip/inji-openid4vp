@@ -22,7 +22,7 @@ class AuthorizationResponseTest {
             created = "time",
             challenge = "challenge",
             domain = "domain",
-            jws = "eryy....ewr",
+            proofValue = "eryy....ewr",
             proofPurpose = "authentication",
             verificationMethod = "did:example:holder#key-1"
         )

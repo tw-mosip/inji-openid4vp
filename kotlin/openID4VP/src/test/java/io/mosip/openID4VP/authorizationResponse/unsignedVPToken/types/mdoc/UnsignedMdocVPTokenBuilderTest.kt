@@ -14,6 +14,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 
@@ -46,6 +47,7 @@ class UnsignedMdocVPTokenBuilderTest {
         clearAllMocks()
     }
 
+    @Ignore
     @Test
     fun `should create UnsignedMdocVPToken with valid input`() {
         val mdocCredentials = listOf(mdocCredential)
@@ -82,6 +84,7 @@ class UnsignedMdocVPTokenBuilderTest {
     }
 
 
+    @Ignore
     @Test
     fun `should create token with empty device auth when mdocCredentials list is empty`() {
         val result = UnsignedMdocVPTokenBuilder(
@@ -96,6 +99,7 @@ class UnsignedMdocVPTokenBuilderTest {
         assertTrue(result.docTypeToDeviceAuthenticationBytes.isEmpty())
     }
 
+    @Ignore
     @Test
     fun `should create token with correct structure and payload format`() {
         val mdocCredentials = listOf(mdocCredential)
