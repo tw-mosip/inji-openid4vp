@@ -1,17 +1,35 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
-//
-//import io.mockk.mockk
-//import io.mockk.verify
-//import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
-//import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
-//import io.mosip.openID4VP.testData.unsignedLdpVPToken
-//import org.junit.Test
-//import org.junit.jupiter.api.Assertions.*
-//
-//
-//class LdpVPTokenBuilderTest {
-//    private val mockLdpVPTokenSigningResult = mockk<LdpVPTokenSigningResult>(relaxed = true)
-//
+
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mockk.mockk
+import io.mockk.verify
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
+import io.mosip.openID4VP.common.encodeToJsonString
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.testData.ldpVPToken
+import io.mosip.openID4VP.testData.unsignedLdpVPToken
+import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+
+
+class LdpVPTokenBuilderTest {
+    private val mockLdpVPTokenSigningResult = mockk<LdpVPTokenSigningResult>(relaxed = true)
+
+    @Test
+    fun name(){
+        val ldpVPToken  = ldpVPToken.let {
+                it as LdpVPToken
+            }.copy(proof = null)
+
+        val abc=  encodeToJsonString(ldpVPToken, "unsignedLdpVPToken", "className")
+        println(abc)
+
+
+    }
+
 //
 //    @Test
 //    fun `should build LdpVPToken with valid inputs`() {
@@ -58,4 +76,4 @@ package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 //            mockLdpVPTokenSigningResult.validate()
 //        }
 //    }
-//}
+}

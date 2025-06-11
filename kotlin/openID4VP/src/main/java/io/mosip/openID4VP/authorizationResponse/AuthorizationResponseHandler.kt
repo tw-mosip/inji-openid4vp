@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationResponse
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
@@ -20,13 +19,18 @@ import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.constants.VPFormatType
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.VPTokenSigningPayload
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
-import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
+import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 
 private val className = AuthorizationResponseHandler::class.java.simpleName
+
+/**
+ * This class also has V1 methods for handling backward compatibility.
+ * The previous version of the OpenID4VP library supported only Ldp VC and had a simplier structure.
+ */
 
 internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
@@ -48,7 +52,8 @@ internal class AuthorizationResponseHandler {
             )
         }
         this.credentialsMap = credentialsMap
-        this.unsignedVPTokens = createUnsignedVPTokens(authorizationRequest, responseUri, holderId, signatureSuite)
+        this.unsignedVPTokens =
+            createUnsignedVPTokens(authorizationRequest, responseUri, holderId, signatureSuite)
 
         return unsignedVPTokens.mapValues { it.value["unsignedVPToken"] as UnsignedVPToken }
     }
@@ -251,22 +256,43 @@ internal class AuthorizationResponseHandler {
         }
     }
 
-    @Deprecated("Use constructUnsignedVPToken instead")
-    fun shareVP(
+    @Deprecated("This method supports constructing VP token for LDP VC without canonicalization of the data sent for signing")
+    fun constructUnsignedVPTokenV1(
+        verifiableCredentials: Map<String, List<String>>,
+        authorizationRequest: AuthorizationRequest,
+        responseUri: String
+    ): String{
+
+        val transformedCredentials = verifiableCredentials.mapValues { (_, credentials) ->
+            mapOf(FormatType.LDP_VC to credentials)
+        }
+        constructUnsignedVPToken(
+            credentialsMap = transformedCredentials,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUri,
+            holderId = "",
+            signatureSuite = "Ed25519Signature2020"
+        )
+        val unsignedLdpVPToken =
+            unsignedVPTokens[FormatType.LDP_VC]?.get("vpTokenSigningPayload").let {
+                it as LdpVPToken
+            }.copy(proof = null)
+
+        return encodeToJsonString(unsignedLdpVPToken, "unsignedLdpVPToken", className)
+    }
+
+    @Deprecated("This method only supports sharing LDP VC in direct post response mode")
+    fun shareVPV1(
         vpResponseMetadata: VPResponseMetadata,
-        nonce: String,
-        state: String?,
+        authorizationRequest: AuthorizationRequest,
         responseUri: String,
-        presentationDefinitionId: String
     ): String {
         try {
             vpResponseMetadata.validate()
             var pathIndex = 0
-
             val flattenedCredentials = credentialsMap.mapValues { (_, formatMap) ->
                 formatMap.values.first()
             }
-
             val descriptorMap = mutableListOf<DescriptorMap>()
             flattenedCredentials.forEach { (inputDescriptorId, vcs) ->
                 vcs.forEach { _ ->
@@ -280,74 +306,30 @@ internal class AuthorizationResponseHandler {
                 }
             }
             val presentationSubmission = PresentationSubmission(
-                UUIDGenerator.generateUUID(), presentationDefinitionId, descriptorMap
+                UUIDGenerator.generateUUID(),
+                authorizationRequest.presentationDefinition.id,
+                descriptorMap
             )
             val unsignedLdpVPToken =
-                unsignedVPTokens[FormatType.LDP_VC]?.get("unsignedLdpVPToken") as LdpVPToken
+                unsignedVPTokens[FormatType.LDP_VC]?.get("vpTokenSigningPayload") as VPTokenSigningPayload
             val vpToken = unsignedLdpVPToken.apply {
-                proof.verificationMethod = vpResponseMetadata.publicKey
-                proof.proofValue = vpResponseMetadata.jws
+                holder = vpResponseMetadata.publicKey
+                proof!!.verificationMethod = vpResponseMetadata.publicKey
+                proof.jws = vpResponseMetadata.jws
             }
-
-            println("$className VP Token: $vpToken")
-
-            return constructHttpRequestBody(
-                vpToken,
-                presentationSubmission,
-                responseUri, state
+            val authorizationResponse = AuthorizationResponse(
+                presentationSubmission = presentationSubmission,
+                vpToken = VPTokenElement(vpToken),
+                state = authorizationRequest.state
+            )
+            return sendAuthorizationResponse(
+                authorizationResponse = authorizationResponse,
+                responseUri = responseUri,
+                authorizationRequest = authorizationRequest
             )
         } catch (exception: Exception) {
             throw exception
         }
     }
 
-    @Deprecated("Use constructUnsignedVPToken instead")
-    private fun constructHttpRequestBody(
-        vpToken: VPToken,
-        presentationSubmission: PresentationSubmission,
-        responseUri: String, state: String?
-    ): String {
-        val encodedVPToken: String
-        val encodedPresentationSubmission: String
-        try {
-            encodedVPToken = jacksonObjectMapper().writeValueAsString(vpToken)
-        } catch (exception: Exception) {
-            throw Logger.handleException(
-                exceptionType = "JsonEncodingFailed",
-                message = exception.message,
-                fieldPath = listOf("vp_token"),
-                className = className
-            )
-        }
-        try {
-            encodedPresentationSubmission =
-                jacksonObjectMapper().writeValueAsString(presentationSubmission)
-        } catch (exception: Exception) {
-            throw Logger.handleException(
-                exceptionType = "JsonEncodingFailed",
-                message = exception.message,
-                fieldPath = listOf("presentation_submission"),
-                className = className
-            )
-        }
-
-        try {
-            val bodyParams = mapOf(
-                "vp_token" to encodedVPToken,
-                "presentation_submission" to encodedPresentationSubmission,
-            ).let { baseParams ->
-                state?.let { baseParams + mapOf("state" to it) } ?: baseParams
-            }
-
-            val response = sendHTTPRequest(
-                url = responseUri,
-                method = HttpMethod.POST,
-                bodyParams = bodyParams,
-                headers = mapOf("content-type" to "application/x-www-form-urlencoded")
-            )
-            return response["body"].toString()
-        } catch (exception: Exception) {
-            throw exception
-        }
-    }
 }

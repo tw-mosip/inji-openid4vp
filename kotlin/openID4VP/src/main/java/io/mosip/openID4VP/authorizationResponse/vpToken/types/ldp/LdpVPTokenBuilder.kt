@@ -17,7 +17,7 @@ class LdpVPTokenBuilder(
             unsignedLdpVPToken.verifiableCredential,
             unsignedLdpVPToken.id,
             unsignedLdpVPToken.holder,
-            unsignedLdpVPToken.proof.apply {
+            unsignedLdpVPToken.proof!!.apply {
                 proofValue = ldpVPTokenSigningResult.proofValue
                 jws = ldpVPTokenSigningResult.jws
             }
