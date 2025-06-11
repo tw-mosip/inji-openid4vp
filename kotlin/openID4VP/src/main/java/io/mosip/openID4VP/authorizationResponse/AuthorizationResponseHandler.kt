@@ -212,8 +212,6 @@ internal class AuthorizationResponseHandler {
                 }
 
             }
-        println("AuthorizationResponseHandler Descriptor Mappings: $descriptorMappings")
-        println("AuthorizationResponseHandler Descriptor Mappings: ${descriptorMappings.flatten()}")
         return descriptorMappings.flatten()
     }
 
