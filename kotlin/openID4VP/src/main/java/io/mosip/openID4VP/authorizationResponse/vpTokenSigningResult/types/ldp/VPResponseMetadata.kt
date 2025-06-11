@@ -5,6 +5,7 @@ import io.mosip.openID4VP.common.validateField
 
 private val className = VPResponseMetadata::class.simpleName!!
 
+@Deprecated("This class is deprecated and will be removed in future versions.")
 data class VPResponseMetadata(
     val jws: String,
     val signatureAlgorithm: String,
