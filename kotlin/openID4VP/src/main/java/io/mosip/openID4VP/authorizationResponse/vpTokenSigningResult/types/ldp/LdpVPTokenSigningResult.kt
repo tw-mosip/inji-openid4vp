@@ -3,31 +3,40 @@ package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
+import io.mosip.openID4VP.constants.SignatureAlgorithm.Ed25519Signature2018
+import io.mosip.openID4VP.constants.SignatureAlgorithm.Ed25519Signature2020
+import io.mosip.openID4VP.constants.SignatureAlgorithm.JsonWebSignature2020
+import io.mosip.openID4VP.constants.SignatureAlgorithm.RSASignature2018
 
 private val className = LdpVPTokenSigningResult::class.simpleName!!
 
 data class LdpVPTokenSigningResult(
-    val jws: String,
-    val signatureAlgorithm: String,
-    val publicKey: String,
-    val domain: String,
+    val jws: String? = null,
+    val proofValue: String? = null,
+    val signatureAlgorithm: String
 ) : VPTokenSigningResult {
     fun validate() {
-        val requiredParams = mapOf(
-            "jws" to this.jws,
-            "signatureAlgorithm" to this.signatureAlgorithm,
-            "publicKey" to this.publicKey,
-            "domain" to this.domain,
-        )
+        when (signatureAlgorithm) {
+            Ed25519Signature2020.value -> {
+                require(proofValue != "null" && validateField(proofValue, "String")) {
+                    throw Logger.handleException(
+                        exceptionType = "InvalidInput",
+                        fieldPath = listOf("LdpVPTokenSigningResult", "proofValue"),
+                        className = className,
+                        fieldType = "String"
+                    )
+                }
+            }
 
-        requiredParams.forEach { (key, value) ->
-            require(value != "null" && validateField(value, "String")) {
-                throw Logger.handleException(
-                    exceptionType = "InvalidInput",
-                    fieldPath = listOf("ldp_vp_token_signing_result", key),
-                    className = className,
-                    fieldType = key::class.simpleName
-                )
+            JsonWebSignature2020.value, RSASignature2018.value, Ed25519Signature2018.value -> {
+                require(jws != "null" && validateField(jws, "String")) {
+                    throw Logger.handleException(
+                        exceptionType = "InvalidInput",
+                        fieldPath = listOf("LdpVPTokenSigningResult", "jws"),
+                        className = className,
+                        fieldType = "String"
+                    )
+                }
             }
         }
     }

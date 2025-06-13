@@ -9,6 +9,7 @@ import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 
 private val logTag = Logger.getLogTag(OpenID4VP::class.simpleName!!)
@@ -27,13 +28,17 @@ class OpenID4VP(private val traceabilityId: String) {
     fun authenticateVerifier(
         urlEncodedAuthorizationRequest: String,
         trustedVerifiers: List<Verifier>,
-        walletMetadata: WalletMetadata? = null,
-        shouldValidateClient: Boolean = false
+        shouldValidateClient: Boolean = false,
+        walletMetadata: WalletMetadata? = null
     ): AuthorizationRequest {
         try {
             Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndCreateAuthorizationRequest(
-                urlEncodedAuthorizationRequest, trustedVerifiers, walletMetadata, ::setResponseUri,shouldValidateClient
+                urlEncodedAuthorizationRequest,
+                trustedVerifiers,
+                walletMetadata,
+                ::setResponseUri,
+                shouldValidateClient
             )
             return this.authorizationRequest
         } catch (exception: Exception) {
@@ -42,12 +47,18 @@ class OpenID4VP(private val traceabilityId: String) {
         }
     }
 
-    fun constructUnsignedVPToken(verifiableCredentials: Map<String, Map<FormatType, List<Any>>>): Map<FormatType, UnsignedVPToken> {
+    fun constructUnsignedVPToken(
+        verifiableCredentials: Map<String, Map<FormatType, List<Any>>>,
+        holderId: String,
+        signatureSuite: String
+    ): Map<FormatType, UnsignedVPToken> {
         try {
             return authorizationResponseHandler.constructUnsignedVPToken(
                 credentialsMap = verifiableCredentials,
                 authorizationRequest = this.authorizationRequest,
-                responseUri = this.responseUri!!
+                responseUri = this.responseUri!!,
+                holderId = holderId,
+                signatureSuite = signatureSuite
             )
         } catch (exception: Exception) {
             sendErrorToVerifier(exception)
@@ -82,4 +93,35 @@ class OpenID4VP(private val traceabilityId: String) {
             }
         }
     }
+
+
+    @Deprecated("This method supports constructing VP token for LDP VC without canonicalization of the data sent for signing")
+    fun constructVerifiablePresentationToken(verifiableCredentials: Map<String, List<String>>): String {
+        try {
+            return authorizationResponseHandler.constructUnsignedVPTokenV1(
+                verifiableCredentials = verifiableCredentials,
+                authorizationRequest = this.authorizationRequest,
+                responseUri = this.responseUri!!
+            )
+        } catch (exception: Exception) {
+            sendErrorToVerifier(exception)
+            throw exception
+        }
+    }
+
+    @Deprecated("This method only supports sharing LDP VC in direct post response mode")
+    fun shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata): String {
+        try {
+            return authorizationResponseHandler.shareVPV1(
+                vpResponseMetadata = vpResponseMetadata,
+                authorizationRequest = this.authorizationRequest,
+                responseUri = this.responseUri!!
+            )
+        } catch (exception: Exception) {
+            sendErrorToVerifier(exception)
+            throw exception
+        }
+    }
+
+
 }
