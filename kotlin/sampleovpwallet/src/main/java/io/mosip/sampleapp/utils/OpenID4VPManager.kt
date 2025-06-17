@@ -51,7 +51,7 @@ object OpenID4VPManager {
         )
     }
 
-    fun constructUnsignedVpToken(selectedCredentials : Map<String, Map<FormatType, List<String>>>, holderId: String, signatureSuite: String): Map<FormatType, UnsignedVPToken> {
+    fun constructUnsignedVpToken(selectedCredentials : Map<String, Map<FormatType, List<Any>>>, holderId: String, signatureSuite: String): Map<FormatType, UnsignedVPToken> {
         return instance.constructUnsignedVPToken(selectedCredentials, holderId, signatureSuite)
     }
 

@@ -1,5 +1,7 @@
 package io.mosip.sampleapp.utils
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.jayway.jsonpath.JsonPath
@@ -66,11 +68,17 @@ class MatchingVcsHelper {
         )
     }
 
+    private fun convertJsonToMap(jsonString: String): MutableMap<String, Any> {
+        val mapper = jacksonObjectMapper()
+        return mapper.readValue(
+            jsonString,
+            object : TypeReference<MutableMap<String, Any>>() {})
+    }
 
     fun buildSelectedVCsMapPlain(
         selectedItems: List<Pair<String, VCMetadata>>
-    ): Map<String, Map<FormatType, List<String>>> {
-        val result = mutableMapOf<String, MutableMap<FormatType, MutableList<String>>>()
+    ): Map<String, Map<FormatType, List<Any>>> {
+        val result = mutableMapOf<String, MutableMap<FormatType, MutableList<Any>>>()
         val gson = Gson()
 
         for ((inputDescriptorId, vcMetadata) in selectedItems) {
@@ -83,18 +91,18 @@ class MatchingVcsHelper {
             val credentialValue = if (formatType == FormatType.MSO_MDOC) {
                 vcMetadata.rawCBORData
             } else {
-                gson.toJson(vcMetadata.vc)
+                convertJsonToMap(gson.toJson(vcMetadata.vc))
             }
 
             val formatMap = result.getOrPut(inputDescriptorId) { mutableMapOf() }
             val credentialList = formatMap.getOrPut(formatType) { mutableListOf() }
 
-            credentialValue?.let { credentialList.add(it) }
+            credentialValue?.let {
+                credentialList.add(it)
+            }
         }
 
-        return result.mapValues { (_, innerMap) ->
-            innerMap.mapValues { (_, list) -> list.toList() }
-        }
+        return result
     }
 
 
