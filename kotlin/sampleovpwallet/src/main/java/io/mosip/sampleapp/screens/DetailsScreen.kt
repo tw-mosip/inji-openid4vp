@@ -7,17 +7,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.google.gson.GsonBuilder
 import io.mosip.sampleapp.data.SharedViewModel
 import io.mosip.sampleovpwallet.R
 
@@ -43,15 +47,26 @@ fun DetailScreen(viewModel: SharedViewModel, navController: NavHostController) {
                     Text(stringResource(R.string.no_item_selected))
                 }
             } else {
+                val prettyJson = remember(jsonObj) {
+                    GsonBuilder().setPrettyPrinting().create().toJson(jsonObj)
+                }
+
                 LazyColumn(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp)) {
-                    items(jsonObj.entrySet().toList()) { (key, value) ->
-                        Text("$key: $value", Modifier.padding(4.dp))
+                        .padding(16.dp)
+                ) {
+                    item {
+                        Text(
+                            text = prettyJson,
+                            style = MaterialTheme.typography.caption.copy(
+                                fontFamily = FontFamily.Monospace
+                            )
+                        )
                     }
                 }
             }
         }
     }
 }
+
