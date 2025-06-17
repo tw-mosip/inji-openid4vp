@@ -109,4 +109,10 @@ dependencies {
     implementation("com.google.crypto.tink:tink-android:1.6.1")
     implementation("io.mosip:pixelpass-aar:0.6.0")
 
+    androidTestImplementation("androidx.test:core:1.5.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    testImplementation("junit:junit:4.13.2")
+
+
 }
