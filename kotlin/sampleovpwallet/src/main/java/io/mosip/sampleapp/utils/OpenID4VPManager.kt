@@ -17,10 +17,13 @@ import io.mosip.openID4VP.constants.FormatType
 import io.mosip.sampleapp.VCMetadata
 import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.extractWalletMetadata
 import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.isClientValidationRequired
+import io.mosip.sampleapp.utils.SampleKeyGenerator.HOLDER_ID
+import io.mosip.sampleapp.utils.SampleKeyGenerator.SIGNATURE_SUITE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.security.KeyPair
 
 object OpenID4VPManager {
     private var _instance: OpenID4VP? = null
@@ -48,8 +51,8 @@ object OpenID4VPManager {
         )
     }
 
-    fun constructUnsignedVpToken(selectedCredentials : Map<String, Map<FormatType, List<String>>>): Map<FormatType, UnsignedVPToken> {
-        return instance.constructUnsignedVPToken(selectedCredentials)
+    fun constructUnsignedVpToken(selectedCredentials : Map<String, Map<FormatType, List<String>>>, holderId: String, signatureSuite: String): Map<FormatType, UnsignedVPToken> {
+        return instance.constructUnsignedVPToken(selectedCredentials, holderId, signatureSuite)
     }
 
     fun shareVerifiablePresentation(selectedItems: SnapshotStateList<Pair<String, VCMetadata>>) {
@@ -63,21 +66,21 @@ object OpenID4VPManager {
         Dispatchers.IO) {
         val parsedSelectedItems = MatchingVcsHelper().buildSelectedVCsMapPlain(selectedItems)
 
-        val unsignedVpTokenMap = constructUnsignedVpToken(parsedSelectedItems)
+
+        val unsignedVpTokenMap = constructUnsignedVpToken(parsedSelectedItems, HOLDER_ID, SIGNATURE_SUITE)
 
         // LDP_VC signing
         val ldpSigningResult = unsignedVpTokenMap[FormatType.LDP_VC]?.let { vpPayload ->
             val gson = Gson()
             val jsonElement = gson.toJsonTree(vpPayload)
             val mapPayload: Map<String, Any> = gson.fromJson(jsonElement, object : TypeToken<Map<String, Any>>() {}.type)
-            val keyType = KeyType.RSA
-            val keyPair = VPTokenSigner.generateKeyPair(keyType)
-            val result: SignedVPJWT = VPTokenSigner.signVPToken(keyPair, keyType, mapPayload)
+
+            val keyType = KeyType.Ed25519
+            val result = VPTokenSigner.signVpToken(keyType, mapPayload)
+
             LdpVPTokenSigningResult(
                 jws = result.jwt,
-                signatureAlgorithm = result.algorithm,
-                publicKey = result.publicJWK,
-                domain = "OpenID4VP"
+                signatureAlgorithm = result.algorithm
             )
         }
 
@@ -86,12 +89,12 @@ object OpenID4VPManager {
             val mdocPayload = payload as UnsignedMdocVPToken
             val docTypeToDeviceAuthenticationBytes = mdocPayload.docTypeToDeviceAuthenticationBytes
             val keyType = KeyType.ES256
-            val keyPair = VPTokenSigner.generateKeyPair(keyType)
+            val keyPair = SampleKeyGenerator.generateKeyPair(keyType)
             val docTypeToDeviceAuthentication = docTypeToDeviceAuthenticationBytes.mapValues { (_, deviceAuthBytes) ->
                 val bytes = if (deviceAuthBytes is String) {
                     deviceAuthBytes.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
                 } else deviceAuthBytes as ByteArray
-                val signed = VPTokenSigner.signDeviceAuthentication(keyPair, keyType, bytes)
+                val signed = VPTokenSigner.signDeviceAuthentication(keyPair as KeyPair, keyType, bytes)
                 val jwsParts = signed.jwt.split(".")
                 val signaturePart = if (jwsParts.size == 3) jwsParts[2] else signed.jwt
                 DeviceAuthentication(signature = signaturePart, algorithm = signed.algorithm)
