@@ -24,3 +24,6 @@ Formats supported:
 - If the VCs are not matching the auth request, Error popup will be shown.
 - If the VCs matching the auth request, List of Credentials will be shown. User can select the VCs and tap on Share to send VP to Verifier.
 - On successful sharing , Success Screen will be shown with `Home` Button. 
+
+## Limitations
+- This Sample app does not download or issue Verifiable Credentials (VCs). Therefore, holder binding is not part of this app.
