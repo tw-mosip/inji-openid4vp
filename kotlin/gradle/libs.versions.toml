@@ -1,5 +1,5 @@
 [versions]
-agp = "8.2.2"
+agp = "8.4.2"
 identityCredential = "20231002"
 jacksonAnnotations = "2.14.0"
 jacksonModuleKotlin = "2.14.0"
