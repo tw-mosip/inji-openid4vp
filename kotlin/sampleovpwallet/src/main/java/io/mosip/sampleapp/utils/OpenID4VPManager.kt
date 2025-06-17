@@ -66,8 +66,7 @@ object OpenID4VPManager {
         val unsignedVpTokenMap = constructUnsignedVpToken(parsedSelectedItems)
 
         // LDP_VC signing
-        val ldpSigningResult = run {
-            val vpPayload = unsignedVpTokenMap[FormatType.LDP_VC] ?: return@run null
+        val ldpSigningResult = unsignedVpTokenMap[FormatType.LDP_VC]?.let { vpPayload ->
             val gson = Gson()
             val jsonElement = gson.toJsonTree(vpPayload)
             val mapPayload: Map<String, Any> = gson.fromJson(jsonElement, object : TypeToken<Map<String, Any>>() {}.type)
@@ -83,8 +82,8 @@ object OpenID4VPManager {
         }
 
         // MSO_MDOC signing
-        val mdocSigningResult = run {
-            val mdocPayload = unsignedVpTokenMap[FormatType.MSO_MDOC] as UnsignedMdocVPToken
+        val mdocSigningResult = unsignedVpTokenMap[FormatType.MSO_MDOC]?.let { payload ->
+            val mdocPayload = payload as UnsignedMdocVPToken
             val docTypeToDeviceAuthenticationBytes = mdocPayload.docTypeToDeviceAuthenticationBytes
             val keyType = KeyType.ES256
             val keyPair = VPTokenSigner.generateKeyPair(keyType)
@@ -99,6 +98,7 @@ object OpenID4VPManager {
             }
             MdocVPTokenSigningResult(docTypeToDeviceAuthentication)
         }
+
 
         val vpTokenSigningResultMap = buildMap {
             ldpSigningResult?.let { put(FormatType.LDP_VC, it) }
