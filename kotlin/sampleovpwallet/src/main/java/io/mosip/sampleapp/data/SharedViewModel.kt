@@ -23,7 +23,6 @@ class SharedViewModel : ViewModel() {
     val issuersList = listOf(
         "Download Mosip" to HardcodedVC.get(0),
         "Download Insurance" to HardcodedVC.get(1),
-        "Download Mock" to HardcodedVC.get(2),
         "Download MDL Driving License" to HardcodedVC.get(3)
     )
 
