@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.jayway.jsonpath.JsonPath
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.sampleapp.VCMetadata
+import io.mosip.sampleapp.data.VCMetadata
 import io.mosip.sampleapp.utils.MdocKeyManager.getIssuerAuthenticationAlgorithmForMdocVC
 import io.mosip.sampleapp.utils.MdocKeyManager.getMdocAuthenticationAlgorithm
 
@@ -50,7 +50,7 @@ class MatchingVcsHelper {
                     val list = matchingVCs.getOrPut(descriptorId) { mutableListOf() }
 
                     if (list.none { it.vc == vc && it.format == vcFormat }) {
-                        list.add(VCMetadata(vcFormat, vc.deepCopy(), vcMetadata.keyType, rawCBORData))
+                        list.add(VCMetadata(vcFormat, vc.deepCopy(), rawCBORData))
                     }
                 }
             }
@@ -58,7 +58,7 @@ class MatchingVcsHelper {
 
         if (!hasFormatOrConstraints && inputDescriptors.size() > 0) {
             val fallbackId = inputDescriptors[0].asJsonObject.get("id").asString
-            matchingVCs[fallbackId] = vcList.map { VCMetadata(it.format, it.vc.deepCopy(), it.keyType, it.rawCBORData) }.toMutableList()
+            matchingVCs[fallbackId] = vcList.map { VCMetadata(it.format, it.vc.deepCopy(), it.rawCBORData) }.toMutableList()
         }
 
         return MatchingResult(

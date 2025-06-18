@@ -6,24 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.google.gson.JsonObject
-import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.sampleapp.utils.MatchingResult
-import io.mosip.sampleapp.HardcodedVC
-import io.mosip.sampleapp.VCMetadata
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class SharedViewModel : ViewModel() {
-
-    val issuersList = listOf(
-        "Download Mosip" to HardcodedVC.get(0),
-        "Download Insurance" to HardcodedVC.get(1),
-        "Download MDL Driving License" to HardcodedVC.get(3)
-    )
-
 
     private val _downloadedVcs = mutableStateListOf<VCMetadata>()
     val downloadedVcs: List<VCMetadata> get() = _downloadedVcs

@@ -1,4 +1,4 @@
-package io.mosip.sampleapp.utils
+package io.mosip.sampleapp.data
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -6,8 +6,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 
-object AuthenticateVerifierHelper {
-    fun extractWalletMetadata(): WalletMetadata {
+object HardcodedOVPData {
+    fun getWalletMetadata(): WalletMetadata {
         val hardcodedMetadataJson = """
             {
               "presentation_definition_uri_supported": true,
@@ -35,7 +35,7 @@ object AuthenticateVerifierHelper {
         return objectMapper.readValue(hardcodedMetadataJson)
     }
 
-    fun extractVerifiers(): List<Verifier> {
+    fun getListOfVerifiers(): List<Verifier> {
         val hardcodedVerifierJson = """
         [
             {

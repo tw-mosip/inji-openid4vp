@@ -1,10 +1,9 @@
-package io.mosip.sampleapp
+package io.mosip.sampleapp.data
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.pixelpass.PixelPass
-import io.mosip.sampleapp.utils.KeyType
 import io.mosip.sampleapp.utils.MdocKeyManager
 import org.json.JSONObject
 
@@ -113,8 +112,8 @@ object HardcodedVC {
     fun get(index: Int): VCMetadata {
         val gson = Gson()
         return when (index) {
-            0 -> VCMetadata(FormatType.LDP_VC.value, gson.fromJson(MOSIP_VC, JsonObject::class.java), KeyType.RSA.name)
-            1 -> VCMetadata(FormatType.LDP_VC.value, gson.fromJson(INSURANCE_VC, JsonObject::class.java), KeyType.RSA.name)
+            0 -> VCMetadata(FormatType.LDP_VC.value, gson.fromJson(MOSIP_VC, JsonObject::class.java))
+            1 -> VCMetadata(FormatType.LDP_VC.value, gson.fromJson(INSURANCE_VC, JsonObject::class.java))
             else -> {
                 val rawMdoc = PixelPass().toJson(MDOC_CBOR_DATA)
                 val jsonString = when (rawMdoc) {
@@ -125,10 +124,16 @@ object HardcodedVC {
                 val mdocJsonObject = gson.fromJson(jsonString, JsonObject::class.java)
                 val mdocKeyType = getKeyTypeForMdoc(mdocJsonObject)
 
-                VCMetadata(FormatType.MSO_MDOC.value, mdocJsonObject, mdocKeyType, MDOC_CBOR_DATA)
+                VCMetadata(FormatType.MSO_MDOC.value, mdocJsonObject, mdocKeyType)
             }
         }
     }
+
+    val issuersList = listOf(
+        "Download Mosip" to get(0),
+        "Download Insurance" to get(1),
+        "Download MDL Driving License" to get(3)
+    )
 }
 
 fun getKeyTypeForMdoc(vc: JsonObject): String {
@@ -146,6 +151,5 @@ fun getKeyTypeForMdoc(vc: JsonObject): String {
 data class VCMetadata(
     val format: String,
     val vc: JsonObject,
-    val keyType: String,
     val rawCBORData : String? = null
 )

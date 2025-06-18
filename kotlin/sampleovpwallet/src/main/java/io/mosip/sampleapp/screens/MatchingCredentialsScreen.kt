@@ -43,7 +43,7 @@ import io.mosip.sampleapp.utils.OpenID4VPManager
 import io.mosip.sampleapp.utils.OpenID4VPManager.shareVerifiablePresentation
 import io.mosip.sampleapp.Screen
 import io.mosip.sampleapp.data.SharedViewModel
-import io.mosip.sampleapp.VCMetadata
+import io.mosip.sampleapp.data.VCMetadata
 import io.mosip.sampleapp.utils.Utils.getDisplayLabel
 import io.mosip.sampleovpwallet.R
 import kotlinx.coroutines.CoroutineScope

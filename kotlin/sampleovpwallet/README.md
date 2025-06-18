@@ -14,11 +14,12 @@ Formats supported:
 - Error handling for declining or non-matching QR codes.
 
 ## Steps to run the app
-- Hardcode the VC as downloading the VC is not part of the Sample App. (`io.mosip.sampleapp.HardcodedVC.kt`)
+- Hardcode the VC as downloading the VC is not part of the Sample App. (`io.mosip.sampleapp.data.HardcodedVC.kt`)
   - For `ldp_vc`, Update the Vc Json.
-  - For `mso_mdoc` , update MDOC_CBOR_DATA. 
-- Update the `issuersList` accordingly in the shared View Model (`io.mosip.sampleapp.data.SharedViewModel`) which mimics downloading the respective VC from the Issuer.
-- Run the App.
+  - For `mso_mdoc` , update MDOC_CBOR_DATA.
+- Update the `issuersList` accordingly in the shared View Model (`io.mosip.sampleapp.data.HardcodedVC.kt`) which mimics downloading the respective VC from the Issuer.
+- Wallet Metadata and Verifiers list are hardcoded in the app. Update the `walletMetadata` and `verifiersList` in `io.mosip.sampleapp.data.HarcodedOVPData.kt` as per your requirements.
+- Run the App
 - Tap `+` icon in the home screen, Select Issuers to download the VC in the Home screen.
 - Tap on `Share` bottom navigation, Scan the QR code. Grant necessary Camera permission. 
 - If the VCs are not matching the auth request, Error popup will be shown.

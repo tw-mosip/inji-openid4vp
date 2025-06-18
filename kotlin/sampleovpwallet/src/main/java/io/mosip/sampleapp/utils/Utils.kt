@@ -1,7 +1,7 @@
 package io.mosip.sampleapp.utils
 
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.sampleapp.VCMetadata
+import io.mosip.sampleapp.data.VCMetadata
 
 object Utils {
     fun getDisplayLabel(vcMetadata: VCMetadata): String? {

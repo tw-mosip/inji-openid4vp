@@ -6,16 +6,15 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPToken
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.sampleapp.VCMetadata
-import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.extractVerifiers
-import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.extractWalletMetadata
+import io.mosip.sampleapp.data.VCMetadata
+import io.mosip.sampleapp.data.HardcodedOVPData.getListOfVerifiers
+import io.mosip.sampleapp.data.HardcodedOVPData.getWalletMetadata
 import io.mosip.sampleapp.utils.SampleKeyGenerator.HOLDER_ID
 import io.mosip.sampleapp.utils.SampleKeyGenerator.SIGNATURE_SUITE
 import kotlinx.coroutines.CoroutineScope
@@ -37,14 +36,12 @@ object OpenID4VPManager {
         urlEncodedAuthRequest: String
     ): AuthorizationRequest {
 
-        val walletMetadata = extractWalletMetadata()
-
         val validateClient = false
 
         return instance.authenticateVerifier(
             urlEncodedAuthorizationRequest = urlEncodedAuthRequest,
-            trustedVerifiers = extractVerifiers(),
-            walletMetadata = walletMetadata,
+            trustedVerifiers = getListOfVerifiers(),
+            walletMetadata = getWalletMetadata(),
             shouldValidateClient = validateClient
         )
     }

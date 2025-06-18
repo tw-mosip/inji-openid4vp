@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,9 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import io.mosip.sampleapp.data.HardcodedVC
 import io.mosip.sampleapp.Screen
+import io.mosip.sampleapp.data.VCMetadata
 import io.mosip.sampleapp.data.SharedViewModel
-import io.mosip.sampleapp.VCMetadata
 import io.mosip.sampleapp.utils.Utils.getDisplayLabel
 import io.mosip.sampleovpwallet.R
 
@@ -115,13 +115,13 @@ fun HomeScreen(navController: NavHostController, viewModel: SharedViewModel) {
         ) {
             Column(horizontalAlignment = Alignment.End) {
                 if (showFabMenu) {
-                    viewModel.issuersList.forEach { (label, credential) ->
+                    HardcodedVC.issuersList.forEach { (label, credential) ->
                         ExtendedFloatingActionButton(
                             text = { Text(label) },
                             onClick = {
                                 val copiedVc = credential.vc.deepCopy().asJsonObject
                                 val format = credential.format
-                                viewModel.addVC(VCMetadata(format, copiedVc, credential.keyType, credential.rawCBORData))
+                                viewModel.addVC(VCMetadata(format, copiedVc, credential.rawCBORData))
                                 showFabMenu = false
                             },
                             modifier = Modifier.padding(bottom = 8.dp)
