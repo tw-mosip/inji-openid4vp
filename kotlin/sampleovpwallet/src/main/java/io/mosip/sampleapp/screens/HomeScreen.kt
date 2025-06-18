@@ -44,9 +44,6 @@ fun HomeScreen(navController: NavHostController, viewModel: SharedViewModel) {
     var showFabMenu by remember { mutableStateOf(false) }
     var expandedRowIndex by remember { mutableStateOf<Int?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadVerifiers()
-    }
 
     val downloadedVcs = viewModel.downloadedVcs
 

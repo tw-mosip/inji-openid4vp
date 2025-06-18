@@ -267,8 +267,7 @@ suspend fun handleScannedText(
     try {
         val authorizationRequest = withContext(Dispatchers.IO) {
             OpenID4VPManager.authenticateVerifier(
-                urlEncodedAuthRequest,
-                sharedViewModel.verifiers
+                urlEncodedAuthRequest
             )
         }
 

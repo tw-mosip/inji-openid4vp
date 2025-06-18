@@ -1,7 +1,9 @@
 package io.mosip.sampleapp.utils
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 
 object AuthenticateVerifierHelper {
@@ -31,5 +33,23 @@ object AuthenticateVerifierHelper {
         val objectMapper = jacksonObjectMapper()
 
         return objectMapper.readValue(hardcodedMetadataJson)
+    }
+
+    fun extractVerifiers(): List<Verifier> {
+        val hardcodedVerifierJson = """
+        [
+            {
+              "client_id": "https://localhost:3000",
+              "response_uris": [
+                "https://localhost:3000/v1/verify/vp-submission/direct-post"
+              ]
+            }
+        ]
+    """.trimIndent()
+
+        val objectMapper = jacksonObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+
+        return objectMapper.readValue(hardcodedVerifierJson)
     }
 }

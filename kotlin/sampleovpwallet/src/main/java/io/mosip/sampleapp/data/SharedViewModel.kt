@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.mosip.openID4VP.authorizationRequest.Verifier
-import io.mosip.sampleapp.data.repository.VerifierRepository
 import io.mosip.sampleapp.utils.MatchingResult
 import io.mosip.sampleapp.HardcodedVC
 import io.mosip.sampleapp.VCMetadata
@@ -58,28 +57,6 @@ class SharedViewModel : ViewModel() {
 
     fun displayVcDetails(item: JsonObject) {
         vcSelectedForDetails = item
-    }
-
-    private val repository = VerifierRepository()
-
-    var verifiersJson by mutableStateOf<List<JsonObject>>(emptyList())
-        private set
-
-    var verifiers by mutableStateOf<List<Verifier>>(emptyList())
-        private set
-
-    fun loadVerifiers() {
-        viewModelScope.launch {
-            repository.fetchVerifiers()?.let { jsonList ->
-                verifiersJson = jsonList
-                verifiers = jsonList.map { mapJsonObjectToVerifier(it) }
-            }
-        }
-    }
-
-    private fun mapJsonObjectToVerifier(jsonObject: JsonObject): Verifier {
-        val gson = Gson()
-        return gson.fromJson(jsonObject, Verifier::class.java)
     }
 
 }

@@ -14,6 +14,7 @@ import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.sampleapp.VCMetadata
+import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.extractVerifiers
 import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.extractWalletMetadata
 import io.mosip.sampleapp.utils.SampleKeyGenerator.HOLDER_ID
 import io.mosip.sampleapp.utils.SampleKeyGenerator.SIGNATURE_SUITE
@@ -33,16 +34,16 @@ object OpenID4VPManager {
     }
 
     fun authenticateVerifier(
-        urlEncodedAuthRequest: String,
-        trustedVerifiers: List<Verifier>
+        urlEncodedAuthRequest: String
     ): AuthorizationRequest {
 
         val walletMetadata = extractWalletMetadata()
+
         val validateClient = false
 
         return instance.authenticateVerifier(
             urlEncodedAuthorizationRequest = urlEncodedAuthRequest,
-            trustedVerifiers = trustedVerifiers,
+            trustedVerifiers = extractVerifiers(),
             walletMetadata = walletMetadata,
             shouldValidateClient = validateClient
         )
