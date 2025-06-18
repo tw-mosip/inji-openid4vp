@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
     id("com.android.application") version "8.4.2"
@@ -15,12 +13,6 @@ configurations.all {
     exclude(module = "bcutil-jdk15on")
     exclude(module = "titanium-json-ld")
 }
-val localPropsFile = File(projectDir, "gradle.properties")
-val localProps = Properties()
-if (localPropsFile.exists()) {
-    localProps.load(localPropsFile.inputStream())
-}
-val apiBaseUrl = localProps["API_BASE_URL"] as? String ?: error("API_BASE_URL not found")
 
 
 android {
@@ -33,7 +25,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,7 +47,6 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
     packagingOptions {
 
