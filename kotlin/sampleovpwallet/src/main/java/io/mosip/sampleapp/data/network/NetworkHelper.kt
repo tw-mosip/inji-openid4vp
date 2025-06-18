@@ -1,6 +1,5 @@
 package io.mosip.sampleapp.data.network
 
-import io.mosip.sampleapp.data.api.AllPropertiesApi
 import io.mosip.sampleapp.data.api.VerifierApi
 import io.mosip.sampleovpwallet.BuildConfig
 import retrofit2.Retrofit
@@ -20,7 +19,4 @@ object NetworkHelper {
         retrofit.create(VerifierApi::class.java)
     }
 
-    val allPropertiesApi: AllPropertiesApi by lazy {
-        retrofit.create(AllPropertiesApi::class.java)
-    }
 }

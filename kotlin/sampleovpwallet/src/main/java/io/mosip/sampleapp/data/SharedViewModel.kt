@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.mosip.openID4VP.authorizationRequest.Verifier
-import io.mosip.sampleapp.data.repository.AllPropertiesRepository
 import io.mosip.sampleapp.data.repository.VerifierRepository
 import io.mosip.sampleapp.utils.MatchingResult
 import io.mosip.sampleapp.HardcodedVC
@@ -82,21 +81,6 @@ class SharedViewModel : ViewModel() {
         val gson = Gson()
         return gson.fromJson(jsonObject, Verifier::class.java)
     }
-
-
-
-    var allProperties by mutableStateOf<JsonObject?>(null)
-        private set
-
-    private val allPropertiesRepository = AllPropertiesRepository()
-
-    fun loadAllProperties() {
-        viewModelScope.launch {
-            val result = allPropertiesRepository.fetchAllProperties()
-            allProperties = result
-        }
-    }
-
 
 }
 

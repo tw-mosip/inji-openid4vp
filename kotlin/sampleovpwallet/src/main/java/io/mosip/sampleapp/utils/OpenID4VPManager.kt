@@ -3,7 +3,6 @@ package io.mosip.sampleapp.utils
 import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
@@ -16,7 +15,6 @@ import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.sampleapp.VCMetadata
 import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.extractWalletMetadata
-import io.mosip.sampleapp.utils.AuthenticateVerifierHelper.isClientValidationRequired
 import io.mosip.sampleapp.utils.SampleKeyGenerator.HOLDER_ID
 import io.mosip.sampleapp.utils.SampleKeyGenerator.SIGNATURE_SUITE
 import kotlinx.coroutines.CoroutineScope
@@ -36,12 +34,11 @@ object OpenID4VPManager {
 
     fun authenticateVerifier(
         urlEncodedAuthRequest: String,
-        trustedVerifiers: List<Verifier>,
-        allProperties: JsonObject?
+        trustedVerifiers: List<Verifier>
     ): AuthorizationRequest {
 
-        val walletMetadata = extractWalletMetadata(allProperties)
-        val validateClient = isClientValidationRequired(allProperties)
+        val walletMetadata = extractWalletMetadata()
+        val validateClient = false
 
         return instance.authenticateVerifier(
             urlEncodedAuthorizationRequest = urlEncodedAuthRequest,

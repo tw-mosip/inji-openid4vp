@@ -45,7 +45,6 @@ fun HomeScreen(navController: NavHostController, viewModel: SharedViewModel) {
     var expandedRowIndex by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
-        viewModel.loadAllProperties()
         viewModel.loadVerifiers()
     }
 
