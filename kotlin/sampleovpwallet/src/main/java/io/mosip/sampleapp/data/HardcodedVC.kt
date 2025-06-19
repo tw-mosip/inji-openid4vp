@@ -122,9 +122,8 @@ object HardcodedVC {
                     else -> gson.toJson(rawMdoc)
                 }
                 val mdocJsonObject = gson.fromJson(jsonString, JsonObject::class.java)
-                val mdocKeyType = getKeyTypeForMdoc(mdocJsonObject)
 
-                VCMetadata(FormatType.MSO_MDOC.value, mdocJsonObject, mdocKeyType)
+                VCMetadata(FormatType.MSO_MDOC.value, mdocJsonObject, MDOC_CBOR_DATA)
             }
         }
     }

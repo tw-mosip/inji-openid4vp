@@ -35,13 +35,11 @@ object OpenID4VPManager {
         urlEncodedAuthRequest: String
     ): AuthorizationRequest {
 
-        val validateClient = false
-
         return instance.authenticateVerifier(
             urlEncodedAuthorizationRequest = urlEncodedAuthRequest,
             trustedVerifiers = getListOfVerifiers(),
             walletMetadata = getWalletMetadata(),
-            shouldValidateClient = validateClient
+            shouldValidateClient = false
         )
     }
 
