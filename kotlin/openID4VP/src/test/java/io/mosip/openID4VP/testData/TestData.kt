@@ -20,6 +20,7 @@ import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.VPTokenSigningPayload
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPToken
@@ -41,14 +42,20 @@ val ldpCredential2 =
         "{\"id\":\"did:rcw:da2d0059-cce8-4bad-923a-217cd381dbd2\",\"type\":[\"VerifiableCredential\",\"InsuranceCredential\"],\"proof\":{\"type\":\"Ed25519Signature2020\",\"created\":\"2025-05-12T10:51:44Z\",\"proofValue\":\"z3rACCjPw79KfPSYGasCVpqyWUpUhEYzPcmo2QLoVtj6LYUxpXi22UBcQdNSFbd3YedVrysS5Svzgcy1uYJEiVPKA\",\"proofPurpose\":\"assertionMethod\",\"verificationMethod\":\"did:web:api.collab.mosip.net:identity-service:56de166e-0e2f-4734-b8e7-be42b3117d39#key-0\"},\"issuer\":\"did:web:api.collab.mosip.net:identity-service:56de166e-0e2f-4734-b8e7-be42b3117d39\",\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://holashchand.github.io/test_project/insurance-context.json\",\"https://w3id.org/security/suites/ed25519-2020/v1\"],\"issuanceDate\":\"2025-05-12T10:51:44.739Z\",\"expirationDate\":\"2025-06-11T10:51:44.734Z\",\"credentialSubject\":{\"id\":\"did:jwk:eyJrdHkiOiJSU0EiLCJlIjoiQVFBQiIsInVzZSI6InNpZyIsImtpZCI6Ii1zUVpsbDhYQXBySGVlNG5CdzB5TUwtLTdsOFJBNGhaM2dMclkzMzdtVUUiLCJhbGciOiJSUzI1NiIsIm4iOiJrUHllWHdIMVM3cjE3WmhOMkl3YmhZejR6bnNEVnl3bDdLRzllUjZ3bUM1YUtaZ0dyY18yWXB1V28tT2RuWDhOc3VWLWFzU0NjU01FVThVdUZqNWtienhRRGdPWFNQWlI1MHVCS19TVEtXTHNVenVlRHpQZUpGdDhibWItVjgtQ0FOa2JrSGRYbXVSS0pUU0JVd3lWRXdtTERnb0ZLYTlVLXhjVTVELWFDcHJFVS1fQ1oyUGZDcF9jdmtJNmdOS2FKRHJBcVVlUkVQYzAzbl93WXd0bE82S1RhQ25jc0JMbEp2U1NBM1B1ZEN5ZFFMVUZwak12R2d3VUlFNkg3d3FoTGdZeXZLTVBTYzVEMG8ybWZ0cHNTVFNrY3p2OEVPdnMtNU5kaHZXTXFlc0dtSE5helk5bDhOMFQyWGxrM0ZqM1lDcXNmQ1lnLUd1RkFRaXpZOU1ZV3cifQ==\",\"dob\":\"2025-01-01\",\"email\":\"abcd@gmail.com\",\"gender\":\"Male\",\"mobile\":\"0123456789\",\"benefits\":[\"Critical Surgery\",\"Full body checkup\"],\"fullName\":\"wallet\",\"policyName\":\"wallet\",\"policyNumber\":\"5555\",\"policyIssuedOn\":\"2023-04-20\",\"policyExpiresOn\":\"2033-04-20\"}}"
     )
 
+const val clientId = "client-id"
+const val verifierNonce = "GM12ZywLxmA0PjQFevb/WQ=="
+const val walletNonce = "P0RVGUe5OoDctvuK"
 
 const val publicKey = """-----BEGIN RSA PUBLIC KEY-----publickey-----END RSA PUBLIC KEY-----"""
-const val jws = "eyJiweyrtwegrfwwaBKCGSwxjpa5suaMtgnQ"
+const val holderId = "did:jwk:eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6IkdMbEJOQkstRmdicDBqaEVNUWx1MkkxV1dPeGtlZHRaYkVLalAtYndyYkkiLCJhbGciOiJFZDI1NTE5IiwidXNlIjoic2lnIn0#0"
+const val signatureSuite = "JsonWebSignature2020"
+
+const val jws = "eyJhbGciOiJFZERTQSIsImp3ayI6eyJrdHkiOiJPS1AiLCJjcnYiOiJFZDI1NTE5IiwieCI6ImtldWxwNGVVU0d1eEVLSDlzQ0JkaTN1ek1sQmQ4cE1wMVdlamhTUFZybUEiLCJhbGciOiJFZDI1NTE5IiwidXNlIjoic2lnIn19..NGhwSDJoTktZT25kU2lVc3JwUEJoY1dld2JjT1FxQ2RsQW9qNFlENktMam9WT0M0N1RDMXk5cXFGTWpwZUVsMFhHeWNFZmpEd0s0N2pKOXFZOHFKRGc"
 val ldpVPTokenSigningResult: LdpVPTokenSigningResult = LdpVPTokenSigningResult(
     jws,
-    "RsaSignature2018",
-    publicKey,
-    //"https://123",
+    null,
+    signatureSuite
+
 )
 val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResult(
     docTypeToDeviceAuthentication = mapOf(
@@ -58,7 +65,7 @@ val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResul
         )
     )
 )
-val holderId = "did:jwk:eyJrdHkiOiJSU0EiLCJlIjoiQVFBQiIsInVzZSI6InNpZyIs"
+
 val ldpvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
     mapOf(FormatType.LDP_VC to ldpVPTokenSigningResult)
 
@@ -66,16 +73,13 @@ val mdocvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
     mapOf(FormatType.MSO_MDOC to mdocVPTokenSigningResult)
 
 val unsignedLdpVPToken: UnsignedLdpVPToken = UnsignedLdpVPToken(
-   dataToSign = "dataToSign"
+   dataToSign = "base64EncodedCanonicalisedData"
 )
 val unsignedMdocVPToken: UnsignedMdocVPToken = UnsignedMdocVPToken(
     docTypeToDeviceAuthenticationBytes = mapOf(
         "org.iso.18013.5.1.mDL" to "d8185892847444657669636541757468656e7469636174696f6e83f6f6835820ed084cf67d819fdc2ab6711e1a36053719358b46bfbf51a523c690f9cb6b1e5d5820ed084cf67d819fdc2ab6711e1a36053719358b46bfbf51a523c690f9cb6b1e5d7818624d487658314847686268387a716c5357662f6675513d3d756f72672e69736f2e31383031332e352e312e6d444cd81841a0"
     )
 )
-
-val unsignedVPTokens =
-    mapOf(FormatType.LDP_VC to unsignedLdpVPToken, FormatType.MSO_MDOC to unsignedMdocVPToken)
 
 val clientMetadataMap = mapOf(
     "client_name" to "Requester name",
@@ -388,6 +392,23 @@ val ldpVPToken = LdpVPToken(
     id = "id",
     holder = "holder",
     proof = proof
+)
+
+val vpTokenSigningPayload = VPTokenSigningPayload(
+    context = listOf("context"),
+    type = listOf("type"),
+    verifiableCredential = listOf(ldpCredential1, ldpCredential2, ldpCredential2),
+    id = "id",
+    holder = "holder",
+    proof = proof.apply {
+        jws = null
+        proofValue = null
+    }
+)
+
+val unsignedVPTokens = mapOf(
+    FormatType.LDP_VC to mapOf("vpTokenSigningPayload" to vpTokenSigningPayload, "unsignedVPToken" to unsignedLdpVPToken),
+    FormatType.MSO_MDOC to mapOf("vpTokenSigningPayload" to listOf(mdocCredential), "unsignedVPToken" to unsignedMdocVPToken)
 )
 
 val mdocVPToken = MdocVPToken(

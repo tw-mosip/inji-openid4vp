@@ -7,7 +7,7 @@ import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 
 class AuthorizationResponseUtilsTest{
-    @Ignore
+
     @Test
     fun `should convert the unsignedVPTokens to JSON successfully`() {
         val unsignedLdpVPToken = UnsignedLdpVPToken(
@@ -15,7 +15,7 @@ class AuthorizationResponseUtilsTest{
         )
         val unsignedVPTokens = mapOf(FormatType.LDP_VC to unsignedLdpVPToken)
         assertEquals(
-            "{\"ldp_vc\":{\"@context\":[\"https://www.w3.org/2018/credentials/v1\"],\"type\":[\"VerifiablePresentation\"],\"verifiableCredential\":[\"credential1\",\"credential2\",\"credential3\"],\"id\":\"649d581c-f291-4969-9cd5-2c27385a348f\",\"holder\":\"\"}}",
+            "{\"ldp_vc\":{\"dataToSign\":\"dataToSign\"}}",
             unsignedVPTokens.toJsonString()
         )
     }
