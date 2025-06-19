@@ -1,34 +1,46 @@
 package io.mosip.sampleapp.utils;
 
 import com.google.gson.JsonObject
-import com.nimbusds.jose.*
-import com.nimbusds.jose.crypto.*
-import com.nimbusds.jose.jwk.*
+import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.JWSObject
+import com.nimbusds.jose.JWSSigner
+import com.nimbusds.jose.Payload
+import com.nimbusds.jose.crypto.ECDSASigner
+import com.nimbusds.jose.crypto.RSASSASigner
+import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.jwk.RSAKey
-import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
-import com.nimbusds.jose.util.Base64URL
-import com.nimbusds.jwt.*
-import java.security.*
-import java.security.interfaces.*
-import java.util.*
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.SignedJWT
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
+import java.util.Date
+import java.util.UUID
 
 enum class KeyType {
     RSA, ES256, Ed25519
 }
 
 data class SignedVPJWT(
-    val jwt: String,
-    val publicJWK: String,
-    val algorithm: String
+    val jws: String,
+    val proofValue: String? = null,
+    val signatureAlgorithm: String
 )
 
 object VPTokenSigner {
 
     private fun signVPTokenWithRSAorEC(
-        keyPair: KeyPair,
         keyType: KeyType,
-        vpPayload: Map<String, Any>
+        vpPayload: String,
+        keyPair: KeyPair,
     ): SignedVPJWT {
         val jwk: JWK
         val signer: JWSSigner
@@ -72,41 +84,17 @@ object VPTokenSigner {
         return SignedVPJWT(signedJWT.serialize(), jwk.toPublicJWK().toJSONString(), alg.name)
     }
 
-    private fun signVPTokenWithEd25519(
-        jwk: OctetKeyPair,
-        vpPayload: Map<String, Any>
-    ): SignedVPJWT {
-        val signer = Ed25519Signer(jwk)
-        val claimsSet = JWTClaimsSet.Builder()
-            .issuer("did:jwk")
-            .issueTime(Date())
-            .claim("vp", vpPayload)
-            .build()
-
-        val signedJWT = SignedJWT(
-            JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                .keyID(jwk.keyID)
-                .type(JOSEObjectType.JWT)
-                .build(),
-            claimsSet
-        )
-        signedJWT.sign(signer)
-
-        return SignedVPJWT(signedJWT.serialize(), jwk.toPublicJWK().toJSONString(), JWSAlgorithm.EdDSA.name)
-    }
-
     fun signVpToken(
         keyType: KeyType,
-        mapPayload: Map<String, Any>
+        vpPayload: String,
+        keyPair: Any
     ) = when (keyType) {
         KeyType.RSA, KeyType.ES256 -> {
-            val keyPair = SampleKeyGenerator.generateKeyPair(keyType) as KeyPair
-            signVPTokenWithRSAorEC(keyPair, keyType, mapPayload)
+            signVPTokenWithRSAorEC(keyType, vpPayload, keyPair as KeyPair)
         }
 
         KeyType.Ed25519 -> {
-            val jwk = SampleKeyGenerator.generateKeyPair(keyType) as OctetKeyPair
-            signVPTokenWithEd25519(jwk, mapPayload)
+            DetachedJwtKeyManager.signDetachedVpJWT(vpPayload, keyPair as OctetKeyPair)
         }
     }
 
@@ -127,9 +115,8 @@ object VPTokenSigner {
         jwsObject.sign(signer)
 
         return SignedVPJWT(
-            jwt = jwsObject.serialize(),
-            algorithm = jwsObject.header.algorithm.name,
-            publicJWK = ""
+            jws = jwsObject.serialize(),
+            signatureAlgorithm = jwsObject.header.algorithm.name
         )
     }
 }
@@ -138,7 +125,6 @@ object VPTokenSigner {
 
 object SampleKeyGenerator {
 
-    val HOLDER_ID = generateEd25519Jwk()
     const val SIGNATURE_SUITE = "JsonWebSignature2020"
 
     fun generateKeyPair(keyType: KeyType): Any {
@@ -154,20 +140,9 @@ object SampleKeyGenerator {
                 keyGen.generateKeyPair()
             }
             KeyType.Ed25519 -> {
-                generateEd25519KeyPair()
+                DetachedJwtKeyManager.generateEd25519JWK()
             }
         }
-    }
-
-    private fun generateEd25519KeyPair(): OctetKeyPair {
-        return OctetKeyPairGenerator(Curve.Ed25519)
-            .keyUse(KeyUse.SIGNATURE)
-            .keyIDFromThumbprint(true)
-            .generate()
-    }
-
-    private fun generateEd25519Jwk(): String {
-        return "did:jwk:${Base64URL.encode(generateEd25519KeyPair().toPublicJWK().toJSONString().toByteArray())}"
     }
 
 }

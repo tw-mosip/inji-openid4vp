@@ -2,20 +2,19 @@ package io.mosip.sampleapp.utils
 
 import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.nimbusds.jose.jwk.OctetKeyPair
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPToken
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.sampleapp.data.VCMetadata
 import io.mosip.sampleapp.data.HardcodedOVPData.getListOfVerifiers
 import io.mosip.sampleapp.data.HardcodedOVPData.getWalletMetadata
-import io.mosip.sampleapp.utils.SampleKeyGenerator.HOLDER_ID
+import io.mosip.sampleapp.data.VCMetadata
 import io.mosip.sampleapp.utils.SampleKeyGenerator.SIGNATURE_SUITE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +45,7 @@ object OpenID4VPManager {
         )
     }
 
-    fun constructUnsignedVpToken(selectedCredentials : Map<String, Map<FormatType, List<Any>>>, holderId: String, signatureSuite: String): Map<FormatType, UnsignedVPToken> {
+    private fun constructUnsignedVpToken(selectedCredentials : Map<String, Map<FormatType, List<Any>>>, holderId: String, signatureSuite: String): Map<FormatType, UnsignedVPToken> {
         return instance.constructUnsignedVPToken(selectedCredentials, holderId, signatureSuite)
     }
 
@@ -57,42 +56,47 @@ object OpenID4VPManager {
     }
 
 
-    suspend fun sendVP(selectedItems: SnapshotStateList<Pair<String, VCMetadata>>) = withContext(
+    private suspend fun sendVP(selectedItems: SnapshotStateList<Pair<String, VCMetadata>>) = withContext(
         Dispatchers.IO) {
         val parsedSelectedItems = MatchingVcsHelper().buildSelectedVCsMapPlain(selectedItems)
 
 
-        val unsignedVpTokenMap = constructUnsignedVpToken(parsedSelectedItems, HOLDER_ID, SIGNATURE_SUITE)
-
         // LDP_VC signing
-        val ldpSigningResult = unsignedVpTokenMap[FormatType.LDP_VC]?.let { vpPayload ->
-            val gson = Gson()
-            val jsonElement = gson.toJsonTree(vpPayload)
-            val mapPayload: Map<String, Any> = gson.fromJson(jsonElement, object : TypeToken<Map<String, Any>>() {}.type)
+        val ldpKeyType = KeyType.Ed25519
+        val ldpKeyPair = SampleKeyGenerator.generateKeyPair(ldpKeyType)
+        val holderId = DetachedJwtKeyManager.generateHolderId(ldpKeyPair as OctetKeyPair)
 
-            val keyType = KeyType.Ed25519
-            val result = VPTokenSigner.signVpToken(keyType, mapPayload)
+        val unsignedVpTokenMap = constructUnsignedVpToken(parsedSelectedItems,
+            holderId, SIGNATURE_SUITE)
+
+
+        val ldpSigningResult = unsignedVpTokenMap[FormatType.LDP_VC]?.let { vpPayload ->
+
+
+            val result = VPTokenSigner.signVpToken(ldpKeyType, (vpPayload as UnsignedLdpVPToken).dataToSign, ldpKeyPair)
 
             LdpVPTokenSigningResult(
-                jws = result.jwt,
-                signatureAlgorithm = result.algorithm
+                jws = result.jws,
+                signatureAlgorithm = result.signatureAlgorithm
             )
         }
 
         // MSO_MDOC signing
+        val mdocKeyType = KeyType.ES256
+        val mdocKeyPair = SampleKeyGenerator.generateKeyPair(mdocKeyType)
+
         val mdocSigningResult = unsignedVpTokenMap[FormatType.MSO_MDOC]?.let { payload ->
             val mdocPayload = payload as UnsignedMdocVPToken
             val docTypeToDeviceAuthenticationBytes = mdocPayload.docTypeToDeviceAuthenticationBytes
-            val keyType = KeyType.ES256
-            val keyPair = SampleKeyGenerator.generateKeyPair(keyType)
+
             val docTypeToDeviceAuthentication = docTypeToDeviceAuthenticationBytes.mapValues { (_, deviceAuthBytes) ->
                 val bytes = if (deviceAuthBytes is String) {
                     deviceAuthBytes.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
                 } else deviceAuthBytes as ByteArray
-                val signed = VPTokenSigner.signDeviceAuthentication(keyPair as KeyPair, keyType, bytes)
-                val jwsParts = signed.jwt.split(".")
-                val signaturePart = if (jwsParts.size == 3) jwsParts[2] else signed.jwt
-                DeviceAuthentication(signature = signaturePart, algorithm = signed.algorithm)
+                val signed = VPTokenSigner.signDeviceAuthentication(mdocKeyPair as KeyPair, mdocKeyType, bytes)
+                val jwsParts = signed.jws.split(".")
+                val signaturePart = if (jwsParts.size == 3) jwsParts[2] else signed.jws
+                DeviceAuthentication(signature = signaturePart, algorithm = signed.signatureAlgorithm)
             }
             MdocVPTokenSigningResult(docTypeToDeviceAuthentication)
         }
