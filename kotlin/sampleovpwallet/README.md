@@ -5,6 +5,14 @@ Formats supported:
 - LDP_VC : Implemented using [Specification-21](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html) and [Specification-23](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html)
 - MSO_MDOC_VC: Implemented Using [ISO/IEC 18013-5:2021](https://www.iso.org/standard/69084.html) and [ISO/IEC TS 18013-7](https://www.iso.org/standard/82772.html)
 
+## Prerequisites
+
+- Install Android Studio
+- Install required SDK platforms and tools via SDK Manager in Android Studio which is expected tobe installed during Android Studio Installation
+- Make sure Android Studio is configured to use JDK 17. It can be verified in Preferences → Build, Execution, Deployment → Build Tools → Gradle.
+- Physical device to run the app, as QR code scanning requires camera access.
+
+
 ## Features
 
 - Scans QR codes to receive Verifier Authorization Requests.
