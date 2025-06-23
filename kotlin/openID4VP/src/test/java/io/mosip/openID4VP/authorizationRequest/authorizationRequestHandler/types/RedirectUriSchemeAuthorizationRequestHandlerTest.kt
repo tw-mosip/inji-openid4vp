@@ -191,21 +191,6 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
     }
 
     @Test
-    fun `validateAndParseRequestFields should throw exception when response_mode is missing1`() {
-        // Arrange
-        val modifiedParams = authorizationRequestParameters.toMutableMap()
-        modifiedParams.remove(RESPONSE_MODE.value)
-
-        val handler = RedirectUriSchemeAuthorizationRequestHandler(
-            modifiedParams, walletMetadata, setResponseUri
-        )
-
-        // Act & Assert
-        val exception = assertThrows<MissingInput> { handler.validateAndParseRequestFields() }
-        assertTrue(exception.message?.contains("response_mode") == true)
-    }
-
-    @Test
     fun `validateAndParseRequestFields should throw exception when response_mode is missing`() {
         mockkStatic("io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataUtilKt")
         every {
