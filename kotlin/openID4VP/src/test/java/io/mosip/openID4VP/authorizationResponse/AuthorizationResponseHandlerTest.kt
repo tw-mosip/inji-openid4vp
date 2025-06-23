@@ -12,44 +12,36 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionSerializer
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PathNested
-import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.VPTokenSigningPayload
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
-import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
-import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import io.mosip.openID4VP.common.DateUtil
-import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.common.UUIDGenerator
+import io.mosip.openID4VP.common.encodeToJsonString
+import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
 import io.mosip.openID4VP.testData.authorizationRequest
-import io.mosip.openID4VP.testData.authorizationRequestForResponseModeJWT
 import io.mosip.openID4VP.testData.clientMetadataMap
 import io.mosip.openID4VP.testData.holderId
-import io.mosip.openID4VP.testData.presentationDefinitionMap
-import io.mosip.openID4VP.testData.setField
-import io.mosip.openID4VP.testData.ldpvpTokenSigningResults
+import io.mosip.openID4VP.testData.jws
 import io.mosip.openID4VP.testData.ldpCredential1
 import io.mosip.openID4VP.testData.ldpCredential2
 import io.mosip.openID4VP.testData.ldpVPToken
 import io.mosip.openID4VP.testData.ldpVPTokenSigningResult
-import io.mosip.openID4VP.testData.mdocvpTokenSigningResults
+import io.mosip.openID4VP.testData.ldpvpTokenSigningResults
 import io.mosip.openID4VP.testData.mdocCredential
 import io.mosip.openID4VP.testData.mdocVPToken
 import io.mosip.openID4VP.testData.mdocVPTokenSigningResult
-import io.mosip.openID4VP.testData.proof
+import io.mosip.openID4VP.testData.mdocvpTokenSigningResults
+import io.mosip.openID4VP.testData.presentationDefinitionMap
 import io.mosip.openID4VP.testData.responseUrl
+import io.mosip.openID4VP.testData.setField
 import io.mosip.openID4VP.testData.signatureSuite
 import io.mosip.openID4VP.testData.unsignedLdpVPToken
 import io.mosip.openID4VP.testData.unsignedMdocVPToken
@@ -59,12 +51,9 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertThrows
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.BeforeEach
 import java.io.IOException
 
 class AuthorizationResponseHandlerTest {
@@ -201,225 +190,6 @@ class AuthorizationResponseHandlerTest {
     }
 
     // Sharing of Verifiable Presentation
-
-    @Ignore
-    @Test
-    fun `should make network call to verifier responseUri with the vp_token, presentation_submission and state successfully`() {
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier.com",
-                HttpMethod.POST,
-                any(),
-                any()
-            )
-        } returns mapOf("body" to "VP share success")
-        val authorizationResponse = AuthorizationResponse(
-            presentationSubmission = PresentationSubmission(
-                id = "649d581c-f291-4969-9cd5-2c27385a348f",
-                definitionId = "649d581c-f891-4969-9cd5-2c27385a348f",
-                descriptorMap = listOf(
-                    DescriptorMap(
-                        id = "456",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "456",
-                            format = "ldp_vc",
-                            path = "$.VerifiableCredential[0]"
-                        )
-                    ),
-                    DescriptorMap(
-                        id = "456",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "456",
-                            format = "ldp_vc",
-                            path = "$.VerifiableCredential[1]"
-                        )
-                    ),
-                    DescriptorMap(
-                        id = "789",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "789",
-                            format = "ldp_vc",
-                            path = "$.VerifiableCredential[2]"
-                        )
-                    )
-                )
-            ),
-            vpToken = VPTokenType.VPTokenElement(
-                value = LdpVPToken(
-                    context = listOf("https://www.w3.org/2018/credentials/v1"),
-                    type = listOf("VerifiablePresentation"),
-                    verifiableCredential = listOf("credential1", "credential2", "credential3"),
-                    id = "649d581c-f291-4969-9cd5-2c27385a348f",
-                    holder = "",
-                    proof = proof
-                )
-            ),
-            state = "fsnC8ixCs6mWyV+00k23Qg=="
-        )
-        val expectedHeaders = mapOf("Content-Type" to "application/x-www-form-urlencoded")
-
-        authorizationResponseHandler.shareVP(
-            authorizationRequest = authorizationRequest,
-            vpTokenSigningResults = ldpvpTokenSigningResults,
-            responseUri = authorizationRequest.responseUri!!
-        )
-
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                url = authorizationRequest.responseUri!!,
-                method = HttpMethod.POST,
-                bodyParams = authorizationResponse.toJsonEncodedMap(),
-                headers = expectedHeaders
-            )
-        }
-    }
-
-    @Ignore
-    @Test
-    fun `should make network call to verifier responseUri with encrypted body successfully when both mdoc vc is being shared`() {
-        authorizationResponseHandler = AuthorizationResponseHandler()
-//
-//        mockkConstructor(LdpVPTokenBuilder::class)
-//        every { anyConstructed<LdpVPTokenBuilder>().build() } returns ldpVPToken
-//
-//        mockkConstructor(MdocVPTokenBuilder::class)
-//        every { anyConstructed<MdocVPTokenBuilder>().build() } returns mdocVPToken
-
-
-        setField(authorizationResponseHandler, "credentialsMap", selectedLdpVcCredentialsList + selectedMdocCredentialsList)
-        setField(authorizationResponseHandler, "unsignedVPTokens", unsignedVPTokens)
-
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                authorizationRequestForResponseModeJWT.responseUri!!,
-                HttpMethod.POST,
-                any(),
-                any()
-            )
-        } returns mapOf("body" to "VP share success")
-
-        mockkConstructor(JWEHandler::class)
-        every { anyConstructed<JWEHandler>().generateEncryptedResponse(any()) } returns "eytyiewr.....jewjr"
-        val expectedBodyWithAuthResponseParams = mapOf(
-            "response" to "eytyiewr.....jewjr"
-        )
-        val expectedHeaders = mapOf("Content-Type" to "application/x-www-form-urlencoded")
-
-        authorizationResponseHandler.shareVP(
-            authorizationRequest = authorizationRequestForResponseModeJWT,
-            vpTokenSigningResults = ldpvpTokenSigningResults + mdocvpTokenSigningResults,
-            responseUri = authorizationRequestForResponseModeJWT.responseUri!!
-        )
-
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                url = authorizationRequestForResponseModeJWT.responseUri!!,
-                method = HttpMethod.POST,
-                bodyParams = expectedBodyWithAuthResponseParams,
-                headers = expectedHeaders
-            )
-        }
-    }
-
-    @Ignore
-    @Test
-    fun `should make network call to verifier responseUri with the vp_token, presentation_submission successfully`() {
-        val authorizationRequestWithoutStateProperty = AuthorizationRequest(
-            clientId = "https://mock-verifier.com",
-            responseType = "vp_token",
-            responseMode = "direct_post",
-            presentationDefinition = deserializeAndValidate(
-                presentationDefinitionMap,
-                PresentationDefinitionSerializer
-            ),
-            responseUri = "https://mock-verifier.com",
-            redirectUri = null,
-            nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
-            state = null,
-            clientMetadata = deserializeAndValidate(clientMetadataMap, ClientMetadataSerializer)
-        )
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                "https://mock-verifier.com",
-                HttpMethod.POST,
-                any(),
-                any()
-            )
-        } returns mapOf("body" to "VP share success")
-        val expectedHeaders = mapOf("Content-Type" to "application/x-www-form-urlencoded")
-
-        authorizationResponseHandler.shareVP(
-            authorizationRequest = authorizationRequestWithoutStateProperty,
-            vpTokenSigningResults = ldpvpTokenSigningResults,
-            responseUri = authorizationRequest.responseUri!!
-        )
-
-        val authorizationResponse = AuthorizationResponse(
-            presentationSubmission = PresentationSubmission(
-                id = "649d581c-f291-4969-9cd5-2c27385a348f",
-                definitionId = "649d581c-f891-4969-9cd5-2c27385a348f",
-                descriptorMap = listOf(
-                    DescriptorMap(
-                        id = "456",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "456",
-                            format = "ldp_vc",
-                            path = "$.VerifiableCredential[0]"
-                        )
-                    ),
-                    DescriptorMap(
-                        id = "456",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "456",
-                            format = "ldp_vc",
-                            path = "$.VerifiableCredential[1]"
-                        )
-                    ),
-                    DescriptorMap(
-                        id = "789",
-                        format = "ldp_vp",
-                        path = "$",
-                        pathNested = PathNested(
-                            id = "789",
-                            format = "ldp_vc",
-                            path = "$.VerifiableCredential[2]"
-                        )
-                    )
-                )
-            ),
-            vpToken = VPTokenType.VPTokenElement(
-                value = LdpVPToken(
-                    context = listOf("https://www.w3.org/2018/credentials/v1"),
-                    type = listOf("VerifiablePresentation"),
-                    verifiableCredential = listOf("credential1", "credential2", "credential3"),
-                    id = "649d581c-f291-4969-9cd5-2c27385a348f",
-                    holder = "",
-                    proof = proof
-                )
-            ),
-            state = null
-        )
-
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                url = authorizationRequest.responseUri!!,
-                method = HttpMethod.POST,
-                bodyParams = authorizationResponse.toJsonEncodedMap(),
-                headers = expectedHeaders
-            )
-        }
-    }
-
     @Test
     fun `should throw error when response type is not supported`() {
         val authorizationRequestWithNonVPTokenResponseType = AuthorizationRequest(
@@ -476,7 +246,7 @@ class AuthorizationResponseHandlerTest {
 
     @Test
     fun `should throw exception when credentials map is empty`() {
-        val exception = Assert.assertThrows(Exceptions.InvalidData::class.java) {
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
             authorizationResponseHandler.constructUnsignedVPToken(
                 credentialsMap = emptyMap<String, Map<FormatType, List<String>>>(),
                 holderId = holderId,
@@ -540,7 +310,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = Assert.assertThrows(Exceptions.InvalidData::class.java) {
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = mockInvalidRequest,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -567,7 +337,7 @@ class AuthorizationResponseHandlerTest {
         )
 
         // Try to sign with MSO_MDOC which wasn't in the unsigned tokens
-        val exception = Assert.assertThrows(Exceptions.InvalidData::class.java) {
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = authorizationRequest,
                 vpTokenSigningResults = mdocvpTokenSigningResults,
@@ -604,7 +374,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = Assert.assertThrows(Exceptions.InvalidData::class.java) {
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = mockRequestWithUnsupportedMode,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -630,7 +400,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = Assert.assertThrows(Exceptions.InvalidData::class.java) {
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = mockRequestWithUnsupportedMode,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -660,7 +430,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = Assert.assertThrows(IOException::class.java) {
+        val exception = assertThrows(IOException::class.java) {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = authorizationRequest,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -692,5 +462,170 @@ class AuthorizationResponseHandlerTest {
         Assert.assertEquals(1, result.size)
         Assert.assertEquals(unsignedLdpVPToken, result[FormatType.LDP_VC])
     }
+
+    @Test
+    fun `constructUnsignedVPTokenV1 should successfully construct unsigned VP token`() {
+        // Arrange
+        val verifiableCredentials = mapOf(
+            "input1" to listOf(encodeToJsonString(ldpCredential1, "ldpCredential1", "LDP_VC")),
+            "input2" to listOf(encodeToJsonString(ldpCredential2, "ldpCredential2", "LDP_VC")),
+        )
+
+        // Act
+        val result = authorizationResponseHandler.constructUnsignedVPTokenV1(
+            verifiableCredentials = verifiableCredentials,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUrl
+        )
+
+        // Assert
+        Assert.assertNotNull(result)
+        Assert.assertTrue(result.contains("verifiableCredential"))
+        Assert.assertTrue(result.contains("type"))
+    }
+
+    @Test
+    fun `constructUnsignedVPTokenV1 should throw exception when credentials map is empty`() {
+        // Arrange
+        val emptyCredentials = emptyMap<String, List<String>>()
+
+        // Act & Assert
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
+            authorizationResponseHandler.constructUnsignedVPTokenV1(
+                verifiableCredentials = emptyCredentials,
+                authorizationRequest = authorizationRequest,
+                responseUri = responseUrl
+            )
+        }
+
+        Assert.assertEquals(
+            "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
+            exception.message
+        )
+    }
+
+    // Tests for shareVPV1
+
+    @Test
+    fun `shareVPV1 should successfully share VP and return response`() {
+        // Arrange
+        val vpResponseMetadata = VPResponseMetadata(
+            publicKey = "did:example:123#key-1",
+            jws = jws,
+            domain = "example.com",
+            signatureAlgorithm = "Ed25519Signature2020"
+        )
+
+        // Setup internal state by calling constructUnsignedVPTokenV1 first
+        val verifiableCredentials = mapOf(
+            "input1" to listOf(encodeToJsonString(ldpCredential1, "ldpCredential1", "LDP_VC")),
+            "input2" to listOf(encodeToJsonString(ldpCredential2, "ldpCredential2", "LDP_VC")),
+        )
+        authorizationResponseHandler.constructUnsignedVPTokenV1(
+            verifiableCredentials = verifiableCredentials,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUrl
+        )
+
+        // Act
+        val result = authorizationResponseHandler.shareVPV1(
+            vpResponseMetadata = vpResponseMetadata,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUrl
+        )
+
+        // Assert
+        Assert.assertEquals("success", result)
+
+        // Verify the correct authorization response was sent
+        verify {
+            mockResponseHandler.sendAuthorizationResponse(
+                authorizationRequest = authorizationRequest,
+                url = responseUrl,
+                authorizationResponse = any(),
+                walletNonce = any()
+            )
+        }
+    }
+
+    @Test
+    fun `shareVPV1 should throw exception when VP response metadata is invalid`() {
+        // Arrange
+        val invalidVpResponseMetadata = VPResponseMetadata(
+            publicKey = "",  // Invalid empty public key
+            jws = jws,
+            domain = "example.com",
+            signatureAlgorithm = "Ed25519Signature2020"
+        )
+
+        // Setup internal state
+        val verifiableCredentials = mapOf(
+            "input1" to listOf(encodeToJsonString(ldpCredential1, "ldpCredential1", "LDP_VC")),
+        )
+        authorizationResponseHandler.constructUnsignedVPTokenV1(
+            verifiableCredentials = verifiableCredentials,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUrl
+        )
+
+        // Mock validation to throw exception
+        val validationException = Exceptions.InvalidData("Public key cannot be empty")
+
+        val mockVPResponseMetadata = mockk<VPResponseMetadata>()
+        every { mockVPResponseMetadata.publicKey } returns ""
+        every { mockVPResponseMetadata.jws } returns "eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJ0ZXN0In0.dBjftO-_JW9-IrdJQ6LpHc_2-qAzGR7O-fF_86eQj-EHtP-UbIVv27mWYNgIbpNTsR_bSe_YkWqiWxOb0-JICA"
+        every { mockVPResponseMetadata.validate() } throws validationException
+
+        // Act & Assert
+        val exception = assertThrows(Exceptions.InvalidData::class.java) {
+            authorizationResponseHandler.shareVPV1(
+                vpResponseMetadata = mockVPResponseMetadata,
+                authorizationRequest = authorizationRequest,
+                responseUri = responseUrl
+            )
+        }
+
+        Assert.assertEquals("Public key cannot be empty", exception.message)
+    }
+
+    @Test
+    fun `shareVPV1 should handle network errors during sharing`() {
+        // Arrange
+        val vpResponseMetadata = VPResponseMetadata(
+            publicKey = "did:example:123#key-1",
+            jws = jws,
+            domain = "example.com",
+            signatureAlgorithm = "Ed25519Signature2020"
+        )
+
+        // Setup internal state
+        val verifiableCredentials = mapOf(
+            "input1" to listOf(encodeToJsonString(ldpCredential1, "ldpCredential1", "LDP_VC")),
+        )
+        authorizationResponseHandler.constructUnsignedVPTokenV1(
+            verifiableCredentials = verifiableCredentials,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUrl
+        )
+
+        // Mock network error
+        every {
+            mockResponseHandler.sendAuthorizationResponse(any(), any(), any(), any())
+        } throws IOException("Network connection failed")
+
+        // Act & Assert
+        val exception = assertThrows(IOException::class.java) {
+            authorizationResponseHandler.shareVPV1(
+                vpResponseMetadata = vpResponseMetadata,
+                authorizationRequest = authorizationRequest,
+                responseUri = responseUrl
+            )
+        }
+
+        Assert.assertEquals("Network connection failed", exception.message)
+    }
+
 }
+
+
 
