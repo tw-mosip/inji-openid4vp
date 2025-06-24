@@ -25,7 +25,7 @@ The library validates the client_id and client_id_scheme parameters in the autho
 Snapshot builds are available - 
 
 ```
-implementation "io.mosip:inji-openid4vp:0.3.0-SNAPSHOT"
+implementation "io.mosip:inji-openid4vp:0.4.0-SNAPSHOT"
 ```
 
 ## Create instance of OpenID4VP library to invoke it's methods
