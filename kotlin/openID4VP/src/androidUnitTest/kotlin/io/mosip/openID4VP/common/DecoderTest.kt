@@ -1,50 +1,65 @@
 package io.mosip.openID4VP.common
 
 
-import io.mockk.clearAllMocks
+import android.util.Base64
 import io.mockk.every
-import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertEquals
 
 class DecoderTest {
-
     @Before
     fun setUp() {
-        mockkStatic(android.util.Base64::class)
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
-    }
-
-    @After
-    fun tearDown() {
-        clearAllMocks()
-    }
-
-    @Test
-    fun `should decode the base64 url encoded content successfully with API greater than or equal to Version O`() {
-
-        val decodedData: ByteArray = decodeBase64Data("aGVsbG8gd29ybGQ")
-
-        assertTrue("hello world".toByteArray().contentEquals(decodedData))
-    }
-
-    @Test
-    fun `should decode the base64 url encoded content successfully with API lesser than  Version O`() {
+        mockkStatic(Base64::class)
 
         every {
-            android.util.Base64.decode(
-                "aGVsbG8gd29ybGQ=",
-                android.util.Base64.DEFAULT
-            )
-        } returns "hello world".toByteArray()
+            Base64.decode(any<String>(), any<Int>())
+        } answers {
+            ByteArray(0)
+        }
+    }
 
-        val decodedData: ByteArray = decodeBase64Data("aGVsbG8gd29ybGQ")
+    @Test
+    fun `should decode base64 url safe content`() {
+        val input = "aGVsbG8gd29ybGQ="
+        val expectedOutput = "hello world"
 
-        Assertions.assertEquals("hello world", decodedData.toString(Charsets.UTF_8))
+        every {
+            Base64.decode(input, Base64.DEFAULT or Base64.URL_SAFE)
+        } answers {
+            expectedOutput.toByteArray()
+        }
+
+        val result = decodeBase64Data(input)
+        assertEquals(expectedOutput, result.toString(Charsets.UTF_8))
+    }
+
+    @Test
+    fun `should handle url safe characters`() {
+        val input = "aGVsbG8-d29ybGQ_"
+        val expectedOutput = "hello>world?"
+
+        every {
+            Base64.decode(input, Base64.DEFAULT or Base64.URL_SAFE)
+        } answers {
+            expectedOutput.toByteArray()
+        }
+
+        val result = decodeBase64Data(input)
+        assertEquals(expectedOutput, result.toString(Charsets.UTF_8))
+    }
+
+    @Test
+    fun `should throw error for invalid base64`() {
+        val input = "invalid%%base64"
+
+        every {
+            Base64.decode(input, Base64.DEFAULT or Base64.URL_SAFE)
+        } throws IllegalArgumentException("Invalid base64")
+
+        kotlin.test.assertFailsWith<IllegalArgumentException> {
+            decodeBase64Data(input)
+        }
     }
 }

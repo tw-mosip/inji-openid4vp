@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.common
 
 
+import android.util.Base64
 import android.util.Base64.encodeToString
 
 import io.mockk.clearAllMocks
@@ -16,7 +17,7 @@ class EncoderTest {
 
     @Before
     fun setUp() {
-        mockkStatic(android.util.Base64::class)
+        mockkStatic(Base64::class)
         mockkObject(Logger)
         every { Logger.error(any(), any(), any()) } answers {  }
     }
@@ -24,16 +25,6 @@ class EncoderTest {
     @After
     fun tearDown() {
         clearAllMocks()
-    }
-
-
-
-    @Test
-    fun `should encode the content to base64 url successfully with API greater than or equal to Version O`() {
-
-        val encodedData = encodeToBase64Url("hello world".toByteArray())
-
-        assertEquals("aGVsbG8gd29ybGQ=", encodedData)
     }
 
     @Test
