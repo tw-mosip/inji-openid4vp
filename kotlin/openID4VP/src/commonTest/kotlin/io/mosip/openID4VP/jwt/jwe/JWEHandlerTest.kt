@@ -1,7 +1,7 @@
 
 package io.mosip.openID4VP.jwt.jwe
 
-import android.util.Log
+
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader
@@ -23,6 +23,7 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
+import io.mosip.openID4VP.common.decodeBase64Data
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.jwt.jwe.encryption.EncryptionProvider
@@ -56,13 +57,7 @@ class JWEHandlerTest {
         )
 
         mockkObject(Logger)
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        every { Logger.error(any(), any(), any()) } answers {  }
 
     }
     @After
@@ -92,7 +87,7 @@ class JWEHandlerTest {
         val jweParts = encryptedResponse.split(".")
         assertTrue(jweParts.size == 5)
 
-        val decodedJWEHeader = convertJsonToMap(String(openID4VP.common.Decoder.decodeBase64Data(jweParts[0])))
+        val decodedJWEHeader = convertJsonToMap(String(decodeBase64Data(jweParts[0])))
 
         assertEquals(walletNonce, decodedJWEHeader["apu"])
         assertEquals(verifierNonce, decodedJWEHeader["apv"])

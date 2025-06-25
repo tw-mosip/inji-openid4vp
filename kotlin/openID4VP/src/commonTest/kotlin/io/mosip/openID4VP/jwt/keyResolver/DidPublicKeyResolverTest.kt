@@ -1,10 +1,12 @@
 package io.mosip.openID4VP.jwt.keyResolver
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.jwt.exception.JWSException
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import io.mosip.vercred.vcverifier.DidWebResolver
@@ -24,19 +26,8 @@ class DidPublicKeyResolverTest {
          mockkConstructor(DidWebResolver::class)
         resolver = DidPublicKeyResolver(mockDidUrl)
 
-        mockkStatic(android.util.Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
-        every { Log.d(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
 
     @After

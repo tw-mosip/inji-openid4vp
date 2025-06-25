@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.authorizationResponse
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -19,6 +19,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPTokenBuil
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import io.mosip.openID4VP.common.DateUtil
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.constants.FormatType
@@ -99,13 +100,8 @@ class AuthorizationResponseHandlerTest {
         setField(authorizationResponseHandler, "credentialsMap", selectedLdpVcCredentialsList + selectedMdocCredentialsList)
         setField(authorizationResponseHandler, "unsignedVPTokens", unsignedVPTokens)
 
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
 
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"

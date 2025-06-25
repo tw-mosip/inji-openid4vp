@@ -1,12 +1,14 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ResponseMode.DIRECT_POST_JWT
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
@@ -29,13 +31,8 @@ class PresentationDefinitionTest {
 
     @Before
     fun setUp() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
 
     @After

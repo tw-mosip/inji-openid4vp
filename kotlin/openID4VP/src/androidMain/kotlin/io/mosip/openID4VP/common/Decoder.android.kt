@@ -1,4 +1,4 @@
-package io.mosip.openID4VP
+package io.mosip.openID4VP.common
 
 actual fun decodeBase64Data(content: String): ByteArray {
     var base64: String = content.replace('-', '+').replace('_', '/')

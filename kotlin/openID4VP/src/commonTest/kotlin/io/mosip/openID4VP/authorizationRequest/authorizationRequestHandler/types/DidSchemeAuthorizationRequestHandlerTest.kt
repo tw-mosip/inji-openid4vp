@@ -1,10 +1,11 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
-import android.util.Log
+
 import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
@@ -28,11 +29,8 @@ class DidSchemeAuthorizationRequestHandlerTest {
 
     @Before
     fun setup() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            println("Error: logTag: ${arg<String>(0)} | Message: ${arg<String>(1)}")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
 
         authorizationRequestParameters = mutableMapOf(
             CLIENT_ID.value to didUrl,

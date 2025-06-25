@@ -4,7 +4,6 @@ import foundation.identity.jsonld.ConfigurableDocumentLoader
 import foundation.identity.jsonld.JsonLDObject
 import info.weboftrust.ldsignatures.LdProof
 import info.weboftrust.ldsignatures.canonicalizer.URDNA2015Canonicalizer
-import io.mosip.openID4VP.encodeToBase64Url
 
 object URDNA2015Canonicalization{
     fun canonicalize(jsonString: String): String{

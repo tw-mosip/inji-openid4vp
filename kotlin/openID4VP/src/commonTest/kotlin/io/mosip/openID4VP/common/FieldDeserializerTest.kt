@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.common
 
-import android.util.Log
+
 import io.mockk.*
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
@@ -21,13 +21,7 @@ class FieldDeserializerTest {
     @Before
     fun setUp() {
         mockkObject(Logger)
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
 
     @After

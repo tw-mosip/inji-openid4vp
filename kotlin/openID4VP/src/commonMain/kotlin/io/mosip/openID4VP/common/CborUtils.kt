@@ -10,7 +10,6 @@ import co.nstant.`in`.cbor.model.DoublePrecisionFloat
 import co.nstant.`in`.cbor.model.NegativeInteger
 import co.nstant.`in`.cbor.model.UnicodeString
 import co.nstant.`in`.cbor.model.UnsignedInteger
-import io.mosip.openID4VP.decodeBase64Data
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest

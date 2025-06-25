@@ -1,12 +1,13 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
-import android.util.Log
+
 import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.exceptions.Exceptions.*
 import io.mosip.openID4VP.testData.clientMetadataString
@@ -26,11 +27,8 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
 
     @Before
     fun setup() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            println("Error: logTag: ${arg<String>(0)} | Message: ${arg<String>(1)}")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
 
         // Client ID is set to response URI for redirect_uri scheme
         authorizationRequestParameters = mutableMapOf(

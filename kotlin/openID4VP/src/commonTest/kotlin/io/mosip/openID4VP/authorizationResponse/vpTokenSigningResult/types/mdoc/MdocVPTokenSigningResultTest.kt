@@ -1,11 +1,13 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
+import io.mosip.openID4VP.common.Logger
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -25,13 +27,8 @@ class MdocVPTokenSigningResultTest {
             "doctype1" to mockDeviceAuthentication1,
             "doctype2" to mockDeviceAuthentication2
         )
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
 
     @After

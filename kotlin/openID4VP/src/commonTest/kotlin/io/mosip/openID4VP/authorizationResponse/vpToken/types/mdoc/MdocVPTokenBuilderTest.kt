@@ -1,15 +1,19 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc
 
-import android.util.Log
+
 import co.nstant.`in`.cbor.CborDecoder
 import co.nstant.`in`.cbor.model.Array
 import co.nstant.`in`.cbor.model.UnicodeString
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.encodeCbor
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
+import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.decodeBase64Data
+import io.mosip.openID4VP.common.encodeToBase64Url
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import io.mosip.openID4VP.testData.mdocCredential
 import org.junit.Assert.assertEquals
@@ -39,19 +43,8 @@ class MdocVPTokenBuilderTest {
         )
         mdocCredentials = listOf(mdocCredential)
 
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
-        every { Log.d(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
 
     @Test
@@ -59,7 +52,7 @@ class MdocVPTokenBuilderTest {
         val result = MdocVPTokenBuilder(mdocVPTokenSigningResult, mdocCredentials).build()
 
         assertNotNull(result)
-        val decodedResult = openID4VP.common.Decoder.decodeBase64Data(result.base64EncodedDeviceResponse)
+        val decodedResult = decodeBase64Data(result.base64EncodedDeviceResponse)
         val decodedCbor = CborDecoder(decodedResult.inputStream()).decode()[0] as CborMap
 
         assertEquals("1.0", decodedCbor[UnicodeString("version")].toString())
@@ -81,12 +74,12 @@ class MdocVPTokenBuilderTest {
                 "org.iso.18013.5.1.elc" to deviceAuthentication
             )
         )
-        val multipleCredentials = mdocCredentials + Encoder.encodeToBase64Url(mdocCredential2)
+        val multipleCredentials = mdocCredentials + encodeToBase64Url(mdocCredential2)
 
         val result = MdocVPTokenBuilder(mdocVPTokenSigningResult, multipleCredentials).build()
 
         assertNotNull(result)
-        val decodedResult = openID4VP.common.Decoder.decodeBase64Data(result.base64EncodedDeviceResponse)
+        val decodedResult = decodeBase64Data(result.base64EncodedDeviceResponse)
         val decodedCbor = CborDecoder(decodedResult.inputStream()).decode()[0] as CborMap
 
         val documents = decodedCbor[UnicodeString("documents")] as Array

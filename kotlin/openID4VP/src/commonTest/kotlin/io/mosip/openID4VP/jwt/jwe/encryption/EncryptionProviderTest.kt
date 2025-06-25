@@ -1,12 +1,14 @@
 package io.mosip.openID4VP.jwt.jwe.encryption
 
-import android.util.Log
+
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.crypto.X25519Encrypter
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.jwt.exception.JWEException.*
 import io.mosip.openID4VP.jwt.jwe.encryption.EncryptionProvider
 import org.junit.After
@@ -18,13 +20,8 @@ import org.junit.Test
 class EncryptionProviderTest {
     @Before
     fun setUp() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
     @After
     fun tearDown() {

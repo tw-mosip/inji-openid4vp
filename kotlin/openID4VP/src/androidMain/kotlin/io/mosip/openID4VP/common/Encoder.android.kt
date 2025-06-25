@@ -1,4 +1,4 @@
-package io.mosip.openID4VP
+package io.mosip.openID4VP.common
 
 import android.util.Base64.NO_PADDING
 import android.util.Base64.encodeToString

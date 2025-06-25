@@ -1,9 +1,11 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
 import org.junit.After
 import org.junit.Before
@@ -16,13 +18,8 @@ class DeviceAuthenticationTest {
 
     @Before
     fun setUp() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
 
     @After

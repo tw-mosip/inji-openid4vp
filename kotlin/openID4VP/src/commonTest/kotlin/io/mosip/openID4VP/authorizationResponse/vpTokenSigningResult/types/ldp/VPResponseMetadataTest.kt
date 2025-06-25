@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
@@ -16,12 +16,9 @@ class VPResponseMetadataTest {
 
     @Before
     fun setUp() {
-        mockkStatic(Log::class)
         mockkStatic(::validateField)
         mockkObject(Logger)
-
-        every { Log.e(any(), any()) } returns 0
-        every { Log.d(any(), any()) } returns 0
+        every { Logger.error(any(), any(), any()) } answers {  }
 
         every { validateField(any(), "String") } answers {
             val value = arg<String?>(0)

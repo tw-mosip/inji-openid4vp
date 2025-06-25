@@ -1,12 +1,13 @@
 package io.mosip.openID4VP.responseModeHandler.types
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mosip.openID4VP.authorizationResponse.toJsonEncodedMap
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
@@ -23,9 +24,8 @@ class DirectPostResponseModeHandlerTest {
 
     @Before
     fun setUp() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } returns 0
-        every { Log.d(any(), any()) } returns 0
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
 
         mockkObject(NetworkManagerClient)
     }

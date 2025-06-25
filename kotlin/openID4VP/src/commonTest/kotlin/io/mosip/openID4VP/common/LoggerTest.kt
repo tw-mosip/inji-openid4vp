@@ -1,10 +1,11 @@
 package io.mosip.openID4VP.common
 
-import android.util.Log
+
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import foundation.identity.jsonld.JsonLDObject
 import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import kotlinx.serialization.encodeToString
@@ -21,13 +22,8 @@ class LoggerTest {
 
 	@Before
 	fun setUp() {
-		mockkStatic(Log::class)
-		every { Log.e(any(), any()) } answers {
-			val tag = arg<String>(0)
-			val msg = arg<String>(1)
-			println("Error: logTag: $tag | Message: $msg")
-			0
-		}
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
 		Logger.setTraceabilityId("test-openId4VP")
 	}
 

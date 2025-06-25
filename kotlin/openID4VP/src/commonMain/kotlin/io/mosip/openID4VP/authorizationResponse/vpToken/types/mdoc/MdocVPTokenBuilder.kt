@@ -13,8 +13,8 @@ import io.mosip.openID4VP.common.getDecodedMdocCredential
 import io.mosip.openID4VP.common.mapSigningAlgorithmToProtectedAlg
 import io.mosip.openID4VP.common.tagEncodedCbor
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
-import io.mosip.openID4VP.decodeBase64Data
-import io.mosip.openID4VP.encodeToBase64Url
+import io.mosip.openID4VP.common.decodeBase64Data
+import io.mosip.openID4VP.common.encodeToBase64Url
 
 private val className = MdocVPTokenBuilder::class.java.simpleName
 

@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
-import android.util.Log
+
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
@@ -28,13 +28,8 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
     @Before
     fun setup() {
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
         authorizationRequestParameters = mutableMapOf(
             CLIENT_ID.value to validClientId,
             RESPONSE_TYPE.value to "vp_token",

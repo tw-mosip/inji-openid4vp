@@ -1,7 +1,7 @@
 package io.mosip.openID4VP.responseModeHandler.types
 
 
-import android.util.Log
+
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkConstructor
@@ -12,6 +12,7 @@ import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.constants.ClientIdScheme.*
@@ -34,19 +35,8 @@ class DirectPostJwtResponseModeHandlerTest {
 
     @Before
     fun setUp() {
-        mockkStatic(android.util.Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
-        every { Log.d(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
 
         mockkObject(NetworkManagerClient)
         mockkConstructor(JWEHandler::class)

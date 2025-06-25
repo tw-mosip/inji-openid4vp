@@ -1,6 +1,6 @@
 package io.mosip.openID4VP.common
 
-import android.util.Log
+
 import co.nstant.`in`.cbor.model.*
 import co.nstant.`in`.cbor.model.Array
 import co.nstant.`in`.cbor.model.Map
@@ -18,13 +18,7 @@ class CborUtilsTest {
     @Before
     fun setUp() {
         mockkObject(Logger)
-        mockkStatic(Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        every { Logger.error(any(), any(), any()) } answers {}
     }
 
     @After

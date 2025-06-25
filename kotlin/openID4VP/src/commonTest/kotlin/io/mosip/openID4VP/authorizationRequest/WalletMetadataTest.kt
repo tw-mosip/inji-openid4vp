@@ -1,8 +1,10 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import android.util.Log
+
 import io.mockk.every
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
@@ -14,19 +16,8 @@ import org.junit.jupiter.api.assertThrows
 class WalletMetadataTest {
     @Before
     fun setUp() {
-        mockkStatic(android.util.Log::class)
-        every { Log.e(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
-        every { Log.d(any(), any()) } answers {
-            val tag = arg<String>(0)
-            val msg = arg<String>(1)
-            println("Error: logTag: $tag | Message: $msg")
-            0
-        }
+        mockkObject(Logger)
+        every { Logger.error(any(), any(), any()) } answers {  }
     }
 
     @Test

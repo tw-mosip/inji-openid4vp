@@ -2,7 +2,7 @@ package io.mosip.openID4VP.jwt.jws
 
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
-import io.mosip.openID4VP.decodeBase64Data
+import io.mosip.openID4VP.common.decodeBase64Data
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.*
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
