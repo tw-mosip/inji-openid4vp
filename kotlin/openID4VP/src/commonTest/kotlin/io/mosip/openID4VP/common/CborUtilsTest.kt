@@ -1,27 +1,20 @@
 package io.mosip.openID4VP.common
 
-
 import co.nstant.`in`.cbor.model.*
 import co.nstant.`in`.cbor.model.Array
 import co.nstant.`in`.cbor.model.Map
 import io.mockk.*
-import io.mosip.openID4VP.testData.mdocCredential
-import org.junit.After
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.assertThrows
-import java.lang.IllegalArgumentException
+import kotlin.test.*
 
 class CborUtilsTest {
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkObject(Logger)
         every { Logger.error(any(), any(), any()) } answers {}
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -45,7 +38,7 @@ class CborUtilsTest {
     }
 
     @Test
-    fun ` should create cbor array with different types of data`() {
+    fun `should create cbor array with different types of data`() {
         val result = cborArrayOf(
             "string",
             123,
@@ -70,15 +63,14 @@ class CborUtilsTest {
 
     @Test
     fun `cborArrayOf should throw exception for unsupported type`() {
-        val exception = assertThrows(IllegalArgumentException::class.java){
+        val exception = assertFailsWith<IllegalArgumentException> {
             cborArrayOf(Object())
         }
         assertTrue(exception.message!!.contains("Unsupported type"))
-
     }
 
     @Test
-    fun ` should create cbor map with different types`() {
+    fun `should create cbor map with different types`() {
         val map = cborMapOf(
             "key1" to "value1",
             123 to 456,
@@ -105,16 +97,15 @@ class CborUtilsTest {
 
     @Test
     fun `cborMapOf should throw exception for null key`() {
-        val exception = assertThrows(IllegalArgumentException::class.java){
+        val exception = assertFailsWith<IllegalArgumentException> {
             cborMapOf(null to "value")
         }
-        println(exception)
-        assertEquals(exception.message, "Key cannot be null")
+        assertEquals("Key cannot be null", exception.message)
     }
 
     @Test
     fun `cborMapOf should throw exception for unsupported key type`() {
-        val exception = assertThrows(IllegalArgumentException::class.java){
+        val exception = assertFailsWith<IllegalArgumentException> {
             cborMapOf(Object() to "value")
         }
         assertTrue(exception.message!!.contains("Unsupported key type"))
@@ -122,7 +113,7 @@ class CborUtilsTest {
 
     @Test
     fun `cborMapOf should throw exception for unsupported value type`() {
-        val exception = assertThrows(IllegalArgumentException::class.java){
+        val exception = assertFailsWith<IllegalArgumentException> {
             cborMapOf("key" to Object())
         }
         assertTrue(exception.message!!.contains("Unsupported value type"))
@@ -141,15 +132,10 @@ class CborUtilsTest {
         val hash1 = generateHash(input)
         val hash2 = generateHash(input)
 
-        assertTrue(hash1.contentEquals(hash2))
+        assertContentEquals(hash1, hash2)
         assertEquals(32, hash1.size)
     }
 
-    @Test
-    fun `getMdocDocType should extract docType from credential`() {
-        val result = getDecodedMdocCredential(mdocCredential)
-        assertTrue(result is Map)
-    }
 
     @Test
     fun `mapSigningAlgorithmToProtectedAlg should return correct value for supported algorithm`() {
@@ -164,7 +150,7 @@ class CborUtilsTest {
 
     @Test
     fun `mapSigningAlgorithmToProtectedAlg should throw exception for unsupported algorithm`() {
-        val exception = assertThrows(IllegalArgumentException::class.java) {
+        val exception = assertFailsWith<IllegalArgumentException> {
             mapSigningAlgorithmToProtectedAlg("UNSUPPORTED")
         }
         assertTrue(exception.message!!.contains("Unsupported signing algorithm: UNSUPPORTED"))

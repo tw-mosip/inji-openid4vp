@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 
-
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
@@ -8,17 +7,15 @@ import io.mockk.mockkObject
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.*
 
 class VPResponseMetadataTest {
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkStatic(::validateField)
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
 
         every { validateField(any(), "String") } answers {
             val value = arg<String?>(0)
@@ -30,7 +27,7 @@ class VPResponseMetadataTest {
         } returns InvalidInput("", "Validation failed")
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -44,11 +41,10 @@ class VPResponseMetadataTest {
             domain = "example.com"
         )
 
-        // Should not throw exception
         metadata.validate()
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when jws is empty`() {
         val metadata = VPResponseMetadata(
             jws = "",
@@ -57,10 +53,12 @@ class VPResponseMetadataTest {
             domain = "example.com"
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when jws is null string`() {
         val metadata = VPResponseMetadata(
             jws = "null",
@@ -69,10 +67,12 @@ class VPResponseMetadataTest {
             domain = "example.com"
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when signatureAlgorithm is empty`() {
         val metadata = VPResponseMetadata(
             jws = "valid-jws-value",
@@ -81,10 +81,12 @@ class VPResponseMetadataTest {
             domain = "example.com"
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when signatureAlgorithm is null string`() {
         val metadata = VPResponseMetadata(
             jws = "valid-jws-value",
@@ -93,10 +95,12 @@ class VPResponseMetadataTest {
             domain = "example.com"
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when publicKey is empty`() {
         val metadata = VPResponseMetadata(
             jws = "valid-jws-value",
@@ -105,10 +109,12 @@ class VPResponseMetadataTest {
             domain = "example.com"
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when publicKey is null string`() {
         val metadata = VPResponseMetadata(
             jws = "valid-jws-value",
@@ -117,10 +123,12 @@ class VPResponseMetadataTest {
             domain = "example.com"
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when domain is empty`() {
         val metadata = VPResponseMetadata(
             jws = "valid-jws-value",
@@ -129,10 +137,12 @@ class VPResponseMetadataTest {
             domain = ""
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when domain is null string`() {
         val metadata = VPResponseMetadata(
             jws = "valid-jws-value",
@@ -141,6 +151,8 @@ class VPResponseMetadataTest {
             domain = "null"
         )
 
-        metadata.validate()
+        assertFailsWith<InvalidInput> {
+            metadata.validate()
+        }
     }
 }

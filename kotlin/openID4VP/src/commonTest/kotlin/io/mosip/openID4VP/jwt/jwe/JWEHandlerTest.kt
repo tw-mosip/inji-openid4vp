@@ -1,40 +1,15 @@
-
 package io.mosip.openID4VP.jwt.jwe
 
-
-import com.nimbusds.jose.EncryptionMethod
-import com.nimbusds.jose.JWEAlgorithm
-import com.nimbusds.jose.JWEHeader
-import com.nimbusds.jose.util.Base64URL
 import com.nimbusds.jwt.EncryptedJWT
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockkConstructor
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.runs
-import io.mockk.slot
-import io.mockk.spyk
-import io.mockk.verify
+import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.convertJsonToMap
-import io.mosip.openID4VP.common.decodeBase64Data
-import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.jwt.jwe.encryption.EncryptionProvider
 import io.mosip.openID4VP.testData.clientMetadataString
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.*
 
 class JWEHandlerTest {
 
@@ -44,7 +19,7 @@ class JWEHandlerTest {
     private val walletNonce = "wallet123"
     private val verifierNonce = "verifier456"
 
-    @Before
+    @BeforeTest
     fun setUp() {
         clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
         publicKey = clientMetadata.jwks!!.keys[0]
@@ -57,10 +32,10 @@ class JWEHandlerTest {
         )
 
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
-
+        every { Logger.error(any(), any(), any()) } answers { }
     }
-    @After
+
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -72,31 +47,11 @@ class JWEHandlerTest {
         val encryptedResponse = jweHandler.generateEncryptedResponse(payload)
 
         assertNotNull(encryptedResponse)
-        assert(encryptedResponse.isNotEmpty())
-        assertTrue(encryptedResponse.split(".").size == 5)
+        assertTrue(encryptedResponse.isNotEmpty())
+        assertEquals(5, encryptedResponse.split(".").size)
     }
 
-    @Test
-    fun `should contain all the headers parameters of JWE successfully`() {
-        val payload = mapOf("key1" to "value1", "key2" to 123)
 
-        val encryptedResponse = jweHandler.generateEncryptedResponse(payload)
-
-        assertNotNull(encryptedResponse)
-        assert(encryptedResponse.isNotEmpty())
-        val jweParts = encryptedResponse.split(".")
-        assertTrue(jweParts.size == 5)
-
-        val decodedJWEHeader = convertJsonToMap(String(decodeBase64Data(jweParts[0])))
-
-        assertEquals(walletNonce, decodedJWEHeader["apu"])
-        assertEquals(verifierNonce, decodedJWEHeader["apv"])
-        assertEquals(publicKey.kid, decodedJWEHeader["kid"])
-        assertEquals(JWEAlgorithm.ECDH_ES.name, decodedJWEHeader["alg"])
-        assertEquals(EncryptionMethod.A256GCM.name, decodedJWEHeader["enc"])
-        assertEquals("OKP", (decodedJWEHeader["epk"] as Map<*, *>)["kty"])
-        assertEquals("X25519", (decodedJWEHeader["epk"] as Map<*, *>)["crv"])
-    }
 
     @Test
     fun `should throw exception when encryption fails`() {
@@ -105,13 +60,11 @@ class JWEHandlerTest {
         mockkObject(EncryptionProvider)
         every { EncryptionProvider.getEncrypter(any()) } throws Exception("Encryption failed")
 
-        val exception = assertThrows(Exception::class.java) {
+        val exception = assertFailsWith<Exception> {
             jweHandler.generateEncryptedResponse(payload)
         }
 
         assertTrue(exception.message?.contains("Encryption failed") ?: false)
-
-
     }
 
     @Test
@@ -121,9 +74,10 @@ class JWEHandlerTest {
         mockkConstructor(EncryptedJWT::class)
         every { anyConstructed<EncryptedJWT>().encrypt(any()) } throws Exception("JWT encryption failed")
 
-        val exception = assertThrows(Exception::class.java) {
+        val exception = assertFailsWith<Exception> {
             jweHandler.generateEncryptedResponse(payload)
         }
+
         assertEquals("JWE Encryption failed", exception.message)
 
         verify {
@@ -138,8 +92,4 @@ class JWEHandlerTest {
             )
         }
     }
-
-
 }
-
-

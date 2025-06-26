@@ -1,36 +1,26 @@
-package io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc
-
+package io.mosip.openID4VP.common
 
 import co.nstant.`in`.cbor.CborDecoder
-import co.nstant.`in`.cbor.model.Array
+import co.nstant.`in`.cbor.model.Map
 import co.nstant.`in`.cbor.model.UnicodeString
+import co.nstant.`in`.cbor.model.Array
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mosip.openID4VP.common.cborMapOf
-import io.mosip.openID4VP.common.encodeCbor
+import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
-import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.decodeBase64Data
-import io.mosip.openID4VP.common.encodeToBase64Url
-import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.testData.mdocCredential
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.*
 import co.nstant.`in`.cbor.model.Map as CborMap
 
-class MdocVPTokenBuilderTest {
+class MdocVPTokenBuilderJvmTest {
 
     private lateinit var mdocVPTokenSigningResult: MdocVPTokenSigningResult
     private lateinit var mdocCredentials: List<String>
     private lateinit var deviceAuthentication: DeviceAuthentication
 
-    @Before
+    @BeforeTest
     fun setup() {
         deviceAuthentication = DeviceAuthentication(
             signature = "c2lnbmF0dXJlX2RhdGE=",
@@ -46,14 +36,17 @@ class MdocVPTokenBuilderTest {
         mockkObject(Logger)
         every { Logger.error(any(), any(), any()) } answers {  }
     }
-
     @Test
-    fun `should return valid MdocVPToken with expected structure`() {
+    fun `should decode base64 using JVM decoder`() {
+        val input = "aGVsbG8=" // "hello"
+        val decoded = decodeBase64Data(input)
+        assertEquals("hello", decoded.toString(Charsets.UTF_8))
         val result = MdocVPTokenBuilder(mdocVPTokenSigningResult, mdocCredentials).build()
 
         assertNotNull(result)
+
         val decodedResult = decodeBase64Data(result.base64EncodedDeviceResponse)
-        val decodedCbor = CborDecoder(decodedResult.inputStream()).decode()[0] as CborMap
+        val decodedCbor = CborDecoder(decodedResult.inputStream()).decode()[0] as Map
 
         assertEquals("1.0", decodedCbor[UnicodeString("version")].toString())
         assertEquals(0, decodedCbor[UnicodeString("status")].toString().toInt())
@@ -91,7 +84,7 @@ class MdocVPTokenBuilderTest {
     fun `should throw exception when device authentication signature is missing`() {
         val emptyMetadata = MdocVPTokenSigningResult(docTypeToDeviceAuthentication = mapOf())
 
-        val exception = assertThrows(MissingInput::class.java) {
+        val exception = assertFailsWith<Exceptions.MissingInput> {
             MdocVPTokenBuilder(emptyMetadata, mdocCredentials).build()
         }
 
@@ -100,5 +93,4 @@ class MdocVPTokenBuilderTest {
             exception.message
         )
     }
-
 }

@@ -1,6 +1,5 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
-
 import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
@@ -14,10 +13,7 @@ import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.presentationDefinitionString
 import io.mosip.openID4VP.testData.responseUrl
 import okhttp3.Headers
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.Assertions.*
+import kotlin.test.*
 
 class RedirectUriSchemeAuthorizationRequestHandlerTest {
 
@@ -25,12 +21,11 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
     private lateinit var walletMetadata: WalletMetadata
     private val setResponseUri: (String) -> Unit = mockk(relaxed = true)
 
-    @Before
+    @BeforeTest
     fun setup() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers {}
 
-        // Client ID is set to response URI for redirect_uri scheme
         authorizationRequestParameters = mutableMapOf(
             CLIENT_ID.value to responseUrl,
             RESPONSE_TYPE.value to "vp_token",
@@ -53,7 +48,6 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
 
     @Test
     fun `validateRequestUriResponse should succeed with valid JSON content type`() {
-        // Arrange
         val handler = RedirectUriSchemeAuthorizationRequestHandler(
             authorizationRequestParameters, walletMetadata, setResponseUri
         )
@@ -77,24 +71,28 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             """.trimIndent()
         )
 
-        // Act & Assert
-        assertDoesNotThrow { handler.validateRequestUriResponse(requestUriResponse) }
+        try {
+            handler.validateRequestUriResponse(requestUriResponse)
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateRequestUriResponse should handle empty request URI response`() {
-        // Arrange
         val handler = RedirectUriSchemeAuthorizationRequestHandler(
             authorizationRequestParameters, walletMetadata, setResponseUri
         )
 
-        // Act & Assert
-        assertDoesNotThrow { handler.validateRequestUriResponse(emptyMap()) }
+        try {
+            handler.validateRequestUriResponse(emptyMap())
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateRequestUriResponse should throw exception with invalid content type`() {
-        // Arrange
         val handler = RedirectUriSchemeAuthorizationRequestHandler(
             authorizationRequestParameters, walletMetadata, setResponseUri
         )
@@ -114,54 +112,50 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             """.trimIndent()
         )
 
-        // Act & Assert
-        val exception = assertThrows<InvalidData> { handler.validateRequestUriResponse(requestUriResponse) }
+        val exception = assertFailsWith<InvalidData> {
+            handler.validateRequestUriResponse(requestUriResponse)
+        }
         assertTrue(exception.message?.contains("Authorization Request must not be signed") == true)
     }
 
     @Test
     fun `process should return wallet metadata with requestObjectSigningAlgValuesSupported set to null`() {
-        // Arrange
         val handler = RedirectUriSchemeAuthorizationRequestHandler(
             authorizationRequestParameters, walletMetadata, setResponseUri
         )
 
-        // Act
         val result = handler.process(walletMetadata)
 
-        // Assert
         assertNull(result.requestObjectSigningAlgValuesSupported)
     }
 
     @Test
     fun `getHeadersForAuthorizationRequestUri should return correct headers`() {
-        // Arrange
         val handler = RedirectUriSchemeAuthorizationRequestHandler(
             authorizationRequestParameters, walletMetadata, setResponseUri
         )
 
-        // Act
         val headers = handler.getHeadersForAuthorizationRequestUri()
 
-        // Assert
         assertEquals(ContentType.APPLICATION_FORM_URL_ENCODED.value, headers["content-type"])
         assertEquals(ContentType.APPLICATION_JSON.value, headers["accept"])
     }
 
     @Test
     fun `validateAndParseRequestFields should succeed with valid direct_post response mode`() {
-        // Arrange
         val handler = RedirectUriSchemeAuthorizationRequestHandler(
             authorizationRequestParameters, walletMetadata, setResponseUri
         )
 
-        // Act & Assert
-        assertDoesNotThrow { handler.validateAndParseRequestFields() }
+        try {
+            handler.validateAndParseRequestFields()
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateAndParseRequestFields should succeed with direct_post_jwt response mode`() {
-        // Arrange
         val modifiedParams = authorizationRequestParameters.toMutableMap()
         modifiedParams[RESPONSE_MODE.value] = "direct_post.jwt"
 
@@ -169,13 +163,15 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        // Act & Assert
-        assertDoesNotThrow { handler.validateAndParseRequestFields() }
+        try {
+            handler.validateAndParseRequestFields()
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateAndParseRequestFields should throw exception with unsupported response mode`() {
-        // Arrange
         val modifiedParams = authorizationRequestParameters.toMutableMap()
         modifiedParams[RESPONSE_MODE.value] = "unsupported_mode"
 
@@ -183,8 +179,9 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        // Act & Assert
-        val exception = assertThrows<InvalidData> { handler.validateAndParseRequestFields() }
+        val exception = assertFailsWith<InvalidData> {
+            handler.validateAndParseRequestFields()
+        }
         assertTrue(exception.message?.contains("Given response_mode is not supported") == true)
     }
 
@@ -193,9 +190,8 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
         mockkStatic("io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataUtilKt")
         every {
             parseAndValidateClientMetadata(any(), any(), any())
-        }  just runs
+        } just runs
 
-        // Mock the PresentationDefinitionUtil function - this is what's causing the NPE
         mockkStatic("io.mosip.openID4VP.authorizationRequest.presentationDefinition.PresentationDefinitionUtilKt")
         every {
             parseAndValidatePresentationDefinition(any(), any())
@@ -209,16 +205,16 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        val exception = assertThrows<MissingInput> { handler.validateAndParseRequestFields() }
+        val exception = assertFailsWith<MissingInput> {
+            handler.validateAndParseRequestFields()
+        }
         assertTrue(exception.message?.contains("response_mode") == true)
 
         unmockkStatic("io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataUtilKt")
     }
 
-
     @Test
     fun `validateAndParseRequestFields should throw exception when REDIRECT_URI is present`() {
-        // Arrange
         val modifiedParams = authorizationRequestParameters.toMutableMap()
         modifiedParams[REDIRECT_URI.value] = "https://example.com/redirect"
 
@@ -226,14 +222,14 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        // Act & Assert
-        val exception = assertThrows<InvalidData> { handler.validateAndParseRequestFields() }
+        val exception = assertFailsWith<InvalidData> {
+            handler.validateAndParseRequestFields()
+        }
         assertTrue(exception.message?.contains("redirect_uri should not be present") == true)
     }
 
     @Test
     fun `validateAndParseRequestFields should throw exception when RESPONSE_URI is missing`() {
-        // Arrange
         val modifiedParams = authorizationRequestParameters.toMutableMap()
         modifiedParams.remove(RESPONSE_URI.value)
 
@@ -241,14 +237,14 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        // Act & Assert
-        val exception = assertThrows<MissingInput> { handler.validateAndParseRequestFields() }
+        val exception = assertFailsWith<MissingInput> {
+            handler.validateAndParseRequestFields()
+        }
         assertTrue(exception.message?.contains("response_uri") == true)
     }
 
     @Test
     fun `validateAndParseRequestFields should throw exception when RESPONSE_URI doesn't match CLIENT_ID`() {
-        // Arrange
         val modifiedParams = authorizationRequestParameters.toMutableMap()
         modifiedParams[RESPONSE_URI.value] = "https://different-domain.com/response"
 
@@ -256,8 +252,9 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        // Act & Assert
-        val exception = assertThrows<InvalidData> { handler.validateAndParseRequestFields() }
+        val exception = assertFailsWith<InvalidData> {
+            handler.validateAndParseRequestFields()
+        }
         assertTrue(exception.message?.contains("response_uri should be equal to client_id") == true)
     }
 }

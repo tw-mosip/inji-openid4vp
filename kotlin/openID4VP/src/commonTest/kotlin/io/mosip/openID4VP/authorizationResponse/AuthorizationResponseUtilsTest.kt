@@ -2,11 +2,10 @@ package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
 import io.mosip.openID4VP.constants.FormatType
-import org.junit.Ignore
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-class AuthorizationResponseUtilsTest{
+class AuthorizationResponseUtilsTest {
 
     @Test
     fun `should convert the unsignedVPTokens to JSON successfully`() {

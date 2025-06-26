@@ -4,11 +4,7 @@ import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.VPToke
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.constants.SignatureAlgorithm
 import io.mosip.openID4VP.testData.ldpVPToken
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Before
-import org.junit.Test
-import org.junit.Assert.assertThrows
+import kotlin.test.*
 
 class LdpVPTokenBuilderTest {
 
@@ -17,21 +13,19 @@ class LdpVPTokenBuilderTest {
     private lateinit var mockProof: Proof
     private val testNonce = "test-nonce-123"
 
-    @Before
+    @BeforeTest
     fun setUp() {
-        // Create mock proof
         mockProof = Proof(
             type = "Ed25519Signature2020",
             created = "2023-01-01T12:00:00Z",
             verificationMethod = "did:example:123#key-1",
             proofPurpose = "authentication",
             challenge = testNonce,
-            proofValue = null, // Initially null, will be updated by builder
-            jws = null, // Initially null, will be updated by builder
+            proofValue = null,
+            jws = null,
             domain = "example.com"
         )
 
-        // Create mock unsigned VP token
         mockUnsignedLdpVPToken = VPTokenSigningPayload(
             context = listOf("https://www.w3.org/2018/credentials/v1"),
             type = listOf("VerifiablePresentation"),
@@ -41,7 +35,6 @@ class LdpVPTokenBuilderTest {
             proof = mockProof
         )
 
-        // Setup default signing result with Ed25519Signature2020
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = null,
             proofValue = "test-proof-value-123",
@@ -51,17 +44,14 @@ class LdpVPTokenBuilderTest {
 
     @Test
     fun `should build LdpVPToken with Ed25519Signature2020 successfully`() {
-        // Arrange
         val builder = LdpVPTokenBuilder(
             mockLdpVPTokenSigningResult,
             mockUnsignedLdpVPToken,
             testNonce
         )
 
-        // Act
         val result = builder.build()
 
-        // Assert
         assertNotNull(result)
         assertEquals(mockUnsignedLdpVPToken.context, result.context)
         assertEquals(mockUnsignedLdpVPToken.type, result.type)
@@ -74,7 +64,6 @@ class LdpVPTokenBuilderTest {
 
     @Test
     fun `should build LdpVPToken with JsonWebSignature2020 successfully`() {
-        // Arrange
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = "test-jws-signature",
             proofValue = null,
@@ -87,10 +76,8 @@ class LdpVPTokenBuilderTest {
             testNonce
         )
 
-        // Act
         val result = builder.build()
 
-        // Assert
         assertNotNull(result)
         assertEquals(mockLdpVPTokenSigningResult.jws, result.proof?.jws)
         assertEquals(null, result.proof?.proofValue)
@@ -98,7 +85,6 @@ class LdpVPTokenBuilderTest {
 
     @Test
     fun `should build LdpVPToken with RSASignature2018 successfully`() {
-        // Arrange
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = "test-rsa-signature",
             proofValue = null,
@@ -111,17 +97,14 @@ class LdpVPTokenBuilderTest {
             testNonce
         )
 
-        // Act
         val result = builder.build()
 
-        // Assert
         assertNotNull(result)
         assertEquals(mockLdpVPTokenSigningResult.jws, result.proof?.jws)
     }
 
     @Test
     fun `should build LdpVPToken with Ed25519Signature2018 successfully`() {
-        // Arrange
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = "test-ed25519-2018-signature",
             proofValue = null,
@@ -134,17 +117,14 @@ class LdpVPTokenBuilderTest {
             testNonce
         )
 
-        // Act
         val result = builder.build()
 
-        // Assert
         assertNotNull(result)
         assertEquals(mockLdpVPTokenSigningResult.jws, result.proof?.jws)
     }
 
     @Test
     fun `should use existing LdpVPToken from testData`() {
-        // Arrange
         val testToken = ldpVPToken as LdpVPToken
         val unsignedToken = VPTokenSigningPayload(
             context = testToken.context,
@@ -152,7 +132,7 @@ class LdpVPTokenBuilderTest {
             verifiableCredential = testToken.verifiableCredential,
             id = testToken.id,
             holder = testToken.holder,
-            proof = testToken.proof?.apply{
+            proof = testToken.proof?.apply {
                 proofValue = null
                 jws = null
             }
@@ -166,10 +146,8 @@ class LdpVPTokenBuilderTest {
 
         val builder = LdpVPTokenBuilder(signingResult, unsignedToken, "test-nonce")
 
-        // Act
         val result = builder.build()
 
-        // Assert
         assertNotNull(result)
         assertEquals(testToken.context, result.context)
         assertEquals(testToken.type, result.type)
@@ -181,7 +159,6 @@ class LdpVPTokenBuilderTest {
 
     @Test
     fun `should handle null proof in unsigned token`() {
-        // Arrange - create token with null proof
         val unsignedTokenWithNullProof = mockUnsignedLdpVPToken.copy(proof = null)
 
         val builder = LdpVPTokenBuilder(
@@ -190,8 +167,7 @@ class LdpVPTokenBuilderTest {
             testNonce
         )
 
-        // Act & Assert
-        assertThrows(NullPointerException::class.java) {
+        assertFailsWith<NullPointerException> {
             builder.build()
         }
     }

@@ -1,17 +1,8 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 
-
-import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.verify
+import io.mockk.*
 import io.mosip.openID4VP.common.Logger
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
+import kotlin.test.*
 
 class MdocVPTokenSigningResultTest {
 
@@ -19,7 +10,7 @@ class MdocVPTokenSigningResultTest {
     private lateinit var mockDeviceAuthentication2: DeviceAuthentication
     private lateinit var deviceAuthenticationMap: Map<String, DeviceAuthentication>
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockDeviceAuthentication1 = mockk(relaxed = true)
         mockDeviceAuthentication2 = mockk(relaxed = true)
@@ -28,10 +19,10 @@ class MdocVPTokenSigningResultTest {
             "doctype2" to mockDeviceAuthentication2
         )
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -48,7 +39,6 @@ class MdocVPTokenSigningResultTest {
     fun `should handle empty map`() {
         val emptyMap = emptyMap<String, DeviceAuthentication>()
         val mdocVPTokenSigningResult = MdocVPTokenSigningResult(emptyMap)
-        assertDoesNotThrow { mdocVPTokenSigningResult.validate() }
+        mdocVPTokenSigningResult.validate() // Should not throw
     }
-
 }

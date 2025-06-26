@@ -1,28 +1,26 @@
 package io.mosip.openID4VP.common
 
-
 import android.util.Base64
 import android.util.Base64.encodeToString
-
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class EncoderTest {
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkStatic(Base64::class)
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -40,5 +38,4 @@ class EncoderTest {
 
         assertEquals("aGVsbG8gd29ybGQ=", encodedData)
     }
-
 }

@@ -2,8 +2,6 @@ package io.mosip.openID4VP
 
 import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
-import io.mosip.openID4VP.authorizationRequest.Verifier
-import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
@@ -15,29 +13,18 @@ import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
-import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestFailed
-import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions.NetworkRequestTimeout
 import io.mosip.openID4VP.testData.*
-import okhttp3.Headers
-import org.junit.After
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
 import foundation.identity.jsonld.JsonLDObject
+import kotlin.test.*
 
 class OpenID4VPTest {
 
     private lateinit var openID4VP: OpenID4VP
     private val selectedLdpCredentialsList = mapOf(
         "456" to mapOf(
-            FormatType.LDP_VC to listOf(
-                ldpCredential1,
-                ldpCredential2
-            )
+            FormatType.LDP_VC to listOf(ldpCredential1, ldpCredential2)
         ), "789" to mapOf(
-            FormatType.LDP_VC to listOf(
-                ldpCredential2
-            )
+            FormatType.LDP_VC to listOf(ldpCredential2)
         )
     )
     private val selectedMdocCredentialsList = mapOf(
@@ -46,21 +33,16 @@ class OpenID4VPTest {
         )
     )
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkObject(NetworkManagerClient)
 
         openID4VP = OpenID4VP("test-OpenID4VP")
-
         openID4VP.authorizationRequest = authorizationRequest
-        setField(
-            openID4VP,
-            "responseUri",
-            responseUrl
-        )
+        setField(openID4VP, "responseUri", responseUrl)
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -68,9 +50,6 @@ class OpenID4VPTest {
     @Test
     fun `should authenticate verifier successfully`() {
         mockkObject(AuthorizationRequest.Companion)
-
-        val trustedVerifiers = trustedVerifiers
-        val walletMetadata = walletMetadata
 
         every {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
@@ -93,12 +72,12 @@ class OpenID4VPTest {
         }
     }
 
-    @Test(expected = Exceptions.InvalidInput::class)
+    @Test
     fun `should throw exception during verifier authentication`() {
         mockkObject(AuthorizationRequest.Companion)
         mockkObject(NetworkManagerClient)
 
-        val testException = Exceptions.InvalidInput("","Invalid authorization request")
+        val testException = Exceptions.InvalidInput("", "Invalid authorization request")
 
         every {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
@@ -112,7 +91,9 @@ class OpenID4VPTest {
             )
         } returns mapOf("body" to "Error sent")
 
-        openID4VP.authenticateVerifier("openid-vc://?request=invalid", trustedVerifiers)
+        assertFailsWith<Exceptions.InvalidInput> {
+            openID4VP.authenticateVerifier("openid-vc://?request=invalid", trustedVerifiers)
+        }
     }
 
     @Test
@@ -148,7 +129,7 @@ class OpenID4VPTest {
         assertEquals(expectedUnsignedVPTokens[FormatType.MSO_MDOC]!!["unsignedVPToken"], actualUnsignedVPTokens[FormatType.MSO_MDOC])
     }
 
-    @Test(expected = Exceptions.InvalidData::class)
+    @Test
     fun `should throw exception during VP token construction with invalid data`() {
         val mockHandler = mockk<AuthorizationResponseHandler>()
         val testException = Exceptions.InvalidData("Invalid credential format")
@@ -163,7 +144,10 @@ class OpenID4VPTest {
             NetworkManagerClient.sendHTTPRequest(any(), any(), any())
         } returns mapOf("body" to "Error sent")
 
-        openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList, holderId, signatureSuite)
+        val thrown = assertFailsWith<Exceptions.InvalidData> {
+            openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList, holderId, signatureSuite)
+        }
+        assertEquals("Invalid credential format", thrown.message)
     }
 
     @Test
@@ -192,16 +176,11 @@ class OpenID4VPTest {
         mockkObject(Logger)
 
         every {
-            NetworkManagerClient.sendHTTPRequest(
-                any(),
-                any(),
-                any()
-            )
+            NetworkManagerClient.sendHTTPRequest(any(), any(), any())
         } throws Exception("Network error")
 
         every { Logger.error(any(), any()) } just runs
 
-        // Should not throw exception
         openID4VP.sendErrorToVerifier(Exceptions.InvalidData("Test error"))
 
         verify {
@@ -222,9 +201,7 @@ class OpenID4VPTest {
 
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
-        val verifiableCredentials = mapOf("id1" to listOf("vc1", "vc2"))
-
-        val result = openID4VP.constructVerifiablePresentationToken(verifiableCredentials)
+        val result = openID4VP.constructVerifiablePresentationToken(mapOf("id1" to listOf("vc1", "vc2")))
 
         assertEquals("Deprecated VP Token", result)
     }
@@ -245,7 +222,7 @@ class OpenID4VPTest {
         assertEquals("Deprecated VP Sharing Result", result)
     }
 
-    @Test(expected = Exceptions.InvalidData::class)
+    @Test
     fun `should handle exception in deprecated constructVerifiablePresentationToken method`() {
         val mockHandler = mockk<AuthorizationResponseHandler>()
         val exception = Exceptions.InvalidData("Invalid VC format")
@@ -260,7 +237,10 @@ class OpenID4VPTest {
 
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
-        openID4VP.constructVerifiablePresentationToken(mapOf("id1" to listOf("vc1")))
+        val thrown = assertFailsWith<Exceptions.InvalidData> {
+            openID4VP.constructVerifiablePresentationToken(mapOf("id1" to listOf("vc1")))
+        }
+        assertEquals("Invalid VC format", thrown.message)
     }
 
     @Test

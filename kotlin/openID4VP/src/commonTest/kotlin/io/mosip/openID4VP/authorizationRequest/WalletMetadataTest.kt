@@ -1,23 +1,19 @@
 package io.mosip.openID4VP.authorizationRequest
 
-
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.*
 
 class WalletMetadataTest {
-    @Before
+
+    @BeforeTest
     fun setUp() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
 
     @Test
@@ -37,7 +33,7 @@ class WalletMetadataTest {
             authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
             authorizationEncryptionEncValuesSupported = listOf("A256GCM")
         )
-        assertEquals(walletMetadata.presentationDefinitionURISupported, true)
+        assertEquals(true, walletMetadata.presentationDefinitionURISupported)
     }
 
     @Test
@@ -54,11 +50,11 @@ class WalletMetadataTest {
             authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
             authorizationEncryptionEncValuesSupported = listOf("A256GCM")
         )
-        assertEquals(walletMetadata.clientIdSchemesSupported, listOf(PRE_REGISTERED.value))
+        assertEquals(listOf(PRE_REGISTERED.value), walletMetadata.clientIdSchemesSupported)
     }
 
     @Test
-    fun `should keep null value for authorization_encryption_enc_values_supported and authorization_encryption_alg_values_supported if provided` () {
+    fun `should keep null values for encryption alg and enc if provided`() {
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
             vpFormatsSupported = mapOf(
@@ -71,12 +67,14 @@ class WalletMetadataTest {
             authorizationEncryptionAlgValuesSupported = null,
             authorizationEncryptionEncValuesSupported = null
         )
-        assertEquals(walletMetadata.clientIdSchemesSupported, listOf(PRE_REGISTERED.value))
+        assertEquals(listOf(PRE_REGISTERED.value), walletMetadata.clientIdSchemesSupported)
+        assertNull(walletMetadata.authorizationEncryptionAlgValuesSupported)
+        assertNull(walletMetadata.authorizationEncryptionEncValuesSupported)
     }
 
     @Test
     fun `should throw error if vp_formats_supported is empty map`() {
-        val exception = assertThrows<InvalidData> {
+        val ex = assertFailsWith<InvalidData> {
             WalletMetadata(
                 presentationDefinitionURISupported = true,
                 vpFormatsSupported = emptyMap(),
@@ -91,16 +89,17 @@ class WalletMetadataTest {
         }
         assertEquals(
             "vp_formats_supported should at least have one supported vp_format",
-            exception.message
+            ex.message
         )
     }
+
     @Test
     fun `should throw error if vp_formats_supported has empty key`() {
-        val exception = assertThrows<InvalidData> {
+        val ex = assertFailsWith<InvalidData> {
             WalletMetadata(
                 presentationDefinitionURISupported = true,
                 vpFormatsSupported = mapOf(
-                    ""  to VPFormatSupported(
+                    "" to VPFormatSupported(
                         algValuesSupported = null
                     )
                 ),
@@ -115,16 +114,17 @@ class WalletMetadataTest {
         }
         assertEquals(
             "vp_formats_supported cannot have empty keys",
-            exception.message
+            ex.message
         )
     }
+
     @Test
-    fun `should throw error if vp_formats_supported has just empty space`() {
-        val exception = assertThrows<InvalidData> {
+    fun `should throw error if vp_formats_supported has key with space only`() {
+        val ex = assertFailsWith<InvalidData> {
             WalletMetadata(
                 presentationDefinitionURISupported = true,
                 vpFormatsSupported = mapOf(
-                    " "  to VPFormatSupported(
+                    " " to VPFormatSupported(
                         algValuesSupported = null
                     )
                 ),
@@ -139,7 +139,7 @@ class WalletMetadataTest {
         }
         assertEquals(
             "vp_formats_supported cannot have empty keys",
-            exception.message
+            ex.message
         )
     }
 }

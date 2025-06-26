@@ -1,12 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
     kotlin("multiplatform")
-    alias(libs.plugins.kotlin.serialization)
-    id("maven-publish")
-    id("signing")
     alias(libs.plugins.dokka)
+    `maven-publish`
     alias(libs.plugins.sonarqube)
+    signing
     jacoco
+    alias(libs.plugins.kotlin.serialization)
 }
 
 jacoco {

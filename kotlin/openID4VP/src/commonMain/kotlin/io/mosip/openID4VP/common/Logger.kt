@@ -7,7 +7,6 @@ import io.mosip.openID4VP.jwt.exception.JWEException
 import io.mosip.openID4VP.jwt.exception.JWSException
 import io.mosip.openID4VP.exceptions.Exceptions
 
-//TODO: Log - use common logger for android and Java env
 object Logger {
 
     private var traceabilityId: String? = null

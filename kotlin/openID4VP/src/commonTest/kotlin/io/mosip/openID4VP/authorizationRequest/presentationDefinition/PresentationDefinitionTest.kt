@@ -1,10 +1,8 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.PRESENTATION_DEFINITION_URI
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_MODE
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
@@ -15,28 +13,21 @@ import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.*
 
 class PresentationDefinitionTest {
 
     private lateinit var presentationDefinition: String
     private lateinit var expectedExceptionMessage: String
 
-
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
 
-    @After
-    fun tearDown(){
+    @AfterTest
+    fun tearDown() {
         clearAllMocks()
     }
 
@@ -46,29 +37,23 @@ class PresentationDefinitionTest {
             """{"input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         expectedExceptionMessage = "Missing Input: presentation_definition->id param is required"
 
-        val actualException =
-            assertThrows(MissingInput::class.java) {
-                deserializeAndValidate(
-                    presentationDefinition,
-                    PresentationDefinitionSerializer
-                )
-            }
+        val exception = assertFailsWith<MissingInput> {
+            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+        }
 
-        assertEquals(expectedExceptionMessage, actualException.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
     fun `should throw missing input exception if input_descriptors param is missing`() {
         presentationDefinition = """{"id":"pd_123"}"""
-        expectedExceptionMessage =
-            "Missing Input: presentation_definition->input_descriptors param is required"
+        expectedExceptionMessage = "Missing Input: presentation_definition->input_descriptors param is required"
 
-        val actualException =
-            assertThrows(MissingInput::class.java) {
-                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-            }
+        val exception = assertFailsWith<MissingInput> {
+            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+        }
 
-        assertEquals(expectedExceptionMessage, actualException.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
@@ -78,12 +63,11 @@ class PresentationDefinitionTest {
         expectedExceptionMessage =
             "Invalid Input: presentation_definition->id value cannot be an empty string, null, or an integer"
 
-        val actualException =
-            assertThrows(InvalidInput::class.java) {
-                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-            }
+        val exception = assertFailsWith<InvalidInput> {
+            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+        }
 
-        assertEquals(expectedExceptionMessage, actualException.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
@@ -92,12 +76,11 @@ class PresentationDefinitionTest {
         expectedExceptionMessage =
             "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
 
-        val actualException =
-            assertThrows(InvalidInput::class.java) {
-                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-            }
+        val exception = assertFailsWith<InvalidInput> {
+            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+        }
 
-        assertEquals(expectedExceptionMessage, actualException.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
@@ -106,12 +89,11 @@ class PresentationDefinitionTest {
         expectedExceptionMessage =
             "Invalid Input: presentation_definition->input_descriptors value cannot be empty or null"
 
-        val actualException =
-            assertThrows(InvalidInput::class.java) {
-                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-            }
+        val exception = assertFailsWith<InvalidInput> {
+            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+        }
 
-        assertEquals(expectedExceptionMessage,actualException.message)
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
@@ -121,15 +103,13 @@ class PresentationDefinitionTest {
             RESPONSE_MODE.value to DIRECT_POST_JWT.value
         )
 
-        val expectedExceptionMessage =
-            "presentation_definition_uri is not support"
+        val expectedExceptionMessage = "presentation_definition_uri is not support"
 
-        val exception = assertThrows<InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             parseAndValidatePresentationDefinition(authorizationRequestParam, false)
         }
 
-        Assertions.assertEquals(expectedExceptionMessage, exception.message)
-
+        assertEquals(expectedExceptionMessage, exception.message)
     }
 
     @Test
@@ -145,7 +125,7 @@ class PresentationDefinitionTest {
                         fields = listOf(
                             Fields(
                                 id = "id",
-                                path = listOf("${'$'}.type"),
+                                path = listOf("$.type"),
                                 filter = Filter(type = "type", pattern = "pattern")
                             )
                         )

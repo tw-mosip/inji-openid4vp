@@ -1,15 +1,16 @@
 package io.mosip.openID4VP.common
 
-
 import android.util.Base64
 import io.mockk.every
 import io.mockk.mockkStatic
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class DecoderTest {
-    @Before
+
+    @BeforeTest
     fun setUp() {
         mockkStatic(Base64::class)
 
@@ -58,7 +59,7 @@ class DecoderTest {
             Base64.decode(input, Base64.DEFAULT or Base64.URL_SAFE)
         } throws IllegalArgumentException("Invalid base64")
 
-        kotlin.test.assertFailsWith<IllegalArgumentException> {
+        assertFailsWith<IllegalArgumentException> {
             decodeBase64Data(input)
         }
     }

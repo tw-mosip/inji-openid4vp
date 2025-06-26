@@ -1,32 +1,25 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
-
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
-
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.*
 
 class FilterTest {
 	private lateinit var presentationDefinition: String
 	private lateinit var expectedExceptionMessage: String
 
-	@Before
+	@BeforeTest
 	fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+		mockkObject(Logger)
+		every { Logger.error(any(), any(), any()) } answers {}
 	}
 
-	@After
+	@AfterTest
 	fun tearDown() {
 		clearAllMocks()
 	}
@@ -37,12 +30,11 @@ class FilterTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{}}]}}]}"""
 		expectedExceptionMessage = "Missing Input: filter->type param is required"
 
-		val actualException =
-			Assert.assertThrows(MissingInput::class.java) {
-				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-			}
+		val actualException = assertFailsWith<MissingInput> {
+			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+		}
 
-		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
 	@Test
@@ -51,12 +43,11 @@ class FilterTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{"type":"string"}}]}}]}"""
 		expectedExceptionMessage = "Missing Input: filter->pattern param is required"
 
-		val actualException =
-			Assert.assertThrows(MissingInput::class.java) {
-				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-			}
+		val actualException = assertFailsWith<MissingInput> {
+			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+		}
 
-		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
 	@Test
@@ -65,12 +56,11 @@ class FilterTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{"type":"","pattern":"MosipCredential"}}]}}]}"""
 		expectedExceptionMessage = "Invalid Input: filter->type value cannot be an empty string, null, or an integer"
 
-		val actualException =
-			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
-				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-			}
+		val actualException = assertFailsWith<Exceptions.InvalidInput> {
+			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+		}
 
-		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
 	@Test
@@ -79,12 +69,11 @@ class FilterTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{"type":"string","pattern":""}}]}}]}"""
 		expectedExceptionMessage = "Invalid Input: filter->pattern value cannot be an empty string, null, or an integer"
 
-		val actualException =
-			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
-				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-			}
+		val actualException = assertFailsWith<Exceptions.InvalidInput> {
+			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+		}
 
-		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
 	@Test
@@ -93,11 +82,10 @@ class FilterTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":["$.type"], "filter":{"type":"string","pattern":null}}]}}]}"""
 		expectedExceptionMessage = "Invalid Input: filter->pattern value cannot be an empty string, null, or an integer"
 
-		val actualException =
-			Assert.assertThrows(Exceptions.InvalidInput::class.java) {
-				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-			}
+		val actualException = assertFailsWith<Exceptions.InvalidInput> {
+			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+		}
 
-		Assert.assertEquals(expectedExceptionMessage, actualException.message)
+		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 }

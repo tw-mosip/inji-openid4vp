@@ -1,10 +1,8 @@
 package io.mosip.openID4VP.responseModeHandler.types
 
-
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.verify
 import io.mosip.openID4VP.authorizationResponse.toJsonEncodedMap
 import io.mosip.openID4VP.common.Logger
@@ -13,24 +11,19 @@ import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.authorizationRequestForResponseModeJWT
 import io.mosip.openID4VP.testData.authorizationResponse
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.assertThrows
-import java.io.IOException
+import kotlin.test.*
 
 class DirectPostResponseModeHandlerTest {
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
 
         mockkObject(NetworkManagerClient)
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -39,12 +32,11 @@ class DirectPostResponseModeHandlerTest {
     fun `validate should not throw any exception`() {
         val handler = DirectPostResponseModeHandler()
         handler.validate(null, null, false)
-        // No assertion needed as method simply returns without doing anything
+        // No exception means pass
     }
 
     @Test
     fun `sendAuthorizationResponse should send request and return response body`() {
-        // Arrange
         val handler = DirectPostResponseModeHandler()
         val responseUri = "https://example.com/response"
         val walletNonce = "test-nonce"
@@ -59,7 +51,6 @@ class DirectPostResponseModeHandlerTest {
             )
         } returns mapOf("body" to expectedResponse)
 
-        // Act
         val actualResponse = handler.sendAuthorizationResponse(
             authorizationRequestForResponseModeJWT,
             responseUri,
@@ -67,7 +58,6 @@ class DirectPostResponseModeHandlerTest {
             walletNonce
         )
 
-        // Assert
         verify {
             NetworkManagerClient.sendHTTPRequest(
                 url = responseUri,
@@ -81,7 +71,6 @@ class DirectPostResponseModeHandlerTest {
 
     @Test
     fun `sendAuthorizationResponse should handle network errors`() {
-        // Arrange
         val handler = DirectPostResponseModeHandler()
         val responseUri = "https://example.com/response"
         val walletNonce = "test-nonce"
@@ -93,10 +82,9 @@ class DirectPostResponseModeHandlerTest {
                 any(),
                 any()
             )
-        } throws IOException("Network error")
+        } throws java.io.IOException("Network error")
 
-        // Act & Assert
-        assertThrows<IOException> {
+        val exception = assertFailsWith<java.io.IOException> {
             handler.sendAuthorizationResponse(
                 authorizationRequestForResponseModeJWT,
                 responseUri,
@@ -104,11 +92,12 @@ class DirectPostResponseModeHandlerTest {
                 walletNonce
             )
         }
+
+        assertEquals("Network error", exception.message)
     }
 
     @Test
     fun `sendAuthorizationResponse should handle empty response`() {
-        // Arrange
         val handler = DirectPostResponseModeHandler()
         val responseUri = "https://example.com/response"
         val walletNonce = "test-nonce"
@@ -122,7 +111,6 @@ class DirectPostResponseModeHandlerTest {
             )
         } returns mapOf("body" to "")
 
-        // Act
         val actualResponse = handler.sendAuthorizationResponse(
             authorizationRequestForResponseModeJWT,
             responseUri,
@@ -130,7 +118,6 @@ class DirectPostResponseModeHandlerTest {
             walletNonce
         )
 
-        // Assert
         assertEquals("", actualResponse)
     }
 }

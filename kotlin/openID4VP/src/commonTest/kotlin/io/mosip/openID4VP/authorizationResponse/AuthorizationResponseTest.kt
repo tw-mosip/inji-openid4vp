@@ -4,10 +4,10 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.Proof
 import io.mosip.openID4VP.testData.presentationSubmission
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class AuthorizationResponseTest {
 
@@ -61,6 +61,4 @@ class AuthorizationResponseTest {
         assertTrue(map.containsKey("presentation_submission"))
         assertFalse(map.containsKey("state"))
     }
-
-
 }

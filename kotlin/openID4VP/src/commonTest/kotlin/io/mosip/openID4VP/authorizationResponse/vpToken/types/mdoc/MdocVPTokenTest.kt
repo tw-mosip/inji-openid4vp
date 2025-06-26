@@ -1,9 +1,9 @@
 package io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
-
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class MdocVPTokenTest {
 
@@ -24,7 +24,6 @@ class MdocVPTokenTest {
         val objectMapper = ObjectMapper()
         val serializedJson = objectMapper.writeValueAsString(token)
 
-        assertEquals("\"dGhpcyBpcyBhIHRlc3QgYmFzZTY0IHN0cmluZw==\"", serializedJson)
+        assertEquals("\"$base64Response\"", serializedJson)
     }
-
 }

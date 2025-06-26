@@ -1,30 +1,22 @@
 package io.mosip.openID4VP.common
 
-
 import io.mockk.*
-import io.mosip.openID4VP.exceptions.Exceptions
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
 import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.*
 
 class FieldDeserializerTest {
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -117,7 +109,7 @@ class FieldDeserializerTest {
         val jsonObject = buildJsonObject {}
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertThrows(MissingInput::class.java) {
+        val exception = assertFailsWith<MissingInput> {
             deserializer.deserializeField<String>("mandatoryField", "String", isMandatory = true)
         }
         assertEquals("Missing Input: parentField->mandatoryField param is required", exception.message)
@@ -130,10 +122,13 @@ class FieldDeserializerTest {
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertThrows(InvalidInput::class.java) {
+        val exception = assertFailsWith<InvalidInput> {
             deserializer.deserializeField<String>("nullField", "String")
         }
-        assertEquals("Invalid Input: parentField->nullField value cannot be an empty string, null, or an integer", exception.message)
+        assertEquals(
+            "Invalid Input: parentField->nullField value cannot be an empty string, null, or an integer",
+            exception.message
+        )
     }
 
     @Test
@@ -143,10 +138,13 @@ class FieldDeserializerTest {
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertThrows(InvalidInput::class.java) {
+        val exception = assertFailsWith<InvalidInput> {
             deserializer.deserializeField<String>("stringField", "String")
         }
-        assertEquals("Invalid Input: parentField->stringField value cannot be an empty string, null, or an integer", exception.message)
+        assertEquals(
+            "Invalid Input: parentField->stringField value cannot be an empty string, null, or an integer",
+            exception.message
+        )
     }
 
     @Test
@@ -156,10 +154,13 @@ class FieldDeserializerTest {
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertThrows(InvalidInput::class.java) {
+        val exception = assertFailsWith<InvalidInput> {
             deserializer.deserializeField<Boolean>("booleanField", "Boolean")
         }
-        assertEquals("Invalid Input: parentField->booleanField value must be either true or false", exception.message)
+        assertEquals(
+            "Invalid Input: parentField->booleanField value must be either true or false",
+            exception.message
+        )
     }
 
     @Test
@@ -169,7 +170,7 @@ class FieldDeserializerTest {
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertThrows(SerializationException::class.java) {
+        val exception = assertFailsWith<SerializationException> {
             deserializer.deserializeField<Any>("testField", "UnsupportedType")
         }
         assertTrue(exception.message!!.contains("Unsupported field type"))
@@ -183,9 +184,7 @@ class FieldDeserializerTest {
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
         val customDeserializer = mockk<DeserializationStrategy<String>>()
 
-        every {
-            customDeserializer.deserialize(any())
-        } returns "deserialized value"
+        every { customDeserializer.deserialize(any()) } returns "deserialized value"
 
         val result = deserializer.deserializeField("testField", "CustomType", customDeserializer)
         assertEquals("deserialized value", result)

@@ -1,23 +1,14 @@
 package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.types
 
-
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
+import io.mosip.openID4VP.testData.*
 import okhttp3.Headers
-import org.junit.jupiter.api.Assertions.*
-import org.junit.Test
-import org.junit.jupiter.api.assertThrows
 import io.mockk.*
-import io.mosip.openID4VP.testData.clientMetadataString
-import io.mosip.openID4VP.testData.presentationDefinitionString
-import io.mosip.openID4VP.testData.requestUrl
-import io.mosip.openID4VP.testData.responseUrl
-import io.mosip.openID4VP.testData.trustedVerifiers
-import org.junit.Before
+import kotlin.test.*
 
 class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
@@ -26,10 +17,11 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
     private val setResponseUri: (String) -> Unit = mockk(relaxed = true)
     private val validClientId = "mock-client"
 
-    @Before
+    @BeforeTest
     fun setup() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers {}
+
         authorizationRequestParameters = mutableMapOf(
             CLIENT_ID.value to validClientId,
             RESPONSE_TYPE.value to "vp_token",
@@ -50,43 +42,46 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
     @Test
     fun `validateClientId should pass when client ID is trusted and validation is enabled`() {
-        // Arrange
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
 
-        // Act & Assert - no exception thrown
-        assertDoesNotThrow { handler.validateClientId() }
+        try {
+            handler.validateClientId()
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateClientId should skip validation when shouldValidateClient is false`() {
-        // Arrange
         authorizationRequestParameters[CLIENT_ID.value] = "untrusted-client-id"
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, false, setResponseUri
         )
 
-        // Act & Assert - no exception thrown
-        assertDoesNotThrow { handler.validateClientId() }
+        try {
+            handler.validateClientId()
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateClientId should throw exception when client ID is not trusted`() {
-        // Arrange
         authorizationRequestParameters[CLIENT_ID.value] = "untrusted-client-id"
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
 
-        // Act & Assert
-        val exception = assertThrows<Exception> { handler.validateClientId() }
+        val exception = assertFailsWith<Exception> {
+            handler.validateClientId()
+        }
         assertTrue(exception.message?.contains("Verifier is not trusted") == true)
     }
 
     @Test
     fun `validateRequestUriResponse should accept valid JSON response`() {
-        // Arrange
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
@@ -96,19 +91,17 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
             .build()
 
         val responseBody = """{"client_id":"$validClientId","response_uri":"$responseUrl"}"""
+        val requestUriResponse = mapOf("header" to headers, "body" to responseBody)
 
-        val requestUriResponse = mapOf(
-            "header" to headers,
-            "body" to responseBody
-        )
-
-        // Act & Assert - no exception thrown
-        assertDoesNotThrow { handler.validateRequestUriResponse(requestUriResponse) }
+        try {
+            handler.validateRequestUriResponse(requestUriResponse)
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateRequestUriResponse should throw exception for invalid content type`() {
-        // Arrange
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
@@ -118,81 +111,76 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
             .build()
 
         val responseBody = """{"client_id":"$validClientId","response_uri":"$responseUrl"}"""
+        val requestUriResponse = mapOf("header" to headers, "body" to responseBody)
 
-        val requestUriResponse = mapOf(
-            "header" to headers,
-            "body" to responseBody
-        )
-
-        // Act & Assert
-        val exception = assertThrows<Exception> { handler.validateRequestUriResponse(requestUriResponse) }
+        val exception = assertFailsWith<Exception> {
+            handler.validateRequestUriResponse(requestUriResponse)
+        }
         assertTrue(exception.message?.contains("Authorization Request must not be signed") == true)
     }
 
     @Test
     fun `process should return wallet metadata with null requestObjectSigningAlgValuesSupported`() {
-        // Arrange
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
 
-        // Act
         val processedMetadata = handler.process(walletMetadata.copy(
             requestObjectSigningAlgValuesSupported = listOf("ES256")
         ))
 
-        // Assert
         assertNull(processedMetadata.requestObjectSigningAlgValuesSupported)
     }
 
     @Test
     fun `getHeadersForAuthorizationRequestUri should return correct headers`() {
-        // Arrange
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
 
-        // Act
         val headers = handler.getHeadersForAuthorizationRequestUri()
 
-        // Assert
         assertEquals(ContentType.APPLICATION_FORM_URL_ENCODED.value, headers["content-type"])
         assertEquals(ContentType.APPLICATION_JSON.value, headers["accept"])
     }
 
     @Test
     fun `validateAndParseRequestFields should pass for trusted client with valid response URI`() {
-        // Arrange
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
 
-        // Act & Assert - no exception thrown
-        assertDoesNotThrow { handler.validateAndParseRequestFields() }
+        try {
+            handler.validateAndParseRequestFields()
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 
     @Test
     fun `validateAndParseRequestFields should throw exception when response URI is not trusted`() {
-        // Arrange
         authorizationRequestParameters[RESPONSE_URI.value] = "https://untrusted.verifier.com/response"
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, true, setResponseUri
         )
 
-        // Act & Assert
-        val exception = assertThrows<Exception> { handler.validateAndParseRequestFields() }
+        val exception = assertFailsWith<Exception> {
+            handler.validateAndParseRequestFields()
+        }
         assertTrue(exception.message?.contains("Verifier is not trusted") == true)
     }
 
     @Test
     fun `validateAndParseRequestFields should skip validation when shouldValidateClient is false`() {
-        // Arrange
         authorizationRequestParameters[RESPONSE_URI.value] = "https://untrusted.verifier.com/response"
         val handler = PreRegisteredSchemeAuthorizationRequestHandler(
             trustedVerifiers, authorizationRequestParameters, walletMetadata, false, setResponseUri
         )
 
-        // Act & Assert - no exception thrown
-        assertDoesNotThrow { handler.validateAndParseRequestFields() }
+        try {
+            handler.validateAndParseRequestFields()
+        } catch (e: Throwable) {
+            fail("Expected no exception, but got: ${e.message}")
+        }
     }
 }

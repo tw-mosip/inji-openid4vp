@@ -8,17 +8,15 @@ import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
 import io.mosip.openID4VP.constants.SignatureAlgorithm
 import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.*
 
 class LdpVPTokenSigningResultTest {
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkStatic(::validateField)
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
 
         every { validateField(any(), "String") } answers {
             val value = arg<String?>(0)
@@ -27,10 +25,10 @@ class LdpVPTokenSigningResultTest {
 
         every {
             Logger.handleException(any(), any(), any(), any())
-        } returns InvalidInput("","Validation failed")
+        } returns InvalidInput("", "Validation failed")
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -42,7 +40,6 @@ class LdpVPTokenSigningResultTest {
             signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2020.value
         )
 
-        // Should not throw exception
         result.validate()
     }
 
@@ -53,68 +50,79 @@ class LdpVPTokenSigningResultTest {
             signatureAlgorithm = SignatureAlgorithm.JsonWebSignature2020.value
         )
 
-        // Should not throw exception
         result.validate()
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when proofValue is null string for Ed25519Signature2020`() {
         val result = LdpVPTokenSigningResult(
             proofValue = "null",
             signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2020.value
         )
 
-        result.validate()
+        assertFailsWith<InvalidInput> {
+            result.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when proofValue is null for Ed25519Signature2020`() {
         val result = LdpVPTokenSigningResult(
             proofValue = null,
             signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2020.value
         )
 
-        result.validate()
+        assertFailsWith<InvalidInput> {
+            result.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when proofValue is empty for Ed25519Signature2020`() {
         val result = LdpVPTokenSigningResult(
             proofValue = "",
             signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2020.value
         )
 
-        result.validate()
+        assertFailsWith<InvalidInput> {
+            result.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when jws is null string for JsonWebSignature2020`() {
         val result = LdpVPTokenSigningResult(
             jws = "null",
             signatureAlgorithm = SignatureAlgorithm.JsonWebSignature2020.value
         )
 
-        result.validate()
+        assertFailsWith<InvalidInput> {
+            result.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when jws is null for JsonWebSignature2020`() {
         val result = LdpVPTokenSigningResult(
             jws = null,
             signatureAlgorithm = SignatureAlgorithm.JsonWebSignature2020.value
         )
 
-        result.validate()
+        assertFailsWith<InvalidInput> {
+            result.validate()
+        }
     }
 
-    @Test(expected = InvalidInput::class)
+    @Test
     fun `should throw exception when jws is empty for JsonWebSignature2020`() {
         val result = LdpVPTokenSigningResult(
             jws = "",
             signatureAlgorithm = SignatureAlgorithm.JsonWebSignature2020.value
         )
 
-        result.validate()
+        assertFailsWith<InvalidInput> {
+            result.validate()
+        }
     }
 
     @Test
@@ -125,7 +133,6 @@ class LdpVPTokenSigningResultTest {
             signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2020.value
         )
 
-        // Should validate proofValue and ignore jws for Ed25519Signature2020
         result.validate()
     }
 }

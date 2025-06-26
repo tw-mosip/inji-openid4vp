@@ -1,24 +1,22 @@
 package io.mosip.openID4VP.common
 
-
-
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class EncoderTest {
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -34,7 +32,6 @@ class EncoderTest {
         val encodedContent = encodeToBase64Url(ByteArray(0))
         assertEquals("", encodedContent)
     }
-
 
     @Test
     fun `should handle special characters correctly during encoding`() {

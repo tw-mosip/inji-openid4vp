@@ -1,7 +1,6 @@
 package io.mosip.openID4VP.testData
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_ID_SCHEME
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
 import io.mosip.openID4VP.constants.ClientIdScheme

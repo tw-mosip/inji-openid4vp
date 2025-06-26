@@ -1,9 +1,8 @@
 package io.mosip.openID4VP.common
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.junit.Test
-import org.junit.Assert.*
 import io.mosip.openID4VP.constants.HttpMethod
+import kotlin.test.*
 
 class UtilsTest {
 
@@ -60,9 +59,11 @@ class UtilsTest {
         assertEquals(HttpMethod.POST, determineHttpMethod("post"))
     }
 
-    @Test(expected = IllegalArgumentException::class)
+    @Test
     fun `determineHttpMethod should throw exception for unsupported method`() {
-        determineHttpMethod("put")
+        assertFailsWith<IllegalArgumentException> {
+            determineHttpMethod("put")
+        }
     }
 
     @Test

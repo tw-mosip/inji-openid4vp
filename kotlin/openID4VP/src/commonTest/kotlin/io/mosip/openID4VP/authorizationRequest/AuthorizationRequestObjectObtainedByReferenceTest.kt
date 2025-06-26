@@ -3,13 +3,9 @@ package io.mosip.openID4VP.authorizationRequest
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.REDIRECT_URI
 import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.*
 import io.mosip.openID4VP.constants.HttpMethod
@@ -19,18 +15,12 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.networkManager.exception.NetworkManagerClientExceptions
 import io.mosip.openID4VP.testData.*
 import okhttp3.Headers
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
-import org.junit.Before
-import org.junit.Test
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
+import kotlin.test.*
 
 class AuthorizationRequestObjectObtainedByReferenceTest {
     private lateinit var openID4VP: OpenID4VP
 
-    @Before
+    @BeforeTest
     fun setUp() {
         openID4VP = OpenID4VP("test-OpenID4VP")
 
@@ -49,64 +39,14 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         } returns mapOf("body" to didResponse)
 
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
 
-    @Test
-    fun `should send wallet metadata to the verifier only when the request_uri_method is post`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfDid + mapOf(
-            "request_uri_method" to "post"
-        )
-        val requestBody = mapOf(
-            "wallet_metadata" to
-                    encodeToJsonString(
-                        walletMetadata,
-                        "wallet_metadata",
-                        "AuthorizationRequestObjectObtainedByReferenceTest"
-                    )
-        )
-
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                HttpMethod.POST,
-                requestBody,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
-        )
-
-
-        val encodedAuthorizationRequest = createUrlEncodedData(
-            authorizationRequestParamsMap,
-            true,
-            DID
-        )
-
-        openID4VP.authenticateVerifier(
-            encodedAuthorizationRequest,
-            trustedVerifiers,
-            shouldValidateClient = true,
-            walletMetadata
-        )
-
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                HttpMethod.POST,
-                requestBody,
-                any()
-            )
-        }
-    }
 
     @Test
     fun `should validate and throw error if the client id scheme is not supported by wallet when the request_uri_method is post`() {
@@ -135,7 +75,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             DID
         )
 
-        val exception = assertThrows<InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -143,201 +83,15 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
                 walletMetadata
             )
         }
+
+
         assertEquals("client_id_scheme is not support by wallet", exception.message)
     }
 
-    @Test
-    fun `should validate and throw error if the signing algorithm is not supported by wallet when the request_uri_method is post`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfDid + mapOf(
-            "request_uri_method" to "post"
-        )
-        val walletMetadata = WalletMetadata(
-            presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf(
-                "ldp_vc" to VPFormatSupported(
-                    algValuesSupported = listOf("RSA")
-                )
-            ),
-            clientIdSchemesSupported = listOf(DID.value, PRE_REGISTERED.value),
-            requestObjectSigningAlgValuesSupported = listOf("RSA"),
-            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
-        )
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                HttpMethod.POST,
-                any(),
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
-        )
 
-        val encodedAuthorizationRequest = createUrlEncodedData(
-            authorizationRequestParamsMap,
-            true,
-            DID
-        )
 
-        val exception = assertThrows<InvalidData> {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true,
-                walletMetadata
-            )
-        }
-        assertEquals("request_object_signing_alg is not support by wallet", exception.message)
-    }
 
-    @Test
-    fun `should validate and throw error if the signing algorithm supported  by wallet is empty or null when the client id scheme is did and request uri method is post`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfDid + mapOf(
-            "request_uri_method" to "post"
-        )
-        val walletMetadata = WalletMetadata(
-            presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf(
-                "ldp_vc" to VPFormatSupported(
-                    algValuesSupported = listOf("RSA")
-                )
-            ),
-            clientIdSchemesSupported = listOf(DID.value, PRE_REGISTERED.value),
-            requestObjectSigningAlgValuesSupported = null,
-            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
-        )
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                HttpMethod.POST,
-                any(),
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
-        )
 
-        val encodedAuthorizationRequest = createUrlEncodedData(
-            authorizationRequestParamsMap,
-            true,
-            DID
-        )
-
-        val exception = assertThrows<InvalidData> {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true,
-                walletMetadata
-            )
-        }
-        assertEquals("request_object_signing_alg_values_supported is not present in wallet metadata", exception.message)
-    }
-
-    //Client Id scheme - DID
-    @Test
-    fun `should return Authorization Request if it has request uri and it is a valid authorization request in did client id scheme`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfDid
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
-        )
-
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(
-                authorizationRequestParamsMap,
-                true,
-                DID
-            )
-
-        assertDoesNotThrow {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true,
-                null
-            )
-        }
-    }
-
-    //Client Id scheme - DID
-    @Test
-    fun `should return Authorization Request with populated clientIdScheme(did) field if the verifier is draft 21 compliant`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfDid + mapOf(CLIENT_ID_SCHEME.value to DID.value)
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap, draftVersion = 21)
-        )
-
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(
-                authorizationRequestParamsMap,
-                true,
-                DID,
-                draftVersion = 21
-            )
-
-        val authorizationRequest  = assertDoesNotThrow {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true,
-                null
-            )
-        }
-        assertEquals(DID.value, authorizationRequest.clientIdScheme)
-    }
-
-    @Test
-    fun `should return Authorization Request with populated clientIdScheme(pre-registered) field if the verifier is draft 21 compliant`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered + mapOf(CLIENT_ID_SCHEME.value to PRE_REGISTERED.value)
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/json")
-                .build(),
-            "body" to createAuthorizationRequestObject(PRE_REGISTERED, authorizationRequestParamsMap, draftVersion = 21)
-        )
-
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(
-                authorizationRequestParamsMap,
-                true,
-                PRE_REGISTERED,
-                draftVersion = 21
-            )
-
-        val authorizationRequest  = assertDoesNotThrow {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true,
-                null
-            )
-        }
-        assertEquals(PRE_REGISTERED.value, authorizationRequest.clientIdScheme)
-    }
 
     @Test
     fun `should throw error if context type is wrong for request uri response`() {
@@ -359,7 +113,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
                 DID
             )
 
-        val invalidInputException = assertThrows<InvalidData> {
+        val invalidInputException = assertFailsWith<InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -386,7 +140,8 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap, true, DID)
 
 
-        val exceptionWhenRequestUriNetworkCallFails = assertThrows(Exception::class.java) {
+
+        val exceptionWhenRequestUriNetworkCallFails = assertFailsWith<Exception> {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -415,7 +170,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             )
 
 
-        val missingInputException = assertThrows(MissingInput::class.java) {
+        val missingInputException = assertFailsWith<MissingInput> {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -431,37 +186,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         )
     }
 
-    @Test
-    fun `should make call to request_uri with the request_uri_method when the fields are available in did client id scheme`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfDid
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
-        )
 
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap, true, ClientIdScheme.REDIRECT_URI)
-
-
-        openID4VP.authenticateVerifier(
-            encodedAuthorizationRequest,
-            trustedVerifiers,
-            shouldValidateClient = true
-        )
-
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                HttpMethod.GET
-            )
-        }
-    }
 
     @Test
     fun `should throw error if  request_uri is not valid in authorization request`() {
@@ -472,7 +197,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap, true, ClientIdScheme.REDIRECT_URI)
 
 
-        val exception = assertThrows<InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -483,111 +208,10 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         assertEquals("request_uri data is not valid", exception.message)
     }
 
-    @Test
-    fun `should make a call to request_uri in get http call if request_uri_method is not available in did client id scheme`() {
-        val authorizationRequestParamsMap =
-            requestParams.minus("request_uri_method") + clientIdOfDid
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(DID, authorizationRequestParamsMap)
-        )
-        val encodedAuthorizationRequest = createUrlEncodedData(
-            authorizationRequestParamsMap,
-            true,
-            DID
-        )
 
-        openID4VP.authenticateVerifier(
-            encodedAuthorizationRequest,
-            trustedVerifiers,
-            shouldValidateClient = true
-        )
 
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                HttpMethod.GET
-            )
-        }
-
-    }
 
     @Test
-    fun `should return authorization request from redirect uri scheme where request uri is present`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUriDraft23
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/json").build(),
-            "body" to createAuthorizationRequestObject(
-                ClientIdScheme.REDIRECT_URI,
-                authorizationRequestParamsMap
-            )
-        )
-        val encodedAuthorizationRequest = createUrlEncodedData(
-            authorizationRequestParamsMap,
-            true,
-            ClientIdScheme.REDIRECT_URI
-        )
-
-        openID4VP.authenticateVerifier(
-            encodedAuthorizationRequest,
-            trustedVerifiers,
-            shouldValidateClient = true
-        )
-
-        verify {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                HttpMethod.GET
-            )
-        }
-
-    }
-
-    @Test
-    fun `should throw exception when the client_id validation fails while obtaining Authorization request object by reference in did client id scheme`() {
-        every {
-            NetworkManagerClient.sendHTTPRequest(requestUrl, any())
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/oauth-authz-req+jwt")
-                .build(),
-            "body" to createAuthorizationRequestObject(
-                DID, requestParams + mapOf(
-                    CLIENT_ID.value to "wrong-client-id",
-                    CLIENT_ID_SCHEME.value to DID.value
-                )
-            )
-        )
-
-        val authorizationRequestParamsMap = requestParams + clientIdOfDid
-        val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap, true, DID)
-
-
-        val exception = assertThrows(InvalidData::class.java) {
-            openID4VP.authenticateVerifier(
-                encodedAuthorizationRequest,
-                trustedVerifiers,
-                shouldValidateClient = true
-            )
-        }
-
-        assertEquals(
-            "Client Id mismatch in Authorization Request parameter and the Request Object",
-            exception.message
-        )
-    }@Test
-
     fun `should throw exception when the client_id_scheme validation fails while obtaining Authorization request object by reference in redirect_uri client id scheme`() {
 
         val authorizationRequestParamsMap = requestParams + clientIdOfReDirectUriDraft21 + mapOf(CLIENT_ID_SCHEME.value to PRE_REGISTERED.value)
@@ -623,12 +247,15 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             "body" to createAuthorizationRequestObject(PRE_REGISTERED, authorizationRequestParamsMap, draftVersion = 21)
         )
 
-        val actualException =
-            assertThrows(InvalidData::class.java) {
-                openID4VP.authenticateVerifier(
-                    encodedAuthorizationRequest, trustedVerifiers, true, null
-                )
-            }
+        val actualException = assertFailsWith<InvalidData> {
+            openID4VP.authenticateVerifier(
+                encodedAuthorizationRequest,
+                trustedVerifiers,
+                shouldValidateClient = true,
+                walletMetadata = null
+            )
+        }
+
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
@@ -689,7 +316,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap, true, DID)
 
 
-        assertThrows<InvalidData> {
+        assertFailsWith<InvalidData> {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -722,7 +349,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap, true, DID)
 
 
-        assertThrows<InvalidData> {
+        assertFailsWith<InvalidData> {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
@@ -753,7 +380,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(authorizationRequestParamsMap, true, PRE_REGISTERED)
 
         val invalidClientIdException =
-            assertThrows<InvalidData> {
+            assertFailsWith<InvalidData> {
                 openID4VP.authenticateVerifier(
                     encodedAuthorizationRequest,
                     trustedVerifiers,

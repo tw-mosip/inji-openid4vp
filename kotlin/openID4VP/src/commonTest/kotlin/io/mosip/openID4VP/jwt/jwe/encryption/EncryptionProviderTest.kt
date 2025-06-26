@@ -1,29 +1,23 @@
 package io.mosip.openID4VP.jwt.jwe.encryption
 
-
-import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.crypto.X25519Encrypter
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.jwt.exception.JWEException.*
-import io.mosip.openID4VP.jwt.jwe.encryption.EncryptionProvider
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.*
 
 class EncryptionProviderTest {
-    @Before
+
+    @BeforeTest
     fun setUp() {
         mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+        every { Logger.error(any(), any(), any()) } answers { }
     }
-    @After
+
+    @AfterTest
     fun tearDown() {
         clearAllMocks()
     }
@@ -40,7 +34,7 @@ class EncryptionProviderTest {
         )
         val encrypter = EncryptionProvider.getEncrypter(jwk)
 
-        assert(encrypter is X25519Encrypter)
+        assertTrue(encrypter is X25519Encrypter)
     }
 
     @Test
@@ -54,12 +48,10 @@ class EncryptionProviderTest {
             kid = "ed-key1"
         )
 
-        val exception = assertThrows(UnsupportedKeyExchangeAlgorithm::class.java) {
+        val exception = assertFailsWith<UnsupportedKeyExchangeAlgorithm> {
             EncryptionProvider.getEncrypter(jwk)
         }
 
         assertEquals("Required Key exchange algorithm is not supported", exception.message)
     }
-
 }
-
