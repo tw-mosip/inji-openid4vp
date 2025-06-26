@@ -1,6 +1,5 @@
 package io.mosip.sampleapp.utils
 
-
 import android.util.Log
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.nimbusds.jose.jwk.OctetKeyPair
