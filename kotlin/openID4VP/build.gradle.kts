@@ -27,7 +27,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.androidx.core.ktx)
                 implementation(libs.jetbrains.kotlinx.serialization.json)
                 implementation(libs.okhttp3)
                 implementation(libs.commons.codec)
@@ -73,9 +72,6 @@ android {
 
     defaultConfig {
         minSdk = 23
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -205,6 +201,8 @@ tasks.register<Jar>("javadocJar") {
 tasks.register("generatePom") {
     dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
 }
+
+apply(from = "publish-artifact.gradle")
 var buildDir = project.layout.buildDirectory.get()
 sonarqube {
     properties {
@@ -219,4 +217,4 @@ sonarqube {
     }
 }
 
-apply(from = "publish-artifact.gradle")
+

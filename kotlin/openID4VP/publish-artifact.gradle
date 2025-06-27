@@ -1,3 +1,4 @@
+group = "io.mosip"
 version = "0.4.0-SNAPSHOT"
 
 
@@ -94,8 +95,7 @@ publishing {
                     gpgArgumentsNode.appendNode('arg', 'loopback')
                 }
             }
-            groupId = "io.mosip"
-            artifactId = "inji-openid4vp"
+            artifactId = "inji-openid4vp-aar"
             if (project.gradle.startParameter.taskNames.any { it.contains('assembleRelease') }) {
                 artifacts {
                     aar {
@@ -121,13 +121,6 @@ publishing {
                         appendNode('url', 'https://www.mozilla.org/en-US/MPL/2.0/')
                     }
 
-                    asNode().appendNode('scm').with {
-                        appendNode('connection', 'scm:git:git://github.com/mosip/inji-openid4vp.git')
-                        appendNode('developerConnection', 'scm:git:ssh://github.com/mosip/inji-openid4vp.git')
-                        appendNode('url', "https://github.com/mosip/inji-openid4vp")
-                        appendNode('tag', "HEAD")
-                    }
-
                     asNode().appendNode('developers').appendNode('developer').with {
                         appendNode('id', 'Your developer ID')
                         appendNode('name', 'Mosip')
@@ -135,23 +128,32 @@ publishing {
                         appendNode('organization', 'io.mosip')
                         appendNode('organizationUrl', 'https://github.com/mosip/inji-openid4vp')
 
-                        def dependenciesNode = asNode().appendNode('dependencies')
-                        def commonMainDependencies = configurations["commonMainImplementation"].dependencies
-                        commonMainDependencies.forEach { dep ->
-                            if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
-                                def dependencyNode = dependenciesNode.appendNode("dependency")
-                                dependencyNode.appendNode("groupId", dep.group)
-                                dependencyNode.appendNode("artifactId", dep.name)
-                                dependencyNode.appendNode("version", dep.version)
-                            }
+                    }
+
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    def commonMainDependencies = configurations["commonMainImplementation"].dependencies
+                    commonMainDependencies.forEach { dep ->
+                        if (dep instanceof org.gradle.api.artifacts.ExternalDependency) {
+                            def dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", dep.group)
+                            dependencyNode.appendNode("artifactId", dep.name)
+                            dependencyNode.appendNode("version", dep.version)
                         }
+                    }
 
-                        def pluginsNode = asNode().appendNode('build').appendNode('plugins')
+                    def pluginsNode = asNode().appendNode('build').appendNode('plugins')
 
-                        def pluginNode = pluginsNode.appendNode('plugin')
-                        pluginNode.appendNode('groupId', 'pl.project13.maven')
-                        pluginNode.appendNode('artifactId', 'git-commit-id-plugin')
-                        pluginNode.appendNode('version', '3.0.1')
+                    def pluginNode = pluginsNode.appendNode('plugin')
+                    pluginNode.appendNode('groupId', 'pl.project13.maven')
+                    pluginNode.appendNode('artifactId', 'git-commit-id-plugin')
+                    pluginNode.appendNode('version', '3.0.1')
+
+                    asNode().appendNode('scm').with {
+                        appendNode('connection', 'scm:git:git://github.com/mosip/inji-openid4vp.git')
+                        appendNode('developerConnection', 'scm:git:ssh://github.com/mosip/inji-openid4vp.git')
+                        appendNode('url', "https://github.com/mosip/inji-openid4vp")
+                        appendNode('tag', "HEAD")
+                    }
 
                         def executionsNode = pluginNode.appendNode('executions')
                         def executionNode = executionsNode.appendNode('execution')
