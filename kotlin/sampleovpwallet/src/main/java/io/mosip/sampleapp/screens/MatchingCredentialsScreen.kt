@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.sampleapp.Constants
 import io.mosip.sampleapp.utils.OpenID4VPManager
 import io.mosip.sampleapp.utils.OpenID4VPManager.shareVerifiablePresentation
@@ -74,7 +75,7 @@ fun MatchingCredentialsScreen(
         ) {
             IconButton(onClick = {
                 coroutineScope.launch(Dispatchers.IO) {
-                    OpenID4VPManager.sendErrorToVerifier(Constants.ERR_DECLINED)
+                    OpenID4VPManager.sendErrorToVerifier(OpenID4VPExceptions.AccessDenied(Constants.ERR_DECLINED, "MatchingCredentialsScreen"))
                     withContext(Dispatchers.Main) {
                         navController.popBackStack(Screen.Share.route, inclusive = false)
                     }
@@ -227,7 +228,7 @@ fun handleDecline(
     onDeclineConfirmed: () -> Unit
 ) {
     coroutineScope.launch(Dispatchers.IO) {
-        OpenID4VPManager.sendErrorToVerifier(Constants.ERR_DECLINED)
+        OpenID4VPManager.sendErrorToVerifier(OpenID4VPExceptions.AccessDenied(Constants.ERR_DECLINED, "MatchingCredentialsScreen"))
         withContext(Dispatchers.Main) {
             onDeclineConfirmed()
         }
