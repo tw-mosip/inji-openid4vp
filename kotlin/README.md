@@ -1,5 +1,35 @@
 # INJI-OpenID4VP  
 
+## 🚨 Breaking Changes
+
+### From Version `release-0.3.x` onward:
+
+As part of package restructuring, some classes have moved to a new package.
+
+#### ❗ Required Update in Imports
+
+Replace:
+
+```kotlin
+import io.mosip.openID4VP.dto.Verifier;
+import io.mosip.openID4VP.dto.vpResponseMetadata.VPResponseMetadata;
+```
+
+With:
+
+```kotlin
+import io.mosip.openID4VP.authorizationRequest.Verifier;
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata;
+```
+
+## API contract changes
+
+- This library has undergone significant changes in its API contract. The new API contracts are designed to be more flexible and extensible, allowing for support of multiple verifiable credential formats. The changes are discussed in the [API section](#apis) below.
+- Backward compatibility of all the APIs with the previous version of the library has been maintained.
+
+
+## **Introduction**
+
 inji-openid4vp is an implementation of OpenID for Verifiable Presentations written in kotlin. It supports sharing of verifiable credentials with verifiers using the OpenID4VP protocol. 
 Formats supported:  
 - LDP_VC : Implemented using [Specification-21](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html) and [Specification-23](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html)
@@ -10,9 +40,10 @@ The library validates the client_id and client_id_scheme parameters in the autho
 - If the client_id_scheme parameter is not included, the request is interpreted as following Draft 23, and validation is applied based on that specification.
 
 
-**Table of Contents**
+## **Table of Contents**
 
 - [Installation](#installation)
+- [Integration](#integration)
 - [APIs](#apis)
   - [authenticateVerifier](#authenticateverifier)
   - [constructUnsignedVPToken](#constructUnsignedVPToken)
@@ -34,49 +65,105 @@ implementation "io.mosip:inji-openid4vp:0.3.0-SNAPSHOT"
 val openID4VP = OpenID4VP(traceabilityId = "sample-id")
 ```
 
+## Integration
+- To integrate the inji-openid4vp library into your Android application, there is a sample application created in `kotlin/sampleovpwallet` directory. This sample app demonstrates how to use the library to authenticate Verifiers, construct unsigned Verifiable Presentation (VP) tokens, and share them with Verifiers.
+- For more details refer to [README](https://github.com/mosip/inji-openid4vp/blob/release-0.3.x/kotlin/sampleovpwallet/README.md) of the sample application.
+
 ## APIs
 
 ### authenticateVerifier
-- Receives a list of trusted verifiers & Verifier's encoded Authorization request from consumer app(mobile wallet).
-- Optionally it also receives wallet metadata to be shared with the verifier.
-- Decodes and parses the qr code data. Checks if the data contains request_uri or contains the entire Authorization request data entirely.
-- If the data contains request_uri and request_uri_method as post, then the wallet metadata is shared in the request body while making an api call to request_uri for fetching authorization request.
-- The library also validates the incoming authorization request with the wallet metadata
-- Constructs the Authorization request object based on the client_id_scheme.
-- Takes an optional boolean to toggle the client validation.
+- Accepts a URL-encoded Authorization Request from the Verifier and a list of trusted Verifiers provided by the consumer app (e.g., mobile wallet).
+- Optionally accepts wallet metadata to be shared with the verifier.
+- Decodes and parses the QR code data to determine if it contains a `request_uri` or the complete Authorization Request data.
+- If the data contains `request_uri` and `request_uri_method` as POST, the wallet metadata is included in the request body when making an API call to fetch the Authorization Request.
+- Validates the incoming authorization request with the provided wallet metadata.
+- Constructs the Authorization request object based on the `client_id_scheme`.
+- Includes an optional boolean parameter to enable or disable client validation.
+- Sets the response URI for communication with the verifier.
 - Returns the validated Authorization request object.
 
 **Note 1:** Wallet can send the entire metadata, library will customize it as per authorization request client_id_scheme. Eg - in case pre-registered, library modifies wallet metadata to be sent without request object signing info properties as specified in the specification.
 
 **Note 2:** Currently the library does not support limit disclosure for any format of VC. It will throw an error if the request contains `presentation_definition` or `presentation_definition_uri` with `input_descriptors` and `limit_disclosure` set to required. 
 
-#### WalletMetadata Parameters
 
-| Parameter                                 | Type                        | Required   | Default Value      | Description                                                                                      |
-|-------------------------------------------|-----------------------------|------------|--------------------|--------------------------------------------------------------------------------------------------|
-| presentationDefinitionURISupported        | Bool                        | No         | true               | Indicates whether the wallet supports `presentation_definition_uri`.                             |
-| vpFormatsSupported                        | [String: VPFormatSupported] | Yes        | N/A                | A dictionary specifying the supported verifiable presentation formats and their algorithms.      |
-| clientIdSchemesSupported                  | List\<String\>              | No         | ["pre-registered"] | A list of supported client ID schemes.                                                           |
-| requestObjectSigningAlgValuesSupported    | List\<String\>?             | No         | null               | A list of supported algorithms for signing request objects.                                      |
-| authorizationEncryptionAlgValuesSupported | List\<String\>?             | No         | null               | A list of supported algorithms for encrypting authorization responses.                           |
-| authorizationEncryptionEncValuesSupported | List\<String\>?             | No         | null               | A list of supported encryption methods for authorization responses.                              |
-
-
-
-```
- val authenticationResponse = openID4VP.authenticateVerifier(urlEncodedAuthorizationRequest: String, trustedVerifierJSON: List<Verifier>,
- walletMetadata: WalletMetadata, shouldValidateClient: Bool)
+``` kotlin
+//NOTE: New API contract
+ val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
+                                    urlEncodedAuthorizationRequest: String, 
+                                    trustedVerifierJSON: List<Verifier>,
+                                    shouldValidateClient: Boolean = false,
+                                    walletMetadata: WalletMetadata? = null)
+                                    
+//NOTE: Old API contract for backward compatibility
+ val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
+                                    urlEncodedAuthorizationRequest: String, 
+                                    trustedVerifierJSON: List<Verifier>,
+                                    shouldValidateClient: Boolean = false)
 ```
 
-###### Parameters
+###### Request Parameters
 
-| Name                            | Type             | Description                                                                          |
-|---------------------------------|------------------|--------------------------------------------------------------------------------------|
-| urlEncodedAuthorizationRequest  | String           | URL encoded query parameter string containing the Verifier's authorization request   |
-| trustedVerifiers                | List\<Verifier\> | A list of trusted Verifier objects each containing a clientId and a responseUri list |
-| walletMetadata                  | WalletMetadata?  | Optional WalletMetadata to be shared with Verifier                                   |
-| shouldValidateClient            | Bool?            | Optional Boolean to toggle client validation for pre-registered client id scheme     |
+| Name                            | Type             | Description                                                                                               |
+|---------------------------------|------------------|-----------------------------------------------------------------------------------------------------------|
+| urlEncodedAuthorizationRequest  | String           | URL encoded query parameter string containing the Verifier's authorization request                        |
+| trustedVerifiers                | List\<Verifier\> | A list of trusted Verifier objects each containing a clientId and a responseUri list                      |
+| walletMetadata                  | WalletMetadata?  | Nullable WalletMetadata to be shared with Verifier                                                        |
+| shouldValidateClient            | Boolean?         | Nullable Boolean with default value false to toggle client validation for pre-registered client id scheme |
 
+###### Response 
+```kotlin
+val authorizationRequest = AuthorizationRequest(
+    clientId = "https://mock-verifier.com",
+    responseType = "vp_token",
+    responseMode = "direct_post",
+    presentationDefinition = PresentationDefinition(
+        id = "649d581c-f891-4969-9cd5-2c27385a348f",
+        inputDescriptors = listOf(
+            InputDescriptor(
+                id = "id card credential",
+                format = mapOf(
+                    "ldp_vc" to mapOf(
+                        "proof_type" to listOf("Ed25519Signature2018")
+                    )
+                ),
+                constraints = Constraints(
+                    fields = listOf(
+                        Fields(path = listOf("\$.type"))
+                    )
+                )
+            )
+        )
+    ),
+    responseUri = "https://mock-verifier.com",
+    redirectUri = null,
+    nonce = "bMHvX1HGhbh8zqlSWf/fuQ==",
+    state = "fsnC8ixCs6mWyV+00k23Qg==",
+    clientMetadata = ClientMetadata(
+        clientName = "Requester name",
+        logoUri = "<logo_uri>",
+        authorizationEncryptedResponseAlg = "ECDH-ES",
+        authorizationEncryptedResponseEnc = "A256GCM",
+        vpFormats = mapOf(
+            "ldp_vc" to mapOf(
+                "algValuesSupported" to listOf("Ed25519Signature2018", "Ed25519Signature2020")
+            )
+        ),
+        jwks = Jwks(
+            keys = listOf(
+                Jwk(
+                    kty = "OKP",
+                    crv = "X25519",
+                    use = "enc",
+                    x = "BVNVdqorpxCCnTOkkw8S2NAYXvfEvkC-8RDObhrAUA4",
+                    alg = "ECDH-ES",
+                    kid = "ed-key1"
+                )
+            )
+        )
+    )
+)
+```
 ###### Example usage
 
 ```kotlin
@@ -105,6 +192,26 @@ val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
                 )
 ```
 
+#### WalletMetadata Parameters
+
+| Parameter                                 | Type                             | Required   | Default Value    | Description                                                                                      |
+|-------------------------------------------|----------------------------------|------------|------------------|--------------------------------------------------------------------------------------------------|
+| presentationDefinitionURISupported        | Bool                             | No         | true             | Indicates whether the wallet supports `presentation_definition_uri`.                             |
+| vpFormatsSupported                        | Map\<String: VPFormatSupported\> | Yes        | N/A              | A dictionary specifying the supported verifiable presentation formats and their algorithms.      |
+| clientIdSchemesSupported                  | List\<String\>                   | No         | "pre-registered" | A list of supported client ID schemes.                                                           |
+| requestObjectSigningAlgValuesSupported    | List\<String\>?                  | No         | null             | A list of supported algorithms for signing request objects.                                      |
+| authorizationEncryptionAlgValuesSupported | List\<String\>?                  | No         | null             | A list of supported algorithms for encrypting authorization responses.                           |
+| authorizationEncryptionEncValuesSupported | List\<String\>?                  | No         | null             | A list of supported encryption methods for authorization responses.                              |
+
+#### Verifier Parameters
+
+| Parameter                                   | Type                             | Required                     | Description                                                                                       |
+|---------------------------------------------|----------------------------------|------------------------------|---------------------------------------------------------------------------------------------------|
+| clientId                                    | String                           | Yes                          | The unique identifier for the Verifier.                                                           |
+| responseUri                                 | List\<String\>                   | Yes                          | A list of URIs where the Verifier can receive responses from the wallet.                          |
+
+
+
 ###### Exceptions
 
 1. DecodingException is thrown when there is an issue while decoding the Authorization Request
@@ -125,19 +232,58 @@ val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
+
 ### constructUnsignedVPToken
-- Receives a map of input_descriptor id & list of verifiable credentials for each input_descriptor that are selected by the end-user.
-- Creates a vp_token without proof using received input_descriptor IDs and verifiable credentials, then returns its string representation to consumer app(mobile wallet) for signing it.
+- This method creates unsigned Verifiable Presentation (VP) tokens from a collection of Verifiable Credentials. It:  
+  - Takes credentials organized by input descriptor IDs and formats along with the holder's identifier, and the signature suite to be used for signing the VP tokens.
+  - Creates format-specific VP tokens (supporting JSON-LD and  mDOC formats)
+  - Returns a map of unsigned VP tokens organized by format type
+- The tokens returned are ready for digital signing **to be signed by wallet** before being shared with verifiers in an OpenID4VP flow.
 
-```
-    val unsignedVPTokens : Map<FormatType, UnsignedVPToken> = openID4VP.constructUnsignedVPToken(Map<String, Map<FormatType, List<Any>>>)    
+```kotlin
+    //NOTE: New API contract
+    val unsignedVPTokens : Map<FormatType, UnsignedVPToken> = openID4VP.constructUnsignedVPToken(Map<String, Map<FormatType, List<Any>>>)
+
+    //NOTE: Old API contract for backward compatibility
+    val unsignedVPTokens : String = openID4VP.constructUnsignedVPToken(Map<String, List<String>>)
 ```
 
-###### Parameters
+###### Request Parameters
 
 | Name                  | Type                                    | Description                                                                                                                                    |
 |-----------------------|-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
 | verifiableCredentials | Map<String, Map<FormatType, List<Any>>> | A Map which contains input descriptor id as key and value is the map of credential format and the list of user selected verifiable credentials |
+
+
+###### Response Parameters
+```kotlin
+//NOTE: New API contract Response
+val unsignedLdpVpTokens: Map<FormatType, UnsignedVPToken> = mapOf(
+    FormatType.LDP_VC to UnsignedLdpVPToken(
+        dataToSign = "base64EncodedCanonicalisedData", // This should be the actual base64 encoded canonicalized data of the VP token
+    ),
+    FormatType.MSO_MDOC to UnsignedMdocVPToken(
+        docTypeToDeviceAuthenticationBytes = mapOf(
+            "org.iso.18013.5.1.mDL" to "<docTypeToDeviceAuthenticationBytes>" // This should be the actual base64 encoded bytes of the device authentication
+        )
+    )
+)
+
+//NOTE: Old API contract Response
+val unsignedVPToken: String = """
+    {
+          "@context": ["context-url"],
+          "type": ["type"],
+          "verifiableCredential": [
+            "ldpCredential1",
+            "ldpCredential2"
+          ],
+          "id": "id",
+          "holder": "holder"
+    }
+"""
+```
+
 
 ###### Example usage
 
@@ -146,7 +292,7 @@ This method will also notify the Verifier about the error by sending it to the r
             verifiableCredentials = mapOf(
                 "input_descriptor_id" to mapOf(
                     FormatType.LDP_VC to listOf(
-                        """credential1""",
+                        <ldp-vc-json>,
                     )
                 ),
                 "input_descriptor_id" to mapOf(
@@ -166,17 +312,21 @@ This method will also notify the Verifier about the error by sending it to the r
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
 ### shareVerifiablePresentation
-- This function constructs a vp_token with proof using received VPTokenSigningResult, then sends it and the presentation_submission to the Verifier via a HTTP POST request.
-- Returns the response back to the consumer app(mobile app) saying whether it has received the shared Verifiable Credentials or not.
+- Constructs a `vp_token` with proof using the provided `VPTokenSigningResult`, then sends it along with the `presentation_submission` to the Verifier via an HTTP POST request.
+- Returns a response to the consumer app (e.g., mobile app) indicating whether the Verifiable Credentials were successfully shared with the Verifier.
 
-**Note 1:** For MSO_MDOC credential, if multiple credentials are shared it is left on the verfier to map each credential to the corresponding input descriptor. The library does not provide this mapping as the ISO standard does not specify any such mapping.
+**Note 1:** When sharing multiple MSO_MDOC credentials, the verifier is responsible for mapping each credential to its corresponding input descriptor. This mapping is not handled by the library since the ISO standard does not define such a mapping mechanism.
 
 
 ```kotlin
+//NOTE: New API contract
     val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>) 
+
+//NOTE: Old API contract for backward compatibility
+    val response : String = openID4VP.shareVerifiablePresentation(vpResponseMetadata: VPResponseMetadata)
 ```
 
-###### Parameters
+###### Request Parameters
 
 | Name                    | Type                                  | Description                                                                                                                                                   |
 |-------------------------|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -207,6 +357,7 @@ val vpTokenSigningResults : Map<FormatType, VPTokenSigningResult> = mapOf(
 val response : String = openID4VP.shareVerifiablePresentation(vpTokenSigningResults = vpTokenSigningResults)
 ```
 
+
 ###### Exceptions
 
 1. JsonEncodingFailed exception is thrown if there is any issue while serializing the generating vp_token or presentation_submission class instances.
@@ -219,7 +370,7 @@ This method will also notify the Verifier about the error by sending it to the r
 ### sendErrorToVerifier
 - Receives an exception and sends it's message to the Verifier via an HTTP POST request.
 
-```
+```kotlin
  openID4VP.sendErrorToVerifier(exception: Exception)
 ```
 
