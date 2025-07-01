@@ -26,6 +26,12 @@ sealed class OpenID4VPExceptions(
     class InvalidVerifier(message: String, className: String) :
         OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_REQUEST, message, className)
 
+    class AccessDenied(message: String, className: String) :
+        OpenID4VPExceptions(OpenID4VPErrorCodes.ACCESS_DENIED, message, className)
+
+    class InvalidTransactionData(message: String, className: String) :
+        OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_TRANSACTION_DATA, message, className)
+
     class InvalidInputPattern(fieldPath: Any, className: String) :
         OpenID4VPExceptions(
             OpenID4VPErrorCodes.INVALID_REQUEST,

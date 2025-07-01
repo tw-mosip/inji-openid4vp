@@ -49,6 +49,7 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.sampleapp.Constants
 import io.mosip.sampleapp.utils.OpenID4VPManager
 import io.mosip.sampleapp.data.SharedViewModel
@@ -206,7 +207,7 @@ fun CameraPreviewAndScanner(
         if (showErrorDialog) {
             LaunchedEffect(Unit) {
                 withContext(Dispatchers.IO) {
-                    OpenID4VPManager.sendErrorToVerifier(Constants.ERR_NO_MATCHING_VCs)
+                    OpenID4VPManager.sendErrorToVerifier(OpenID4VPExceptions.InvalidTransactionData(Constants.ERR_NO_MATCHING_VCs, "ShareScreen"))
                 }
             }
 

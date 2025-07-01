@@ -12,6 +12,7 @@ import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.L
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.sampleapp.data.HardcodedOVPData.getListOfVerifiers
 import io.mosip.sampleapp.data.HardcodedOVPData.getWalletMetadata
 import io.mosip.sampleapp.data.VCMetadata
@@ -113,8 +114,8 @@ object OpenID4VPManager {
         }
     }
 
-    fun sendErrorToVerifier(errorMessage: String) {
-        return instance.sendErrorToVerifier(Exception(errorMessage))
+    fun sendErrorToVerifier(ovpException: OpenID4VPExceptions) {
+        return instance.sendErrorToVerifier(ovpException)
     }
 }
 
