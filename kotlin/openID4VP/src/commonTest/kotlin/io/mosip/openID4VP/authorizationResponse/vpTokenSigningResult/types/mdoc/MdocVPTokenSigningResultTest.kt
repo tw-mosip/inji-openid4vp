@@ -1,7 +1,6 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 
 import io.mockk.*
-import io.mosip.openID4VP.common.Logger
 import kotlin.test.*
 
 class MdocVPTokenSigningResultTest {
@@ -18,8 +17,6 @@ class MdocVPTokenSigningResultTest {
             "doctype1" to mockDeviceAuthentication1,
             "doctype2" to mockDeviceAuthentication2
         )
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
     }
 
     @AfterTest

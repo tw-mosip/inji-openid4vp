@@ -1,13 +1,10 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions.InvalidInputPattern
-import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+import io.mosip.openID4VP.common.OpenID4VPErrorCodes
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
+
 import kotlin.test.*
 
 class FieldsTest {
@@ -16,8 +13,7 @@ class FieldsTest {
 
 	@BeforeTest
 	fun setUp() {
-		mockkObject(Logger)
-		every { Logger.error(any(), any(), any()) } answers {}
+
 	}
 
 	@AfterTest
@@ -32,10 +28,11 @@ class FieldsTest {
 		expectedExceptionMessage =
 			"Invalid Input Pattern: fields->path pattern is not matching with OpenId4VP specification"
 
-		val actualException = assertFailsWith<InvalidInputPattern> {
-			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-		}
-
+		val actualException =
+			assertFailsWith<OpenID4VPExceptions.InvalidInputPattern> {
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+			}
+		assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
 		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
@@ -45,10 +42,12 @@ class FieldsTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{}]}}]}"""
 		expectedExceptionMessage = "Missing Input: fields->path param is required"
 
-		val actualException = assertFailsWith<MissingInput> {
-			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-		}
+		val actualException =
 
+				assertFailsWith<OpenID4VPExceptions.MissingInput> {
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+			}
+		assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
 		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
@@ -58,10 +57,11 @@ class FieldsTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":[]}]}}]}"""
 		expectedExceptionMessage = "Invalid Input: fields->path value cannot be empty or null"
 
-		val actualException = assertFailsWith<Exceptions.InvalidInput> {
-			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-		}
-
+		val actualException =
+			assertFailsWith<OpenID4VPExceptions.InvalidInput> {
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+			}
+		assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
 		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 
@@ -71,10 +71,11 @@ class FieldsTest {
 			"""{"id":"pd_123","input_descriptors":[{"id":"id_123","constraints":{"fields":[{"path":null}]}}]}"""
 		expectedExceptionMessage = "Invalid Input: fields->path value cannot be empty or null"
 
-		val actualException = assertFailsWith<Exceptions.InvalidInput> {
-			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-		}
-
+		val actualException =
+			assertFailsWith<OpenID4VPExceptions.InvalidInput> {
+				deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+			}
+		assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
 		assertEquals(expectedExceptionMessage, actualException.message)
 	}
 }

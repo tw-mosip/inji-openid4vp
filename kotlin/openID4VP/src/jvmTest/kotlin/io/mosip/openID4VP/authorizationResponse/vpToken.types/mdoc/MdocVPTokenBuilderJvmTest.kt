@@ -9,7 +9,7 @@ import io.mockk.mockkObject
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
-import io.mosip.openID4VP.exceptions.Exceptions
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.testData.mdocCredential
 import kotlin.test.*
 import co.nstant.`in`.cbor.model.Map as CborMap
@@ -33,8 +33,7 @@ class MdocVPTokenBuilderJvmTest {
         )
         mdocCredentials = listOf(mdocCredential)
 
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {  }
+
     }
     @Test
     fun `should decode base64 using JVM decoder`() {
@@ -84,7 +83,7 @@ class MdocVPTokenBuilderJvmTest {
     fun `should throw exception when device authentication signature is missing`() {
         val emptyMetadata = MdocVPTokenSigningResult(docTypeToDeviceAuthentication = mapOf())
 
-        val exception = assertFailsWith<Exceptions.MissingInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.MissingInput> {
             MdocVPTokenBuilder(emptyMetadata, mdocCredentials).build()
         }
 
@@ -93,4 +92,5 @@ class MdocVPTokenBuilderJvmTest {
             exception.message
         )
     }
+
 }

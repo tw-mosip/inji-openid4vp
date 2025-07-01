@@ -1,7 +1,8 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 
-import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.common.validateField
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = VPResponseMetadata::class.simpleName!!
 
@@ -22,12 +23,7 @@ data class VPResponseMetadata(
 
         requiredParams.forEach { (key, value) ->
             require(value != "null" && validateField(value, "String")) {
-                throw Logger.handleException(
-                    exceptionType = "InvalidInput",
-                    fieldPath = listOf("ldp_vp_token_signing_result", key),
-                    className = className,
-                    fieldType = key::class.simpleName
-                )
+                throw OpenID4VPExceptions.InvalidInput(listOf("ldp_vp_token_signing_result", key),key::class.simpleName, className)
             }
         }
     }

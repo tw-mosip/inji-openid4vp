@@ -1,8 +1,6 @@
 package io.mosip.openID4VP.common
 
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -13,8 +11,7 @@ class DecoderTest {
 
     @BeforeTest
     fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
+
     }
 
     @AfterTest

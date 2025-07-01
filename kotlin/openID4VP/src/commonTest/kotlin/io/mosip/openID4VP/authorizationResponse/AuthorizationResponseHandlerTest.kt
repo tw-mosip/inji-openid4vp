@@ -9,11 +9,10 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPTokenBuil
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import io.mosip.openID4VP.common.DateUtil
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.constants.FormatType
-import io.mosip.openID4VP.exceptions.Exceptions
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -52,9 +51,7 @@ class AuthorizationResponseHandlerTest {
 
         setField(authorizationResponseHandler, "credentialsMap", selectedLdpVcCredentialsList + selectedMdocCredentialsList)
         setField(authorizationResponseHandler, "unsignedVPTokens", unsignedVPTokens)
-
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
+        
 
         mockkObject(UUIDGenerator)
         every { UUIDGenerator.generateUUID() } returns "649d581c-f291-4969-9cd5-2c27385a348f"
@@ -109,7 +106,7 @@ class AuthorizationResponseHandlerTest {
 
     @Test
     fun `should throw error during construction of data for signing when selected Credentials is empty`() {
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.constructUnsignedVPToken(
                 credentialsMap = mapOf(),
                 authorizationRequest = authorizationRequest,
@@ -127,7 +124,7 @@ class AuthorizationResponseHandlerTest {
     @Test
     fun `should throw error when response type is not supported`() {
         val request = authorizationRequest.copy(responseType = "code")
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = request,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -141,7 +138,7 @@ class AuthorizationResponseHandlerTest {
     fun `should throw error when a credential format entry is not available in unsignedVPTokens but available in vpTokenSigningResults`() {
         setField(authorizationResponseHandler, "unsignedVPTokens", emptyMap<FormatType, UnsignedVPToken>())
 
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = authorizationRequest,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -157,7 +154,7 @@ class AuthorizationResponseHandlerTest {
 
     @Test
     fun `should throw exception when credentials map is empty`() {
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.constructUnsignedVPToken(
                 credentialsMap = emptyMap(),
                 holderId = holderId,
@@ -219,7 +216,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = mockInvalidRequest,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -235,7 +232,7 @@ class AuthorizationResponseHandlerTest {
     fun `should throw exception when unsupported response mode is provided`() {
         val request = authorizationRequest.copy(responseMode = "unsupported_mode")
         every { ResponseModeBasedHandlerFactory.get("unsupported_mode") } throws
-                Exceptions.InvalidData("Unsupported response mode: unsupported_mode")
+                InvalidData("Unsupported response mode: unsupported_mode","")
 
         authorizationResponseHandler.constructUnsignedVPToken(
             credentialsMap = credentialsMap,
@@ -245,7 +242,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = request,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -271,7 +268,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = mockRequestWithUnsupportedType,
                 vpTokenSigningResults = ldpvpTokenSigningResults,
@@ -296,7 +293,7 @@ class AuthorizationResponseHandlerTest {
             signatureSuite = signatureSuite
         )
 
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.shareVP(
                 authorizationRequest = authorizationRequest,
                 vpTokenSigningResults = mdocvpTokenSigningResults,
@@ -375,7 +372,7 @@ class AuthorizationResponseHandlerTest {
 
     @Test
     fun `constructUnsignedVPTokenV1 should throw exception when credentials map is empty`() {
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.constructUnsignedVPTokenV1(
                 verifiableCredentials = emptyMap(),
                 authorizationRequest = authorizationRequest,
@@ -432,7 +429,7 @@ class AuthorizationResponseHandlerTest {
         val mockVPResponseMetadata = mockk<VPResponseMetadata>()
         every { mockVPResponseMetadata.publicKey } returns ""
         every { mockVPResponseMetadata.jws } returns jws
-        every { mockVPResponseMetadata.validate() } throws Exceptions.InvalidData("Public key cannot be empty")
+        every { mockVPResponseMetadata.validate() } throws InvalidData("Public key cannot be empty","")
 
         val credentials = mapOf("input1" to listOf(encodeToJsonString(ldpCredential1, "ldpCredential1", "LDP_VC")))
 
@@ -442,7 +439,7 @@ class AuthorizationResponseHandlerTest {
             responseUri = responseUrl
         )
 
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<InvalidData> {
             authorizationResponseHandler.shareVPV1(
                 vpResponseMetadata = mockVPResponseMetadata,
                 authorizationRequest = authorizationRequest,

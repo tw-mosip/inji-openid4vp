@@ -16,8 +16,6 @@ class EncoderTest {
     @BeforeTest
     fun setUp() {
         mockkStatic(Base64::class)
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
     }
 
     @AfterTest

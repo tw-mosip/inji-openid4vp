@@ -2,7 +2,6 @@ package io.mosip.openID4VP.authorizationRequest.clientMetadata
 
 import Generated
 import io.mosip.openID4VP.common.FieldDeserializer
-import io.mosip.openID4VP.common.Logger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -18,6 +17,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.jsonObject
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = ClientMetadata::class.simpleName!!
 
@@ -35,12 +35,9 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 		val jsonDecoder = try {
 			decoder as JsonDecoder
 		} catch (e: ClassCastException) {
-			throw Logger.handleException(
-				exceptionType = "DeserializationFailure",
-				fieldPath = listOf(CLIENT_METADATA.value),
-				message = e.message!!,
-				className = className
-			)
+			throw  OpenID4VPExceptions.DeserializationFailure(
+				listOf(CLIENT_METADATA.value),e.message!!,
+				className)
 		}
 		val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
 		val deserializer = FieldDeserializer(
@@ -57,12 +54,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 			deserializer.deserializeField<Map<String, Map<String, List<String>>>>(
 				key = "vp_formats",
 				fieldType = "Map"
-			) ?: throw Logger.handleException(
-				exceptionType = "InvalidInput",
-				fieldPath = listOf(CLIENT_METADATA.value, "vp_formats"),
-				className = className,
-				fieldType = "map"
-			)
+			) ?: throw  OpenID4VPExceptions.InvalidInput(listOf(CLIENT_METADATA.value,"vp_formats"),"map",className)
 		val authorizationEncryptedResponseAlg: String? =
 			deserializer.deserializeField(key = "authorization_encrypted_response_alg", fieldType = "String")
 		val authorizationEncryptedResponseEnc: String? =
@@ -131,12 +123,9 @@ class ClientMetadata(
 ) : Validatable {
 	override fun validate() {
 		if(vpFormats.isEmpty())	{
-			throw Logger.handleException(
-				exceptionType = "InvalidInput",
-				fieldPath = listOf(CLIENT_METADATA.value, "vp_formats"),
-				className = className,
-				fieldType = "map"
-			)
+			throw OpenID4VPExceptions.InvalidInput(
+				listOf(CLIENT_METADATA.value,"vp_formats"),"map",
+				className)
 		}
 		return
 	}

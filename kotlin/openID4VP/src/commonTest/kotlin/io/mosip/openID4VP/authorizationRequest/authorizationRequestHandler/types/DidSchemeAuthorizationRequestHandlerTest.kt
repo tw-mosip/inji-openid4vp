@@ -4,10 +4,8 @@ import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
-import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import io.mosip.openID4VP.testData.clientMetadataString
@@ -25,8 +23,7 @@ class DidSchemeAuthorizationRequestHandlerTest {
 
     @BeforeTest
     fun setup() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {}
+
 
         authorizationRequestParameters = mutableMapOf(
             CLIENT_ID.value to didUrl,
@@ -111,7 +108,7 @@ class DidSchemeAuthorizationRequestHandlerTest {
     fun `validateRequestUriResponse should throw exception when requestUriResponse is empty`() {
         val handler = DidSchemeAuthorizationRequestHandler(authorizationRequestParameters, walletMetadata, setResponseUri)
 
-        val exception = assertFailsWith<MissingInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.MissingInput> {
             handler.validateRequestUriResponse(emptyMap())
         }
         assertEquals("Missing Input: request_uri param is required", exception.message)
@@ -131,7 +128,7 @@ class DidSchemeAuthorizationRequestHandlerTest {
         val headers = Headers.Builder().add("content-type", ContentType.APPLICATION_JWT.value).build()
         val requestUriResponse = mapOf("header" to headers, "body" to jws)
 
-        val exception = assertFailsWith<Exceptions.InvalidData> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             handler.validateRequestUriResponse(requestUriResponse)
         }
         assertEquals("request_object_signing_alg is not support by wallet", exception.message)

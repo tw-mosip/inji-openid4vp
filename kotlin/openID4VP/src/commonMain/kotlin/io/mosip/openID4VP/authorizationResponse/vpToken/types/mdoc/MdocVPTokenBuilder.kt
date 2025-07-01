@@ -5,7 +5,6 @@ import co.nstant.`in`.cbor.model.ByteString
 import co.nstant.`in`.cbor.model.DataItem
 import co.nstant.`in`.cbor.model.UnicodeString
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenBuilder
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.cborArrayOf
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.encodeCbor
@@ -15,6 +14,7 @@ import io.mosip.openID4VP.common.tagEncodedCbor
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
 import io.mosip.openID4VP.common.decodeBase64Data
 import io.mosip.openID4VP.common.encodeToBase64Url
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = MdocVPTokenBuilder::class.java.simpleName
 
@@ -72,11 +72,7 @@ class MdocVPTokenBuilder(
     }
 
     private fun throwMissingInput(message: String): Nothing {
-        throw Logger.handleException(
-            exceptionType = "MissingInput",
-            message = message,
-            className = className
-        )
+        throw OpenID4VPExceptions.MissingInput("",message, className)
     }
 }
 

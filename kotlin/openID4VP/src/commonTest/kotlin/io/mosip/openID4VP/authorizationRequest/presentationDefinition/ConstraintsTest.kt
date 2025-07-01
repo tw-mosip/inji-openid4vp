@@ -4,16 +4,14 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.authorizationRequest.exception.AuthorizationRequestExceptions
-import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import kotlin.test.*
 
 class ConstraintsTest {
 
 	@BeforeTest
 	fun setUp() {
-		mockkObject(Logger)
-		every { Logger.error(any(), any(), any()) } answers {}
+
 	}
 
 	@AfterTest
@@ -41,7 +39,7 @@ class ConstraintsTest {
 		val expectedExceptionMessage =
 			"Invalid Input: constraints->limit_disclosure value should be preferred"
 
-		val actualException = assertFailsWith<AuthorizationRequestExceptions.InvalidLimitDisclosure> {
+		val actualException = assertFailsWith<OpenID4VPExceptions.InvalidLimitDisclosure> {
 			deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
 		}
 

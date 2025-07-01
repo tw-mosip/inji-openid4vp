@@ -3,8 +3,6 @@ package io.mosip.openID4VP.jwt
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.jws.createMockJws
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
@@ -17,11 +15,6 @@ import kotlin.test.*
 class JWSHandlerTest {
     private val publicKeyResolver = mockk<PublicKeyResolver>()
 
-    @BeforeTest
-    fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-    }
 
     @AfterTest
     fun tearDown() {

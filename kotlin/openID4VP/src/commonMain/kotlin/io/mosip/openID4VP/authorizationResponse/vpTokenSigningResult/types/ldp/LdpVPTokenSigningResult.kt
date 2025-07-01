@@ -1,12 +1,12 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
 import io.mosip.openID4VP.constants.SignatureAlgorithm.Ed25519Signature2018
 import io.mosip.openID4VP.constants.SignatureAlgorithm.Ed25519Signature2020
 import io.mosip.openID4VP.constants.SignatureAlgorithm.JsonWebSignature2020
 import io.mosip.openID4VP.constants.SignatureAlgorithm.RSASignature2018
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = LdpVPTokenSigningResult::class.simpleName!!
 
@@ -19,8 +19,7 @@ data class LdpVPTokenSigningResult(
         when (signatureAlgorithm) {
             Ed25519Signature2020.value -> {
                 require(proofValue != "null" && validateField(proofValue, "String")) {
-                    throw Logger.handleException(
-                        exceptionType = "InvalidInput",
+                    throw OpenID4VPExceptions.InvalidInput(
                         fieldPath = listOf("LdpVPTokenSigningResult", "proofValue"),
                         className = className,
                         fieldType = "String"
@@ -30,8 +29,7 @@ data class LdpVPTokenSigningResult(
 
             JsonWebSignature2020.value, RSASignature2018.value, Ed25519Signature2018.value -> {
                 require(jws != "null" && validateField(jws, "String")) {
-                    throw Logger.handleException(
-                        exceptionType = "InvalidInput",
+                    throw OpenID4VPExceptions.InvalidInput(
                         fieldPath = listOf("LdpVPTokenSigningResult", "jws"),
                         className = className,
                         fieldType = "String"

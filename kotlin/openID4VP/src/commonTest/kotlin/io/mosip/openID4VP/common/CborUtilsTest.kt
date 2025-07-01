@@ -8,11 +8,7 @@ import kotlin.test.*
 
 class CborUtilsTest {
 
-    @BeforeTest
-    fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {}
-    }
+
 
     @AfterTest
     fun tearDown() {

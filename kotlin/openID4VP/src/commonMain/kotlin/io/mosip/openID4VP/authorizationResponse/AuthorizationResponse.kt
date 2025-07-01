@@ -1,12 +1,8 @@
 package io.mosip.openID4VP.authorizationResponse
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.google.gson.annotations.SerializedName
-import com.google.gson.reflect.TypeToken
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
-import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenTypeSerializer
 import io.mosip.openID4VP.common.encodeToJsonString
 
 private val className: String = AuthorizationResponse::class.simpleName!!

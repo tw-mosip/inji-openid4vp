@@ -3,9 +3,6 @@ package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc
 import co.nstant.`in`.cbor.model.DataItem
 import co.nstant.`in`.cbor.model.UnicodeString
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPTokenBuilder
-import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPToken
-import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.cborArrayOf
 import io.mosip.openID4VP.common.cborMapOf
 import io.mosip.openID4VP.common.createHashedDataItem
@@ -13,6 +10,7 @@ import io.mosip.openID4VP.common.encodeCbor
 import io.mosip.openID4VP.common.getDecodedMdocCredential
 import io.mosip.openID4VP.common.tagEncodedCbor
 import io.mosip.openID4VP.common.toHex
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val classname = UnsignedMdocVPToken::class.simpleName!!
 class UnsignedMdocVPTokenBuilder(
@@ -48,11 +46,7 @@ class UnsignedMdocVPTokenBuilder(
             )
             val deviceAuthenticationBytes = tagEncodedCbor(deviceAuthentication)
             if (docTypeToDeviceAuthenticationBytes.containsKey(docType)) {
-                throw Logger.handleException(
-                    exceptionType = "InvalidData",
-                    message = "Duplicate Mdoc Credentials with same doctype found",
-                    className = classname
-                )
+                throw OpenID4VPExceptions.InvalidData("Duplicate Mdoc Credentials with same doctype found", classname)
             }
             docTypeToDeviceAuthenticationBytes[docType] = encodeCbor(deviceAuthenticationBytes).toHex()
 

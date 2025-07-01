@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.verify
 import io.mosip.openID4VP.authorizationResponse.toJsonEncodedMap
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
@@ -17,9 +16,6 @@ class DirectPostResponseModeHandlerTest {
 
     @BeforeTest
     fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-
         mockkObject(NetworkManagerClient)
     }
 

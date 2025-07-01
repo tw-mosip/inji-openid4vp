@@ -1,8 +1,7 @@
 package io.mosip.openID4VP.common
 
 import io.mockk.*
-import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
-import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
@@ -10,11 +9,6 @@ import kotlin.test.*
 
 class FieldDeserializerTest {
 
-    @BeforeTest
-    fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-    }
 
     @AfterTest
     fun tearDown() {
@@ -109,9 +103,10 @@ class FieldDeserializerTest {
         val jsonObject = buildJsonObject {}
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertFailsWith<MissingInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.MissingInput> {
             deserializer.deserializeField<String>("mandatoryField", "String", isMandatory = true)
         }
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, exception.errorCode)
         assertEquals("Missing Input: parentField->mandatoryField param is required", exception.message)
     }
 
@@ -122,13 +117,11 @@ class FieldDeserializerTest {
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertFailsWith<InvalidInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidInput> {
             deserializer.deserializeField<String>("nullField", "String")
         }
-        assertEquals(
-            "Invalid Input: parentField->nullField value cannot be an empty string, null, or an integer",
-            exception.message
-        )
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, exception.errorCode)
+        assertEquals("Invalid Input: parentField->nullField value cannot be an empty string, null, or an integer", exception.message)
     }
 
     @Test
@@ -138,13 +131,11 @@ class FieldDeserializerTest {
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertFailsWith<InvalidInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidInput> {
             deserializer.deserializeField<String>("stringField", "String")
         }
-        assertEquals(
-            "Invalid Input: parentField->stringField value cannot be an empty string, null, or an integer",
-            exception.message
-        )
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, exception.errorCode)
+        assertEquals("Invalid Input: parentField->stringField value cannot be an empty string, null, or an integer", exception.message)
     }
 
     @Test
@@ -154,13 +145,11 @@ class FieldDeserializerTest {
         }
         val deserializer = FieldDeserializer(jsonObject, "TestClass", "parentField")
 
-        val exception = assertFailsWith<InvalidInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidInput> {
             deserializer.deserializeField<Boolean>("booleanField", "Boolean")
         }
-        assertEquals(
-            "Invalid Input: parentField->booleanField value must be either true or false",
-            exception.message
-        )
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, exception.errorCode)
+        assertEquals("Invalid Input: parentField->booleanField value must be either true or false", exception.message)
     }
 
     @Test

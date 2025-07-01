@@ -2,20 +2,14 @@ package io.mosip.openID4VP.jwt.jwe.encryption
 
 import com.nimbusds.jose.crypto.X25519Encrypter
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
-import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.jwt.exception.JWEException.*
+import io.mosip.openID4VP.common.OpenID4VPErrorCodes
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import kotlin.test.*
+
 
 class EncryptionProviderTest {
 
-    @BeforeTest
-    fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-    }
 
     @AfterTest
     fun tearDown() {
@@ -48,10 +42,10 @@ class EncryptionProviderTest {
             kid = "ed-key1"
         )
 
-        val exception = assertFailsWith<UnsupportedKeyExchangeAlgorithm> {
+        val exception = assertFailsWith<OpenID4VPExceptions.UnsupportedKeyExchangeAlgorithm> {
             EncryptionProvider.getEncrypter(jwk)
         }
-
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, exception.errorCode)
         assertEquals("Required Key exchange algorithm is not supported", exception.message)
     }
 }

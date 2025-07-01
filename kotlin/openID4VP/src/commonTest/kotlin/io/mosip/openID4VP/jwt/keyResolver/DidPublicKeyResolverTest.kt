@@ -3,9 +3,7 @@ package io.mosip.openID4VP.jwt.keyResolver
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkConstructor
-import io.mockk.mockkObject
-import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.jwt.exception.JWSException
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import io.mosip.vercred.vcverifier.DidWebResolver
 import io.mosip.vercred.vcverifier.exception.DidResolverExceptions.DidResolutionFailed
@@ -21,8 +19,7 @@ class DidPublicKeyResolverTest {
         mockkConstructor(DidWebResolver::class)
         resolver = DidPublicKeyResolver(mockDidUrl)
 
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
+
     }
 
     @AfterTest
@@ -53,7 +50,7 @@ class DidPublicKeyResolverTest {
     fun `should throw exception when kid is missing`() {
         every { anyConstructed<DidWebResolver>().resolve() } returns mapOf("didDocument" to "mockResponse")
 
-        val exception = assertFailsWith<JWSException.KidExtractionFailed> {
+        val exception = assertFailsWith<KidExtractionFailed> {
             resolver.resolveKey(emptyMap())
         }
         assertEquals("KID extraction from DID document failed", exception.message)
@@ -63,7 +60,7 @@ class DidPublicKeyResolverTest {
     fun `should throw exception when did resolution fails`() {
         every { anyConstructed<DidWebResolver>().resolve() } throws DidResolutionFailed("Did document could not be fetched")
 
-        val exception = assertFailsWith<JWSException.PublicKeyResolutionFailed> {
+        val exception = assertFailsWith<PublicKeyResolutionFailed> {
             resolver.resolveKey(emptyMap())
         }
         assertEquals("Did document could not be fetched", exception.message)
@@ -81,7 +78,7 @@ class DidPublicKeyResolverTest {
 
         val header = mapOf("kid" to "did:example:123456789#keys-1")
 
-        val exception = assertFailsWith<JWSException.PublicKeyExtractionFailed> {
+        val exception = assertFailsWith<PublicKeyExtractionFailed> {
             resolver.resolveKey(header)
         }
         assertEquals("Public key extraction failed", exception.message)

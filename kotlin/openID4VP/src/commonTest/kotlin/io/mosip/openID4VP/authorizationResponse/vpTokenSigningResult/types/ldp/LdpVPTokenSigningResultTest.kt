@@ -3,11 +3,9 @@ package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkStatic
-import io.mockk.mockkObject
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.validateField
 import io.mosip.openID4VP.constants.SignatureAlgorithm
-import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import kotlin.test.*
 
 class LdpVPTokenSigningResultTest {
@@ -15,17 +13,12 @@ class LdpVPTokenSigningResultTest {
     @BeforeTest
     fun setUp() {
         mockkStatic(::validateField)
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
 
         every { validateField(any(), "String") } answers {
             val value = arg<String?>(0)
             value != null && value.isNotEmpty()
         }
 
-        every {
-            Logger.handleException(any(), any(), any(), any())
-        } returns InvalidInput("", "Validation failed")
     }
 
     @AfterTest

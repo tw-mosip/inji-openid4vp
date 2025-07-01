@@ -6,13 +6,12 @@ import io.mockk.verify
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_ID
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_ID_SCHEME
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.DID
 import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.exceptions.Exceptions.InvalidData
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.assertDoesNotThrow
 import io.mosip.openID4VP.testData.clientIdOfDid
@@ -51,8 +50,7 @@ class AuthRequestByReferenceTest {
             )
         } returns mapOf("body" to didResponse)
 
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
+
     }
 
     @Test

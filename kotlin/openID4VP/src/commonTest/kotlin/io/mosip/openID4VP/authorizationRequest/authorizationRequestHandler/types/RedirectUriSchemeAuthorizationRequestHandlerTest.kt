@@ -6,9 +6,8 @@ import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
-import io.mosip.openID4VP.exceptions.Exceptions.*
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.presentationDefinitionString
 import io.mosip.openID4VP.testData.responseUrl
@@ -23,8 +22,6 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
 
     @BeforeTest
     fun setup() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {}
 
         authorizationRequestParameters = mutableMapOf(
             CLIENT_ID.value to responseUrl,
@@ -112,7 +109,7 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             """.trimIndent()
         )
 
-        val exception = assertFailsWith<InvalidData> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             handler.validateRequestUriResponse(requestUriResponse)
         }
         assertTrue(exception.message?.contains("Authorization Request must not be signed") == true)
@@ -179,7 +176,7 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        val exception = assertFailsWith<InvalidData> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             handler.validateAndParseRequestFields()
         }
         assertTrue(exception.message?.contains("Given response_mode is not supported") == true)
@@ -205,7 +202,7 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        val exception = assertFailsWith<MissingInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.MissingInput> {
             handler.validateAndParseRequestFields()
         }
         assertTrue(exception.message?.contains("response_mode") == true)
@@ -222,7 +219,7 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        val exception = assertFailsWith<InvalidData> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             handler.validateAndParseRequestFields()
         }
         assertTrue(exception.message?.contains("redirect_uri should not be present") == true)
@@ -237,7 +234,7 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        val exception = assertFailsWith<MissingInput> {
+        val exception = assertFailsWith<OpenID4VPExceptions.MissingInput> {
             handler.validateAndParseRequestFields()
         }
         assertTrue(exception.message?.contains("response_uri") == true)
@@ -252,7 +249,7 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
             modifiedParams, walletMetadata, setResponseUri
         )
 
-        val exception = assertFailsWith<InvalidData> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             handler.validateAndParseRequestFields()
         }
         assertTrue(exception.message?.contains("response_uri should be equal to client_id") == true)

@@ -1,23 +1,17 @@
 package io.mosip.openID4VP.authorizationRequest.presentationDefinition
 
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
+
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.exceptions.Exceptions
-import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+import io.mosip.openID4VP.common.OpenID4VPErrorCodes
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import kotlin.test.*
 
 class InputDescriptorTest {
     private lateinit var presentationDefinition: String
     private lateinit var expectedExceptionMessage: String
 
-    @BeforeTest
-    fun setUp(){
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-    }
+    
 
     @AfterTest
     fun tearDown(){
@@ -30,10 +24,11 @@ class InputDescriptorTest {
             """{"id":"id_123","input_descriptors":[{"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         expectedExceptionMessage = "Missing Input: input_descriptor->id param is required"
 
-        val actualException = assertFailsWith<MissingInput> {
-            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-        }
-
+        val actualException =
+            assertFailsWith<OpenID4VPExceptions.MissingInput> {
+                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+            }
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
@@ -43,10 +38,11 @@ class InputDescriptorTest {
             """{"id":"pd_123","input_descriptors":[{"id":"id_123"}]}"""
         expectedExceptionMessage = "Missing Input: input_descriptor->constraints param is required"
 
-        val actualException = assertFailsWith<MissingInput> {
-            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-        }
-
+        val actualException =
+            assertFailsWith<OpenID4VPExceptions.MissingInput> {
+                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+            }
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
@@ -56,10 +52,11 @@ class InputDescriptorTest {
             """{"id":"pd_123","input_descriptors":[{"id":"","constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be an empty string, null, or an integer"
 
-        val actualException = assertFailsWith<Exceptions.InvalidInput> {
-            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-        }
-
+        val actualException =
+            assertFailsWith<OpenID4VPExceptions.InvalidInput> {
+                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+            }
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
@@ -69,10 +66,11 @@ class InputDescriptorTest {
             """{"id":"pd_123","input_descriptors":[{"id":null,"constraints":{"fields":[{"path":["$.type"]}]}}]}"""
         expectedExceptionMessage = "Invalid Input: input_descriptor->id value cannot be an empty string, null, or an integer"
 
-        val actualException = assertFailsWith<Exceptions.InvalidInput> {
-            deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
-        }
-
+        val actualException =
+            assertFailsWith<OpenID4VPExceptions.InvalidInput> {
+                deserializeAndValidate(presentationDefinition, PresentationDefinitionSerializer)
+            }
+        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 }

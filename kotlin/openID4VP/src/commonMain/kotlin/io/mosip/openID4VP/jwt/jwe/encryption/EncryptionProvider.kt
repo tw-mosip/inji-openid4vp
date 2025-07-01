@@ -10,7 +10,7 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
-import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = EncryptionProvider::class.simpleName!!
 object EncryptionProvider {
@@ -18,10 +18,7 @@ object EncryptionProvider {
     fun getEncrypter(jwk: Jwk): JWEEncrypter =
         when (jwk.kty) {
             KeyType.OKP.value -> X25519Encrypter(getPublicOctetKey(jwk))
-            else -> throw Logger.handleException(
-                exceptionType = "UnsupportedKeyExchangeAlgorithm",
-                className = className
-            )
+            else -> throw OpenID4VPExceptions.UnsupportedKeyExchangeAlgorithm(className)
         }
 
     private fun getPublicOctetKey(jwk: Jwk): OctetKeyPair {

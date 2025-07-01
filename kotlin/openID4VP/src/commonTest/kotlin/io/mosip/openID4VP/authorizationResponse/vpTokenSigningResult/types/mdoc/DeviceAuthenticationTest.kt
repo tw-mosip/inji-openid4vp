@@ -1,19 +1,11 @@
 package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc
 
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
-import io.mosip.openID4VP.common.Logger
-import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import kotlin.test.*
 
 class DeviceAuthenticationTest {
 
-    @BeforeTest
-    fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-    }
 
     @AfterTest
     fun tearDown() {

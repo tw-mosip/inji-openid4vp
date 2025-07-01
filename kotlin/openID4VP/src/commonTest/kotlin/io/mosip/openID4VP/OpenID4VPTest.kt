@@ -6,15 +6,16 @@ import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.URDNA2015Canonicalization
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
-import io.mosip.openID4VP.exceptions.Exceptions
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.*
 import foundation.identity.jsonld.JsonLDObject
+import java.util.logging.Level
+import java.util.logging.Logger
 import kotlin.test.*
 
 class OpenID4VPTest {
@@ -77,7 +78,7 @@ class OpenID4VPTest {
         mockkObject(AuthorizationRequest.Companion)
         mockkObject(NetworkManagerClient)
 
-        val testException = Exceptions.InvalidInput("", "Invalid authorization request")
+        val testException = InvalidInput("", "Invalid authorization request","")
 
         every {
             AuthorizationRequest.validateAndCreateAuthorizationRequest(
@@ -91,7 +92,7 @@ class OpenID4VPTest {
             )
         } returns mapOf("body" to "Error sent")
 
-        assertFailsWith<Exceptions.InvalidInput> {
+        assertFailsWith<InvalidInput> {
             openID4VP.authenticateVerifier("openid-vc://?request=invalid", trustedVerifiers)
         }
     }
@@ -132,7 +133,7 @@ class OpenID4VPTest {
     @Test
     fun `should throw exception during VP token construction with invalid data`() {
         val mockHandler = mockk<AuthorizationResponseHandler>()
-        val testException = Exceptions.InvalidData("Invalid credential format")
+        val testException = InvalidData("Invalid credential format","")
 
         every {
             mockHandler.constructUnsignedVPToken(any(), any(), any(), any(), any())
@@ -144,7 +145,7 @@ class OpenID4VPTest {
             NetworkManagerClient.sendHTTPRequest(any(), any(), any())
         } returns mapOf("body" to "Error sent")
 
-        val thrown = assertFailsWith<Exceptions.InvalidData> {
+        val thrown = assertFailsWith<InvalidData> {
             openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList, holderId, signatureSuite)
         }
         assertEquals("Invalid credential format", thrown.message)
@@ -160,35 +161,49 @@ class OpenID4VPTest {
             )
         } returns mapOf("body" to "VP share success")
 
-        openID4VP.sendErrorToVerifier(Exceptions.InvalidData("Unsupported response_mode"))
+        openID4VP.sendErrorToVerifier(InvalidData("Unsupported response_mode",""))
 
         verify {
             NetworkManagerClient.sendHTTPRequest(
-                url = "https://mock-verifier.com/response-uri",
-                method = HttpMethod.POST,
-                bodyParams = mapOf("error" to "Unsupported response_mode")
+                "https://mock-verifier.com/response-uri",
+                HttpMethod.POST,
+                match {
+                    it["error"] == "invalid_request" &&
+                            it["error_description"] == "Unsupported response_mode"
+                },
+                null
             )
         }
     }
 
+
     @Test
     fun `should handle exception during sending error to verifier`() {
-        mockkObject(Logger)
+
+        mockkStatic(Logger::class)
+        val mockLogger = mockk<Logger>()
+        every { Logger.getLogger(any()) } returns mockLogger
 
         every {
             NetworkManagerClient.sendHTTPRequest(any(), any(), any())
         } throws Exception("Network error")
 
-        every { Logger.error(any(), any()) } just runs
+        val field = openID4VP::class.java.getDeclaredField("responseUri")
+        field.isAccessible = true
+        field.set(openID4VP, "https://mock-verifier.com/callback")
 
-        openID4VP.sendErrorToVerifier(Exceptions.InvalidData("Test error"))
-
-        verify {
-            Logger.error(
-                any(),
-                match<Exception> { it.message!!.contains("Unexpected error occurred") }
-            )
+        var capturedLog: String? = null
+        every { mockLogger.log(eq(Level.SEVERE), any<String>()) } answers {
+            capturedLog = secondArg()
         }
+
+        openID4VP.sendErrorToVerifier(Exception("Network error"))
+
+        assertTrue(
+            capturedLog?.contains("Failed to send error to verifier: Network error") == true
+        )
+
+        unmockkStatic(Logger::class)
     }
 
     @Test
@@ -225,7 +240,7 @@ class OpenID4VPTest {
     @Test
     fun `should handle exception in deprecated constructVerifiablePresentationToken method`() {
         val mockHandler = mockk<AuthorizationResponseHandler>()
-        val exception = Exceptions.InvalidData("Invalid VC format")
+        val exception = InvalidData("Invalid VC format","")
 
         every {
             mockHandler.constructUnsignedVPTokenV1(any(), any(), any())
@@ -237,7 +252,7 @@ class OpenID4VPTest {
 
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
-        val thrown = assertFailsWith<Exceptions.InvalidData> {
+        val thrown = assertFailsWith<InvalidData> {
             openID4VP.constructVerifiablePresentationToken(mapOf("id1" to listOf("vc1")))
         }
         assertEquals("Invalid VC format", thrown.message)

@@ -11,7 +11,6 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenArray
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenElement
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.UUIDGenerator
 import io.mosip.openID4VP.common.generateNonce
 import io.mosip.openID4VP.constants.FormatType
@@ -21,6 +20,8 @@ import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSign
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.VPTokenSigningPayload
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
+import io.mosip.openID4VP.common.OpenID4VPErrorCodes
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -45,11 +46,7 @@ internal class AuthorizationResponseHandler {
         signatureSuite: String
     ): Map<FormatType, UnsignedVPToken> {
         if (credentialsMap.isEmpty()) {
-            throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request."
-            )
+            throw OpenID4VPExceptions.InvalidData("Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.", className)
         }
         this.credentialsMap = credentialsMap
         this.unsignedVPTokens =
@@ -99,11 +96,7 @@ internal class AuthorizationResponseHandler {
                 )
             }
 
-            else -> throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "Provided response_type - ${authorizationRequest.responseType} is not supported"
-            )
+            else -> throw  OpenID4VPExceptions.InvalidData("Provided response_type - ${authorizationRequest.responseType} is not supported", className,OpenID4VPErrorCodes.VP_FORMATS_NOT_SUPPORTED)
         }
     }
 
@@ -134,11 +127,7 @@ internal class AuthorizationResponseHandler {
                 VPTokenFactory(
                     vpTokenSigningResult = vpTokenSigningResult,
                     vpTokenSigningPayload = unsignedVPTokens[credentialFormat]?.get("vpTokenSigningPayload")
-                        ?: throw Logger.handleException(
-                            exceptionType = "InvalidData",
-                            message = "unable to find the related credential format - $credentialFormat in the unsignedVPTokens map",
-                            className = className
-                        ),
+                        ?: throw OpenID4VPExceptions.InvalidData("unable to find the related credential format - $credentialFormat in the unsignedVPTokens map", className),
                     nonce = authorizationRequest.nonce
                 ).getVPTokenBuilder(credentialFormat).build()
             )

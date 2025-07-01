@@ -4,16 +4,15 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
-
-private val logTag = Logger.getLogTag(OpenID4VP::class.simpleName!!)
-
+import java.util.logging.Level
+import java.util.logging.Logger
 
 class OpenID4VP(private val traceabilityId: String) {
     lateinit var authorizationRequest: AuthorizationRequest
@@ -25,6 +24,9 @@ class OpenID4VP(private val traceabilityId: String) {
         this.responseUri = responseUri
     }
 
+    private fun logTag(): String =
+        "INJI-OpenID4VP : class name - ${OpenID4VP::class.simpleName} | traceID - $traceabilityId"
+
     @JvmOverloads
     fun authenticateVerifier(
         urlEncodedAuthorizationRequest: String,
@@ -33,7 +35,6 @@ class OpenID4VP(private val traceabilityId: String) {
         walletMetadata: WalletMetadata? = null
     ): AuthorizationRequest {
         try {
-            Logger.setTraceabilityId(traceabilityId)
             authorizationRequest = AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 urlEncodedAuthorizationRequest,
                 trustedVerifiers,
@@ -81,16 +82,22 @@ class OpenID4VP(private val traceabilityId: String) {
     }
 
     fun sendErrorToVerifier(exception: Exception) {
-        responseUri?.let {
+        responseUri?.let { uri ->
             try {
+                val errorPayload: Map<String, String> = when (exception) {
+                    is OpenID4VPExceptions -> exception.toErrorResponse()
+                    else -> OpenID4VPExceptions.GenericFailure(
+                        message = exception.message ?: "Unknown internal error",
+                        className = "OpenID4VP.kt"
+                    ).toErrorResponse()
+                }
                 sendHTTPRequest(
-                    url = it, method = HttpMethod.POST, mapOf("error" to exception.message!!)
+                    url = uri,
+                    method = HttpMethod.POST,
+                    bodyParams = errorPayload
                 )
-            } catch (exception: Exception) {
-                Logger.error(
-                    logTag,
-                    Exception("Unexpected error occurred while sending the error to verifier: ${exception.message}")
-                )
+            } catch (e: Exception) {
+                Logger.getLogger(logTag()).log(Level.SEVERE, "Failed to send error to verifier: ${e.message}")
             }
         }
     }

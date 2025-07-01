@@ -1,15 +1,11 @@
 package io.mosip.openID4VP.authorizationRequest
 
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.*
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ClientIdScheme.*
 import io.mosip.openID4VP.constants.ResponseMode.*
-import io.mosip.openID4VP.exceptions.Exceptions.InvalidInput
-import io.mosip.openID4VP.exceptions.Exceptions.MissingInput
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.walletMetadata
 import kotlinx.serialization.json.Json
@@ -18,11 +14,7 @@ import kotlin.test.*
 class ClientMetadataTest {
     private lateinit var actualException: Exception
 
-    @BeforeTest
-    fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-    }
+
 
     @AfterTest
     fun tearDown() {

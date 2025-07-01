@@ -5,10 +5,10 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstant
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = ResponseModeBasedHandler::class.simpleName!!
 
@@ -36,11 +36,7 @@ abstract class ResponseModeBasedHandler {
         val responseUri = getStringValue(authorizationRequestParameters, RESPONSE_URI.value)
         validate(RESPONSE_URI.value, responseUri, className)
         if (!isValidUrl(responseUri!!)) {
-            throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "${RESPONSE_URI.value} data is not valid"
-            )
+            throw OpenID4VPExceptions.InvalidData("${RESPONSE_URI.value} data is not valid", className)
         }
         setResponseUri(responseUri)
     }

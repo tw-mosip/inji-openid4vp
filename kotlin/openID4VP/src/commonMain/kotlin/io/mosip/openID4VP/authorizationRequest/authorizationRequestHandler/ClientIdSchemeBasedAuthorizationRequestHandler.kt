@@ -8,7 +8,7 @@ import io.mosip.openID4VP.authorizationRequest.presentationDefinition.Presentati
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.extractClientIdScheme
-import io.mosip.openID4VP.common.Logger
+import io.mosip.openID4VP.common.OpenID4VPErrorCodes
 import io.mosip.openID4VP.common.determineHttpMethod
 import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.common.getStringValue
@@ -17,6 +17,7 @@ import io.mosip.openID4VP.common.validate
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
+import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = ClientIdSchemeBasedAuthorizationRequestHandler::class.simpleName!!
 
@@ -35,14 +36,14 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
         var requestUriResponse: Map<String, Any> = emptyMap()
         getStringValue(authorizationRequestParameters, REQUEST_URI.value)?.let { requestUri ->
             if (!isValidUrl(requestUri))
-                throw Logger.handleException(
-                    exceptionType = "InvalidData",
-                    className = className,
-                    message = "${REQUEST_URI.value} data is not valid"
-                )
+                throw OpenID4VPExceptions.InvalidData("${REQUEST_URI.value} data is not valid", className)
             val requestUriMethod =
                 getStringValue(authorizationRequestParameters, REQUEST_URI_METHOD.value) ?: "get"
-            val httpMethod = determineHttpMethod(requestUriMethod)
+            val httpMethod = try {
+                determineHttpMethod(requestUriMethod)
+            } catch (e: IllegalArgumentException) {
+                throw OpenID4VPExceptions.InvalidData("Unsupported HTTP method: $requestUriMethod", className, OpenID4VPErrorCodes.INVALID_REQUEST_URI_METHOD)
+            }
 
             var body: Map<String, String>? = null
             var headers: Map<String, String>? = null
@@ -77,11 +78,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
 
     fun setResponseUrl() {
         val responseMode = getStringValue(authorizationRequestParameters, RESPONSE_MODE.value)
-            ?: throw Logger.handleException(
-                exceptionType = "MissingInput",
-                className = className,
-                fieldPath = listOf(RESPONSE_MODE.value)
-            )
+            ?: throw  OpenID4VPExceptions.MissingInput(listOf(RESPONSE_MODE.value),"", className)
         ResponseModeBasedHandlerFactory.get(responseMode)
             .setResponseUrl(authorizationRequestParameters, setResponseUri)
     }
@@ -104,11 +101,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
     private fun isClientIdSchemeSupported(walletMetadata: WalletMetadata) {
         val clientIdScheme = extractClientIdScheme(authorizationRequestParameters)
         if (!walletMetadata.clientIdSchemesSupported.contains(clientIdScheme))
-            throw Logger.handleException(
-                exceptionType = "InvalidData",
-                className = className,
-                message = "client_id_scheme is not support by wallet"
-            )
+            throw OpenID4VPExceptions.InvalidData("client_id_scheme is not support by wallet", className)
 
     }
 

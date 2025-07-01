@@ -9,7 +9,6 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.decodeBase64Data
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
@@ -37,8 +36,6 @@ class JWEHandlerJvmTest {
             verifierNonce
         )
 
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
     }
 
     @AfterTest

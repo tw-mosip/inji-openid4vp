@@ -2,7 +2,6 @@ package io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc
 
 import co.nstant.`in`.cbor.model.UnicodeString
 import io.mockk.*
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.common.getDecodedMdocCredential
 import io.mosip.openID4VP.testData.clientId
 import io.mosip.openID4VP.testData.mdocCredential
@@ -13,11 +12,6 @@ import kotlin.test.*
 
 class UnsignedMdocVPTokenBuilderTest {
 
-    @BeforeTest
-    fun setUp() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers { }
-    }
 
     @AfterTest
     fun tearDown() {

@@ -3,7 +3,6 @@ package io.mosip.openID4VP.authorizationRequest.authorizationRequestHandler.type
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
-import io.mosip.openID4VP.common.Logger
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.testData.*
 import okhttp3.Headers
@@ -19,8 +18,6 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
     @BeforeTest
     fun setup() {
-        mockkObject(Logger)
-        every { Logger.error(any(), any(), any()) } answers {}
 
         authorizationRequestParameters = mutableMapOf(
             CLIENT_ID.value to validClientId,
