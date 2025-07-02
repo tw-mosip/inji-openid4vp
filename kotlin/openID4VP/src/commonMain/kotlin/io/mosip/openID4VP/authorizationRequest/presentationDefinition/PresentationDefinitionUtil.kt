@@ -38,7 +38,7 @@ fun parseAndValidatePresentationDefinition(
         hasPresentationDefinitionUri -> {
             if (!isPresentationDefinitionUriSupported) {
                 throw  OpenID4VPExceptions.InvalidData("presentation_definition_uri is not support",
-                    className,OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI)
+                    className,OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE)
             }
 
             val presentationDefinitionUri = getStringValue(
@@ -47,7 +47,7 @@ fun parseAndValidatePresentationDefinition(
             )
             validate(PRESENTATION_DEFINITION_URI.value, presentationDefinitionUri, className)
             if (!isValidUrl(presentationDefinitionUri!!)) {
-                throw OpenID4VPExceptions.InvalidData("${PRESENTATION_DEFINITION_URI.value} data is not valid", className,OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE)
+                throw OpenID4VPExceptions.InvalidData("${PRESENTATION_DEFINITION_URI.value} data is not valid", className,OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI)
             }
             val response =
                 sendHTTPRequest(

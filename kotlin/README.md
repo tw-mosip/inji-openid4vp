@@ -135,6 +135,12 @@ val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
 
 This method will also notify the Verifier about the error by sending it to the response_uri endpoint over http post request. If response_uri is invalid and validation failed then Verifier won't be able to know about it.
 
+##### Exception Handling Enhancement
+
+- The library has been enhanced to handle exceptions more gracefully. Library is throwing `OpenID4VPExceptions` now which gives both Error Code and Message to the consumer app. This allows the consumer app to handle exceptions more effectively and provide better user experience.
+- For the backward compatibility, the library will still throw the exceptions with `message` which can be referred in sample application `io.mosip.sampleapp.utils.OpenID4VPManager`. However, it is recommended to use the new `OpenID4VPExceptions` for better error handling.
+
+
 ### constructUnsignedVPToken
 - Receives a map of input_descriptor id & list of verifiable credentials for each input_descriptor that are selected by the end-user.
 - Creates a vp_token without proof using received input_descriptor IDs and verifiable credentials, then returns its string representation to consumer app(mobile wallet) for signing it.

@@ -43,7 +43,7 @@ class OpenID4VP(private val traceabilityId: String) {
                 shouldValidateClient
             )
             return this.authorizationRequest
-        } catch (exception: Exception) {
+        } catch (exception: OpenID4VPExceptions) {
             sendErrorToVerifier(exception)
             throw exception
         }
@@ -62,7 +62,7 @@ class OpenID4VP(private val traceabilityId: String) {
                 holderId = holderId,
                 signatureSuite = signatureSuite
             )
-        } catch (exception: Exception) {
+        } catch (exception: OpenID4VPExceptions) {
             sendErrorToVerifier(exception)
             throw exception
         }
@@ -75,7 +75,7 @@ class OpenID4VP(private val traceabilityId: String) {
                 vpTokenSigningResults = vpTokenSigningResults,
                 responseUri = this.responseUri!!
             )
-        } catch (exception: Exception) {
+        } catch (exception: OpenID4VPExceptions) {
             sendErrorToVerifier(exception)
             throw exception
         }
