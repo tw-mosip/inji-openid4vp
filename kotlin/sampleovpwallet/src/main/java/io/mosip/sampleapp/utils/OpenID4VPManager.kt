@@ -35,22 +35,36 @@ object OpenID4VPManager {
     fun authenticateVerifier(
         urlEncodedAuthRequest: String
     ): AuthorizationRequest {
-
-        return instance.authenticateVerifier(
-            urlEncodedAuthorizationRequest = urlEncodedAuthRequest,
-            trustedVerifiers = getListOfVerifiers(),
-            walletMetadata = getWalletMetadata(),
-            shouldValidateClient = false
-        )
+        return try {
+            instance.authenticateVerifier(
+                urlEncodedAuthorizationRequest = urlEncodedAuthRequest,
+                trustedVerifiers = getListOfVerifiers(),
+                walletMetadata = getWalletMetadata(),
+                shouldValidateClient = false
+            )
+        } catch (exception: Exception) {
+            Log.e("OpenID4VP-sample wallet", "Error authenticating verifier ${exception.message}")
+            throw exception
+        }
     }
 
     private fun constructUnsignedVpToken(selectedCredentials : Map<String, Map<FormatType, List<Any>>>, holderId: String, signatureSuite: String): Map<FormatType, UnsignedVPToken> {
-        return instance.constructUnsignedVPToken(selectedCredentials, holderId, signatureSuite)
+        return try {
+            instance.constructUnsignedVPToken(selectedCredentials, holderId, signatureSuite)
+        } catch (exception: Exception) {
+            Log.e("OpenID4VP-sample wallet", "Error constructing Unsigned vp token: ${exception.message}")
+            throw exception
+        }
     }
 
     fun shareVerifiablePresentation(selectedItems: SnapshotStateList<Pair<String, VCMetadata>>) {
         CoroutineScope(Dispatchers.IO).launch {
-            sendVP(selectedItems)
+            try {
+                sendVP(selectedItems)
+            } catch (exception: Exception) {
+                Log.e("OpenID4VP-sample wallet", "Error sharing Verifiable Presentation: ${exception.message}")
+                throw exception
+            }
         }
     }
 

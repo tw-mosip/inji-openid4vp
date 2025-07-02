@@ -108,7 +108,7 @@ class PresentationDefinitionTest {
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             parseAndValidatePresentationDefinition(authorizationRequestParam, false)
         }
-        assertEquals(OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI, exception.errorCode)
+        assertEquals(OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE, exception.errorCode)
         assertEquals(expectedExceptionMessage, exception.message)
     }
 

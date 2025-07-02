@@ -351,7 +351,7 @@ class AuthorizationRequestTest {
             assertFailsWith<OpenID4VPExceptions.InvalidData> {
                 openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, false,null)
             }
-        assertEquals(OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE, actualException.errorCode)
+        assertEquals(OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI, actualException.errorCode)
         assertEquals("presentation_definition_uri data is not valid",actualException.message)
     }
 
