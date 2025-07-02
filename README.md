@@ -1,6 +1,6 @@
 # INJI-OpenID4VP
 
-Description: Implementation of OpenID for Verifiable Presentations - draft 21 specifications in Kotlin
+Description: Implementation of OpenID for Verifiable Presentations - draft 21 and draft 23 specifications in Kotlin
 
 # Supported features
 
@@ -17,7 +17,7 @@ Description: Implementation of OpenID for Verifiable Presentations - draft 21 sp
 | Authorization Response type                                | `vp_token`                                                                                                                                                                                                                                                                                                                                                         |
 
 ## Specifications supported
-- The implementation follows OpenID for Verifiable Presentations - draft 23. [Specification](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html).
+- The implementation follows OpenID for Verifiable Presentations - [draft 21](https://openid.net/specs/openid-4-verifiable-presentations-1_0-21.html) and [draft 23](https://openid.net/specs/openid-4-verifiable-presentations-1_0-23.html) specification.
 - Below are the fields we expect in the authorization request based on the client id scheme,
     - Client_id_scheme is **_pre-registered_**
         * client_id
