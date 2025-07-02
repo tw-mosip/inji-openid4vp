@@ -52,7 +52,7 @@ object OpenID4VPManager {
         return try {
             instance.constructUnsignedVPToken(selectedCredentials, holderId, signatureSuite)
         } catch (exception: Exception) {
-            Log.e("OpenID4VP-sample wallet", "Error sharing Verifiable Presentation: ${exception.message}")
+            Log.e("OpenID4VP-sample wallet", "Error constructing Unsigned vp token: ${exception.message}")
             throw exception
         }
     }
