@@ -36,7 +36,7 @@ private val className = AuthorizationResponseHandler::class.java.simpleName
 internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
     private lateinit var unsignedVPTokens: Map<FormatType, Map<String, Any>>
-    private val walletNonce = generateNonce(16)
+    private lateinit var walletNonce : String
 
     fun constructUnsignedVPToken(
         credentialsMap: Map<String, Map<FormatType, List<Any>>>,
@@ -161,7 +161,8 @@ internal class AuthorizationResponseHandler {
         val formatTypeToCredentialIndex: MutableMap<FormatType, Int> = mutableMapOf()
 
         val descriptorMappings =
-            credentialsMap.toSortedMap().map { (inputDescriptorId, formatMap) ->
+            credentialsMap.entries.sortedBy { it.key }
+                .map { (inputDescriptorId, formatMap) ->
                 formatMap.flatMap { (credentialFormat, credentials) ->
                     val vpTokenIndex = credentialFormatIndex[credentialFormat]
 
@@ -204,17 +205,22 @@ internal class AuthorizationResponseHandler {
         return descriptorMappings.flatten()
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun createUnsignedVPTokens(
         authorizationRequest: AuthorizationRequest,
         responseUri: String,
         holderId: String,
         signatureSuite: String
     ): Map<FormatType, Map<String, Any>> {
-        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.toSortedMap().values
-            .flatMap { it.entries }
+
+        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.entries
+            .sortedBy { it.key }
+            .flatMap { it.value.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
                 lists.flatten()
             }
+
+        walletNonce = generateNonce(16)
 
         // group all formats together, call specific creator and pass the grouped credentials
         return groupedVcs.mapValues { (format, credentialsArray) ->
