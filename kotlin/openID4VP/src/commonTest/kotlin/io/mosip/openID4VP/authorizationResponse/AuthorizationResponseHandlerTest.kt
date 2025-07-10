@@ -481,4 +481,41 @@ class AuthorizationResponseHandlerTest {
 
         assertEquals("Network connection failed", exception.message)
     }
+
+
+    @Test
+    fun testWalletNonceIsDifferentForEveryConstructUnsignedVPTokenCall() {
+        val verifiableCredentials = mapOf(
+            "input_descriptor1" to mapOf(
+                FormatType.LDP_VC to listOf(ldpCredential1)
+            )
+        )
+        // First call
+        authorizationResponseHandler.constructUnsignedVPToken(
+            credentialsMap = verifiableCredentials,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUrl,
+            holderId = "",
+            signatureSuite = "JsonWebSignature2020"
+        )
+
+        // Get the nonce from the first call using reflection
+        val walletNonceField = AuthorizationResponseHandler::class.java.getDeclaredField("walletNonce")
+        walletNonceField.isAccessible = true
+        val firstNonce = walletNonceField.get(authorizationResponseHandler) as String
+
+        // Second call
+        authorizationResponseHandler.constructUnsignedVPToken(
+            credentialsMap = verifiableCredentials,
+            authorizationRequest = authorizationRequest,
+            responseUri = responseUrl,
+            holderId = "",
+            signatureSuite = "JsonWebSignature2020"
+        )
+
+        val secondNonce = walletNonceField.get(authorizationResponseHandler) as String
+
+        assertNotEquals("Wallet nonce should be different for every constructUnsignedVPToken call", firstNonce, secondNonce)
+    }
+
 }
