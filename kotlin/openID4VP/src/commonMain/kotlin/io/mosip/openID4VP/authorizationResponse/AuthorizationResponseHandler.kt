@@ -36,7 +36,7 @@ private val className = AuthorizationResponseHandler::class.java.simpleName
 internal class AuthorizationResponseHandler {
     private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
     private lateinit var unsignedVPTokens: Map<FormatType, Map<String, Any>>
-    private val walletNonce = generateNonce(16)
+    private lateinit var walletNonce : String
 
     fun constructUnsignedVPToken(
         credentialsMap: Map<String, Map<FormatType, List<Any>>>,
@@ -219,6 +219,8 @@ internal class AuthorizationResponseHandler {
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
                 lists.flatten()
             }
+
+        walletNonce = generateNonce(16)
 
         // group all formats together, call specific creator and pass the grouped credentials
         return groupedVcs.mapValues { (format, credentialsArray) ->
