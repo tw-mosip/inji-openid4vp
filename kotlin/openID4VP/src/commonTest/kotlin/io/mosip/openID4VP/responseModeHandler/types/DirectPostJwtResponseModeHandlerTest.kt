@@ -12,6 +12,10 @@ import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.constants.ClientIdScheme.*
+import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.KeyManagementAlgorithm
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
@@ -123,11 +127,11 @@ class DirectPostJwtResponseModeHandlerTest {
     fun `should throw error if the key exchange algorithm supported list is not provided by wallet`() {
         val invalidWalletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf("ldp_vc" to VPFormatSupported(algValuesSupported = listOf("RSA"))),
-            clientIdSchemesSupported = listOf(REDIRECT_URI.value, DID.value, PRE_REGISTERED.value),
-            requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
+            vpFormatsSupported = mapOf(FormatType.LDP_VC to VPFormatSupported(algValuesSupported = listOf("RSA"))),
+            clientIdSchemesSupported = listOf(REDIRECT_URI, DID, PRE_REGISTERED),
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
             authorizationEncryptionAlgValuesSupported = null,
-            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+            authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
         )
         val clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
 
@@ -153,10 +157,10 @@ class DirectPostJwtResponseModeHandlerTest {
         val clientMetadata = deserializeAndValidate(clientMetadataString, ClientMetadataSerializer)
         val invalidWalletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf("ldp_vc" to VPFormatSupported(algValuesSupported = listOf("RSA"))),
-            clientIdSchemesSupported = listOf(REDIRECT_URI.value, DID.value, PRE_REGISTERED.value),
-            requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
+            vpFormatsSupported = mapOf(FormatType.LDP_VC to VPFormatSupported(algValuesSupported = listOf("RSA"))),
+            clientIdSchemesSupported = listOf(REDIRECT_URI, DID, PRE_REGISTERED),
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+            authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
             authorizationEncryptionEncValuesSupported = null
         )
 

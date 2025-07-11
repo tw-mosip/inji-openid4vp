@@ -14,7 +14,7 @@ import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTP
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class OpenID4VP(private val traceabilityId: String) {
+class OpenID4VP(private val traceabilityId: String, private val walletMetadata: WalletMetadata? = null) {
     lateinit var authorizationRequest: AuthorizationRequest
     private var authorizationResponseHandler: AuthorizationResponseHandler =
         AuthorizationResponseHandler()
@@ -32,7 +32,6 @@ class OpenID4VP(private val traceabilityId: String) {
         urlEncodedAuthorizationRequest: String,
         trustedVerifiers: List<Verifier>,
         shouldValidateClient: Boolean = false,
-        walletMetadata: WalletMetadata? = null
     ): AuthorizationRequest {
         try {
             authorizationRequest = AuthorizationRequest.validateAndCreateAuthorizationRequest(

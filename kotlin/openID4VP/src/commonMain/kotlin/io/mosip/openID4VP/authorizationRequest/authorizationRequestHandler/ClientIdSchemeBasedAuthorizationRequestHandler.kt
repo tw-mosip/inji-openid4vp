@@ -14,6 +14,7 @@ import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.common.getStringValue
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
+import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandlerFactory
@@ -100,7 +101,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
 
     private fun isClientIdSchemeSupported(walletMetadata: WalletMetadata) {
         val clientIdScheme = extractClientIdScheme(authorizationRequestParameters)
-        if (!walletMetadata.clientIdSchemesSupported.contains(clientIdScheme))
+        if (!walletMetadata.clientIdSchemesSupported.contains(ClientIdScheme.fromValue(clientIdScheme)))
             throw OpenID4VPExceptions.InvalidData("client_id_scheme is not support by wallet", className)
 
     }

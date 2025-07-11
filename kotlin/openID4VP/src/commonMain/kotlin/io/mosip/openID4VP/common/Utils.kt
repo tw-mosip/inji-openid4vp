@@ -2,6 +2,7 @@ package io.mosip.openID4VP.common
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
@@ -9,13 +10,14 @@ import java.security.SecureRandom
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 
+private val objectMapper = jacksonObjectMapper()
+
 fun isValidUrl(url : String): Boolean {
     return url.matches(URL_PATTERN.toRegex())
 }
 
 fun convertJsonToMap(jsonString: String): MutableMap<String, Any> {
-    val mapper = jacksonObjectMapper()
-    return mapper.readValue(
+    return objectMapper.readValue(
         jsonString,
         object : TypeReference<MutableMap<String, Any>>() {})
 }
@@ -73,4 +75,8 @@ inline fun <reified T> encodeToJsonString(data: T, fieldName: String, className:
 
 fun ByteArray.toHex(): String{
     return this.joinToString("") { "%02x".format(it) }
+}
+
+fun getObjectMapper(): ObjectMapper {
+    return objectMapper
 }

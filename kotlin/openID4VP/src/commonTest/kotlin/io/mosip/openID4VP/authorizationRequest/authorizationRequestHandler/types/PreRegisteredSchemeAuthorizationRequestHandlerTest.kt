@@ -7,6 +7,9 @@ import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.testData.*
 import okhttp3.Headers
 import io.mockk.*
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import kotlin.test.*
 
 class PreRegisteredSchemeAuthorizationRequestHandlerTest {
@@ -32,8 +35,8 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
 
         walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf("jwt_vp" to VPFormatSupported(listOf("ES256"))),
-            clientIdSchemesSupported = listOf("pre-registered")
+            vpFormatsSupported = mapOf(FormatType.LDP_VC to VPFormatSupported(listOf("ES256"))),
+            clientIdSchemesSupported = listOf(ClientIdScheme.PRE_REGISTERED)
         )
     }
 
@@ -123,7 +126,7 @@ class PreRegisteredSchemeAuthorizationRequestHandlerTest {
         )
 
         val processedMetadata = handler.process(walletMetadata.copy(
-            requestObjectSigningAlgValuesSupported = listOf("ES256")
+            requestObjectSigningAlgValuesSupported =listOf(RequestSigningAlgorithm.EdDSA)
         ))
 
         assertNull(processedMetadata.requestObjectSigningAlgValuesSupported)

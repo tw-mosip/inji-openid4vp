@@ -28,6 +28,10 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPToken
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.constants.ClientIdScheme.DID
 import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
+import io.mosip.openID4VP.constants.FormatType.LDP_VC
+import io.mosip.openID4VP.constants.KeyManagementAlgorithm
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 
 const val requestUrl = "https://mock-verifier.com/verifier/get-auth-request-obj"
 const val responseUrl = "https://mock-verifier.com/response-uri"
@@ -68,7 +72,7 @@ val mdocVPTokenSigningResult: MdocVPTokenSigningResult = MdocVPTokenSigningResul
 )
 
 val ldpvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
-    mapOf(FormatType.LDP_VC to ldpVPTokenSigningResult)
+    mapOf(LDP_VC to ldpVPTokenSigningResult)
 
 val mdocvpTokenSigningResults: Map<FormatType, VPTokenSigningResult> =
     mapOf(FormatType.MSO_MDOC to mdocVPTokenSigningResult)
@@ -98,7 +102,7 @@ val clientMetadataMap = mapOf(
 )
 
 private val vpFormatsMap = mapOf(
-    "ldp_vc" to VPFormatSupported(
+    LDP_VC to VPFormatSupported(
         algValuesSupported = listOf("Ed25519Signature2018", "Ed25519Signature2020")
     )
 )
@@ -107,13 +111,13 @@ val walletMetadata = WalletMetadata(
     presentationDefinitionURISupported = true,
     vpFormatsSupported = vpFormatsMap,
     clientIdSchemesSupported = listOf(
-        ClientIdScheme.REDIRECT_URI.value,
-        DID.value,
-        PRE_REGISTERED.value
+        ClientIdScheme.REDIRECT_URI,
+        DID,
+        PRE_REGISTERED
     ),
-    requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-    authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-    authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+    requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+    authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+    authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
 )
 
 val clientMetadataString = """{
@@ -408,7 +412,7 @@ val vpTokenSigningPayload = VPTokenSigningPayload(
 )
 
 val unsignedVPTokens = mapOf(
-    FormatType.LDP_VC to mapOf("vpTokenSigningPayload" to vpTokenSigningPayload, "unsignedVPToken" to unsignedLdpVPToken),
+    LDP_VC to mapOf("vpTokenSigningPayload" to vpTokenSigningPayload, "unsignedVPToken" to unsignedLdpVPToken),
     FormatType.MSO_MDOC to mapOf("vpTokenSigningPayload" to listOf(mdocCredential), "unsignedVPToken" to unsignedMdocVPToken)
 )
 

@@ -5,9 +5,11 @@ import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.authorizationResponse.toJsonEncodedMap
+import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
+import io.mosip.openID4VP.constants.KeyManagementAlgorithm
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import io.mosip.openID4VP.responseModeHandler.ResponseModeBasedHandler
@@ -58,14 +60,14 @@ class DirectPostJwtResponseModeHandler : ResponseModeBasedHandler() {
         val supportedAlgs = walletMetadata.authorizationEncryptionAlgValuesSupported
             ?: throwInvalidDataException("authorization_encryption_alg_values_supported must be present in wallet_metadata")
 
-        if (clientAlg !in supportedAlgs) {
+        if (KeyManagementAlgorithm.fromValue(clientAlg) !in supportedAlgs) {
             throwInvalidDataException("authorization_encrypted_response_alg is not supported")
         }
 
         val supportedEncs = walletMetadata.authorizationEncryptionEncValuesSupported
             ?: throwInvalidDataException("authorization_encryption_enc_values_supported must be present in wallet_metadata")
 
-        if (clientEnc !in supportedEncs) {
+        if (ContentEncrytionAlgorithm.fromValue(clientEnc) !in supportedEncs) {
             throwInvalidDataException("authorization_encrypted_response_enc is not supported")
         }
     }

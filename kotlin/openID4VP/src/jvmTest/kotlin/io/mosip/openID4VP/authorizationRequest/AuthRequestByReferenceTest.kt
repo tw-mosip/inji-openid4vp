@@ -10,7 +10,11 @@ import io.mosip.openID4VP.common.encodeToJsonString
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.DID
 import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
+import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
+import io.mosip.openID4VP.constants.KeyManagementAlgorithm
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.assertDoesNotThrow
@@ -119,11 +123,12 @@ class AuthRequestByReferenceTest {
             DID
         )
 
+        val openID4VP = OpenID4VP("test-OpenID4VP", walletMetadata)
+
         openID4VP.authenticateVerifier(
             encodedAuthorizationRequest,
             trustedVerifiers,
-            shouldValidateClient = true,
-            walletMetadata
+            shouldValidateClient = true
         )
 
         verify {
@@ -213,14 +218,14 @@ class AuthRequestByReferenceTest {
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
             vpFormatsSupported = mapOf(
-                "ldp_vc" to VPFormatSupported(
+                FormatType.LDP_VC to VPFormatSupported(
                     algValuesSupported = listOf("RSA")
                 )
             ),
-            clientIdSchemesSupported = listOf(DID.value, PRE_REGISTERED.value),
+            clientIdSchemesSupported = listOf(DID, PRE_REGISTERED),
             requestObjectSigningAlgValuesSupported = null,
-            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+            authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+            authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
         )
         every {
             NetworkManagerClient.sendHTTPRequest(
@@ -241,12 +246,12 @@ class AuthRequestByReferenceTest {
             DID
         )
 
+        val openID4VP = OpenID4VP("test-OpenID4VP", walletMetadata)
         val exception = assertFailsWith<InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
-                shouldValidateClient = true,
-                walletMetadata
+                shouldValidateClient = true
             )
         }
         assertEquals("request_object_signing_alg_values_supported is not present in wallet metadata", exception.message)
@@ -296,14 +301,14 @@ fun `should validate and throw error if the signing algorithm is not supported b
     val walletMetadata = WalletMetadata(
         presentationDefinitionURISupported = true,
         vpFormatsSupported = mapOf(
-            "ldp_vc" to VPFormatSupported(
+            FormatType.LDP_VC to VPFormatSupported(
                 algValuesSupported = listOf("RSA")
             )
         ),
-        clientIdSchemesSupported = listOf(DID.value, PRE_REGISTERED.value),
-        requestObjectSigningAlgValuesSupported = listOf("RSA"),
-        authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-        authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+        clientIdSchemesSupported = listOf(DID, PRE_REGISTERED),
+        requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+        authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+        authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
     )
     every {
         NetworkManagerClient.sendHTTPRequest(
@@ -324,12 +329,12 @@ fun `should validate and throw error if the signing algorithm is not supported b
         DID
     )
 
+    val openID4VP = OpenID4VP("test-OpenID4VP", walletMetadata)
     val exception = assertFailsWith<InvalidData> {
         openID4VP.authenticateVerifier(
             encodedAuthorizationRequest,
             trustedVerifiers,
-            shouldValidateClient = true,
-            walletMetadata
+            shouldValidateClient = true
         )
     }
     assertEquals("request_object_signing_alg is not support by wallet", exception.message)
@@ -362,8 +367,7 @@ fun `should return Authorization Request if it has request uri and it is a valid
         openID4VP.authenticateVerifier(
             encodedAuthorizationRequest,
             trustedVerifiers,
-            shouldValidateClient = true,
-            null
+            shouldValidateClient = true
         )
     }
 }
@@ -395,8 +399,7 @@ fun `should return Authorization Request if it has request uri and it is a valid
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
-                shouldValidateClient = true,
-                walletMetadata = null
+                shouldValidateClient = true
             )
         }
         assertEquals(DID.value, authorizationRequest.clientIdScheme)
@@ -431,8 +434,7 @@ fun `should return Authorization Request if it has request uri and it is a valid
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
-                shouldValidateClient = true,
-                walletMetadata = null
+                shouldValidateClient = true
             )
         }
 

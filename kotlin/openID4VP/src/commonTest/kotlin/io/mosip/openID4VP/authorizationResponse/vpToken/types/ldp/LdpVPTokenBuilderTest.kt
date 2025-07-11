@@ -2,7 +2,7 @@ package io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp
 
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.VPTokenSigningPayload
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
-import io.mosip.openID4VP.constants.SignatureAlgorithm
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm
 import io.mosip.openID4VP.testData.ldpVPToken
 import kotlin.test.*
 
@@ -38,7 +38,7 @@ class LdpVPTokenBuilderTest {
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = null,
             proofValue = "test-proof-value-123",
-            signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2020.value
+            signatureAlgorithm = SignatureSuiteAlgorithm.Ed25519Signature2020.value
         )
     }
 
@@ -67,7 +67,7 @@ class LdpVPTokenBuilderTest {
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = "test-jws-signature",
             proofValue = null,
-            signatureAlgorithm = SignatureAlgorithm.JsonWebSignature2020.value
+            signatureAlgorithm = SignatureSuiteAlgorithm.JsonWebSignature2020.value
         )
 
         val builder = LdpVPTokenBuilder(
@@ -88,7 +88,7 @@ class LdpVPTokenBuilderTest {
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = "test-rsa-signature",
             proofValue = null,
-            signatureAlgorithm = SignatureAlgorithm.RSASignature2018.value
+            signatureAlgorithm = SignatureSuiteAlgorithm.RSASignature2018.value
         )
 
         val builder = LdpVPTokenBuilder(
@@ -108,7 +108,7 @@ class LdpVPTokenBuilderTest {
         mockLdpVPTokenSigningResult = LdpVPTokenSigningResult(
             jws = "test-ed25519-2018-signature",
             proofValue = null,
-            signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2018.value
+            signatureAlgorithm = SignatureSuiteAlgorithm.Ed25519Signature2018.value
         )
 
         val builder = LdpVPTokenBuilder(
@@ -141,7 +141,7 @@ class LdpVPTokenBuilderTest {
         val signingResult = LdpVPTokenSigningResult(
             jws = null,
             proofValue = "new-proof-value",
-            signatureAlgorithm = SignatureAlgorithm.Ed25519Signature2020.value
+            signatureAlgorithm = SignatureSuiteAlgorithm.Ed25519Signature2020.value
         )
 
         val builder = LdpVPTokenBuilder(signingResult, unsignedToken, "test-nonce")
