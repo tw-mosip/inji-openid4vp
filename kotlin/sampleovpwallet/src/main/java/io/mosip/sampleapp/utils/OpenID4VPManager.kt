@@ -29,7 +29,7 @@ object OpenID4VPManager {
         get() = _instance ?: throw IllegalStateException("OpenID4VP is not initialized")
 
     fun init(traceabilityId: String) {
-        _instance = OpenID4VP(traceabilityId)
+        _instance = OpenID4VP(traceabilityId, getWalletMetadata())
     }
 
     fun authenticateVerifier(
@@ -39,7 +39,6 @@ object OpenID4VPManager {
             instance.authenticateVerifier(
                 urlEncodedAuthorizationRequest = urlEncodedAuthRequest,
                 trustedVerifiers = getListOfVerifiers(),
-                walletMetadata = getWalletMetadata(),
                 shouldValidateClient = false
             )
         } catch (exception: Exception) {
