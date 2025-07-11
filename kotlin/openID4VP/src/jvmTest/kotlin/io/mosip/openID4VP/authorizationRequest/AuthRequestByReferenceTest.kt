@@ -306,7 +306,7 @@ fun `should validate and throw error if the signing algorithm is not supported b
             )
         ),
         clientIdSchemesSupported = listOf(DID, PRE_REGISTERED),
-        requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+        requestObjectSigningAlgValuesSupported = null,
         authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
         authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
     )
@@ -337,7 +337,7 @@ fun `should validate and throw error if the signing algorithm is not supported b
             shouldValidateClient = true
         )
     }
-    assertEquals("request_object_signing_alg is not support by wallet", exception.message)
+    assertEquals("request_object_signing_alg_values_supported is not present in wallet metadata", exception.message)
 }
 
 
