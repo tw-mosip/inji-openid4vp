@@ -30,7 +30,7 @@ class EncoderTest {
     fun `should handle special characters correctly during encoding`() {
         val specialChars = "!@#$%^&*()_+{}[]|\":<>?,./"
         val encodedContent = encodeToBase64Url(specialChars.toByteArray())
-        val decodedContent = decodeBase64Data(encodedContent)
+        val decodedContent = decodeFromBase64Url(encodedContent)
         assertEquals(specialChars, decodedContent.toString(Charsets.UTF_8))
     }
 }

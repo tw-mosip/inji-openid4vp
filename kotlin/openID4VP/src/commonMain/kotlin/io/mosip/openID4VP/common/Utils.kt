@@ -10,7 +10,6 @@ import java.security.SecureRandom
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 
-
 fun isValidUrl(url : String): Boolean {
     return url.matches(URL_PATTERN.toRegex())
 }

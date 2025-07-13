@@ -12,7 +12,7 @@ import io.mosip.openID4VP.common.getDecodedMdocCredential
 import io.mosip.openID4VP.common.mapSigningAlgorithmToProtectedAlg
 import io.mosip.openID4VP.common.tagEncodedCbor
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
-import io.mosip.openID4VP.common.decodeBase64Data
+import io.mosip.openID4VP.common.decodeFromBase64Url
 import io.mosip.openID4VP.common.encodeToBase64Url
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
@@ -60,7 +60,7 @@ class MdocVPTokenBuilder(
         signingAlgorithm: String,
         signature: String
     ): DataItem {
-        val base64DecodedSignature = decodeBase64Data(signature)
+        val base64DecodedSignature = decodeFromBase64Url(signature)
         val cborEncodedSignature = encodeCbor(ByteString(base64DecodedSignature))
 
         val protectedSigningAlgorithm = mapSigningAlgorithmToProtectedAlg(signingAlgorithm)

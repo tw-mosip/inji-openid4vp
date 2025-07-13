@@ -3,14 +3,12 @@ package io.mosip.openID4VP.jwt
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
 import io.mockk.clearAllMocks
-import io.mockk.every
-import io.mockk.mockkObject
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataSerializer
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.common.convertJsonToMap
-import io.mosip.openID4VP.common.decodeBase64Data
+import io.mosip.openID4VP.common.decodeFromBase64Url
 import io.mosip.openID4VP.jwt.jwe.JWEHandler
 import io.mosip.openID4VP.testData.clientMetadataString
 import kotlin.test.assertEquals
@@ -54,7 +52,7 @@ class JWEHandlerJvmTest {
         val jweParts = encryptedResponse.split(".")
         assertTrue(jweParts.size == 5)
 
-        val decodedJWEHeader = convertJsonToMap(String(decodeBase64Data(jweParts[0])))
+        val decodedJWEHeader = convertJsonToMap(String(decodeFromBase64Url(jweParts[0])))
 
         assertEquals(walletNonce, decodedJWEHeader["apu"])
         assertEquals(verifierNonce, decodedJWEHeader["apv"])
