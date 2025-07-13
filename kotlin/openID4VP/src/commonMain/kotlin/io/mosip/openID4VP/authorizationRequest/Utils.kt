@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.authorizationRequest
 
+import io.mosip.openID4VP.common.JacksonObjectMapper
 import io.mosip.openID4VP.common.getObjectMapper
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json

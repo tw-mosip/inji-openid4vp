@@ -2,6 +2,7 @@ package io.mosip.openID4VP.testData
 
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_ID_SCHEME
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
+import io.mosip.openID4VP.common.JacksonObjectMapper
 import io.mosip.openID4VP.common.getObjectMapper
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.testData.JWSUtil.Companion.createJWS

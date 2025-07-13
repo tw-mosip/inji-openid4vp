@@ -10,14 +10,13 @@ import java.security.SecureRandom
 
 private const val URL_PATTERN = "^https://(?:[\\w-]+\\.)+[\\w-]+(?:/[\\w\\-.~!$&'()*+,;=:@%]+)*/?(?:\\?[^#\\s]*)?(?:#.*)?$"
 
-private val objectMapper = jacksonObjectMapper()
 
 fun isValidUrl(url : String): Boolean {
     return url.matches(URL_PATTERN.toRegex())
 }
 
 fun convertJsonToMap(jsonString: String): MutableMap<String, Any> {
-    return objectMapper.readValue(
+    return getObjectMapper().readValue(
         jsonString,
         object : TypeReference<MutableMap<String, Any>>() {})
 }
@@ -78,5 +77,5 @@ fun ByteArray.toHex(): String{
 }
 
 fun getObjectMapper(): ObjectMapper {
-    return objectMapper
+    return JacksonObjectMapper.instance
 }
