@@ -100,7 +100,7 @@ fun generateHash(input: DataItem): ByteArray {
 }
 
 fun getDecodedMdocCredential(mdocCredential: String): Map {
-    val base64DecodedMdocCredential = decodeBase64Data(mdocCredential)
+    val base64DecodedMdocCredential = decodeFromBase64Url(mdocCredential)
     return decodeCbor(base64DecodedMdocCredential) as Map
 }
 

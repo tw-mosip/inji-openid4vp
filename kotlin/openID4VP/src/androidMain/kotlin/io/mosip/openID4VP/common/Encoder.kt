@@ -16,7 +16,6 @@ actual fun encodeToBase64Url(data: ByteArray): String {
 
 }
 
-
 @SuppressLint("NewApi")
 private fun javaBase64UrlEncode(data: ByteArray): String =
     getUrlEncoder().encodeToString(data)

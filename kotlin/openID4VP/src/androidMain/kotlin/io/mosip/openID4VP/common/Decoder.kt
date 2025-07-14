@@ -3,9 +3,9 @@ package io.mosip.openID4VP.common
 import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Base64
-import io.mosip.vercred.vcverifier.utils.BuildConfig.getVersionSDKInt
+import io.mosip.openID4VP.common.BuildConfig.getVersionSDKInt
 
-actual fun decodeBase64Data(content: String): ByteArray {
+actual fun decodeFromBase64Url(content: String): ByteArray {
     val decodedBase64ByteArray =
         if( getVersionSDKInt() >= Build.VERSION_CODES.O){
             javaBase64UrlDecode(content)
