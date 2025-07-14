@@ -189,7 +189,7 @@ class AuthorizationRequestTest {
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient,null
                 )
             }
-        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
+        assertEquals(OpenID4VPErrorCodes.INVALID_CLIENT, actualException.errorCode)
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
