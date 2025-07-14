@@ -13,6 +13,7 @@ import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.HEADER
 import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.PAYLOAD
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
 import io.mosip.openID4VP.constants.ContentType.APPLICATION_JWT
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import okhttp3.Headers
 
 private val className = DidSchemeAuthorizationRequestHandler::class.simpleName!!
@@ -72,9 +73,9 @@ class DidSchemeAuthorizationRequestHandler(
 
     private fun validateAuthorizationRequestSigningAlgorithm(headers: MutableMap<String, Any>) {
         if (shouldValidateWithWalletMetadata) {
-            val alg = headers["alg"]
+            val alg = headers["alg"] as String
             walletMetadata?.let {
-                if (!it.requestObjectSigningAlgValuesSupported!!.contains(alg))
+                if (!it.requestObjectSigningAlgValuesSupported!!.contains(RequestSigningAlgorithm.fromValue(alg)))
                     throw OpenID4VPExceptions.InvalidData("request_object_signing_alg is not support by wallet", className)
             }
         }

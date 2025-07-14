@@ -21,14 +21,14 @@ class DecoderTest {
 
     @Test
     fun `should decode the base64 url encoded content successfully`() {
-        val decodedContent = decodeBase64Data("aGVsbG8gd29ybGQ=")
+        val decodedContent = decodeFromBase64Url("aGVsbG8gd29ybGQ=")
         assertEquals("hello world", decodedContent.toString(Charsets.UTF_8))
     }
 
     @Test
     fun `should throw error when given base64 url encoded data contains non base64 character`() {
         val exception = assertFailsWith<IllegalArgumentException> {
-            decodeBase64Data("aGVsbG8%d29ybGQ=")
+            decodeFromBase64Url("aGVsbG8%d29ybGQ=")
         }
 
         assertEquals("Illegal base64 character 25", exception.message)
@@ -37,7 +37,7 @@ class DecoderTest {
     @Test
     fun `should throw error when given base64 url encoded data has truncated bytes`() {
         val exception = assertFailsWith<IllegalArgumentException> {
-            decodeBase64Data("aGVsbG8gd29ybG=")
+            decodeFromBase64Url("aGVsbG8gd29ybG=")
         }
 
         assertEquals("Input byte array has wrong 4-byte ending unit", exception.message)

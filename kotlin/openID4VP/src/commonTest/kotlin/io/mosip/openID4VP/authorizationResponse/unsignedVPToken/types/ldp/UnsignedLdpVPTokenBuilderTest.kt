@@ -6,7 +6,7 @@ import io.mockk.unmockkAll
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.common.DateUtil
 import io.mosip.openID4VP.common.URDNA2015Canonicalization
-import io.mosip.openID4VP.constants.SignatureAlgorithm
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm
 import io.mosip.openID4VP.testData.ldpCredential1
 import io.mosip.openID4VP.testData.ldpCredential2
 import kotlin.test.*
@@ -43,7 +43,7 @@ class UnsignedLdpVPTokenBuilderTest {
             holder = holder,
             challenge = challenge,
             domain = domain,
-            signatureSuite = SignatureAlgorithm.Ed25519Signature2020.value
+            signatureSuite = SignatureSuiteAlgorithm.Ed25519Signature2020.value
         )
 
         val result = builder.build()
@@ -63,7 +63,7 @@ class UnsignedLdpVPTokenBuilderTest {
 
         val proof = payload.proof
         assertNotNull(proof)
-        assertEquals(SignatureAlgorithm.Ed25519Signature2020.value, proof?.type)
+        assertEquals(SignatureSuiteAlgorithm.Ed25519Signature2020.value, proof?.type)
         assertEquals(mockDateTime, proof?.created)
         assertEquals(holder, proof?.verificationMethod)
         assertEquals(domain, proof?.domain)
@@ -81,7 +81,7 @@ class UnsignedLdpVPTokenBuilderTest {
             holder = holder,
             challenge = challenge,
             domain = domain,
-            signatureSuite = SignatureAlgorithm.JsonWebSignature2020.value
+            signatureSuite = SignatureSuiteAlgorithm.JsonWebSignature2020.value
         )
 
         val result = builder.build()
@@ -95,7 +95,7 @@ class UnsignedLdpVPTokenBuilderTest {
 
         val proof = payload.proof
         assertNotNull(proof)
-        assertEquals(SignatureAlgorithm.JsonWebSignature2020.value, proof?.type)
+        assertEquals(SignatureSuiteAlgorithm.JsonWebSignature2020.value, proof?.type)
     }
 
     @Test
@@ -131,7 +131,7 @@ class UnsignedLdpVPTokenBuilderTest {
             holder = holder,
             challenge = challenge,
             domain = domain,
-            signatureSuite = SignatureAlgorithm.Ed25519Signature2020.value
+            signatureSuite = SignatureSuiteAlgorithm.Ed25519Signature2020.value
         )
 
         val result = builder.build()
@@ -152,7 +152,7 @@ class UnsignedLdpVPTokenBuilderTest {
             holder = holder,
             challenge = challenge,
             domain = domain,
-            signatureSuite = SignatureAlgorithm.Ed25519Signature2020.value
+            signatureSuite = SignatureSuiteAlgorithm.Ed25519Signature2020.value
         )
 
         val exception = assertFailsWith<RuntimeException> {

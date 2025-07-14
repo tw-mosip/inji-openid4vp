@@ -1,8 +1,9 @@
 package io.mosip.openID4VP.testData
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_ID_SCHEME
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.CLIENT_METADATA
+import io.mosip.openID4VP.common.JacksonObjectMapper
+import io.mosip.openID4VP.common.getObjectMapper
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.testData.JWSUtil.Companion.createJWS
 import kotlinx.serialization.json.JsonObject
@@ -54,7 +55,7 @@ fun createAuthorizationRequestObject(
     isPresentationDefinitionUriPresent: Boolean? = false,
     draftVersion: Int = 23,
 ): Any {
-    val mapper = jacksonObjectMapper()
+    val mapper = getObjectMapper()
     val paramList = applicableFields ?: authorisationRequestListToClientIdSchemeMap[clientIdScheme]!!
     return createAuthorizationRequest(paramList, authorizationRequestParams, draftVersion).let { authRequestParam ->
 

@@ -46,6 +46,7 @@ The library validates the client_id and client_id_scheme parameters in the autho
 
 - [Installation](#installation)
 - [Integration](#integration)
+- [Package Structure](#package-structure)
 - [APIs](#apis)
   - [authenticateVerifier](#authenticateverifier)
   - [constructUnsignedVPToken](#constructUnsignedVPToken)
@@ -76,6 +77,74 @@ val openID4VP = OpenID4VP(traceabilityId = "sample-id")
 ## Integration
 - To integrate the inji-openid4vp library into your Android application, there is a sample application created in `kotlin/sampleovpwallet` directory. This sample app demonstrates how to use the library to authenticate Verifiers, construct unsigned Verifiable Presentation (VP) tokens, and share them with Verifiers.
 - For more details refer to [README](https://github.com/mosip/inji-openid4vp/blob/release-0.3.x/kotlin/sampleovpwallet/README.md) of the sample application.
+
+## Package Structure
+```
+io.mosip.openID4VP/
+├── OpenID4VP.kt                  # Main library class with public APIs
+│
+├── authorizationRequest/         # Authorization request handling
+│   ├── AuthorizationRequest.kt   # Model for parsed authorization requests
+│   ├── Verifier.kt               # Trusted verifier model
+│   ├── clientMetadata/
+│   │   ├── ClientMetadata.kt     # Client metadata model
+│   │   ├── Jwk.kt                # JSON Web Key model
+│   │   └── Jwks.kt               # JSON Web Key Set model
+│   └── presentationDefinition/   # Presentation definition models
+│       ├── PresentationDefinition.kt
+│       ├── InputDescriptor.kt
+│       ├── Constraints.kt
+│       │   └── Fields.kt   
+│       │       └── Filter.kt       
+│
+├── authorizationResponse/        # Response handling
+│   ├── AuthorizationResponse.kt  # Model for authorization responses
+│   ├── presentationSubmission/  # Presentation submission models
+│   │   ├── PresentationSubmission.kt 
+│   │   └── DescriptorMapping.kt
+│   │
+│   ├── unsignedVPToken/            # Unsigned VP token models
+│   │   ├── UnsignedVPToken.kt    # Base class for unsigned tokens
+│   │   ├── types/
+│   │   │   ├── ldp/              # JSON-LD format support
+│   │   │   │   └── UnsignedLdpVPToken.kt
+│   │   │   └── mdoc/             # mDOC format support
+│   │   │       └── UnsignedMdocVPToken.kt
+│   │
+│   ├── vpToken/                  # VP token models
+│   │   ├── VPToken.kt             # Base class for VP tokens
+│   │   ├── types/
+│   │   │   ├── ldp/              # JSON-LD format support
+│   │   │   │   └── LdpVPToken.kt
+│   │   │   └── mdoc/             # mDOC format support
+│   │   │       └── MdocVPToken.kt
+│   │
+│   └── vpTokenSigningResult/     # Signing results models
+│       ├── VPTokenSigningResult.kt # Base interface
+│       ├── types/
+│       │   ├── ldp/              # JSON-LD format support
+│       │   │   └── LdpVPTokenSigningResult.kt
+│       │   └── mdoc/             # mDOC format support
+│       │       └── MdocVPTokenSigningResult.kt
+│
+├── common/                       # Common utilities and models
+├── constants/                    # Constants used across the library  
+│
+├── jwt/                          # JWT handling
+│   ├── jwe/                      # JWE encryption support
+│   │   ├── JWEHandler.kt         # Handles JWE operations
+│   │   └── encryption/
+│   │       └── EncryptionProvider.kt # Provides encryption services
+│   ├── jws/                      # JWS signature support
+│       └── JWSHandler.kt         # Handles JWS operations
+│   ├──keyResolver/          # Resolves keys for JWT operations
+│   │   ├── types/
+│   │   │   ├── DidPublicKeyResolver.kt  
+│   │   └── PublicKeyResolver.kt       # Base class for public key resolution
+│
+├── exceptions/                   # Exceptions
+│   └── OpenID4VPExceptions.kt    # Centralized exception definitions
+```
 
 ## APIs
 

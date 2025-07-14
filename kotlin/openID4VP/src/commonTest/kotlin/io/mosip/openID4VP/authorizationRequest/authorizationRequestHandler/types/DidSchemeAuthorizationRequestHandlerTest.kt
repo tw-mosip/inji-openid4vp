@@ -4,7 +4,14 @@ import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ClientIdScheme.DID
+import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
 import io.mosip.openID4VP.constants.ContentType
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.FormatType.LDP_VC
+import io.mosip.openID4VP.constants.KeyManagementAlgorithm
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.jwt.jws.JWSHandler
 import io.mosip.openID4VP.jwt.keyResolver.types.DidPublicKeyResolver
@@ -38,9 +45,9 @@ class DidSchemeAuthorizationRequestHandlerTest {
 
         walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf("jwt_vp" to VPFormatSupported(listOf("ES256"))),
-            clientIdSchemesSupported = listOf("did"),
-            requestObjectSigningAlgValuesSupported = listOf("ES256", "RS256")
+            vpFormatsSupported = mapOf(LDP_VC to VPFormatSupported(listOf("ES256"))),
+            clientIdSchemesSupported = listOf(DID),
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA)
         )
 
         mockkConstructor(JWSHandler::class)
@@ -141,7 +148,7 @@ class DidSchemeAuthorizationRequestHandlerTest {
         val result = handler.process(walletMetadata)
 
         assertEquals(walletMetadata, result)
-        assertEquals(listOf("ES256", "RS256"), result.requestObjectSigningAlgValuesSupported)
+        assertEquals(listOf(RequestSigningAlgorithm.EdDSA), result.requestObjectSigningAlgValuesSupported)
     }
 
     @Test
