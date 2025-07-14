@@ -18,16 +18,16 @@ fun parseAndValidatePresentationDefinition(
     authorizationRequestParameters: MutableMap<String, Any>,
     isPresentationDefinitionUriSupported: Boolean
 ) {
-    val hasPresentationDefinition =
-        authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
-    val hasPresentationDefinitionUri =
-        authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION_URI.value)
+    val hasPresentationDefinition = authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION.value)
+    val hasPresentationDefinitionUri = authorizationRequestParameters.containsKey(PRESENTATION_DEFINITION_URI.value)
     val presentationDefinition: Any?
 
     when {
         hasPresentationDefinition && hasPresentationDefinitionUri -> {
-            throw OpenID4VPExceptions.InvalidData("Either presentation_definition or presentation_definition_uri request param can be provided but not both",
-                className)
+            throw OpenID4VPExceptions.InvalidData(
+                "Either presentation_definition or presentation_definition_uri request param can be provided but not both",
+                className
+            )
         }
 
         hasPresentationDefinition -> {
@@ -37,28 +37,71 @@ fun parseAndValidatePresentationDefinition(
 
         hasPresentationDefinitionUri -> {
             if (!isPresentationDefinitionUriSupported) {
-                throw  OpenID4VPExceptions.InvalidData("presentation_definition_uri is not support",
-                    className,OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE)
+                throw OpenID4VPExceptions.InvalidData(
+                    "presentation_definition_uri is not supported",
+                    className,
+                    OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE
+                )
             }
 
             val presentationDefinitionUri = getStringValue(
                 authorizationRequestParameters,
                 PRESENTATION_DEFINITION_URI.value
             )
+
             validate(PRESENTATION_DEFINITION_URI.value, presentationDefinitionUri, className)
+
             if (!isValidUrl(presentationDefinitionUri!!)) {
-                throw OpenID4VPExceptions.InvalidData("${PRESENTATION_DEFINITION_URI.value} data is not valid", className,OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI)
+                throw OpenID4VPExceptions.InvalidData(
+                    "presentation_definition_uri is not valid",
+                    className,
+                    OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI
+                )
             }
-            val response =
-                sendHTTPRequest(
+
+            val response: Map<String, Any>
+            try {
+                response = sendHTTPRequest(
                     url = presentationDefinitionUri,
                     method = HttpMethod.GET
                 )
-            presentationDefinition = response["body"].toString()
+            } catch (e: Exception) {
+                throw OpenID4VPExceptions.InvalidData(
+                    "presentation_definition_uri could not be reached: $presentationDefinitionUri",
+                    className,
+                    OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI
+                )
+            }
+
+            val responseBody = response["body"]?.toString()
+            if (responseBody.isNullOrBlank()) {
+                throw OpenID4VPExceptions.InvalidData(
+                    "presentation_definition_uri response body is not valid",
+                    className,
+                    OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE
+                )
+            }
+
+            try {
+                val pd = deserializeAndValidate(
+                    responseBody,
+                    PresentationDefinitionSerializer
+                )
+                presentationDefinition = pd
+            } catch (e: Exception) {
+                throw OpenID4VPExceptions.InvalidData(
+                    "presentation_definition_uri did not contain valid presentation_definition",
+                    className,
+                    OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_REFERENCE
+                )
+            }
         }
 
         else -> {
-            throw  OpenID4VPExceptions.InvalidData("Either presentation_definition or presentation_definition_uri request param must be present", className)
+            throw OpenID4VPExceptions.InvalidData(
+                "Either presentation_definition or presentation_definition_uri request param must be present",
+                className
+            )
         }
     }
 
@@ -73,9 +116,14 @@ fun parseAndValidatePresentationDefinition(
             PresentationDefinitionSerializer
         )
 
-        else -> throw  OpenID4VPExceptions.InvalidData("presentation_definition must be of type String or Map",
-            className)
+        is PresentationDefinition -> presentationDefinition
+
+        else -> throw OpenID4VPExceptions.InvalidData(
+            "presentation_definition must be of type String, Map, or PresentationDefinition",
+            className
+        )
     }
+
 
     authorizationRequestParameters[PRESENTATION_DEFINITION.value] = presentationDefinitionObj
 
@@ -86,6 +134,7 @@ fun parseAndValidatePresentationDefinition(
 
     validateResponseModeForMsoMdocFormat(presentationDefinitionObj, responseMode)
 }
+
 
 
 

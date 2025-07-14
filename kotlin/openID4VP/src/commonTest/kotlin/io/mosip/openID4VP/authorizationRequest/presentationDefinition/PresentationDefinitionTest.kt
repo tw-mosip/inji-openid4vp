@@ -103,7 +103,7 @@ class PresentationDefinitionTest {
             RESPONSE_MODE.value to DIRECT_POST_JWT.value
         )
 
-        val expectedExceptionMessage = "presentation_definition_uri is not support"
+        val expectedExceptionMessage = "presentation_definition_uri is not supported"
 
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             parseAndValidatePresentationDefinition(authorizationRequestParam, false)
