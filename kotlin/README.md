@@ -118,8 +118,14 @@ implementation "io.mosip:inji-openid4vp-jar:0.4.0-SNAPSHOT"
 ## Create instance of OpenID4VP library to invoke it's methods
 
 ```kotlin
-val openID4VP = OpenID4VP(traceabilityId = "sample-id")
+val openID4VP = OpenID4VP(traceabilityId = "trace-id", walletMetadata = walletMetadata)
 ```
+###### Parameters
+| Name           | Type           | Description                                                                                                                                                                                                     |
+|----------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| traceabilityId | String         | Unique identifier for tracking requests and responses.                                                                                                                                                          |
+| walletMetadata | WalletMetadata | Metadata which wallet supports, such that client-id-scheme support, vp format support, proof type support, etc. 
+
 
 ## Integration
 - To integrate the inji-openid4vp library into your Android application, there is a sample application created in `kotlin/sampleovpwallet` directory. This sample app demonstrates how to use the library to authenticate Verifiers, construct unsigned Verifiable Presentation (VP) tokens, and share them with Verifiers.
