@@ -24,7 +24,7 @@ sealed class OpenID4VPExceptions(
     // Authorization Exceptions
 
     class InvalidVerifier(message: String, className: String) :
-        OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_REQUEST, message, className)
+        OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_CLIENT, message, className)
 
     class AccessDenied(message: String, className: String) :
         OpenID4VPExceptions(OpenID4VPErrorCodes.ACCESS_DENIED, message, className)

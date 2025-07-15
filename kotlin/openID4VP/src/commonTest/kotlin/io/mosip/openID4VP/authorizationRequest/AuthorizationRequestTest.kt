@@ -189,7 +189,7 @@ class AuthorizationRequestTest {
                     encodedAuthorizationRequest, trustedVerifiers, shouldValidateClient,null
                 )
             }
-        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, actualException.errorCode)
+        assertEquals(OpenID4VPErrorCodes.INVALID_CLIENT, actualException.errorCode)
         assertEquals(expectedExceptionMessage, actualException.message)
     }
 
@@ -352,7 +352,7 @@ class AuthorizationRequestTest {
                 openID4VP.authenticateVerifier(encodedAuthorizationRequest, trustedVerifiers, false,null)
             }
         assertEquals(OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI, actualException.errorCode)
-        assertEquals("presentation_definition_uri data is not valid",actualException.message)
+        assertEquals("presentation_definition_uri is not valid",actualException.message)
     }
 
     @Test
@@ -537,41 +537,43 @@ class AuthorizationRequestTest {
 
     @Test
     fun `should throw error if api call of presentation_definition_uri fails in authorization request`() {
-        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered + mapOf(PRESENTATION_DEFINITION_URI.value to "https://mock-verifier.com/verifier/get-presentation-definition-1")
-        val applicationFields =
-            listOf(
-                CLIENT_ID.value,
-                CLIENT_ID_SCHEME.value,
-                RESPONSE_MODE.value,
-                RESPONSE_URI.value,
-                PRESENTATION_DEFINITION_URI.value,
-                RESPONSE_TYPE.value,
-                NONCE.value,
-                STATE.value,
-                CLIENT_METADATA.value
-            )
-        every {
-            NetworkManagerClient.sendHTTPRequest(
-                requestUrl,
-                any()
-            )
-        } returns mapOf(
-            "header" to Headers.Builder().add("content-type", "application/json").build(),
-            "body" to createAuthorizationRequestObject(PRE_REGISTERED, authorizationRequestParamsMap, applicationFields)
+        val uri = "https://mock-verifier.com/verifier/get-presentation-definition-1"
+
+        val authorizationRequestParamsMap = requestParams + clientIdOfPreRegistered +
+                mapOf(PRESENTATION_DEFINITION_URI.value to uri)
+
+        val applicationFields = listOf(
+            CLIENT_ID.value,
+            CLIENT_ID_SCHEME.value,
+            RESPONSE_MODE.value,
+            RESPONSE_URI.value,
+            PRESENTATION_DEFINITION_URI.value,
+            RESPONSE_TYPE.value,
+            NONCE.value,
+            STATE.value,
+            CLIENT_METADATA.value
         )
 
+        // Simulate network failure
+        every {
+            NetworkManagerClient.sendHTTPRequest(uri, HttpMethod.GET)
+        } throws NetworkRequestFailed("Network request failed with error response - mock-verifier.com")
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap,false , PRE_REGISTERED, applicationFields)
+            createUrlEncodedData(authorizationRequestParamsMap, false, PRE_REGISTERED, applicationFields)
 
+        val expectedMessage = "presentation_definition_uri could not be reached: $uri"
 
-        assertFailsWith<NetworkRequestFailed> {
+        val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
             openID4VP.authenticateVerifier(
                 encodedAuthorizationRequest,
                 trustedVerifiers,
                 shouldValidateClient = true
             )
         }
+
+        assertEquals(OpenID4VPErrorCodes.INVALID_PRESENTATION_DEFINITION_URI, exception.errorCode)
+        assertEquals(expectedMessage, exception.message)
     }
 
     @Test
