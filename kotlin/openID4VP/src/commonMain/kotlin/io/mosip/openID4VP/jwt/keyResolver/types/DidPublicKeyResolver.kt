@@ -33,7 +33,7 @@ class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
                 if (!publicKeyMultibase.isNullOrEmpty()) return publicKeyMultibase
 
                 if (PUBLIC_KEY_TYPES.any { method.containsKey(it) }) {
-                    throw OpenID4VPExceptions.UnsupportedPublicKeyFormat(
+                    throw OpenID4VPExceptions.UnsupportedPublicKeyType(
                         className
                     )
                 }
@@ -43,7 +43,7 @@ class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
     }
 
     companion object{
-        val PUBLIC_KEY_TYPES = listOf("publicKey", "publicKeyJwk", "publicKeyPem", "publicKeyBase58", "publicKeyHex")
+        val PUBLIC_KEY_TYPES = listOf("publicKey", "publicKeyJwk", "publicKeyPem", "publicKeyHex")
     }
 
 

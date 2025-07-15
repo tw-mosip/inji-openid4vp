@@ -83,4 +83,73 @@ class DidPublicKeyResolverTest {
         }
         assertEquals("Public key extraction failed", exception.message)
     }
+
+    @Test
+    fun `should throw exception when unsupported public key- publicKeyHex present in verificationMethod`() {
+        val mockResponse = mapOf(
+            "verificationMethod" to listOf(
+                mapOf("publicKeyHex" to  "z3CSkXmF1DmgVuqPFKMTuJgn846mEuVB9rNoyP9hXribo",
+                    "controller" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
+                    "id" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs#key-0",
+                    "type" to "Ed25519VerificationKey2020",
+                    "@context" to "https://w3id.org/security/suites/ed25519-2020/v1"
+                )
+            )
+        )
+
+        every { anyConstructed<DidWebResolver>().resolve() } returns mockResponse
+
+        val header = mapOf("kid" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs#key-0")
+
+        val exception = assertFailsWith<UnsupportedPublicKeyType> {
+            resolver.resolveKey(header)
+        }
+        assertEquals("Unsupported Public Key type. Must be 'publicKeyMultibase'", exception.message)
+    }
+
+    @Test
+    fun `should throw exception when unsupported public key- publicKeyJwk present in verificationMethod`() {
+        val mockResponse = mapOf(
+            "verificationMethod" to listOf(
+                mapOf("publicKeyJwk" to  "z3CSkXmF1DmgVuqPFKMTuJgn846mEuVB9rNoyP9hXribo",
+                    "controller" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
+                    "id" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs#key-0",
+                    "type" to "Ed25519VerificationKey2020",
+                    "@context" to "https://w3id.org/security/suites/ed25519-2020/v1"
+                )
+            )
+        )
+
+        every { anyConstructed<DidWebResolver>().resolve() } returns mockResponse
+
+        val header = mapOf("kid" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs#key-0")
+
+        val exception = assertFailsWith<UnsupportedPublicKeyType> {
+            resolver.resolveKey(header)
+        }
+        assertEquals("Unsupported Public Key type. Must be 'publicKeyMultibase'", exception.message)
+    }
+
+    @Test
+    fun `should throw exception when unsupported public key- publicKeyPem present in verificationMethod`() {
+        val mockResponse = mapOf(
+            "verificationMethod" to listOf(
+                mapOf("publicKeyPem" to  "z3CSkXmF1DmgVuqPFKMTuJgn846mEuVB9rNoyP9hXribo",
+                    "controller" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
+                    "id" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs#key-0",
+                    "type" to "Ed25519VerificationKey2020",
+                    "@context" to "https://w3id.org/security/suites/ed25519-2020/v1"
+                )
+            )
+        )
+
+        every { anyConstructed<DidWebResolver>().resolve() } returns mockResponse
+
+        val header = mapOf("kid" to "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs#key-0")
+
+        val exception = assertFailsWith<UnsupportedPublicKeyType> {
+            resolver.resolveKey(header)
+        }
+        assertEquals("Unsupported Public Key type. Must be 'publicKeyMultibase'", exception.message)
+    }
 }
