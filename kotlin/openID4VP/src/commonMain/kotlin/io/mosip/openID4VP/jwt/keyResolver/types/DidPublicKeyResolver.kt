@@ -25,16 +25,26 @@ class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
     }
 
     private fun extractPublicKeyMultibase(kid: String, didDocument: Map<String, Any>): String? {
-        val verificationMethod = didDocument["verificationMethod"] as? List<Map<String, Any>>
-        if (verificationMethod != null) {
-            for (method in verificationMethod) {
-                val id = method["id"] as? String
-                val publicKeyMultibase = method["publicKey"] as? String
-                if (id == kid && !publicKeyMultibase.isNullOrEmpty()) {
-                    return publicKeyMultibase
+        val verificationMethods = didDocument["verificationMethod"] as? List<Map<String, Any>> ?: return null
+
+        for (method in verificationMethods) {
+            if (method["id"] == kid) {
+                val publicKeyMultibase = method["publicKeyMultibase"] as? String
+                if (!publicKeyMultibase.isNullOrEmpty()) return publicKeyMultibase
+
+                if (PUBLIC_KEY_TYPES.any { method.containsKey(it) }) {
+                    throw OpenID4VPExceptions.UnsupportedPublicKeyFormat(
+                        className
+                    )
                 }
             }
         }
         return null
     }
+
+    companion object{
+        val PUBLIC_KEY_TYPES = listOf("publicKey", "publicKeyJwk", "publicKeyPem", "publicKeyBase58", "publicKeyHex")
+    }
+
+
 }

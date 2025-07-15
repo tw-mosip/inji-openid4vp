@@ -33,7 +33,7 @@ class DidPublicKeyResolverTest {
             "verificationMethod" to listOf(
                 mapOf(
                     "id" to "did:web:example:123456789#keys-1",
-                    "publicKey" to "mockPublicKey123"
+                    "publicKeyMultibase" to "mockPublicKey123"
                 )
             )
         )
