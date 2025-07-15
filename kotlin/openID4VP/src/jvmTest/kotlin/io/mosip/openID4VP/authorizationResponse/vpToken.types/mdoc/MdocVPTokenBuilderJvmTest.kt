@@ -4,8 +4,6 @@ import co.nstant.`in`.cbor.CborDecoder
 import co.nstant.`in`.cbor.model.Map
 import co.nstant.`in`.cbor.model.UnicodeString
 import co.nstant.`in`.cbor.model.Array
-import io.mockk.every
-import io.mockk.mockkObject
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.DeviceAuthentication
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
@@ -38,13 +36,13 @@ class MdocVPTokenBuilderJvmTest {
     @Test
     fun `should decode base64 using JVM decoder`() {
         val input = "aGVsbG8=" // "hello"
-        val decoded = decodeBase64Data(input)
+        val decoded = decodeFromBase64Url(input)
         assertEquals("hello", decoded.toString(Charsets.UTF_8))
         val result = MdocVPTokenBuilder(mdocVPTokenSigningResult, mdocCredentials).build()
 
         assertNotNull(result)
 
-        val decodedResult = decodeBase64Data(result.base64EncodedDeviceResponse)
+        val decodedResult = decodeFromBase64Url(result.base64EncodedDeviceResponse)
         val decodedCbor = CborDecoder(decodedResult.inputStream()).decode()[0] as Map
 
         assertEquals("1.0", decodedCbor[UnicodeString("version")].toString())
@@ -71,7 +69,7 @@ class MdocVPTokenBuilderJvmTest {
         val result = MdocVPTokenBuilder(mdocVPTokenSigningResult, multipleCredentials).build()
 
         assertNotNull(result)
-        val decodedResult = decodeBase64Data(result.base64EncodedDeviceResponse)
+        val decodedResult = decodeFromBase64Url(result.base64EncodedDeviceResponse)
         val decodedCbor = CborDecoder(decodedResult.inputStream()).decode()[0] as CborMap
 
         val documents = decodedCbor[UnicodeString("documents")] as Array

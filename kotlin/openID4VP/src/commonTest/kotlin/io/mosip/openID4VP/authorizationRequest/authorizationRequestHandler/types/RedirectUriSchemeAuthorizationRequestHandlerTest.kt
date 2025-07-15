@@ -6,7 +6,10 @@ import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.parseAndValidateClientMetadata
 import io.mosip.openID4VP.authorizationRequest.presentationDefinition.parseAndValidatePresentationDefinition
+import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ContentType
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.testData.clientMetadataString
 import io.mosip.openID4VP.testData.presentationDefinitionString
@@ -37,9 +40,9 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
 
         walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf("jwt_vp" to VPFormatSupported(listOf("ES256"))),
-            clientIdSchemesSupported = listOf("redirect_uri"),
-            requestObjectSigningAlgValuesSupported = listOf("ES256", "RS256")
+            vpFormatsSupported = mapOf(FormatType.LDP_VC to VPFormatSupported(listOf("ES256"))),
+            clientIdSchemesSupported = listOf(ClientIdScheme.REDIRECT_URI),
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA)
         )
     }
 

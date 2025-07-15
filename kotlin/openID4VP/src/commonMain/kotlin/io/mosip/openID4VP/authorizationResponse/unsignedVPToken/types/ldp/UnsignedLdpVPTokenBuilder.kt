@@ -6,8 +6,8 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.Proof
 import io.mosip.openID4VP.common.DateUtil.formattedCurrentDateTime
 import io.mosip.openID4VP.common.URDNA2015Canonicalization
 import io.mosip.openID4VP.common.encodeToJsonString
-import io.mosip.openID4VP.constants.SignatureAlgorithm.Ed25519Signature2020
-import io.mosip.openID4VP.constants.SignatureAlgorithm.JsonWebSignature2020
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm.Ed25519Signature2020
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm.JsonWebSignature2020
 
 typealias VPTokenSigningPayload = LdpVPToken
 

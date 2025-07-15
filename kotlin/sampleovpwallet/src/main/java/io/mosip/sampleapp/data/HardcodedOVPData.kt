@@ -3,36 +3,32 @@ package io.mosip.sampleapp.data
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mosip.openID4VP.authorizationRequest.VPFormatSupported
 import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
+import io.mosip.openID4VP.constants.ClientIdScheme
+import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.KeyManagementAlgorithm
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 
 object HardcodedOVPData {
     fun getWalletMetadata(): WalletMetadata {
-        val hardcodedMetadataJson = """
-            {
-              "presentation_definition_uri_supported": true,
-              "vp_formats_supported": {
-                "ldp_vc": {
-                  "alg_values_supported": [
-                    "Ed25519Signature2018",
-                    "Ed25519Signature2020",
-                    "RSASignature2018"
-                  ]
-                },
-                "mso_mdoc": {
-                  "alg_values_supported": ["ES256"]
-                }
-              },
-              "client_id_schemes_supported": ["redirect_uri", "did", "pre-registered"],
-              "request_object_signing_alg_values_supported": ["EdDSA"],
-              "authorization_encryption_alg_values_supported": ["ECDH-ES"],
-              "authorization_encryption_enc_values_supported": ["A256GCM"]
-            }
-            """.trimIndent()
-
-        val objectMapper = jacksonObjectMapper()
-
-        return objectMapper.readValue(hardcodedMetadataJson)
+        return WalletMetadata(
+            presentationDefinitionURISupported = true,
+            vpFormatsSupported = mapOf(
+                FormatType.LDP_VC to VPFormatSupported(
+                    algValuesSupported = listOf("Ed25519Signature2018", "Ed25519Signature2020", "RSASignature2018")
+                ),
+                FormatType.MSO_MDOC to VPFormatSupported(
+                    algValuesSupported = listOf("ES256")
+                )
+            ),
+            clientIdSchemesSupported = listOf(ClientIdScheme.REDIRECT_URI, ClientIdScheme.DID, ClientIdScheme.PRE_REGISTERED),
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+            authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+            authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
+        )
     }
 
     fun getListOfVerifiers(): List<Verifier> {

@@ -38,7 +38,7 @@ class OpenID4VPTest {
     fun setUp() {
         mockkObject(NetworkManagerClient)
 
-        openID4VP = OpenID4VP("test-OpenID4VP")
+        openID4VP = OpenID4VP("test-OpenID4VP", walletMetadata)
         openID4VP.authorizationRequest = authorizationRequest
         setField(openID4VP, "responseUri", responseUrl)
     }
@@ -61,8 +61,7 @@ class OpenID4VPTest {
         val result = openID4VP.authenticateVerifier(
             "openid-vc://?request=test-request",
             trustedVerifiers,
-            true,
-            walletMetadata
+            true
         )
 
         assertEquals(authorizationRequest, result)

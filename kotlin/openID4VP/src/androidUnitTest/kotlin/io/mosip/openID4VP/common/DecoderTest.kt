@@ -32,7 +32,7 @@ class DecoderTest {
             expectedOutput.toByteArray()
         }
 
-        val result = decodeBase64Data(input)
+        val result = decodeFromBase64Url(input)
         assertEquals(expectedOutput, result.toString(Charsets.UTF_8))
     }
 
@@ -47,7 +47,7 @@ class DecoderTest {
             expectedOutput.toByteArray()
         }
 
-        val result = decodeBase64Data(input)
+        val result = decodeFromBase64Url(input)
         assertEquals(expectedOutput, result.toString(Charsets.UTF_8))
     }
 
@@ -60,7 +60,7 @@ class DecoderTest {
         } throws IllegalArgumentException("Invalid base64")
 
         assertFailsWith<IllegalArgumentException> {
-            decodeBase64Data(input)
+            decodeFromBase64Url(input)
         }
     }
 }

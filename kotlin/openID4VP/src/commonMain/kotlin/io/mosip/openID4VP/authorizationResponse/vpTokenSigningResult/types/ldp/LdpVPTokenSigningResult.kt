@@ -2,10 +2,10 @@ package io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp
 
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.common.validateField
-import io.mosip.openID4VP.constants.SignatureAlgorithm.Ed25519Signature2018
-import io.mosip.openID4VP.constants.SignatureAlgorithm.Ed25519Signature2020
-import io.mosip.openID4VP.constants.SignatureAlgorithm.JsonWebSignature2020
-import io.mosip.openID4VP.constants.SignatureAlgorithm.RSASignature2018
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm.Ed25519Signature2018
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm.Ed25519Signature2020
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm.JsonWebSignature2020
+import io.mosip.openID4VP.constants.SignatureSuiteAlgorithm.RSASignature2018
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
 private val className = LdpVPTokenSigningResult::class.simpleName!!

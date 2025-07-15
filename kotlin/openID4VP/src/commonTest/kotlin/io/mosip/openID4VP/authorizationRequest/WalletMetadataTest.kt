@@ -3,6 +3,10 @@ package io.mosip.openID4VP.authorizationRequest
 import io.mosip.openID4VP.common.OpenID4VPErrorCodes
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
+import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.KeyManagementAlgorithm
+import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import kotlin.test.*
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 
@@ -14,17 +18,17 @@ class WalletMetadataTest {
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = null,
             vpFormatsSupported = mapOf(
-                "ldp_vc" to VPFormatSupported(
+                FormatType.LDP_VC to VPFormatSupported(
                     algValuesSupported = listOf("EdDSA")
                 )
             ),
             clientIdSchemesSupported = listOf(
-                ClientIdScheme.REDIRECT_URI.value,
-                PRE_REGISTERED.value
+                ClientIdScheme.REDIRECT_URI,
+                PRE_REGISTERED
             ),
-            requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+            authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+            authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
         )
         assertEquals(true, walletMetadata.presentationDefinitionURISupported)
     }
@@ -34,16 +38,16 @@ class WalletMetadataTest {
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
             vpFormatsSupported = mapOf(
-                "ldp_vc" to VPFormatSupported(
+                FormatType.LDP_VC to VPFormatSupported(
                     algValuesSupported = listOf("EdDSA")
                 )
             ),
             clientIdSchemesSupported = null,
-            requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-            authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-            authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+            authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+            authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
         )
-        assertEquals(listOf(PRE_REGISTERED.value), walletMetadata.clientIdSchemesSupported)
+        assertEquals(listOf(PRE_REGISTERED), walletMetadata.clientIdSchemesSupported)
     }
 
     @Test
@@ -51,16 +55,16 @@ class WalletMetadataTest {
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
             vpFormatsSupported = mapOf(
-                "ldp_vc" to VPFormatSupported(
+                FormatType.LDP_VC to VPFormatSupported(
                     algValuesSupported = listOf("EdDSA")
                 )
             ),
             clientIdSchemesSupported = null,
-            requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
             authorizationEncryptionAlgValuesSupported = null,
             authorizationEncryptionEncValuesSupported = null
         )
-        assertEquals(listOf(PRE_REGISTERED.value), walletMetadata.clientIdSchemesSupported)
+        assertEquals(listOf(PRE_REGISTERED), walletMetadata.clientIdSchemesSupported)
         assertNull(walletMetadata.authorizationEncryptionAlgValuesSupported)
         assertNull(walletMetadata.authorizationEncryptionEncValuesSupported)
     }
@@ -72,12 +76,12 @@ class WalletMetadataTest {
                 presentationDefinitionURISupported = true,
                 vpFormatsSupported = emptyMap(),
                 clientIdSchemesSupported = listOf(
-                    ClientIdScheme.REDIRECT_URI.value,
-                    PRE_REGISTERED.value
+                    ClientIdScheme.REDIRECT_URI,
+                    PRE_REGISTERED
                 ),
-                requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-                authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-                authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+                requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+                authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+                authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
             )
         }
         assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, ex.errorCode)
@@ -87,55 +91,4 @@ class WalletMetadataTest {
         )
     }
 
-    @Test
-    fun `should throw error if vp_formats_supported has empty key`() {
-        val ex = assertFailsWith<OpenID4VPExceptions.InvalidData> {
-            WalletMetadata(
-                presentationDefinitionURISupported = true,
-                vpFormatsSupported = mapOf(
-                    "" to VPFormatSupported(
-                        algValuesSupported = null
-                    )
-                ),
-                clientIdSchemesSupported = listOf(
-                    ClientIdScheme.REDIRECT_URI.value,
-                    PRE_REGISTERED.value
-                ),
-                requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-                authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-                authorizationEncryptionEncValuesSupported = listOf("A256GCM")
-            )
-        }
-        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, ex.errorCode)
-        assertEquals(
-            "vp_formats_supported cannot have empty keys",
-            ex.message
-        )
-    }
-
-    @Test
-    fun `should throw error if vp_formats_supported has just empty space`() {
-        val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
-            WalletMetadata(
-                presentationDefinitionURISupported = true,
-                vpFormatsSupported = mapOf(
-                    " " to VPFormatSupported(
-                        algValuesSupported = null
-                    )
-                ),
-                clientIdSchemesSupported = listOf(
-                    ClientIdScheme.REDIRECT_URI.value,
-                    PRE_REGISTERED.value
-                ),
-                requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-                authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-                authorizationEncryptionEncValuesSupported = listOf("A256GCM")
-            )
-        }
-        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, exception.errorCode)
-        assertEquals(
-            "vp_formats_supported cannot have empty keys",
-            exception.message
-        )
-    }
 }

@@ -1,6 +1,7 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.mosip.openID4VP.common.JacksonObjectMapper
+import io.mosip.openID4VP.common.getObjectMapper
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
@@ -25,7 +26,7 @@ fun <T : Validatable> deserializeAndValidate(
     paramJsonAsString: Map<String, Any>, type: KSerializer<T>
 ): T {
     try {
-        val objectMapper = jacksonObjectMapper()
+        val objectMapper = getObjectMapper()
         val rawJsonString = objectMapper.writeValueAsString(paramJsonAsString)
 
         val deserializedValue: T = Json.decodeFromString(type, rawJsonString)

@@ -1,10 +1,57 @@
 # INJI-OpenID4VP  
 
+
 ## 🚨 Breaking Changes
 
-### From Version `release-0.3.x` onward:
+### From Version `release-0.4.x` onward:
 
-As part of package restructuring, some classes have moved to a new package.
+### API contract changes
+This library has undergone some changes in its API contract.
+
+#### 1. Instantiation of OpenID4VP
+- The OpenID4VP class is now initialized with `traceabilityId` and `walletMetadata` parameter, which is used to track the traceability of the requests and responses.
+
+```kotlin
+val openID4VP = OpenID4VP(traceabilityId = "trace-id", walletMetadata = walletMetadata)
+```
+
+#### 2. Construction of WalletMetadata
+- The WalletMetdata construction has now been simplified. You can create a WalletMetadata object with the required parameters exposed as constants.
+- In detail,
+- `WalletMetadata` is now a struct that contains the following properties:
+    - `presentationDefinitionURISupported`: Boolean
+    - `vpFormatsSupported`: Map<String: VPFormatSupported>
+    - `clientIdSchemesSupported`: List<ClientIdScheme>?
+    - `requestObjectSigningAlgValuesSupported`: List<RequestSigningAlgorithm>?
+    - `authorizationEncryptionAlgValuesSupported`: List<KeyManagementAlgorithm>?
+    - `authorizationEncryptionEncValuesSupported`: List<ContentEncryptionAlgorithm>?
+
+```kotlin
+val walletMetadata = WalletMetadata(
+            presentationDefinitionURISupported = true,
+            vpFormatsSupported = mapOf(
+                FormatType.LDP_VC to VPFormatSupported(
+                    algValuesSupported = listOf("EdDSA")
+                )
+            ),
+            clientIdSchemesSupported = listOf(ClientIdScheme.REDIRECT_URI, ClientIdScheme.PRE_REGISTERED),
+            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+            authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+            authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
+        )
+```
+
+3. The shouldValidateClient parameter in authenticateVerifier now defaults to true.
+- If your integration previously relied on it being false, you must now explicitly pass false to preserve the old behavior.
+- Example (updated usage)
+```kotlin
+val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
+                    urlEncodedAuthorizationRequest = encodedAuthorizationRequest,
+                    trustedVerifiers = trustedVerifiers,
+                    shouldValidateClient = true
+                )
+```
+
 
 #### ❗ Required Update in Imports
 
@@ -46,6 +93,7 @@ The library validates the client_id and client_id_scheme parameters in the autho
 
 - [Installation](#installation)
 - [Integration](#integration)
+- [Package Structure](#package-structure)
 - [APIs](#apis)
   - [authenticateVerifier](#authenticateverifier)
   - [constructUnsignedVPToken](#constructUnsignedVPToken)
@@ -70,12 +118,86 @@ implementation "io.mosip:inji-openid4vp-jar:0.4.0-SNAPSHOT"
 ## Create instance of OpenID4VP library to invoke it's methods
 
 ```kotlin
-val openID4VP = OpenID4VP(traceabilityId = "sample-id")
+val openID4VP = OpenID4VP(traceabilityId = "trace-id", walletMetadata = walletMetadata)
 ```
+###### Parameters
+| Name           | Type           | Description                                                                                                                                                                                                     |
+|----------------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| traceabilityId | String         | Unique identifier for tracking requests and responses.                                                                                                                                                          |
+| walletMetadata | WalletMetadata | Metadata which wallet supports, such that client-id-scheme support, vp format support, proof type support, etc. 
+
 
 ## Integration
 - To integrate the inji-openid4vp library into your Android application, there is a sample application created in `kotlin/sampleovpwallet` directory. This sample app demonstrates how to use the library to authenticate Verifiers, construct unsigned Verifiable Presentation (VP) tokens, and share them with Verifiers.
 - For more details refer to [README](https://github.com/mosip/inji-openid4vp/blob/release-0.3.x/kotlin/sampleovpwallet/README.md) of the sample application.
+
+## Package Structure
+```
+io.mosip.openID4VP/
+├── OpenID4VP.kt                  # Main library class with public APIs
+│
+├── authorizationRequest/         # Authorization request handling
+│   ├── AuthorizationRequest.kt   # Model for parsed authorization requests
+│   ├── Verifier.kt               # Trusted verifier model
+│   ├── clientMetadata/
+│   │   ├── ClientMetadata.kt     # Client metadata model
+│   │   ├── Jwk.kt                # JSON Web Key model
+│   │   └── Jwks.kt               # JSON Web Key Set model
+│   └── presentationDefinition/   # Presentation definition models
+│       ├── PresentationDefinition.kt
+│       ├── InputDescriptor.kt
+│       ├── Constraints.kt
+│       │   └── Fields.kt   
+│       │       └── Filter.kt       
+│
+├── authorizationResponse/        # Response handling
+│   ├── AuthorizationResponse.kt  # Model for authorization responses
+│   ├── presentationSubmission/  # Presentation submission models
+│   │   ├── PresentationSubmission.kt 
+│   │   └── DescriptorMapping.kt
+│   │
+│   ├── unsignedVPToken/            # Unsigned VP token models
+│   │   ├── UnsignedVPToken.kt    # Base class for unsigned tokens
+│   │   ├── types/
+│   │   │   ├── ldp/              # JSON-LD format support
+│   │   │   │   └── UnsignedLdpVPToken.kt
+│   │   │   └── mdoc/             # mDOC format support
+│   │   │       └── UnsignedMdocVPToken.kt
+│   │
+│   ├── vpToken/                  # VP token models
+│   │   ├── VPToken.kt             # Base class for VP tokens
+│   │   ├── types/
+│   │   │   ├── ldp/              # JSON-LD format support
+│   │   │   │   └── LdpVPToken.kt
+│   │   │   └── mdoc/             # mDOC format support
+│   │   │       └── MdocVPToken.kt
+│   │
+│   └── vpTokenSigningResult/     # Signing results models
+│       ├── VPTokenSigningResult.kt # Base interface
+│       ├── types/
+│       │   ├── ldp/              # JSON-LD format support
+│       │   │   └── LdpVPTokenSigningResult.kt
+│       │   └── mdoc/             # mDOC format support
+│       │       └── MdocVPTokenSigningResult.kt
+│
+├── common/                       # Common utilities and models
+├── constants/                    # Constants used across the library  
+│
+├── jwt/                          # JWT handling
+│   ├── jwe/                      # JWE encryption support
+│   │   ├── JWEHandler.kt         # Handles JWE operations
+│   │   └── encryption/
+│   │       └── EncryptionProvider.kt # Provides encryption services
+│   ├── jws/                      # JWS signature support
+│       └── JWSHandler.kt         # Handles JWS operations
+│   ├──keyResolver/          # Resolves keys for JWT operations
+│   │   ├── types/
+│   │   │   ├── DidPublicKeyResolver.kt  
+│   │   └── PublicKeyResolver.kt       # Base class for public key resolution
+│
+├── exceptions/                   # Exceptions
+│   └── OpenID4VPExceptions.kt    # Centralized exception definitions
+```
 
 ## APIs
 
@@ -180,36 +302,32 @@ val trustedVerifiers = listOf(Verifier("https://verify.env1.net",listOf("https:/
 val walletMetadata = WalletMetadata(
     presentationDefinitionURISupported = true,
     vpFormatsSupported = mapOf(
-        "ldp_vc" to VPFormatSupported(
-            algValuesSupported = listOf("Ed25519Signature2018", "Ed25519Signature2020")
-        ),
-        "mso_mdoc" to VPFormatSupported(
-            algValuesSupported = listOf("ES256")
+        FormatType.LDP_VC to VPFormatSupported(
+            algValuesSupported = listOf("EdDSA")
         )
     ),
-    clientIdSchemesSupported = listOf("redirect_uri", "did", "pre-registered"),
-    requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
-    authorizationEncryptionAlgValuesSupported = listOf("ECDH-ES"),
-    authorizationEncryptionEncValuesSupported = listOf("A256GCM")
+    clientIdSchemesSupported = listOf(ClientIdScheme.REDIRECT_URI, ClientIdScheme.PRE_REGISTERED),
+    requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
+    authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
+    authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
 )
 val authorizationRequest: AuthorizationRequest = openID4VP.authenticateVerifier(
                     urlEncodedAuthorizationRequest = encodedAuthorizationRequest,
                     trustedVerifiers = trustedVerifiers,
-                    walletMetadata = walletMetadata,
                     shouldValidateClient = true
                 )
 ```
 
 #### WalletMetadata Parameters
 
-| Parameter                                 | Type                             | Required   | Default Value    | Description                                                                                      |
-|-------------------------------------------|----------------------------------|------------|------------------|--------------------------------------------------------------------------------------------------|
-| presentationDefinitionURISupported        | Bool                             | No         | true             | Indicates whether the wallet supports `presentation_definition_uri`.                             |
-| vpFormatsSupported                        | Map\<String: VPFormatSupported\> | Yes        | N/A              | A dictionary specifying the supported verifiable presentation formats and their algorithms.      |
-| clientIdSchemesSupported                  | List\<String\>                   | No         | "pre-registered" | A list of supported client ID schemes.                                                           |
-| requestObjectSigningAlgValuesSupported    | List\<String\>?                  | No         | null             | A list of supported algorithms for signing request objects.                                      |
-| authorizationEncryptionAlgValuesSupported | List\<String\>?                  | No         | null             | A list of supported algorithms for encrypting authorization responses.                           |
-| authorizationEncryptionEncValuesSupported | List\<String\>?                  | No         | null             | A list of supported encryption methods for authorization responses.                              |
+| Parameter                                 | Type                                 | Required   | Default Value    | Description                                                                                      |
+|-------------------------------------------|--------------------------------------|------------|------------------|--------------------------------------------------------------------------------------------------|
+| presentationDefinitionURISupported        | Boolean                              | No         | true             | Indicates whether the wallet supports `presentation_definition_uri`.                             |
+| vpFormatsSupported                        | Map\<FormatType: VPFormatSupported\> | Yes        | N/A              | A dictionary specifying the supported verifiable presentation formats and their algorithms.      |
+| clientIdSchemesSupported                  | List\<ClientIdScheme\>               | No         | "pre-registered" | A list of supported client ID schemes.                                                           |
+| requestObjectSigningAlgValuesSupported    | List\<RequestSigningAlgorithm\>?     | No         | null             | A list of supported algorithms for signing request objects.                                      |
+| authorizationEncryptionAlgValuesSupported | List\<KeyManagementAlgorithm\>?      | No         | null             | A list of supported algorithms for encrypting authorization responses.                           |
+| authorizationEncryptionEncValuesSupported | List\<ContentEncrytionAlgorithm\>?   | No         | null             | A list of supported encryption methods for authorization responses.                              |
 
 #### Verifier Parameters
 
