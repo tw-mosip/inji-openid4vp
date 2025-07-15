@@ -21,7 +21,7 @@ class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
                 className)
 
         return extractPublicKeyMultibase(kid, didResponse)
-            ?: throw  OpenID4VPExceptions.PublicKeyExtractionFailed("Public key extraction failed", className)
+            ?: throw  OpenID4VPExceptions.PublicKeyExtractionFailed("Public key extraction failed for kid: $kid", className)
     }
 
     private fun extractPublicKeyMultibase(kid: String, didDocument: Map<String, Any>): String? {

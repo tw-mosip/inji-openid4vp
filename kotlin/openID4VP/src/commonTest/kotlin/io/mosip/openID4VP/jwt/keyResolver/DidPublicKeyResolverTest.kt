@@ -81,7 +81,7 @@ class DidPublicKeyResolverTest {
         val exception = assertFailsWith<PublicKeyExtractionFailed> {
             resolver.resolveKey(header)
         }
-        assertEquals("Public key extraction failed", exception.message)
+        assertEquals("Public key extraction failed for kid: did:example:123456789#keys-1", exception.message)
     }
 
     @Test
