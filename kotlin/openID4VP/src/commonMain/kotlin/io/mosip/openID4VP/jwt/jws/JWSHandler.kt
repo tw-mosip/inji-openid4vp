@@ -1,5 +1,6 @@
 package io.mosip.openID4VP.jwt.jws
 
+import io.ipfs.multibase.Base58
 import io.mosip.openID4VP.common.convertJsonToMap
 import io.mosip.openID4VP.common.decodeFromBase64Url
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
@@ -7,7 +8,6 @@ import io.mosip.openID4VP.jwt.jws.JWSHandler.JwsPart.*
 import io.mosip.openID4VP.jwt.keyResolver.PublicKeyResolver
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters
 import org.bouncycastle.crypto.signers.Ed25519Signer
-import org.bouncycastle.util.encoders.Base64
 import java.nio.charset.StandardCharsets
 
 private val className = JWSHandler::class.simpleName!!
@@ -28,7 +28,7 @@ class JWSHandler(private val jws: String, private val publicKeyResolver: PublicK
             val payload = parts[PAYLOAD.number]
             val signature = decodeFromBase64Url(parts[SIGNATURE.number])
             val publicKey = publicKeyResolver.resolveKey(extractDataJsonFromJws(HEADER))
-            val publicKeyBytes = Base64.decode(publicKey)
+            val publicKeyBytes = Base58.decode(publicKey.drop(1))
             val publicKeyParams = Ed25519PublicKeyParameters(publicKeyBytes, 0)
             val signer = Ed25519Signer()
             signer.init(false, publicKeyParams)

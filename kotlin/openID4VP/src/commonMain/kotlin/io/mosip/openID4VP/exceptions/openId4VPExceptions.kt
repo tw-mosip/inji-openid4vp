@@ -99,8 +99,8 @@ sealed class OpenID4VPExceptions(
     class PublicKeyExtractionFailed(message: String, className: String) :
         OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_REQUEST, message, className)
 
-    class UnsupportedPublicKeyFormat(className: String) :
-        OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_REQUEST, "Public Key format not supported. Must be 'publicKeyMultibase'", className)
+    class UnsupportedPublicKeyType(className: String) :
+        OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_REQUEST, "Unsupported Public Key type. Must be 'publicKeyMultibase'", className)
 
     class KidExtractionFailed(message: String, className: String) :
         OpenID4VPExceptions(OpenID4VPErrorCodes.INVALID_REQUEST, message, className)
