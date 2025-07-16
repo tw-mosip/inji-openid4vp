@@ -1,6 +1,8 @@
 package io.mosip.openID4VP.exceptions
 
 import io.mosip.openID4VP.common.OpenID4VPErrorCodes
+import io.mosip.openID4VP.common.OpenID4VPErrorFields.ERROR
+import io.mosip.openID4VP.common.OpenID4VPErrorFields.ERROR_DESCRIPTION
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -14,10 +16,10 @@ sealed class OpenID4VPExceptions(
         Logger.getLogger(className).log(Level.SEVERE,"ERROR [$errorCode] - $message | Class: $className")
     }
 
-    fun toErrorResponse(): Map<String, String> {
-        return mapOf(
-            "error" to errorCode,
-            "error_description" to message
+    fun toErrorResponse(): MutableMap<String, String> {
+        return mutableMapOf(
+            ERROR to errorCode,
+            ERROR_DESCRIPTION to message
         )
     }
 

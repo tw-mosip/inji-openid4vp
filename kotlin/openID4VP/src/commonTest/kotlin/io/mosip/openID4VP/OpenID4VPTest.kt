@@ -141,7 +141,7 @@ class OpenID4VPTest {
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
         every {
-            NetworkManagerClient.sendHTTPRequest(any(), any(), any())
+            NetworkManagerClient.sendHTTPRequest(any(), any(), any(), any())
         } returns mapOf("body" to "Error sent")
 
         val thrown = assertFailsWith<InvalidData> {
@@ -170,7 +170,7 @@ class OpenID4VPTest {
                     it["error"] == "invalid_request" &&
                             it["error_description"] == "Unsupported response_mode"
                 },
-                null
+                any()
             )
         }
     }
@@ -184,7 +184,7 @@ class OpenID4VPTest {
         every { Logger.getLogger(any()) } returns mockLogger
 
         every {
-            NetworkManagerClient.sendHTTPRequest(any(), any(), any())
+            NetworkManagerClient.sendHTTPRequest(any(), any(), any(), any())
         } throws Exception("Network error")
 
         val field = openID4VP::class.java.getDeclaredField("responseUri")
@@ -246,7 +246,7 @@ class OpenID4VPTest {
         } throws exception
 
         every {
-            NetworkManagerClient.sendHTTPRequest(any(), any(), any())
+            NetworkManagerClient.sendHTTPRequest(any(), any(), any(), any())
         } returns mapOf("body" to "Error sent")
 
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
