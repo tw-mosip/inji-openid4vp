@@ -11,3 +11,9 @@ object OpenID4VPErrorCodes {
     const val INVALID_REQUEST_URI_METHOD = "invalid_request_uri_method"
     const val INVALID_TRANSACTION_DATA = "invalid_transaction_data"
 }
+
+object OpenID4VPErrorFields {
+    const val ERROR = "error"
+    const val ERROR_DESCRIPTION = "error_description"
+    const val STATE = "state"
+}
