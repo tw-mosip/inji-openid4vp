@@ -207,7 +207,7 @@ val didResponse = """
         "id": "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
         "verificationMethod": [
           {
-            "publicKey": "IKXhA7W1HD1sAl+OfG59VKAqciWrrOL1Rw5F+PGLhi4=",
+            "publicKeyMultibase": "z3CSkXmF1DmgVuqPFKMTuJgn846mEuVB9rNoyP9hXribo",
             "controller": "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs",
             "id": "did:web:mosip.github.io:inji-mock-services:openid4vp-service:docs#key-0",
             "type": "Ed25519VerificationKey2020",
