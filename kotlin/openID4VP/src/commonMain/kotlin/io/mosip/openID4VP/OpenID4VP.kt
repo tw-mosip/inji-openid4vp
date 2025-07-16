@@ -9,6 +9,8 @@ import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
+import io.mosip.openID4VP.common.OpenID4VPErrorFields.STATE
+import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import java.util.logging.Level
@@ -83,17 +85,19 @@ class OpenID4VP(private val traceabilityId: String, private val walletMetadata: 
     fun sendErrorToVerifier(exception: Exception) {
         responseUri?.let { uri ->
             try {
-                val errorPayload: Map<String, String> = when (exception) {
+                var errorPayload: MutableMap<String, String> = when (exception) {
                     is OpenID4VPExceptions -> exception.toErrorResponse()
                     else -> OpenID4VPExceptions.GenericFailure(
                         message = exception.message ?: "Unknown internal error",
                         className = "OpenID4VP.kt"
                     ).toErrorResponse()
                 }
+                errorPayload[STATE] = this.authorizationRequest.state ?: ""
                 sendHTTPRequest(
                     url = uri,
                     method = HttpMethod.POST,
-                    bodyParams = errorPayload
+                    bodyParams = errorPayload,
+                    headers = mapOf("Content-Type" to ContentType.APPLICATION_FORM_URL_ENCODED.value)
                 )
             } catch (e: Exception) {
                 Logger.getLogger(logTag()).log(Level.SEVERE, "Failed to send error to verifier: ${e.message}")
