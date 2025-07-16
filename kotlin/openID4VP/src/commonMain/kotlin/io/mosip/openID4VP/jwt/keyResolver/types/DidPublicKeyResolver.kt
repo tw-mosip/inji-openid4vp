@@ -29,21 +29,24 @@ class DidPublicKeyResolver(private val didUrl: String) : PublicKeyResolver {
 
         for (method in verificationMethods) {
             if (method["id"] == kid) {
-                val publicKeyMultibase = method["publicKeyMultibase"] as? String
-                if (!publicKeyMultibase.isNullOrEmpty()) return publicKeyMultibase
 
-                if (PUBLIC_KEY_TYPES.any { method.containsKey(it) }) {
-                    throw OpenID4VPExceptions.UnsupportedPublicKeyType(
-                        className
-                    )
+                if (!SUPPORTED_PUBLIC_KEY_TYPES.any { method.containsKey(it) }) {
+                    throw OpenID4VPExceptions.UnsupportedPublicKeyType(className)
                 }
+
+                val publicKeyMultibase = method["publicKeyMultibase"] as? String
+                if (publicKeyMultibase.isNullOrEmpty()) {
+                    throw OpenID4VPExceptions.InvalidData("publicKeyMultibase cannot be null or empty", className)
+                }
+
+                return publicKeyMultibase
             }
         }
         return null
     }
 
-    companion object{
-        val PUBLIC_KEY_TYPES = listOf("publicKey", "publicKeyJwk", "publicKeyPem", "publicKeyHex")
+    companion object {
+        val SUPPORTED_PUBLIC_KEY_TYPES = listOf("publicKeyMultibase")
     }
 
 

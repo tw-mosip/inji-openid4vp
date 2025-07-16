@@ -92,7 +92,10 @@ class OpenID4VP(private val traceabilityId: String, private val walletMetadata: 
                         className = "OpenID4VP.kt"
                     ).toErrorResponse()
                 }
-                errorPayload[STATE] = this.authorizationRequest.state ?: ""
+                this.authorizationRequest.state?.takeIf { it.isNotBlank() }?.let {
+                    errorPayload[STATE] = it
+                }
+
                 sendHTTPRequest(
                     url = uri,
                     method = HttpMethod.POST,
