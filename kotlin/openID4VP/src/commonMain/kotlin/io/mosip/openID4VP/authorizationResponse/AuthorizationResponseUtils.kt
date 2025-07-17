@@ -1,11 +1,10 @@
 package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
-import io.mosip.openID4VP.common.JacksonObjectMapper
 import io.mosip.openID4VP.common.getObjectMapper
-import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 
-fun Map<FormatType, UnsignedVPToken>.toJsonString(): String? {
+fun Map<VCFormatType, UnsignedVPToken>.toJsonString(): String? {
     val formattedMap = this.mapKeys { (key, _) -> key.value }
     val objectMapper = getObjectMapper()
 

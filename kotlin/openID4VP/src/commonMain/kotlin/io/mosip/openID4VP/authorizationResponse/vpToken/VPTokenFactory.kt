@@ -6,7 +6,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.types.mdoc.MdocVPTokenBu
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.LdpVPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.mdoc.MdocVPTokenSigningResult
-import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 
 class VPTokenFactory(
     private val vpTokenSigningResult: VPTokenSigningResult,
@@ -14,14 +14,14 @@ class VPTokenFactory(
     private val nonce: String
 ) {
 
-    fun getVPTokenBuilder(credentialFormat: FormatType): VPTokenBuilder {
+    fun getVPTokenBuilder(credentialFormat: VCFormatType): VPTokenBuilder {
         return when (credentialFormat) {
-            FormatType.LDP_VC -> LdpVPTokenBuilder(
+            VCFormatType.LDP_VC -> LdpVPTokenBuilder(
                 ldpVPTokenSigningResult = vpTokenSigningResult as LdpVPTokenSigningResult,
                 unsignedLdpVPToken = vpTokenSigningPayload as VPTokenSigningPayload,
                 nonce = nonce
             )
-            FormatType.MSO_MDOC -> MdocVPTokenBuilder(
+            VCFormatType.MSO_MDOC -> MdocVPTokenBuilder(
                 mdocVPTokenSigningResult = vpTokenSigningResult as MdocVPTokenSigningResult,
                 mdocCredentials = vpTokenSigningPayload as List<String>,
             )

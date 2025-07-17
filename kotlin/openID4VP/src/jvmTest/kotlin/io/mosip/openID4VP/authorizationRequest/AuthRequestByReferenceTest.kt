@@ -11,10 +11,9 @@ import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ClientIdScheme.DID
 import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
-import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.constants.KeyManagementAlgorithm
-import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions.*
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
 import io.mosip.openID4VP.testData.assertDoesNotThrow
@@ -218,7 +217,7 @@ class AuthRequestByReferenceTest {
         val walletMetadata = WalletMetadata(
             presentationDefinitionURISupported = true,
             vpFormatsSupported = mapOf(
-                FormatType.LDP_VC to VPFormatSupported(
+                VCFormatType.LDP_VC to VPFormatSupported(
                     algValuesSupported = listOf("RSA")
                 )
             ),
@@ -301,7 +300,7 @@ fun `should validate and throw error if the signing algorithm is not supported b
     val walletMetadata = WalletMetadata(
         presentationDefinitionURISupported = true,
         vpFormatsSupported = mapOf(
-            FormatType.LDP_VC to VPFormatSupported(
+            VCFormatType.LDP_VC to VPFormatSupported(
                 algValuesSupported = listOf("RSA")
             )
         ),

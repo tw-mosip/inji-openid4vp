@@ -8,7 +8,7 @@ import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
-import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 import io.mosip.openID4VP.constants.KeyManagementAlgorithm
 import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 
@@ -17,10 +17,10 @@ object HardcodedOVPData {
         return WalletMetadata(
             presentationDefinitionURISupported = true,
             vpFormatsSupported = mapOf(
-                FormatType.LDP_VC to VPFormatSupported(
+                VCFormatType.LDP_VC to VPFormatSupported(
                     algValuesSupported = listOf("Ed25519Signature2018", "Ed25519Signature2020", "RSASignature2018")
                 ),
-                FormatType.MSO_MDOC to VPFormatSupported(
+                VCFormatType.MSO_MDOC to VPFormatSupported(
                     algValuesSupported = listOf("ES256")
                 )
             ),

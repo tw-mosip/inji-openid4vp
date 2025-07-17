@@ -101,7 +101,7 @@ abstract class ClientIdSchemeBasedAuthorizationRequestHandler(
 
     private fun isClientIdSchemeSupported(walletMetadata: WalletMetadata) {
         val clientIdScheme = extractClientIdScheme(authorizationRequestParameters)
-        if (!walletMetadata.clientIdSchemesSupported.contains(ClientIdScheme.fromValue(clientIdScheme)))
+        if (!walletMetadata.clientIdSchemesSupported!!.contains(ClientIdScheme.fromValue(clientIdScheme)))
             throw OpenID4VPExceptions.InvalidData("client_id_scheme is not support by wallet", className)
 
     }

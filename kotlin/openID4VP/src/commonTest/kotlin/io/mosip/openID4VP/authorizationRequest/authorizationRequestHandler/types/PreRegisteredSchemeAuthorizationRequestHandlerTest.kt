@@ -9,6 +9,7 @@ import okhttp3.Headers
 import io.mockk.*
 import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 import io.mosip.openID4VP.constants.RequestSigningAlgorithm
 import kotlin.test.*
 

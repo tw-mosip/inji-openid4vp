@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.jayway.jsonpath.JsonPath
-import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 import io.mosip.sampleapp.data.VCMetadata
 import io.mosip.sampleapp.utils.MdocKeyManager.getIssuerAuthenticationAlgorithmForMdocVC
 import io.mosip.sampleapp.utils.MdocKeyManager.getMdocAuthenticationAlgorithm
@@ -77,25 +77,25 @@ class MatchingVcsHelper {
 
     fun buildSelectedVCsMapPlain(
         selectedItems: List<Pair<String, VCMetadata>>
-    ): Map<String, Map<FormatType, List<Any>>> {
-        val result = mutableMapOf<String, MutableMap<FormatType, MutableList<Any>>>()
+    ): Map<String, Map<VCFormatType, List<Any>>> {
+        val result = mutableMapOf<String, MutableMap<VCFormatType, MutableList<Any>>>()
         val gson = Gson()
 
         for ((inputDescriptorId, vcMetadata) in selectedItems) {
-            val formatType = try {
-                FormatType.valueOf(vcMetadata.format.uppercase().replace("-", "_"))
+            val VCFormatType = try {
+                VCFormatType.valueOf(vcMetadata.format.uppercase().replace("-", "_"))
             } catch (e: IllegalArgumentException) {
                 continue
             }
 
-            val credentialValue = if (formatType == FormatType.MSO_MDOC) {
+            val credentialValue = if (VCFormatType == VCFormatType.MSO_MDOC) {
                 vcMetadata.rawCBORData
             } else {
                 convertJsonToMap(gson.toJson(vcMetadata.vc))
             }
 
             val formatMap = result.getOrPut(inputDescriptorId) { mutableMapOf() }
-            val credentialList = formatMap.getOrPut(formatType) { mutableListOf() }
+            val credentialList = formatMap.getOrPut(VCFormatType) { mutableListOf() }
 
             credentialValue?.let {
                 credentialList.add(it)
@@ -114,7 +114,7 @@ class MatchingVcsHelper {
         val vcFormat = vcMetadata.format
 
         return when (vcFormat) {
-            FormatType.LDP_VC.value -> {
+            VCFormatType.LDP_VC.value -> {
                 val proof = vc.getAsJsonObject("proof") ?: return false
                 val proofType = proof.get("type")?.asString ?: return false
 
@@ -126,7 +126,7 @@ class MatchingVcsHelper {
                 }
             }
 
-            FormatType.MSO_MDOC.value -> {
+            VCFormatType.MSO_MDOC.value -> {
                 val issuerAuthArray = vc.getAsJsonObject("issuerSigned")
                     ?.getAsJsonArray("issuerAuth") ?: return false
 
@@ -221,8 +221,8 @@ class MatchingVcsHelper {
         val verifiableCredential = vcMetadata.vc ?: return null
 
         return when (format) {
-            FormatType.LDP_VC.value -> verifiableCredential
-            FormatType.MSO_MDOC.value -> {
+            VCFormatType.LDP_VC.value -> verifiableCredential
+            VCFormatType.MSO_MDOC.value -> {
                 getProcessedDataForMdoc(verifiableCredential)
             }
             else -> null

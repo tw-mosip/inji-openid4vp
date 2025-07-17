@@ -24,7 +24,8 @@ data class AuthorizationRequest(
             trustedVerifiers: List<Verifier>,
             walletMetadata: WalletMetadata?,
             setResponseUri: (String) -> Unit,
-            shouldValidateClient: Boolean
+            shouldValidateClient: Boolean,
+            walletNonce: String
         ): AuthorizationRequest {
 
             val queryParameter = extractQueryParameters(

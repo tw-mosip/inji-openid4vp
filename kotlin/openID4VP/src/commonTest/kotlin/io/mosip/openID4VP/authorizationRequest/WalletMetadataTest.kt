@@ -1,94 +1,98 @@
 package io.mosip.openID4VP.authorizationRequest
 
-import io.mosip.openID4VP.common.OpenID4VPErrorCodes
 import io.mosip.openID4VP.constants.ClientIdScheme
-import io.mosip.openID4VP.constants.ClientIdScheme.PRE_REGISTERED
 import io.mosip.openID4VP.constants.ContentEncrytionAlgorithm
 import io.mosip.openID4VP.constants.FormatType
 import io.mosip.openID4VP.constants.KeyManagementAlgorithm
 import io.mosip.openID4VP.constants.RequestSigningAlgorithm
-import kotlin.test.*
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
+import kotlin.test.*
 
 class WalletMetadataTest {
 
-
     @Test
-    fun `should take default value for presentation_definition_uri_supported if it is null`() {
+    fun `should create WalletMetadata with all parameters provided`() {
         val walletMetadata = WalletMetadata(
-            presentationDefinitionURISupported = null,
+            presentationDefinitionURISupported = false,
             vpFormatsSupported = mapOf(
                 FormatType.LDP_VC to VPFormatSupported(
-                    algValuesSupported = listOf("EdDSA")
+                    algValuesSupported = listOf("EdDSA", "ES256")
                 )
             ),
-            clientIdSchemesSupported = listOf(
-                ClientIdScheme.REDIRECT_URI,
-                PRE_REGISTERED
-            ),
+            clientIdSchemesSupported = listOf(ClientIdScheme.DID),
             requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
             authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
             authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
         )
+
+        assertEquals(false, walletMetadata.presentationDefinitionURISupported)
+        assertEquals(1, walletMetadata.vpFormatsSupported.size)
+        assertEquals(listOf("EdDSA", "ES256"), walletMetadata.vpFormatsSupported[FormatType.LDP_VC]?.algValuesSupported)
+        assertEquals(listOf(ClientIdScheme.DID), walletMetadata.clientIdSchemesSupported)
+        assertEquals(listOf(RequestSigningAlgorithm.EdDSA), walletMetadata.requestObjectSigningAlgValuesSupported)
+        assertEquals(listOf(KeyManagementAlgorithm.ECDH_ES), walletMetadata.authorizationEncryptionAlgValuesSupported)
+        assertEquals(listOf(ContentEncrytionAlgorithm.A256GCM), walletMetadata.authorizationEncryptionEncValuesSupported)
+    }
+
+    @Test
+    fun `should create WalletMetadata with construct method`() {
+        val walletMetadata = WalletMetadata.construct(
+            mapOf(
+                FormatType.LDP_VC to listOf("EdDSA"),
+            )
+        )
+
         assertEquals(true, walletMetadata.presentationDefinitionURISupported)
+        assertEquals(1, walletMetadata.vpFormatsSupported.size)
+        assertEquals(listOf("EdDSA"), walletMetadata.vpFormatsSupported[FormatType.LDP_VC]?.algValuesSupported)
+        assertEquals(3, walletMetadata.clientIdSchemesSupported?.size)
+        assertTrue(walletMetadata.clientIdSchemesSupported?.contains(ClientIdScheme.PRE_REGISTERED) == true)
+        assertTrue(walletMetadata.clientIdSchemesSupported?.contains(ClientIdScheme.DID) == true)
+        assertTrue(walletMetadata.clientIdSchemesSupported?.contains(ClientIdScheme.REDIRECT_URI) == true)
     }
 
     @Test
-    fun `should take default value for client_id_schemes_supported if it is null`() {
-        val walletMetadata = WalletMetadata(
-            presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf(
-                FormatType.LDP_VC to VPFormatSupported(
-                    algValuesSupported = listOf("EdDSA")
-                )
-            ),
-            clientIdSchemesSupported = null,
-            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
-            authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
-            authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
-        )
-        assertEquals(listOf(PRE_REGISTERED), walletMetadata.clientIdSchemesSupported)
+    fun `should throw error when construct method is called with null or empty map`() {
+        val ex1 = assertFailsWith<OpenID4VPExceptions.InvalidData> {
+            WalletMetadata.construct(null)
+        }
+        assertEquals("vpSigningAlgorithmSupported should at least have one supported format type", ex1.message)
+
+        val ex2 = assertFailsWith<OpenID4VPExceptions.InvalidData> {
+            WalletMetadata.construct(emptyMap())
+        }
+        assertEquals("vpSigningAlgorithmSupported should at least have one supported format type", ex2.message)
     }
 
     @Test
-    fun `should keep null values for encryption alg and enc if provided`() {
-        val walletMetadata = WalletMetadata(
-            presentationDefinitionURISupported = true,
-            vpFormatsSupported = mapOf(
-                FormatType.LDP_VC to VPFormatSupported(
-                    algValuesSupported = listOf("EdDSA")
-                )
-            ),
-            clientIdSchemesSupported = null,
-            requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
-            authorizationEncryptionAlgValuesSupported = null,
-            authorizationEncryptionEncValuesSupported = null
-        )
-        assertEquals(listOf(PRE_REGISTERED), walletMetadata.clientIdSchemesSupported)
-        assertNull(walletMetadata.authorizationEncryptionAlgValuesSupported)
-        assertNull(walletMetadata.authorizationEncryptionEncValuesSupported)
-    }
-
-    @Test
-    fun `should throw error if vp_formats_supported is empty map`() {
+    fun `should throw error when construct method is called with empty signing algorithms list`() {
         val ex = assertFailsWith<OpenID4VPExceptions.InvalidData> {
-            WalletMetadata(
-                presentationDefinitionURISupported = true,
-                vpFormatsSupported = emptyMap(),
-                clientIdSchemesSupported = listOf(
-                    ClientIdScheme.REDIRECT_URI,
-                    PRE_REGISTERED
-                ),
-                requestObjectSigningAlgValuesSupported = listOf(RequestSigningAlgorithm.EdDSA),
-                authorizationEncryptionAlgValuesSupported = listOf(KeyManagementAlgorithm.ECDH_ES),
-                authorizationEncryptionEncValuesSupported = listOf(ContentEncrytionAlgorithm.A256GCM)
+            WalletMetadata.construct(
+                mapOf(
+                    FormatType.LDP_VC to emptyList()
+                )
             )
         }
-        assertEquals(OpenID4VPErrorCodes.INVALID_REQUEST, ex.errorCode)
-        assertEquals(
-            "vp_formats_supported should at least have one supported vp_format",
-            ex.message
-        )
+        assertEquals("Signing Algorithm supported for LDP_VC should not be empty", ex.message)
     }
 
+    @Test
+    fun `should create VPFormatSupported with null algValuesSupported`() {
+        val vpFormatSupported = VPFormatSupported(null)
+        assertNull(vpFormatSupported.algValuesSupported)
+    }
+
+    @Test
+    fun `should use default values for requestObjectSigningAlgValuesSupported when null`() {
+        val walletMetadata = WalletMetadata(
+            vpFormatsSupported = mapOf(
+                FormatType.LDP_VC to VPFormatSupported(
+                    algValuesSupported = listOf("EdDSA")
+                )
+            ),
+            requestObjectSigningAlgValuesSupported = null
+        )
+
+        assertEquals(listOf(RequestSigningAlgorithm.EdDSA), walletMetadata.requestObjectSigningAlgValuesSupported)
+    }
 }

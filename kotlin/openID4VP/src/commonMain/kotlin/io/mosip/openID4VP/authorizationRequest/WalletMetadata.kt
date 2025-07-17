@@ -13,40 +13,69 @@ private val className = WalletMetadata::class.simpleName!!
 data class WalletMetadata(
     @JsonProperty("presentation_definition_uri_supported") val presentationDefinitionURISupported: Boolean = true,
     @JsonProperty("vp_formats_supported") val vpFormatsSupported: Map<FormatType, VPFormatSupported>,
-    @JsonProperty("client_id_schemes_supported") val clientIdSchemesSupported: List<ClientIdScheme> = listOf(
-        ClientIdScheme.PRE_REGISTERED
-    ),
+    @JsonProperty("client_id_schemes_supported") var clientIdSchemesSupported: List<ClientIdScheme> ? = null,
     @JsonProperty("request_object_signing_alg_values_supported") var requestObjectSigningAlgValuesSupported: List<RequestSigningAlgorithm>? = null,
-    @JsonProperty("authorization_encryption_alg_values_supported") val authorizationEncryptionAlgValuesSupported: List<KeyManagementAlgorithm>? = null,
-    @JsonProperty("authorization_encryption_enc_values_supported") val authorizationEncryptionEncValuesSupported: List<ContentEncrytionAlgorithm>? = null
+    @JsonProperty("authorization_encryption_alg_values_supported") var authorizationEncryptionAlgValuesSupported: List<KeyManagementAlgorithm>? = null,
+    @JsonProperty("authorization_encryption_enc_values_supported") var authorizationEncryptionEncValuesSupported: List<ContentEncrytionAlgorithm>? = null
 ) {
     init {
         require(vpFormatsSupported.isNotEmpty()) {
             throw OpenID4VPExceptions.InvalidData(
-                "vp_formats_supported should at least have one supported vp_format",
-                className
+                "vp_formats_supported should at least have one supported vp_format", className
+            )
+        }
+        clientIdSchemesSupported = clientIdSchemesSupported
+            ?: getClientIdSchemesSupported()
+        requestObjectSigningAlgValuesSupported = requestObjectSigningAlgValuesSupported
+            ?: getRequestObjectSigningAlgValuesSupported()
+        authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported
+            ?: getAuthorizationEncryptionEncValuesSupported()
+        authorizationEncryptionAlgValuesSupported = authorizationEncryptionAlgValuesSupported
+            ?: getAuthorizationEncryptionAlgValuesSupported()
+    }
+
+
+    companion object {
+        fun construct(vpSigningAlgorithmSupported: Map<FormatType, List<String>>?): WalletMetadata {
+            val vpFormatsSupported = mutableMapOf<FormatType, VPFormatSupported>()
+            if (vpSigningAlgorithmSupported.isNullOrEmpty()) {
+                throw OpenID4VPExceptions.InvalidData(
+                    "vpSigningAlgorithmSupported should at least have one supported format type",
+                    className
+                )
+            }
+            vpSigningAlgorithmSupported.forEach { (formatType, signingAlgorithms) ->
+                if (signingAlgorithms.isEmpty()) {
+                    throw OpenID4VPExceptions.InvalidData(
+                        "Signing Algorithm supported for $formatType should not be empty",
+                        className
+                    )
+                }
+                vpFormatsSupported[formatType] = VPFormatSupported(
+                    algValuesSupported = signingAlgorithms
+                )
+            }
+            return WalletMetadata(
+                vpFormatsSupported = vpFormatsSupported
             )
         }
     }
-
-    constructor(
-        presentationDefinitionURISupported: Boolean?,
-        vpFormatsSupported: Map<FormatType, VPFormatSupported>,
-        clientIdSchemesSupported: List<ClientIdScheme>?,
-        requestObjectSigningAlgValuesSupported: List<RequestSigningAlgorithm>?,
-        authorizationEncryptionAlgValuesSupported: List<KeyManagementAlgorithm>?,
-        authorizationEncryptionEncValuesSupported: List<ContentEncrytionAlgorithm>?
-    ) : this(
-        presentationDefinitionURISupported = presentationDefinitionURISupported ?: true,
-        vpFormatsSupported = vpFormatsSupported,
-        clientIdSchemesSupported = clientIdSchemesSupported
-            ?: listOf(ClientIdScheme.PRE_REGISTERED),
-        requestObjectSigningAlgValuesSupported = requestObjectSigningAlgValuesSupported,
-        authorizationEncryptionAlgValuesSupported = authorizationEncryptionAlgValuesSupported,
-        authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported
-    )
 }
 
 data class VPFormatSupported(
     @JsonProperty("alg_values_supported") val algValuesSupported: List<String>? = null
 )
+
+private fun getRequestObjectSigningAlgValuesSupported() =
+    listOf(RequestSigningAlgorithm.EdDSA)
+
+private fun getAuthorizationEncryptionAlgValuesSupported() =
+    listOf(KeyManagementAlgorithm.ECDH_ES)
+
+private fun getAuthorizationEncryptionEncValuesSupported() =
+    listOf(ContentEncrytionAlgorithm.A256GCM)
+
+private fun getClientIdSchemesSupported() =
+    listOf(ClientIdScheme.PRE_REGISTERED, ClientIdScheme.DID, ClientIdScheme.REDIRECT_URI)
+
+

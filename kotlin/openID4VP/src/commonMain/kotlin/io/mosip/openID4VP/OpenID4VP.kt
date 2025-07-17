@@ -5,22 +5,31 @@ import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.Verifier
-import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
-import io.mosip.openID4VP.common.OpenID4VPErrorFields.STATE
 import io.mosip.openID4VP.constants.ContentType
+import io.mosip.openID4VP.common.generateNonce
+import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.common.OpenID4VPErrorFields.STATE
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.networkManager.NetworkManagerClient.Companion.sendHTTPRequest
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class OpenID4VP(private val traceabilityId: String, private val walletMetadata: WalletMetadata? = null) {
+class OpenID4VP(
+    private val traceabilityId: String,
+    private val vpSigningAlgorithmSupported: Map<FormatType, List<String>>? = null,
+    //private val walletMetadata: WalletMetadata? = null
+) {
     lateinit var authorizationRequest: AuthorizationRequest
     private var authorizationResponseHandler: AuthorizationResponseHandler =
         AuthorizationResponseHandler()
     private var responseUri: String? = null
+    private var walletMetadata =
+        vpSigningAlgorithmSupported?.let { WalletMetadata.construct(vpSigningAlgorithmSupported) }
+    private lateinit var walletNonce: String
 
     private fun setResponseUri(responseUri: String) {
         this.responseUri = responseUri
@@ -33,15 +42,17 @@ class OpenID4VP(private val traceabilityId: String, private val walletMetadata: 
     fun authenticateVerifier(
         urlEncodedAuthorizationRequest: String,
         trustedVerifiers: List<Verifier>,
-        shouldValidateClient: Boolean = false,
+        shouldValidateClient: Boolean = true,
     ): AuthorizationRequest {
         try {
+            walletNonce = generateNonce()
             authorizationRequest = AuthorizationRequest.validateAndCreateAuthorizationRequest(
                 urlEncodedAuthorizationRequest,
                 trustedVerifiers,
                 walletMetadata,
                 ::setResponseUri,
-                shouldValidateClient
+                shouldValidateClient,
+                walletNonce
             )
             return this.authorizationRequest
         } catch (exception: OpenID4VPExceptions) {
@@ -51,17 +62,18 @@ class OpenID4VP(private val traceabilityId: String, private val walletMetadata: 
     }
 
     fun constructUnsignedVPToken(
-        verifiableCredentials: Map<String, Map<FormatType, List<Any>>>,
-        holderId: String,
-        signatureSuite: String
-    ): Map<FormatType, UnsignedVPToken> {
+        verifiableCredentials: Map<String, Map<VCFormatType, List<Any>>>,
+        holderId: String? = null,
+        signatureSuite: String? = null
+    ): Map<VCFormatType, UnsignedVPToken> {
         try {
             return authorizationResponseHandler.constructUnsignedVPToken(
                 credentialsMap = verifiableCredentials,
                 authorizationRequest = this.authorizationRequest,
                 responseUri = this.responseUri!!,
                 holderId = holderId,
-                signatureSuite = signatureSuite
+                signatureSuite = signatureSuite,
+                nonce = walletNonce
             )
         } catch (exception: OpenID4VPExceptions) {
             sendErrorToVerifier(exception)
@@ -69,7 +81,7 @@ class OpenID4VP(private val traceabilityId: String, private val walletMetadata: 
         }
     }
 
-    fun shareVerifiablePresentation(vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>): String {
+    fun shareVerifiablePresentation(vpTokenSigningResults: Map<VCFormatType, VPTokenSigningResult>): String {
         try {
             return this.authorizationResponseHandler.shareVP(
                 authorizationRequest = this.authorizationRequest,
@@ -85,7 +97,7 @@ class OpenID4VP(private val traceabilityId: String, private val walletMetadata: 
     fun sendErrorToVerifier(exception: Exception) {
         responseUri?.let { uri ->
             try {
-                var errorPayload: MutableMap<String, String> = when (exception) {
+                val errorPayload: MutableMap<String, String> = when (exception) {
                     is OpenID4VPExceptions -> exception.toErrorResponse()
                     else -> OpenID4VPExceptions.GenericFailure(
                         message = exception.message ?: "Unknown internal error",

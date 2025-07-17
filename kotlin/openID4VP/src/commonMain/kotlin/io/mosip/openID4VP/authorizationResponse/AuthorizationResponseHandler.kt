@@ -12,8 +12,7 @@ import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenArray
 import io.mosip.openID4VP.authorizationResponse.vpToken.VPTokenType.VPTokenElement
 import io.mosip.openID4VP.authorizationResponse.vpToken.types.ldp.LdpVPToken
 import io.mosip.openID4VP.common.UUIDGenerator
-import io.mosip.openID4VP.common.generateNonce
-import io.mosip.openID4VP.constants.FormatType
+import io.mosip.openID4VP.constants.VCFormatType
 import io.mosip.openID4VP.constants.ResponseType
 import io.mosip.openID4VP.constants.VPFormatType
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
@@ -34,17 +33,19 @@ private val className = AuthorizationResponseHandler::class.java.simpleName
  */
 
 internal class AuthorizationResponseHandler {
-    private lateinit var credentialsMap: Map<String, Map<FormatType, List<Any>>>
-    private lateinit var unsignedVPTokens: Map<FormatType, Map<String, Any>>
+    private lateinit var credentialsMap: Map<String, Map<VCFormatType, List<Any>>>
+    private lateinit var unsignedVPTokens: Map<VCFormatType, Map<String, Any>>
     private lateinit var walletNonce : String
 
     fun constructUnsignedVPToken(
-        credentialsMap: Map<String, Map<FormatType, List<Any>>>,
-        holderId: String,
+        credentialsMap: Map<String, Map<VCFormatType, List<Any>>>,
+        holderId: String?,
         authorizationRequest: AuthorizationRequest,
         responseUri: String,
-        signatureSuite: String
-    ): Map<FormatType, UnsignedVPToken> {
+        signatureSuite: String?,
+        nonce: String
+    ): Map<VCFormatType, UnsignedVPToken> {
+        walletNonce = nonce
         if (credentialsMap.isEmpty()) {
             throw OpenID4VPExceptions.InvalidData("Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.", className)
         }
@@ -57,7 +58,7 @@ internal class AuthorizationResponseHandler {
 
     fun shareVP(
         authorizationRequest: AuthorizationRequest,
-        vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>,
+        vpTokenSigningResults: Map<VCFormatType, VPTokenSigningResult>,
         responseUri: String,
     ): String {
         val authorizationResponse: AuthorizationResponse = createAuthorizationResponse(
@@ -75,11 +76,11 @@ internal class AuthorizationResponseHandler {
     //Create authorization response based on the response_type parameter in authorization response
     private fun createAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
-        vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>,
+        vpTokenSigningResults: Map<VCFormatType, VPTokenSigningResult>,
     ): AuthorizationResponse {
         when (authorizationRequest.responseType) {
             ResponseType.VP_TOKEN.value -> {
-                val credentialFormatIndex: MutableMap<FormatType, Int> = mutableMapOf()
+                val credentialFormatIndex: MutableMap<VCFormatType, Int> = mutableMapOf()
                 val vpToken = createVPToken(
                     vpTokenSigningResults,
                     authorizationRequest,
@@ -116,9 +117,9 @@ internal class AuthorizationResponseHandler {
     }
 
     private fun createVPToken(
-        vpTokenSigningResults: Map<FormatType, VPTokenSigningResult>,
+        vpTokenSigningResults: Map<VCFormatType, VPTokenSigningResult>,
         authorizationRequest: AuthorizationRequest,
-        credentialFormatIndex: MutableMap<FormatType, Int>,
+        credentialFormatIndex: MutableMap<VCFormatType, Int>,
     ): VPTokenType {
         val vpTokens: MutableList<VPToken> = mutableListOf()
 
@@ -143,7 +144,7 @@ internal class AuthorizationResponseHandler {
 
     private fun createPresentationSubmission(
         authorizationRequest: AuthorizationRequest,
-        credentialFormatIndex: MutableMap<FormatType, Int>,
+        credentialFormatIndex: MutableMap<VCFormatType, Int>,
     ): PresentationSubmission {
         val descriptorMap = createInputDescriptor(credentialFormatIndex)
 
@@ -154,11 +155,11 @@ internal class AuthorizationResponseHandler {
         )
     }
 
-    private fun createInputDescriptor(credentialFormatIndex: MutableMap<FormatType, Int>): List<DescriptorMap> {
+    private fun createInputDescriptor(credentialFormatIndex: MutableMap<VCFormatType, Int>): List<DescriptorMap> {
         //In case of only single VP, presentation_submission -> path = $, path_nest = $.<credentialPathIdentifier - internalPath>[n]
         //and in case of multiple VPs, presentation_submission -> path = $[i], path_nest = $[i].<credentialPathIdentifier - internalPath>[n]
         val isMultipleVPTokens: Boolean = credentialFormatIndex.keys.size > 1
-        val formatTypeToCredentialIndex: MutableMap<FormatType, Int> = mutableMapOf()
+        val VCFormatTypeToCredentialIndex: MutableMap<VCFormatType, Int> = mutableMapOf()
 
         val descriptorMappings =
             credentialsMap.entries.sortedBy { it.key }
@@ -172,11 +173,11 @@ internal class AuthorizationResponseHandler {
                             else -> "$"
                         }
                         val credentialIndex =
-                            (formatTypeToCredentialIndex[credentialFormat] ?: -1) + 1
+                            (VCFormatTypeToCredentialIndex[credentialFormat] ?: -1) + 1
                         val vpFormat: String
                         var pathNested: PathNested? = null
                         when (credentialFormat) {
-                            FormatType.LDP_VC -> {
+                            VCFormatType.LDP_VC -> {
                                 val relativePath = "$.${LdpVPToken.INTERNAL_PATH}[$credentialIndex]"
                                 vpFormat = VPFormatType.LDP_VP.value
                                 pathNested = PathNested(
@@ -186,11 +187,11 @@ internal class AuthorizationResponseHandler {
                                 )
                             }
 
-                            FormatType.MSO_MDOC -> {
+                            VCFormatType.MSO_MDOC -> {
                                 vpFormat = VPFormatType.MSO_MDOC.value
                             }
                         }
-                        formatTypeToCredentialIndex[credentialFormat] = credentialIndex
+                        VCFormatTypeToCredentialIndex[credentialFormat] = credentialIndex
 
                         DescriptorMap(
                             id = inputDescriptorId,
@@ -209,23 +210,34 @@ internal class AuthorizationResponseHandler {
     private fun createUnsignedVPTokens(
         authorizationRequest: AuthorizationRequest,
         responseUri: String,
-        holderId: String,
-        signatureSuite: String
-    ): Map<FormatType, Map<String, Any>> {
+        holderId: String?,
+        signatureSuite: String?
+    ): Map<VCFormatType, Map<String, Any>> {
 
-        val groupedVcs: Map<FormatType, List<Any>> = credentialsMap.entries
+        val groupedVcs: Map<VCFormatType, List<Any>> = credentialsMap.entries
             .sortedBy { it.key }
             .flatMap { it.value.entries }
             .groupBy({ it.key }, { it.value }).mapValues { (_, lists) ->
                 lists.flatten()
             }
 
-        walletNonce = generateNonce(16)
-
         // group all formats together, call specific creator and pass the grouped credentials
         return groupedVcs.mapValues { (format, credentialsArray) ->
             when (format) {
-                FormatType.LDP_VC -> {
+                VCFormatType.LDP_VC -> {
+                    if(holderId == null) {
+                        throw OpenID4VPExceptions.InvalidData(
+                            "Holder ID cannot be null or empty for LDP VC format",
+                            className
+                        )
+                    }
+                    if(signatureSuite.isNullOrEmpty()) {
+                        throw OpenID4VPExceptions.InvalidData(
+                            "Signature Suite cannot be null or empty for LDP VC format",
+                            className
+                        )
+                    }
+
                     UnsignedLdpVPTokenBuilder(
                         verifiableCredential = credentialsArray,
                         id = UUIDGenerator.generateUUID(),
@@ -236,7 +248,7 @@ internal class AuthorizationResponseHandler {
                     ).build()
                 }
 
-                FormatType.MSO_MDOC -> {
+                VCFormatType.MSO_MDOC -> {
                     UnsignedMdocVPTokenBuilder(
                         mdocCredentials = credentialsArray as List<String>,
                         clientId = authorizationRequest.clientId,
@@ -257,17 +269,18 @@ internal class AuthorizationResponseHandler {
     ): String{
 
         val transformedCredentials = verifiableCredentials.mapValues { (_, credentials) ->
-            mapOf(FormatType.LDP_VC to credentials)
+            mapOf(VCFormatType.LDP_VC to credentials)
         }
         constructUnsignedVPToken(
             credentialsMap = transformedCredentials,
+            holderId = "",
             authorizationRequest = authorizationRequest,
             responseUri = responseUri,
-            holderId = "",
-            signatureSuite = "Ed25519Signature2020"
+            signatureSuite = "Ed25519Signature2020",
+            nonce = walletNonce
         )
         val unsignedLdpVPToken =
-            unsignedVPTokens[FormatType.LDP_VC]?.get("vpTokenSigningPayload").let {
+            unsignedVPTokens[VCFormatType.LDP_VC]?.get("vpTokenSigningPayload").let {
                 it as LdpVPToken
             }.copy(proof = null)
 
@@ -304,7 +317,7 @@ internal class AuthorizationResponseHandler {
                 descriptorMap
             )
             val unsignedLdpVPToken =
-                unsignedVPTokens[FormatType.LDP_VC]?.get("vpTokenSigningPayload") as VPTokenSigningPayload
+                unsignedVPTokens[VCFormatType.LDP_VC]?.get("vpTokenSigningPayload") as VPTokenSigningPayload
             val vpToken = unsignedLdpVPToken.apply {
                 holder = vpResponseMetadata.publicKey
                 proof!!.verificationMethod = vpResponseMetadata.publicKey
