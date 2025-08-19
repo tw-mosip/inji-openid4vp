@@ -201,6 +201,20 @@ tasks.register<Jar>("javadocJar") {
 tasks.register("generatePom") {
     dependsOn("generatePomFileForAarPublication", "generatePomFileForJarReleasePublication")
 }
+tasks.named<PublishToMavenRepository>("publishAarPublicationToLocalMavenWithChecksumsRepository") {
+    dependsOn(tasks.named("signJarReleasePublication"))
+}
+
+tasks.named<PublishToMavenRepository>("publishJarReleasePublicationToLocalMavenWithChecksumsRepository") {
+    dependsOn(tasks.named("signAarPublication"))
+}
+
+tasks.named<PublishToMavenLocal>("publishAarPublicationToMavenLocal") {
+    dependsOn(tasks.named("signJarReleasePublication"))
+}
+
+tasks.named<PublishToMavenLocal>("publishJarReleasePublicationToMavenLocal") {
+    dependsOn(tasks.named("signAarPublication"))
 
 apply(from = "publish-artifact.gradle")
 var buildDir = project.layout.buildDirectory.get()
