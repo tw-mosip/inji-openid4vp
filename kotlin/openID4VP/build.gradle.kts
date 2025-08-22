@@ -209,6 +209,11 @@ afterEvaluate {
     tasks.findByName("publishJarReleasePublicationToLocalMavenWithChecksumsRepository")?.let {
         it.dependsOn(tasks.named("signAarPublication"))
     }
+    tasks.findByName("publishAarPublicationToInji-openid4vpRepository")?.let { publishTask ->
+        tasks.findByName("signJarReleasePublication")?.let { signTask ->
+            publishTask.dependsOn(signTask)
+        }
+    }
     tasks.findByName("publishAarPublicationToMavenLocal")?.let {
         it.dependsOn(tasks.named("signJarReleasePublication"))
     }
