@@ -17,6 +17,7 @@ import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
 import io.mosip.openID4VP.constants.FormatType.LDP_VC
 import io.mosip.openID4VP.constants.FormatType.MSO_MDOC
+import io.mosip.openID4VP.networkManager.NetworkResponse
 import org.junit.jupiter.api.assertThrows
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -144,7 +145,7 @@ class OpenID4VPTest {
             NetworkManagerClient.sendHTTPRequest(
                 any(), any(), any()
             )
-        } returns mapOf("body" to "Error sent")
+        } returns NetworkResponse(200, """{"message":"Error received successfully"}""", mapOf("Content-Type" to listOf("application/json")))
 
         assertFailsWith<InvalidInput> {
             openID4VP.authenticateVerifier("openid-vc://?request=invalid", trustedVerifiers)
@@ -198,7 +199,7 @@ class OpenID4VPTest {
 
         every {
             NetworkManagerClient.sendHTTPRequest(any(), any(), any(), any())
-        } returns mapOf("body" to "Error sent")
+        } returns NetworkResponse(200, """{"message":"Error received successfully"}""", mapOf("Content-Type" to listOf("application/json")))
 
         val thrown = assertFailsWith<InvalidData> {
             openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList, holderId, signatureSuite)
@@ -215,11 +216,7 @@ class OpenID4VPTest {
                 any(),
                 any()
             )
-        } returns mapOf(
-                    "status" to 200,
-                    "headers" to mapOf("Content-Type" to "application/json"),
-                    "body" to """{"message":"VP share success"}"""
-                )
+        } returns NetworkResponse(200, """{"message":"VP share success"}""", mapOf("Content-Type" to listOf("application/json")))
         setField(openID4VP, "responseUri", "https://mock-verifier.com/response-uri")
 
         val dispatchResult =
@@ -236,7 +233,7 @@ class OpenID4VPTest {
                 any()
             )
         }
-        assertEquals("NetworkResponse(statusCode=200, body={\"message\":\"VP share success\"}, headers={})",dispatchResult.toString())
+        assertEquals("NetworkResponse(statusCode=200, body={\"message\":\"VP share success\"}, headers={Content-Type=[application/json]})",dispatchResult.toString())
     }
 
     @Test
@@ -319,7 +316,7 @@ class OpenID4VPTest {
 
         every {
             NetworkManagerClient.sendHTTPRequest(any(), any(), any(), any())
-        } returns mapOf("body" to "Error sent")
+        } returns NetworkResponse(200, """{"message":"Error received successfully"}""", mapOf("Content-Type" to listOf("application/json")))
 
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
@@ -355,7 +352,7 @@ class OpenID4VPTest {
                 any(),
                 any()
             )
-        } returns mapOf("body" to "Error sent")
+        } returns NetworkResponse(200, """{"message":"Error received successfully"}""", mapOf("Content-Type" to listOf("application/json")))
 
         val customAuthorizationRequest = authorizationRequest.copy(state = "test-state")
         setField(openID4VP, "authorizationRequest", customAuthorizationRequest)
@@ -385,7 +382,7 @@ class OpenID4VPTest {
                 any(),
                 any()
             )
-        } returns mapOf("body" to "Error sent")
+        } returns NetworkResponse(200, """{"message":"Error received successfully"}""", mapOf("Content-Type" to listOf("application/json")))
 
         val customAuthorizationRequest = authorizationRequest.copy(state = "")
         setField(openID4VP, "authorizationRequest", customAuthorizationRequest)
@@ -415,7 +412,7 @@ class OpenID4VPTest {
                 any(),
                 any()
             )
-        } returns mapOf("body" to "Error sent")
+        } returns NetworkResponse(200, """{"message":"Error received successfully"}""", mapOf("Content-Type" to listOf("application/json")))
 
         val noStateAuthorizationRequest = authorizationRequest.copy(state = null)
         setField(openID4VP, "authorizationRequest", noStateAuthorizationRequest)
