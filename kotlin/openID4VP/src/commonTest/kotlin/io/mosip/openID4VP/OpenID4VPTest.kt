@@ -5,10 +5,12 @@ import io.mockk.*
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.Verifier
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponseHandler
+import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPTokenV2
 import io.mosip.openID4VP.verifier.VerifierResponse
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.ldp.UnsignedLdpVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.types.mdoc.UnsignedMdocVPTokenBuilder
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResult
+import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.VPTokenSigningResultV2
 import io.mosip.openID4VP.authorizationResponse.vpTokenSigningResult.types.ldp.VPResponseMetadata
 import io.mosip.openID4VP.common.URDNA2015Canonicalization
 import io.mosip.openID4VP.common.UUIDGenerator
@@ -607,5 +609,73 @@ class OpenID4VPTest {
 
 
         assertEquals(mapOf("error" to "invalid_request", "error_description" to "Unsupported response_mode"), errorResult)
+    }
+
+    @Test
+    fun `should construct unsigned VP token V2 successfully`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        val expectedTokens = listOf(mockk<UnsignedVPTokenV2>(), mockk<UnsignedVPTokenV2>())
+        every {
+            mockHandler.constructUnsignedVPTokenV2(any(), any(), any(), any(), any(), any())
+        } returns expectedTokens
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        val result = openID4VP.constructUnsignedVPTokenV2(selectedLdpCredentialsList + selectedMdocCredentialsList, holderId, signatureSuite)
+        assertEquals(expectedTokens, result)
+    }
+
+    @Test
+    fun `should throw exception during VP token V2 construction with invalid data`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        val testException = InvalidData("Invalid credential format V2","")
+        every {
+            mockHandler.constructUnsignedVPTokenV2(any(), any(), any(), any(), any(), any())
+        } throws testException
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        setField(openID4VP, "walletNonce", "bMHvX1HGhbh8zqlSWf/fuQ==")
+        val thrown = assertFailsWith<InvalidData> {
+            openID4VP.constructUnsignedVPTokenV2(selectedLdpCredentialsList, holderId, signatureSuite)
+        }
+        assertEquals("Invalid credential format V2", thrown.message)
+    }
+
+    @Test
+    fun `should handle empty credential list for VP token V2`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        every {
+            mockHandler.constructUnsignedVPTokenV2(any(), any(), any(), any(), any(), any())
+        } returns emptyList()
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        val result = openID4VP.constructUnsignedVPTokenV2(emptyMap(), holderId, signatureSuite)
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `should construct VP response V2 successfully`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        val vpTokenSigningResults = listOf(mockk<VPTokenSigningResultV2>(), mockk<VPTokenSigningResultV2>())
+        val expectedResponse = mapOf("vp_token" to "<VP2>", "presentation_submission" to "<Submission2>")
+        every {
+            mockHandler.constructVPResponseV2(any(), any())
+        } returns expectedResponse
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        val result = openID4VP.constructVPResponseV2(vpTokenSigningResults)
+        assertEquals(expectedResponse, result)
+    }
+
+    @Test
+    fun `should return error info when exception occurs in constructVPResponseV2`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        val vpTokenSigningResults = listOf<VPTokenSigningResultV2>()
+        val testException = InvalidData("Invalid VPTokenSigningResultV2", "")
+        val expectedError = mapOf("error" to "invalid_request", "error_description" to "Invalid VPTokenSigningResultV2")
+        every {
+            mockHandler.constructVPResponseV2(any(), any())
+        } throws testException
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        every {
+            mockHandler.constructAuthorizationErrorResponse(any(), any(), any())
+        } returns expectedError
+        val result = openID4VP.constructVPResponseV2(vpTokenSigningResults)
+        assertEquals(expectedError, result)
     }
 }
