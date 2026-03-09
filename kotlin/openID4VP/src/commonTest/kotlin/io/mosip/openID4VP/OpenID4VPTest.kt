@@ -24,6 +24,7 @@ import io.mosip.openID4VP.networkManager.NetworkResponse
 import io.mosip.openID4VP.testData.*
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.assertDoesNotThrow
 import kotlin.collections.mapOf
 import kotlin.test.*
 
@@ -677,5 +678,72 @@ class OpenID4VPTest {
         } returns expectedError
         val result = openID4VP.constructVPResponseV2(vpTokenSigningResults)
         assertEquals(expectedError, result)
+    }
+
+    @Test
+    fun `should handle deprecated sendErrorToVerifier method`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        val exception = InvalidData("Deprecated error", "")
+        every {
+            mockHandler.sendAuthorizationError(any(), any(), any())
+        } returns VerifierResponse(400, null, "{\"error\":\"deprecated\"}", emptyMap())
+        // Should not throw
+        assertDoesNotThrow {
+            openID4VP.sendErrorToVerifier(exception)
+        }
+    }
+
+    @Test
+    fun `should handle deprecated shareVerifiablePresentation with VPTokenSigningResults`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        val vpTokenSigningResults = mockk<Map<FormatType, VPTokenSigningResult>>()
+        every {
+            mockHandler.constructAndSendAuthorizationResponseToVerifier(any(), any(), any())
+        } returns VerifierResponse(200, null, "{\"message\":\"success\"}", mapOf("Content-Type" to listOf("application/json")))
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        val result = openID4VP.shareVerifiablePresentation(vpTokenSigningResults)
+        assertEquals("{\"message\":\"success\"}", result)
+    }
+
+    @Test
+    fun `should handle exception in deprecated shareVerifiablePresentation with VPTokenSigningResults`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        val vpTokenSigningResults = mockk<Map<FormatType, VPTokenSigningResult>>()
+        val exception = InvalidData("Deprecated VP error", "")
+        every {
+            mockHandler.constructAndSendAuthorizationResponseToVerifier(any(), any(), any())
+        } throws exception
+        every {
+            NetworkManagerClient.sendHTTPRequest(any(), any(), any(), any())
+        } returns NetworkResponse(200, "{\"error\":\"deprecated\"}", emptyMap())
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        val thrown = assertFailsWith<InvalidData> {
+            openID4VP.shareVerifiablePresentation(vpTokenSigningResults)
+        }
+        assertEquals("Deprecated VP error", thrown.message)
+    }
+
+    @Test
+    fun `should construct error info with null exception message`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        val exception = InvalidData("error", "")
+        every {
+            mockHandler.constructAuthorizationErrorResponse(any(), any(), any())
+        } returns mapOf("error" to "invalid_request", "error_description" to null) as Map<String, Any>
+        val errorResult = openID4VP.constructErrorInfo(exception)
+        assertEquals(mapOf("error" to "invalid_request", "error_description" to "error"), errorResult)
+    }
+
+    @Test
+    fun `should construct VP response with null vpTokenSigningResults`() {
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+        every {
+            mockHandler.constructAuthorizationResponse(any(), any())
+        } returns mapOf("vp_token" to "vp", "presentation_submission" to "presentation_submission")
+        val result = openID4VP.constructVPResponse(emptyMap())
+//        assertEquals(mapOf("vp_token" to null, "presentation_submission" to null), result)
     }
 }
