@@ -13,4 +13,6 @@ fileignoreconfig:
   checksum: 1768cde9fd1b57389f932146b7bf5bf4cfd06324f6803f871e93bac70b954a91
 - filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/authorizationRequest/authorizationRequestHandler/ClientIdPrefixBasedAuthorizationRequestHandler.kt
   checksum: 4cf85874f0cb54f0b3722cc9fc4540300424e4bf6578069dcc3dc95aad63dbfc
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/responseModeHandler/types/DirectPostJwtResponseModeHandler.kt
+  checksum: d9982d9feec7a5c252bb4d4ae40b09f88a0114f79fb35d12875f625757fa2d9a
 version: ""
