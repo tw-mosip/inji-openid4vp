@@ -24,6 +24,14 @@ abstract class ResponseModeBasedHandler {
         return
     }
 
+    open fun validate(
+        clientMetadata: io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataDraft23?,
+        walletMetadata: WalletMetadata?,
+        shouldValidateWithWalletMetadata: Boolean
+    ){
+        return
+    }
+
     abstract fun sendAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
         url: String,

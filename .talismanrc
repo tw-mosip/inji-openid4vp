@@ -3,4 +3,8 @@ fileignoreconfig:
   checksum: ac7fddeb58fda7fafad0bc77bf0d41133d11e14c2a1303164f95971c3a3b69a3
 - filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/authorizationRequest/WalletMetadata.kt
   checksum: b06758797c2e37f25cb976286c9aaeb750f697cb9e24a33132205ae5d12b671c
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/authorizationRequest/clientMetadata/ClientMetadataDraft23.kt
+  checksum: 9da6887d40e6f06655f243404f1cb7a139ae6bcb89d4004540d7e7fb3f6b5fbb
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/authorizationRequest/clientMetadata/ClientMetadata.kt
+  checksum: 8967779ccda2d4f893ed4fbb6c4cde2ed51f9bbf4896043ec1a2f83427cc5dab
 version: ""
