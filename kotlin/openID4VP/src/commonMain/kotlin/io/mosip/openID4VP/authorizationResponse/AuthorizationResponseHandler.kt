@@ -1,7 +1,9 @@
 package io.mosip.openID4VP.authorizationResponse
 
 import io.mosip.openID4VP.OpenID4VP
+import io.mosip.openID4VP.authorizationRequest.AuthorizationPresentationExchangeRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
+import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.DescriptorMap
 import io.mosip.openID4VP.authorizationResponse.presentationSubmission.PresentationSubmission
 import io.mosip.openID4VP.authorizationResponse.unsignedVPToken.UnsignedVPToken
@@ -47,7 +49,9 @@ private val className = AuthorizationResponseHandler::class.java.simpleName
  * The previous version of the OpenID4VP library supported only Ldp VC and had a simpler structure.
  */
 
-internal class AuthorizationResponseHandler {
+internal class AuthorizationResponseHandler(
+    private val walletMetadata: WalletMetadata? = null
+) {
     private lateinit var unsignedVPTokenResults: Map<FormatType, Pair<VPTokenSigningPayload?, UnsignedVPToken>>
     private lateinit var walletNonce: String
     private lateinit var signatureSuite: String
@@ -281,7 +285,7 @@ internal class AuthorizationResponseHandler {
                     formatToCredentialInputDescriptorMapping
                 )
 
-                return AuthorizationResponse(
+                return AuthorizationResponse.PresentationExchange(
                     presentationSubmission = presentationSubmission,
                     vpToken = vpToken,
                     state = authorizationRequest.state
@@ -360,7 +364,7 @@ internal class AuthorizationResponseHandler {
         sanitizeDescriptorMap(finalDescriptorMappings, finalVpTokens.size == 1)
         val presentationSubmission = PresentationSubmission(
             id = UUIDGenerator.generateUUID(),
-            definitionId = authorizationRequest.presentationDefinition.id,
+            definitionId = (authorizationRequest as AuthorizationPresentationExchangeRequest).presentationDefinition.id,
             descriptorMap = finalDescriptorMappings,
         )
 
@@ -480,7 +484,7 @@ internal class AuthorizationResponseHandler {
             }
             val presentationSubmission = PresentationSubmission(
                 UUIDGenerator.generateUUID(),
-                authorizationRequest.presentationDefinition.id,
+                (authorizationRequest as AuthorizationPresentationExchangeRequest).presentationDefinition.id,
                 descriptorMap
             )
             val (ldpVPTokenPayload: VPTokenSigningPayload?, _) = unsignedVPTokenResults[FormatType.LDP_VC]
@@ -493,7 +497,7 @@ internal class AuthorizationResponseHandler {
                 proof!!.verificationMethod = vpResponseMetadata.publicKey
                 proof.jws = vpResponseMetadata.jws
             }
-            val authorizationResponse = AuthorizationResponse(
+            val authorizationResponse = AuthorizationResponse.PresentationExchange(
                 presentationSubmission = presentationSubmission,
                 vpToken = VPTokenElement(vpToken),
                 state = authorizationRequest.state
