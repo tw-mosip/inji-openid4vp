@@ -16,7 +16,7 @@ class OpenID4VP @JvmOverloads constructor(
     private val traceabilityId: String,
     private var walletMetadata: WalletMetadata? = null
 ) {
-    private var authorizationResponseHandler = AuthorizationResponseHandler()
+    private var authorizationResponseHandler = AuthorizationResponseHandler(walletMetadata = walletMetadata)
     private var responseUri: String? = null
     private var walletNonce: String = generateNonce()
     var authorizationRequest: AuthorizationRequest? = null
@@ -34,7 +34,7 @@ class OpenID4VP @JvmOverloads constructor(
             walletNonce = generateNonce()
             authorizationRequest = null
             responseUri = null
-            authorizationResponseHandler = AuthorizationResponseHandler()
+            authorizationResponseHandler = AuthorizationResponseHandler(walletMetadata)
             val authorizationRequest =
                 AuthorizationRequest.validateAndCreateAuthorizationRequest(
                     urlEncodedAuthorizationRequest,
@@ -62,7 +62,7 @@ class OpenID4VP @JvmOverloads constructor(
             walletNonce = generateNonce()
             this.authorizationRequest = null
             responseUri = null
-            authorizationResponseHandler = AuthorizationResponseHandler()
+            authorizationResponseHandler = AuthorizationResponseHandler(walletMetadata)
             val validatedAuthorizationRequest =
                 AuthorizationRequest.validateAndCreateAuthorizationRequest(
                     authorizationRequest,
