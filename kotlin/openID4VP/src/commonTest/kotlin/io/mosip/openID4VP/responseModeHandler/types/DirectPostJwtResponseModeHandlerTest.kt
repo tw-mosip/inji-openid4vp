@@ -163,7 +163,8 @@ class DirectPostJwtResponseModeHandlerTest {
             authorizationRequestForResponseModeJWT,
             responseUri,
             authorizationResponse,
-            "walletNonce"
+            "walletNonce",
+            walletMetadata = null
         )
 
         verify {
@@ -190,7 +191,8 @@ class DirectPostJwtResponseModeHandlerTest {
         val result = DirectPostJwtResponseModeHandler().getAuthorizationResponse(
             authorizationRequestForResponseModeJWT,
             authorizationResponse,
-            walletNonce
+            walletNonce,
+            walletMetadata = null
         )
 
         assertEquals(mapOf("response" to expectedEncryptedResponse), result)
@@ -210,7 +212,8 @@ class DirectPostJwtResponseModeHandlerTest {
         val result = DirectPostJwtResponseModeHandler().getAuthorizationResponse(
             authorizationRequestForResponseModeJWT,
             authorizationResponse,
-            walletNonce
+            walletNonce,
+            walletMetadata = null
         )
 
         verify {
@@ -254,7 +257,8 @@ class DirectPostJwtResponseModeHandlerTest {
         val result = DirectPostJwtResponseModeHandler().getAuthorizationResponse(
             authorizationRequestForResponseModeJWT,
             authorizationResponse,
-            walletNonce
+            walletNonce,
+            walletMetadata = null
         )
 
         verify {
@@ -273,7 +277,8 @@ class DirectPostJwtResponseModeHandlerTest {
         DirectPostJwtResponseModeHandler().getAuthorizationResponse(
             authorizationRequestForResponseModeJWT,
             authorizationResponse,
-            walletNonce
+            walletNonce,
+            walletMetadata = null
         )
 
         verify {
@@ -318,7 +323,8 @@ class DirectPostJwtResponseModeHandlerTest {
         val result = DirectPostJwtResponseModeHandler().getAuthorizationResponse(
             authorizationRequestForResponseModeJWT,
             authorizationResponse,
-            walletNonce
+            walletNonce,
+            walletMetadata = null
         )
 
         assertEquals(1, result.size)

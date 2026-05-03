@@ -5,8 +5,8 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mosip.openID4VP.OpenID4VP
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.*
-import io.mosip.openID4VP.constants.ClientIdScheme
-import io.mosip.openID4VP.constants.ClientIdScheme.*
+import io.mosip.openID4VP.constants.ClientIdPrefix
+import io.mosip.openID4VP.constants.ClientIdPrefix.*
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
 import io.mosip.openID4VP.networkManager.NetworkManagerClient
@@ -53,17 +53,16 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         val encodedAuthorizationRequest = createUrlEncodedData(
             authorizationRequestParamsMap,
             true,
-            DID
+            DECENTRALIZED_IDENTIFIER
         )
 
         val walletMetadata = WalletMetadata(
-            presentationDefinitionURISupported = true,
             vpFormatsSupported = mapOf(
-                "LDP_VC" to VPFormatSupported(
-                    algValuesSupported = listOf("EdDSA", "ES256")
+                "LDP_VC" to LdpVcFormatSupported(
+                    proofTypeValues = listOf(io.mosip.openID4VP.constants.ProofType.Ed25519Signature2020)
                 )
             ),
-            clientIdSchemesSupported = listOf("REDIRECT_URI"),
+            clientIdPrefixesSupported = listOf("REDIRECT_URI"),
             requestObjectSigningAlgValuesSupported = listOf("EdDSA"),
             authorizationEncryptionAlgValuesSupported = listOf("ECDH_ES"),
             authorizationEncryptionEncValuesSupported = listOf("A256GCM")
@@ -92,13 +91,13 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
                 headers = any()
             )
         } returns NetworkResponse(200,
-            createAuthorizationRequestObject(DID, authorizationRequestParamsMap).toString(), mapOf("content-type" to listOf("application/json")))
+            createAuthorizationRequestObject(DECENTRALIZED_IDENTIFIER, authorizationRequestParamsMap).toString(), mapOf("content-type" to listOf("application/json")))
 
         val encodedAuthorizationRequest =
             createUrlEncodedData(
                 authorizationRequestParamsMap,
                 true,
-                DID
+                DECENTRALIZED_IDENTIFIER
             )
 
         val invalidInputException = assertFailsWith<OpenID4VPExceptions.InvalidData> {
@@ -126,7 +125,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
 
         val authorizationRequestParamsMap = requestParams + clientIdOfDid
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap, true, DID)
+            createUrlEncodedData(authorizationRequestParamsMap, true, DECENTRALIZED_IDENTIFIER)
 
 
 
@@ -155,7 +154,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             createUrlEncodedData(
                 authorizationRequestParamsMap,
                 false,
-                DID,
+                DECENTRALIZED_IDENTIFIER,
                 authRequestWithDidByValue
             )
 
@@ -185,7 +184,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
             requestParams + clientIdOfDid + mapOf(REQUEST_URI.value to "test-data")
 
         val encodedAuthorizationRequest =
-            createUrlEncodedData(authorizationRequestParamsMap, true, ClientIdScheme.REDIRECT_URI)
+            createUrlEncodedData(authorizationRequestParamsMap, true, ClientIdPrefix.REDIRECT_URI)
 
 
         val exception = assertFailsWith<OpenID4VPExceptions.InvalidData> {
@@ -200,4 +199,3 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
     }
 
 }
-
