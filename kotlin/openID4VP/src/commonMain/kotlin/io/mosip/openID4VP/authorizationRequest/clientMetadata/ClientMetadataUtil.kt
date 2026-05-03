@@ -65,7 +65,9 @@ enum class ClientMetadataSpecVersionHandler {
         val responseMode = getStringValue(
             authorizationRequestParameters,
             RESPONSE_MODE.value
-        )!!
+        ) ?: throw OpenID4VPExceptions.MissingInput(
+            listOf(RESPONSE_MODE.value), "", className
+        )
 
         val parsedClientMetadata = authorizationRequestParameters[CLIENT_METADATA.value]
         when (this) {

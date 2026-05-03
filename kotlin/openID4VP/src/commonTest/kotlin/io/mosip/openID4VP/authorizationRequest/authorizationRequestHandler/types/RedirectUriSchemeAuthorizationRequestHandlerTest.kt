@@ -30,7 +30,7 @@ class RedirectUriSchemeAuthorizationRequestHandlerTest {
     fun setup() {
 
         authorizationRequestParameters = mutableMapOf(
-            CLIENT_ID.value to responseUrl,
+            CLIENT_ID.value to "redirect_uri:$responseUrl",
             RESPONSE_TYPE.value to "vp_token",
             RESPONSE_URI.value to responseUrl,
             PRESENTATION_DEFINITION.value to presentationDefinitionString,

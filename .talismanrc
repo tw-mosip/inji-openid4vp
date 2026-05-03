@@ -15,4 +15,20 @@ fileignoreconfig:
   checksum: 4cf85874f0cb54f0b3722cc9fc4540300424e4bf6578069dcc3dc95aad63dbfc
 - filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/responseModeHandler/types/DirectPostJwtResponseModeHandler.kt
   checksum: d9982d9feec7a5c252bb4d4ae40b09f88a0114f79fb35d12875f625757fa2d9a
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/common/CborUtils.kt
+  checksum: 95fb9b6639c807fb941ca64dc6ed5658406f7ad93cac487a49b2cccde26ea956
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/responseModeHandler/types/DirectPostJwtResponseModeHandler.kt
+  checksum: fe9a2db51a41f6efb17410292ca57b2ef4118509ef7cb2d9c61b0b0ac5ea1354
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/authorizationResponse/unsignedVPToken/types/mdoc/UnsignedMdocVPTokenBuilder.kt
+  checksum: 5bd517486fc4116862fee35ad2ba2790468e7305c931d887c5bdbcd18c276b0d
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/jwt/jwe/encryption/X25519KeyAgreement.kt
+  checksum: 151e6885f28033ed10de47fd33120c81e29ad53b4f943e27b3644e09c943a52e
+- filename: kotlin/openID4VP/src/jvmTest/kotlin/io/mosip/openID4VP/authorizationResponse/vpToken.types/mdoc/SdJwtVPTokenBuilderJvmTest.kt
+  checksum: 226d469ccf25cef89127010967be788284acf7c552fc2847edb19386ee46cabf
+- filename: kotlin/openID4VP/src/jvmTest/kotlin/io/mosip/openID4VP/jwt/JWEHandlerJvmTest.kt
+  checksum: 47f30cf05fb5e4a9ae60ee01c1c2a958fd2b31a10c005e1d7e97faee31d04348
+- filename: kotlin/openID4VP/src/commonTest/kotlin/io/mosip/openID4VP/jwt/jwe/JWEHandlerTest.kt
+  checksum: 057236d8711ebfc3e4462a7a242350f64f5a94c6f041614b94a1ec0fcc903f9a
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/jwt/jwe/JWEHandler.kt
+  checksum: 2cee822c6f82f9a42a36d672f95a9c0c132b0d0933415e10730dff0c365051f4
 version: ""
