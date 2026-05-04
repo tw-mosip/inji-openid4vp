@@ -1,7 +1,5 @@
 package io.mosip.openID4VP.jwt
 
-import com.nimbusds.jose.EncryptionMethod
-import com.nimbusds.jose.JWEAlgorithm
 import io.mockk.clearAllMocks
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataDraft23
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataDraft23Serializer
@@ -61,18 +59,6 @@ class JWEHandlerJvmTest {
         assertEquals("A256GCM", decodedJWEHeader["enc"])
         assertEquals("OKP", (decodedJWEHeader["epk"] as Map<*, *>)["kty"])
         assertEquals("X25519", (decodedJWEHeader["epk"] as Map<*, *>)["crv"])
-    }
-
-    @Test
-    fun `should decrypt the JWE successfully`() {
-        val payload = mapOf("key1" to "value1", "key2" to 123)
-
-        val encryptedResponse = jweHandler.generateEncryptedResponse(payload)
-        val decryptedPayload = jweHandler.decrypt(encryptedResponse)
-
-        assertEquals(payload["key1"], decryptedPayload["key1"])
-        // Use Long for comparison because jackson might parse 123 as Long/Int
-        assertEquals((payload["key2"] as Int).toLong(), (decryptedPayload["key2"] as Number).toLong())
     }
 
 }

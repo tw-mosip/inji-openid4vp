@@ -77,7 +77,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
                 shouldValidateClient = true
             )
         }
-        assertEquals("client_id_scheme is not support by wallet", exception.message)
+        assertEquals("client_id_prefix is not supported by wallet", exception.message)
     }
 
 
@@ -171,7 +171,7 @@ class AuthorizationRequestObjectObtainedByReferenceTest {
         }
 
         assertEquals(
-            "unsigned request is not supported for given client_id_scheme - did",
+            "unsigned request is not supported for given client_id_prefix - decentralized_identifier",
             invalidDataException.message
         )
     }

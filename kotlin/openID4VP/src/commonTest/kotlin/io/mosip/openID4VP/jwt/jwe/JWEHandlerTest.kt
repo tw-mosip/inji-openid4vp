@@ -6,7 +6,7 @@ import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadataDraf
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationRequest.deserializeAndValidate
 import io.mosip.openID4VP.exceptions.OpenID4VPExceptions
-import io.mosip.openID4VP.jwt.jwe.encryption.X25519KeyAgreement
+import io.mosip.openID4VP.jwt.jwe.encryption.EncryptionProvider
 import io.mosip.openID4VP.testData.clientMetadataString
 import kotlin.test.*
 
@@ -52,8 +52,8 @@ class JWEHandlerTest {
     fun `should throw exception when encryption fails`() {
         val payload = mapOf("key1" to "value1")
 
-        mockkConstructor(X25519KeyAgreement::class)
-        every { anyConstructed<X25519KeyAgreement>().deriveKey(any(), any(), any(), any()) } throws RuntimeException("Key agreement failed")
+        mockkObject(EncryptionProvider)
+        every { EncryptionProvider.getEncrypter(any()) } throws RuntimeException("Key agreement failed")
 
         val handler = JWEHandler("ECDH-ES", "A256GCM", publicKey, walletNonce, verifierNonce)
         val exception = assertFailsWith<OpenID4VPExceptions> {
@@ -67,8 +67,8 @@ class JWEHandlerTest {
     fun `should throw exception when JWT encryption fails`() {
         val payload = mapOf("key1" to "value1")
 
-        mockkConstructor(X25519KeyAgreement::class)
-        every { anyConstructed<X25519KeyAgreement>().deriveKey(any(), any(), any(), any()) } throws RuntimeException("Encryption error")
+        mockkObject(EncryptionProvider)
+        every { EncryptionProvider.getEncrypter(any()) } throws RuntimeException("Encryption error")
 
         val handler = JWEHandler("ECDH-ES", "A256GCM", publicKey, walletNonce, verifierNonce)
         val exception = assertFailsWith<OpenID4VPExceptions.JweEncryptionFailure> {
