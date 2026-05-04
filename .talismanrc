@@ -31,4 +31,12 @@ fileignoreconfig:
   checksum: 057236d8711ebfc3e4462a7a242350f64f5a94c6f041614b94a1ec0fcc903f9a
 - filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/jwt/jwe/JWEHandler.kt
   checksum: 2cee822c6f82f9a42a36d672f95a9c0c132b0d0933415e10730dff0c365051f4
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/common/CborUtils.kt
+  checksum: e5b1c50b4846d66aaa9680cc93b862e4d4413924b59770e58126a6cd2e67098e
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/responseModeHandler/types/DirectPostJwtResponseModeHandler.kt
+  checksum: d1bcd3124d84642cb763d3d84eb1250a6687dad50e6cee71089d48ad6736a94a
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/authorizationResponse/unsignedVPToken/types/mdoc/UnsignedMdocVPTokenBuilder.kt
+  checksum: ef8e03c0077fa18efaf3aa1438c5a74d02e8a63236dd297735e52aa920c92725
+- filename: kotlin/openID4VP/src/commonMain/kotlin/io/mosip/openID4VP/authorizationRequest/clientMetadata/ClientMetadata.kt
+  checksum: 4cb71a444937d49774e3e762b3dfa1acd07b23e9a9d97f127830fbe726869c23
 version: ""

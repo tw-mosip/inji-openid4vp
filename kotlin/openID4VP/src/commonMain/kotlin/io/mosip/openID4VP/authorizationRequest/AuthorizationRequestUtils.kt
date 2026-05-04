@@ -88,31 +88,46 @@ fun extractClientIdPrefix(authorizationRequestParameters: Map<String, Any>): Str
     val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
     val components = clientId.split(":", limit = 2)
 
-    return if (components.size > 1) {
+    if (components.size > 1) {
         val prefix = components[0]
         if (prefix == ClientIdScheme.DID.value) {
-            ClientIdScheme.DID.value
-        } else {
-            prefix
+            return ClientIdScheme.DID.value
         }
-    } else {
-        ClientIdPrefix.PRE_REGISTERED.value
+        if (ClientIdPrefix.fromValue(prefix) != null) {
+            return prefix
+        }
     }
+
+    // Backward compat for draft-21: fall back to client_id_scheme parameter
+    val clientIdScheme = getStringValue(authorizationRequestParameters, "client_id_scheme")
+    if (clientIdScheme != null) {
+        val scheme = ClientIdScheme.fromValue(clientIdScheme)
+        if (scheme != null) {
+            return when (scheme) {
+                ClientIdScheme.REDIRECT_URI -> ClientIdPrefix.REDIRECT_URI.value
+                ClientIdScheme.PRE_REGISTERED -> ClientIdPrefix.PRE_REGISTERED.value
+                ClientIdScheme.DID -> ClientIdScheme.DID.value
+            }
+        }
+    }
+
+    return if (components.size > 1) components[0] else ClientIdPrefix.PRE_REGISTERED.value
 }
 
 fun extractClientIdPartOnly(authorizationRequestParameters: Map<String, Any>): String {
     val clientId = getStringValue(authorizationRequestParameters, CLIENT_ID.value)!!
     val components = clientId.split(":", limit = 2)
-    return if (components.size > 1) {
+    if (components.size > 1) {
         val prefix = components[0]
-        if (prefix == ClientIdScheme.DID.value || prefix == ClientIdPrefix.DECENTRALIZED_IDENTIFIER.value) {
-            clientId
-        } else {
-            components[1]
+        if (prefix == ClientIdScheme.DID.value) {
+            return clientId
         }
-    } else {
-        clientId
+        if (ClientIdPrefix.fromValue(prefix) != null) {
+            return components[1]
+        }
     }
+    // No recognized prefix (e.g., draft-21 style or pre-registered) — return full client_id
+    return clientId
 }
 
 fun findSpecVersion(
@@ -123,7 +138,7 @@ fun findSpecVersion(
 ): SpecVersion {
     if (clientIdPrefix == ClientIdPrefix.REDIRECT_URI.value) {
         return findSpecVersionUsingRequestParameters(authorizationRequestParameters)
-    } else if (clientIdPrefix == ClientIdPrefix.DECENTRALIZED_IDENTIFIER.value) {
+    } else if (clientIdPrefix == ClientIdPrefix.DECENTRALIZED_IDENTIFIER.value || clientIdPrefix == ClientIdScheme.DID.value) {
         return SpecVersion.V1
     } else if (clientIdPrefix == ClientIdPrefix.PRE_REGISTERED.value) {
         val trustedVerifier = trustedVerifiers.firstOrNull { it.clientId == clientId }
@@ -143,7 +158,9 @@ fun findSpecVersionUsingRequestParameters(authorizationRequestParameters: Map<St
     ) {
         SpecVersion.DRAFT_23
     } else {
-        SpecVersion.V1
+        // Default to DRAFT_23 when no query type is specified; Draft-23 validation
+        // will provide explicit errors about missing presentation_definition
+        SpecVersion.DRAFT_23
     }
 }
 

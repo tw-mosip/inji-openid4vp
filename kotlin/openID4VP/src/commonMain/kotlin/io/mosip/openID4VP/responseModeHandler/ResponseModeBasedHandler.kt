@@ -4,6 +4,7 @@ import io.mosip.openID4VP.authorizationRequest.AuthorizationRequest
 import io.mosip.openID4VP.authorizationRequest.AuthorizationRequestFieldConstants.RESPONSE_URI
 import io.mosip.openID4VP.authorizationRequest.WalletMetadata
 import io.mosip.openID4VP.authorizationRequest.clientMetadata.ClientMetadata
+import io.mosip.openID4VP.authorizationRequest.clientMetadata.Jwk
 import io.mosip.openID4VP.authorizationResponse.AuthorizationErrorResponse
 import io.mosip.openID4VP.authorizationResponse.AuthorizationResponse
 import io.mosip.openID4VP.common.getStringValue
@@ -37,6 +38,7 @@ abstract class ResponseModeBasedHandler {
         url: String,
         authorizationResponse: AuthorizationResponse,
         walletNonce: String,
+        walletMetadata: WalletMetadata?
     ): NetworkResponse
 
     fun setResponseUrl(
@@ -54,7 +56,8 @@ abstract class ResponseModeBasedHandler {
     abstract fun getAuthorizationResponse(
         authorizationRequest: AuthorizationRequest,
         authorizationResponse: AuthorizationResponse,
-        walletNonce: String
+        walletNonce: String,
+        walletMetadata: WalletMetadata?
     ): Map<String, String>
 
     abstract fun getAuthorizationErrorResponse(
@@ -62,4 +65,9 @@ abstract class ResponseModeBasedHandler {
         authorizationResponse: AuthorizationErrorResponse,
         walletNonce: String
     ): Map<String, String>
+
+    open fun getVerifierPublicKeyForEncryption(
+        authorizationRequest: AuthorizationRequest,
+        walletMetadata: WalletMetadata?
+    ): Jwk? = null
 }

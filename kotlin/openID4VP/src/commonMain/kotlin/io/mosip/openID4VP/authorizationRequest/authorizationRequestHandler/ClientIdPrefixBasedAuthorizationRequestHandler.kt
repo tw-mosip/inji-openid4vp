@@ -37,6 +37,7 @@ import io.mosip.openID4VP.common.isJWS
 import io.mosip.openID4VP.common.isValidUrl
 import io.mosip.openID4VP.common.validate
 import io.mosip.openID4VP.constants.ClientIdPrefix
+import io.mosip.openID4VP.constants.ClientIdScheme
 import io.mosip.openID4VP.constants.ContentType
 import io.mosip.openID4VP.constants.HttpMethod
 import io.mosip.openID4VP.constants.RequestSigningAlgorithm
@@ -284,6 +285,15 @@ abstract class ClientIdPrefixBasedAuthorizationRequestHandler(
                 )
             }
 
+            val typ = header["typ"] as? String
+            if (typ != "oauth-authz-req+jwt") {
+                throw OpenID4VPExceptions.InvalidData(
+                    "Invalid typ in JWS header. Expected 'oauth-authz-req+jwt', found '${typ ?: "nil"}'",
+                    className,
+                    OpenID4VPErrorCodes.INVALID_REQUEST_OBJECT
+                )
+            }
+
             val algString = header["alg"] as? String
                 ?: throw OpenID4VPExceptions.InvalidData(
                     "'alg' is not present in JWS header",
@@ -387,6 +397,7 @@ abstract class ClientIdPrefixBasedAuthorizationRequestHandler(
     private fun isClientIdPrefixSupported(walletMetadata: WalletMetadata) {
         val clientIdPrefix = extractClientIdPrefix(authorizationRequestParameters)
         val prefix = ClientIdPrefix.fromValue(clientIdPrefix)
+            ?: if (clientIdPrefix == ClientIdScheme.DID.value) ClientIdPrefix.DECENTRALIZED_IDENTIFIER else null
         if (prefix != null && !walletMetadata.clientIdPrefixesSupported!!.contains(prefix)) {
             throw OpenID4VPExceptions.InvalidData(
                 "client_id_prefix is not supported by wallet",

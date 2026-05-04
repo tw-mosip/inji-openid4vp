@@ -105,7 +105,7 @@ data class WalletMetadata(
                 walletMetadataDict["vp_formats_supported"] = vpFormats
                 walletMetadataDict["client_id_schemes_supported"] = clientIdPrefixesSupported?.map {
                     ClientIdPrefix.toClientIdScheme(it)
-                } ?: emptyList()
+                } ?: emptyList<String>()
 
                 requestObjectSigningAlgValuesSupported?.let {
                     walletMetadataDict["request_object_signing_alg_values_supported"] = it.map { alg -> alg.name }
@@ -116,7 +116,7 @@ data class WalletMetadata(
                 authorizationEncryptionEncValuesSupported?.let {
                     walletMetadataDict["authorization_encryption_enc_values_supported"] = it.map { enc -> enc.name }
                 }
-                walletMetadataDict["response_types_supported"] = responseTypeSupported?.map { it.value } ?: emptyList()
+                walletMetadataDict["response_types_supported"] = responseTypeSupported?.map { it.value } ?: emptyList<String>()
 
                 val mapper = ObjectMapper()
                 mapper.writeValueAsString(walletMetadataDict)

@@ -33,7 +33,7 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 	override val descriptor: SerialDescriptor = buildClassSerialDescriptor("ClientMetadata") {
 		element<String>("client_name", isOptional = true)
 		element<String>("logo_uri", isOptional = true)
-		element<Map<String, Any>>("vp_formats_supported", isOptional = false)
+		element<String>("vp_formats_supported", isOptional = false)
 		element<List<String>>("encrypted_response_enc_values_supported", isOptional = true)
 		element<Jwks>("jwks", isOptional = true)
 	}
@@ -124,23 +124,50 @@ object ClientMetadataSerializer : KSerializer<ClientMetadata> {
 
 	@Generated
 	override fun serialize(encoder: Encoder, value: ClientMetadata) {
-		val builtInEncoder = encoder.beginStructure(descriptor)
-		value.clientName?.let {
-			builtInEncoder.encodeStringElement(descriptor, 0, it)
+		require(encoder is kotlinx.serialization.json.JsonEncoder) { "ClientMetadataSerializer only supports JSON encoding" }
+		val jsonObj = kotlinx.serialization.json.buildJsonObject {
+			value.clientName?.let { put("client_name", kotlinx.serialization.json.JsonPrimitive(it)) }
+			value.logoUri?.let { put("logo_uri", kotlinx.serialization.json.JsonPrimitive(it)) }
+			put("vp_formats_supported", kotlinx.serialization.json.buildJsonObject {
+				for ((key, formatSupported) in value.vpFormatsSupported) {
+					put(key, kotlinx.serialization.json.buildJsonObject {
+						when (formatSupported) {
+							is LdpVcFormatSupported -> {
+								formatSupported.proofTypeValues?.let { ptv ->
+									put("proof_type_values", kotlinx.serialization.json.JsonArray(ptv.map { kotlinx.serialization.json.JsonPrimitive(it.value) }))
+								}
+								formatSupported.cryptoSuiteValues?.let { csv ->
+									put("cryptosuite_values", kotlinx.serialization.json.JsonArray(csv.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+								}
+							}
+							is MsoMdocVcFormatSupported -> {
+								formatSupported.issuerAuthAlgValues?.let { iav ->
+									put("issuerauth_alg_values", kotlinx.serialization.json.JsonArray(iav.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+								}
+								formatSupported.deviceAuthAlgValues?.let { dav ->
+									put("deviceauth_alg_values", kotlinx.serialization.json.JsonArray(dav.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+								}
+							}
+							is SdJwtVcFormatSupported -> {
+								formatSupported.sdJwtAlgValues?.let { sav ->
+									put("sd-jwt_alg_values", kotlinx.serialization.json.JsonArray(sav.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+								}
+								formatSupported.kbJwtAlgValues?.let { kav ->
+									put("kb-jwt_alg_values", kotlinx.serialization.json.JsonArray(kav.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+								}
+							}
+						}
+					})
+				}
+			})
+			value.encryptedResponseEncValuesSupported?.let { erevs ->
+				put("encrypted_response_enc_values_supported", kotlinx.serialization.json.JsonArray(erevs.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+			}
+			value.jwks?.let {
+				put("jwks", kotlinx.serialization.json.Json.encodeToJsonElement(Jwks.serializer(), it))
+			}
 		}
-		value.logoUri?.let { builtInEncoder.encodeStringElement(descriptor, 1, it) }
-		// vp_formats_supported serialization is handled as a map
-		value.encryptedResponseEncValuesSupported?.let {
-			builtInEncoder.encodeSerializableElement(
-				descriptor, 3, ListSerializer(String.serializer()), it
-			)
-		}
-		value.jwks?.let {
-			builtInEncoder.encodeSerializableElement(
-				descriptor, 4, Jwks.serializer(), it
-			)
-		}
-		builtInEncoder.endStructure(descriptor)
+		encoder.encodeJsonElement(jsonObj)
 	}
 }
 
