@@ -145,6 +145,41 @@ class OpenID4VPErrorDispatchTest {
         verify { NetworkManagerClient.sendHTTPRequest(any(), any(), match { it["error"] == "server_error" }, any()) }
     }
 
+    @Test
+    fun `VP construction failure sends server_error with generic description to verifier`() {
+        openID4VP.authorizationRequest = authorizationRequest
+        setField(openID4VP, "responseUri", responseUrl)
+
+        val mockHandler = mockk<AuthorizationResponseHandler>()
+        setField(openID4VP, "authorizationResponseHandler", mockHandler)
+
+        every {
+            mockHandler.constructUnsignedVPToken(any(), any(), any(), any(), any(), any())
+        } throws OpenID4VPExceptions.InvalidData("Remote context loading issue", "test")
+
+        val errorPayloadSlot = slot<Exception>()
+        every {
+            mockHandler.sendAuthorizationError(any(), any(), capture(errorPayloadSlot))
+        } returns VerifierResponse(200, null, """{"ok":true}""", mapOf())
+
+        val thrown = assertFailsWith<OpenID4VPExceptions.InvalidData> {
+            openID4VP.constructUnsignedVPToken(emptyMap(), "holder", "Ed25519Signature2020")
+        }
+
+        // Original exception still has its original error code for the wallet
+        assertEquals("invalid_request", thrown.errorCode)
+        assertEquals("Remote context loading issue", thrown.message)
+
+        // But the error sent to verifier is wrapped as VPConstructionFailure (server_error)
+        assertTrue(errorPayloadSlot.isCaptured)
+        val sentError = errorPayloadSlot.captured as OpenID4VPExceptions.VPConstructionFailure
+        assertEquals("server_error", sentError.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the presentation.", sentError.message)
+
+        // Verifier response is attached to original exception
+        assertNotNull(thrown.verifierResponse)
+    }
+
     // --- State in error response ---
 
     @Test

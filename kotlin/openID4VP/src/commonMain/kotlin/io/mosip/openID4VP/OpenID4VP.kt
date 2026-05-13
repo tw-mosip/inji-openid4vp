@@ -97,7 +97,7 @@ class OpenID4VP @JvmOverloads constructor(
                 nonce = walletNonce
             )
         } catch (exception: OpenID4VPExceptions) {
-            this.safeSendError(exception)
+            this.safeSendVPConstructionError(exception)
             throw exception
         }
     }
@@ -131,7 +131,7 @@ class OpenID4VP @JvmOverloads constructor(
                 nonce = walletNonce
             )
         } catch (exception: OpenID4VPExceptions) {
-            this.safeSendError(exception)
+            this.safeSendVPConstructionError(exception)
             throw exception
         }
     }
@@ -143,7 +143,11 @@ class OpenID4VP @JvmOverloads constructor(
                 vpTokenSigningResults = vpTokenSigningResults,
             )
         } catch (exception: OpenID4VPExceptions) {
-            return constructErrorInfo(exception)
+            val vpConstructionError = OpenID4VPExceptions.VPConstructionFailure(
+                className = className,
+                cause = exception
+            )
+            return constructErrorInfo(vpConstructionError)
         }
     }
 
@@ -161,7 +165,7 @@ class OpenID4VP @JvmOverloads constructor(
                 responseUri = responseUri!!
             )
         } catch (exception: OpenID4VPExceptions) {
-            this.safeSendError(exception)
+            this.safeSendVPConstructionError(exception)
             throw exception
         }
     }
@@ -196,6 +200,23 @@ class OpenID4VP @JvmOverloads constructor(
         try {
             val verifierResponse = sendErrorInfoToVerifier(exception)
             (exception as? OpenID4VPExceptions)?.setVerifierResponse(verifierResponse)
+        } catch (error: Exception) {
+            OpenID4VPExceptions.error(error.message ?: error.localizedMessage, className)
+        }
+    }
+
+    // Wraps VP construction errors as server_error per OVP/OAuth 2.0 spec before sending to verifier.
+    // VP construction failures are wallet-side (server) issues, not verifier request issues,
+    // so they should use server_error instead of invalid_request.
+    // The original exception is still thrown to the wallet caller with full details.
+    private fun safeSendVPConstructionError(exception: OpenID4VPExceptions) {
+        try {
+            val vpConstructionError = OpenID4VPExceptions.VPConstructionFailure(
+                className = className,
+                cause = exception
+            )
+            val verifierResponse = sendErrorInfoToVerifier(vpConstructionError)
+            exception.setVerifierResponse(verifierResponse)
         } catch (error: Exception) {
             OpenID4VPExceptions.error(error.message ?: error.localizedMessage, className)
         }

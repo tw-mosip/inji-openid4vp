@@ -183,6 +183,17 @@ sealed class OpenID4VPExceptions(
             className
         )
 
+    // VP construction errors — sent to verifier as server_error per spec
+    class VPConstructionFailure(
+        className: String,
+        cause: Throwable? = null
+    ) : OpenID4VPExceptions(
+        OpenID4VPErrorCodes.SERVER_ERROR,
+        "The wallet encountered an internal error while preparing the presentation.",
+        className,
+        cause = cause
+    )
+
     //fallback
     class GenericFailure(
         override val message: String,
