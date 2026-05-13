@@ -303,7 +303,6 @@ class OpenID4VPTest {
             openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList, holderId, signatureSuite)
         }
 
-        // Verify the error sent to verifier is VPConstructionFailure (server_error), not invalid_request
         assertTrue(errorPayloadSlot.isCaptured)
         val sentError = errorPayloadSlot.captured as OpenID4VPExceptions.VPConstructionFailure
         assertEquals("server_error", sentError.errorCode)

@@ -166,17 +166,14 @@ class OpenID4VPErrorDispatchTest {
             openID4VP.constructUnsignedVPToken(emptyMap(), "holder", "Ed25519Signature2020")
         }
 
-        // Original exception still has its original error code for the wallet
         assertEquals("invalid_request", thrown.errorCode)
         assertEquals("Remote context loading issue", thrown.message)
 
-        // But the error sent to verifier is wrapped as VPConstructionFailure (server_error)
         assertTrue(errorPayloadSlot.isCaptured)
         val sentError = errorPayloadSlot.captured as OpenID4VPExceptions.VPConstructionFailure
         assertEquals("server_error", sentError.errorCode)
         assertEquals("The wallet encountered an internal error while preparing the presentation.", sentError.message)
 
-        // Verifier response is attached to original exception
         assertNotNull(thrown.verifierResponse)
     }
 

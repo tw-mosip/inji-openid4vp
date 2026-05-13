@@ -176,13 +176,11 @@ class AuthorizationResponseHandlerV1Test {
         }
         assertEquals("VP token construction failed", thrown.message)
 
-        // Verify that the error sent to verifier is VPConstructionFailure (server_error)
         assertTrue(errorPayloadSlot.isCaptured)
         val sentError = errorPayloadSlot.captured as OpenID4VPExceptions.VPConstructionFailure
         assertEquals("server_error", sentError.errorCode)
         assertEquals("The wallet encountered an internal error while preparing the presentation.", sentError.message)
 
-        // Verifier response is attached to original exception
         assertNotNull(thrown.verifierResponse)
     }
 

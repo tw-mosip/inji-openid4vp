@@ -205,10 +205,6 @@ class OpenID4VP @JvmOverloads constructor(
         }
     }
 
-    // Wraps VP construction errors as server_error per OVP/OAuth 2.0 spec before sending to verifier.
-    // VP construction failures are wallet-side (server) issues, not verifier request issues,
-    // so they should use server_error instead of invalid_request.
-    // The original exception is still thrown to the wallet caller with full details.
     private fun safeSendVPConstructionError(exception: OpenID4VPExceptions) {
         try {
             val vpConstructionError = OpenID4VPExceptions.VPConstructionFailure(
