@@ -183,12 +183,22 @@ sealed class OpenID4VPExceptions(
             className
         )
 
-    class VPConstructionFailure(
+    class VerifiablePresentationConstructionFailure(
         className: String,
         cause: Throwable? = null
     ) : OpenID4VPExceptions(
         OpenID4VPErrorCodes.SERVER_ERROR,
         "The wallet encountered an internal error while preparing the presentation.",
+        className,
+        cause = cause
+    )
+
+    class AuthorizationResponseConstructionFailure(
+        className: String,
+        cause: Throwable? = null
+    ) : OpenID4VPExceptions(
+        OpenID4VPErrorCodes.SERVER_ERROR,
+        "The wallet encountered an internal error while preparing the authorization response.",
         className,
         cause = cause
     )

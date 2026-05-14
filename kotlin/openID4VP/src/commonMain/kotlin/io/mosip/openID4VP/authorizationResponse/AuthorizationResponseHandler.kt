@@ -182,6 +182,24 @@ internal class AuthorizationResponseHandler(
         return unsignedVPTokenResults
     }
 
+    internal fun sendVPConstructionError(
+        responseUri: String?,
+        authorizationRequest: AuthorizationRequest?,
+        cause: OpenID4VPExceptions
+    ): VerifierResponse {
+        val error = OpenID4VPExceptions.VerifiablePresentationConstructionFailure(className, cause)
+        return sendAuthorizationError(responseUri, authorizationRequest, error)
+    }
+
+    internal fun sendAuthorizationResponseConstructionError(
+        responseUri: String?,
+        authorizationRequest: AuthorizationRequest?,
+        cause: OpenID4VPExceptions
+    ): VerifierResponse {
+        val error = OpenID4VPExceptions.AuthorizationResponseConstructionFailure(className, cause)
+        return sendAuthorizationError(responseUri, authorizationRequest, error)
+    }
+
     internal fun constructAuthorizationErrorResponse(
         authorizationRequest: AuthorizationRequest?,
         exception: Exception,

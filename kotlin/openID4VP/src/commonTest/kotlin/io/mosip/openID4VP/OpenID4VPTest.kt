@@ -294,19 +294,18 @@ class OpenID4VPTest {
 
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
-        val errorPayloadSlot = slot<Exception>()
+        val causeSlot = slot<OpenID4VPExceptions>()
         every {
-            mockHandler.sendAuthorizationError(any(), any(), capture(errorPayloadSlot))
+            mockHandler.sendVPConstructionError(any(), any(), capture(causeSlot))
         } returns VerifierResponse(200, null, """{"message":"Error received successfully"}""", mapOf("Content-Type" to listOf("application/json")))
 
         assertFailsWith<InvalidData> {
             openID4VP.constructUnsignedVPToken(selectedLdpCredentialsList, holderId, signatureSuite)
         }
 
-        assertTrue(errorPayloadSlot.isCaptured)
-        val sentError = errorPayloadSlot.captured as OpenID4VPExceptions.VPConstructionFailure
-        assertEquals("server_error", sentError.errorCode)
-        assertEquals("The wallet encountered an internal error while preparing the presentation.", sentError.message)
+        assertTrue(causeSlot.isCaptured)
+        val cause = assertIs<InvalidData>(causeSlot.captured)
+        assertEquals("Remote context loading issue", cause.message)
     }
 
     @Test
