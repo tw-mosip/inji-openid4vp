@@ -97,12 +97,7 @@ class OpenID4VP @JvmOverloads constructor(
                 nonce = walletNonce
             )
         } catch (exception: OpenID4VPExceptions) {
-            try {
-                val verifierResponse = authorizationResponseHandler.sendVPConstructionError(responseUri, authorizationRequest, exception)
-                exception.setVerifierResponse(verifierResponse)
-            } catch (error: Exception) {
-                OpenID4VPExceptions.error(error.message ?: error.localizedMessage, className)
-            }
+            this.safeSendError(exception)
             throw exception
         }
     }
@@ -136,12 +131,7 @@ class OpenID4VP @JvmOverloads constructor(
                 nonce = walletNonce
             )
         } catch (exception: OpenID4VPExceptions) {
-            try {
-                val verifierResponse = authorizationResponseHandler.sendVPConstructionError(responseUri, authorizationRequest, exception)
-                exception.setVerifierResponse(verifierResponse)
-            } catch (error: Exception) {
-                OpenID4VPExceptions.error(error.message ?: error.localizedMessage, className)
-            }
+            this.safeSendError(exception)
             throw exception
         }
     }
@@ -153,11 +143,7 @@ class OpenID4VP @JvmOverloads constructor(
                 vpTokenSigningResults = vpTokenSigningResults,
             )
         } catch (exception: OpenID4VPExceptions) {
-            val authResponseError = OpenID4VPExceptions.AuthorizationResponseConstructionFailure(
-                className = className,
-                cause = exception
-            )
-            return constructErrorInfo(authResponseError)
+            return constructErrorInfo(exception)
         }
     }
 
@@ -175,12 +161,7 @@ class OpenID4VP @JvmOverloads constructor(
                 responseUri = responseUri!!
             )
         } catch (exception: OpenID4VPExceptions) {
-            try {
-                val verifierResponse = authorizationResponseHandler.sendAuthorizationResponseConstructionError(responseUri, authorizationRequest, exception)
-                exception.setVerifierResponse(verifierResponse)
-            } catch (error: Exception) {
-                OpenID4VPExceptions.error(error.message ?: error.localizedMessage, className)
-            }
+            this.safeSendError(exception)
             throw exception
         }
     }

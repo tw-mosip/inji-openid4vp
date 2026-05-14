@@ -65,23 +65,21 @@ class AuthorizationResponseHandlerV1Test {
         val mockHandler = mockk<AuthorizationResponseHandler>()
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
+        val innerException = OpenID4VPExceptions.InvalidData("No credentials", "test")
         every {
             mockHandler.constructUnsignedVPToken(any(), any(), any(), any(), any(), any())
-        } throws OpenID4VPExceptions.InvalidData("No credentials", "test")
+        } throws OpenID4VPExceptions.VerifiablePresentationConstructionFailure("test", innerException)
 
-        val causeSlot = slot<OpenID4VPExceptions>()
         every {
-            mockHandler.sendVPConstructionError(any(), any(), capture(causeSlot))
+            mockHandler.sendAuthorizationError(any(), any(), any())
         } returns VerifierResponse(200, null, """{"ok":true}""", mapOf())
 
-        val thrown = assertFailsWith<OpenID4VPExceptions.InvalidData> {
+        val thrown = assertFailsWith<OpenID4VPExceptions.VerifiablePresentationConstructionFailure> {
             openID4VP.constructUnsignedVPToken(emptyMap(), holderId, signatureSuite)
         }
-        assertEquals("No credentials", thrown.message)
-
-        assertTrue(causeSlot.isCaptured)
-        assertIs<OpenID4VPExceptions.InvalidData>(causeSlot.captured)
-        assertEquals("No credentials", causeSlot.captured.message)
+        assertEquals("The wallet encountered an internal error while preparing the presentation.", thrown.message)
+        val cause = assertIs<OpenID4VPExceptions.InvalidData>(thrown.cause)
+        assertEquals("No credentials", cause.message)
     }
 
     // --- constructVPResponse error map fallback ---
@@ -91,9 +89,10 @@ class AuthorizationResponseHandlerV1Test {
         val mockHandler = mockk<AuthorizationResponseHandler>()
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
+        val innerException = OpenID4VPExceptions.InvalidData("bad signing result", "test")
         every {
             mockHandler.constructVPResponse(any(), any())
-        } throws OpenID4VPExceptions.InvalidData("bad signing result", "test")
+        } throws OpenID4VPExceptions.AuthorizationResponseConstructionFailure("test", innerException)
 
         val capturedEx = slot<Exception>()
         every {
@@ -105,12 +104,11 @@ class AuthorizationResponseHandlerV1Test {
         assertEquals("server_error", result["error"])
         assertEquals("The wallet encountered an internal error while preparing the authorization response.", result["error_description"])
 
-        assertTrue(capturedEx.isCaptured)
         val capturedError = assertIs<OpenID4VPExceptions.AuthorizationResponseConstructionFailure>(capturedEx.captured)
         assertEquals("server_error", capturedError.errorCode)
         assertEquals("The wallet encountered an internal error while preparing the authorization response.", capturedError.message)
-        assertIs<OpenID4VPExceptions.InvalidData>(capturedError.cause)
-        assertEquals("bad signing result", (capturedError.cause as OpenID4VPExceptions.InvalidData).message)
+        val cause = assertIs<OpenID4VPExceptions.InvalidData>(capturedError.cause)
+        assertEquals("bad signing result", cause.message)
     }
 
     @Test
@@ -175,22 +173,20 @@ class AuthorizationResponseHandlerV1Test {
         val mockHandler = mockk<AuthorizationResponseHandler>()
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 
+        val innerException = OpenID4VPExceptions.InvalidData("VP token construction failed", "test")
         every {
             mockHandler.constructAndSendAuthorizationResponseToVerifier(any(), any(), any())
-        } throws OpenID4VPExceptions.InvalidData("VP token construction failed", "test")
+        } throws OpenID4VPExceptions.AuthorizationResponseConstructionFailure("test", innerException)
 
-        val causeSlot = slot<OpenID4VPExceptions>()
         every {
-            mockHandler.sendAuthorizationResponseConstructionError(any(), any(), capture(causeSlot))
+            mockHandler.sendAuthorizationError(any(), any(), any())
         } returns VerifierResponse(200, null, """{"received":true}""", mapOf())
 
-        val thrown = assertFailsWith<OpenID4VPExceptions.InvalidData> {
+        val thrown = assertFailsWith<OpenID4VPExceptions.AuthorizationResponseConstructionFailure> {
             openID4VP.sendVPResponseToVerifier(emptyList())
         }
-        assertEquals("VP token construction failed", thrown.message)
-
-        assertTrue(causeSlot.isCaptured)
-        val cause = assertIs<OpenID4VPExceptions.InvalidData>(causeSlot.captured)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", thrown.message)
+        val cause = assertIs<OpenID4VPExceptions.InvalidData>(thrown.cause)
         assertEquals("VP token construction failed", cause.message)
 
         assertNotNull(thrown.verifierResponse)
