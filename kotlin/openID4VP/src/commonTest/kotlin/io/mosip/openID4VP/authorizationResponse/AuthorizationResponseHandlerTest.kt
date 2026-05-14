@@ -1975,7 +1975,7 @@ class AuthorizationResponseHandlerTest {
     fun `DCQL - should throw error when selected credentials is empty`() {
         val dcqlRequest = createDcqlAuthorizationRequest()
 
-        val exception = assertFailsWith<InvalidData> {
+        val exception = assertFailsWith<VerifiablePresentationConstructionFailure> {
             authorizationResponseHandler.constructUnsignedVPToken(
                 selectedCredentials = mapOf(),
                 authorizationRequest = dcqlRequest,
@@ -1983,7 +1983,8 @@ class AuthorizationResponseHandlerTest {
                 nonce = walletNonce
             )
         }
-        assertTrue(exception.message!!.contains("Empty credentials list"))
+        val cause = assertIs<InvalidData>(exception.cause)
+        assertTrue(cause.message!!.contains("Empty credentials list"))
     }
 
     @Test
@@ -2244,14 +2245,14 @@ class AuthorizationResponseHandlerTest {
             VPTokenSigningResult(signedData = "mock-sig".toByteArray())
         }
 
-        val exception = assertFailsWith<InvalidData> {
+        val exception = assertFailsWith<AuthorizationResponseConstructionFailure> {
             authorizationResponseHandler.constructVPResponse(
                 vpTokenSigningResults = signingResults,
                 authorizationRequest = dcqlRequest
             )
         }
-
-        assertTrue(exception.message!!.contains("not supported"))
+        val cause = assertIs<InvalidData>(exception.cause)
+        assertTrue(cause.message!!.contains("not supported"))
     }
 
     @Test
