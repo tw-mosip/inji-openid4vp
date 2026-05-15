@@ -285,6 +285,8 @@ class AuthorizationResponseHandlerTest {
                 nonce = walletNonce
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the presentation.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertEquals(
             "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
@@ -316,6 +318,8 @@ class AuthorizationResponseHandlerTest {
                 responseUri = authorizationRequest.responseUri!!
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertEquals("Provided response_type - code is not supported", cause.message)
     }
@@ -340,6 +344,8 @@ class AuthorizationResponseHandlerTest {
                 responseUri = authorizationRequest.responseUri!!
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertEquals(
             "Extra signing results provided",
@@ -359,6 +365,8 @@ class AuthorizationResponseHandlerTest {
                 nonce = walletNonce
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the presentation.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertEquals(
             "Empty credentials list - The Wallet did not have the requested Credentials to satisfy the Authorization Request.",
@@ -425,6 +433,8 @@ class AuthorizationResponseHandlerTest {
                 responseUri = responseUrl
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertEquals("Provided response_type - code is not supported", cause.message)
     }
@@ -492,6 +502,8 @@ class AuthorizationResponseHandlerTest {
                 responseUri = responseUrl
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertEquals(
             "Provided response_type - invalid_vp_token is not supported",
@@ -521,6 +533,8 @@ class AuthorizationResponseHandlerTest {
                 responseUri = responseUrl
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertEquals(
             "Extra signing results provided",
@@ -733,13 +747,16 @@ class AuthorizationResponseHandlerTest {
             walletNonce = authorizationRequest.walletNonce
         )
 
-        assertFailsWith<AuthorizationResponseConstructionFailure> {
+        val exception = assertFailsWith<AuthorizationResponseConstructionFailure> {
             authorizationResponseHandler.constructAndSendAuthorizationResponseToVerifier(
                 request,
                 listOf(VPTokenSigningResult(signedData = "mock-signed-data".toByteArray())),
                 responseUrl
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
+        assertIs<InvalidData>(exception.cause)
     }
 
     @Test
@@ -1466,6 +1483,8 @@ class AuthorizationResponseHandlerTest {
                 authorizationRequest = invalidRequest
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertTrue(cause.message!!.contains("invalid_response_type"))
         assertTrue(cause.message!!.contains("not supported"))
@@ -1490,6 +1509,8 @@ class AuthorizationResponseHandlerTest {
                 authorizationRequest = authorizationRequest
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertTrue(cause.message!!.contains("Missing mdoc signature"))
     }
@@ -1983,6 +2004,8 @@ class AuthorizationResponseHandlerTest {
                 nonce = walletNonce
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the presentation.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertTrue(cause.message!!.contains("Empty credentials list"))
     }
@@ -2251,6 +2274,8 @@ class AuthorizationResponseHandlerTest {
                 authorizationRequest = dcqlRequest
             )
         }
+        assertEquals("server_error", exception.errorCode)
+        assertEquals("The wallet encountered an internal error while preparing the authorization response.", exception.message)
         val cause = assertIs<InvalidData>(exception.cause)
         assertTrue(cause.message!!.contains("not supported"))
     }

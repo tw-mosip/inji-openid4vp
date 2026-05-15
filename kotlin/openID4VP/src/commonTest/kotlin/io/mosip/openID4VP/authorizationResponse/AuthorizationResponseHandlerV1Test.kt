@@ -77,6 +77,7 @@ class AuthorizationResponseHandlerV1Test {
         val thrown = assertFailsWith<OpenID4VPExceptions.VerifiablePresentationConstructionFailure> {
             openID4VP.constructUnsignedVPToken(emptyMap(), holderId, signatureSuite)
         }
+        assertEquals("server_error", thrown.errorCode)
         assertEquals("The wallet encountered an internal error while preparing the presentation.", thrown.message)
         val cause = assertIs<OpenID4VPExceptions.InvalidData>(thrown.cause)
         assertEquals("No credentials", cause.message)
@@ -185,6 +186,7 @@ class AuthorizationResponseHandlerV1Test {
         val thrown = assertFailsWith<OpenID4VPExceptions.AuthorizationResponseConstructionFailure> {
             openID4VP.sendVPResponseToVerifier(emptyList())
         }
+        assertEquals("server_error", thrown.errorCode)
         assertEquals("The wallet encountered an internal error while preparing the authorization response.", thrown.message)
         val cause = assertIs<OpenID4VPExceptions.InvalidData>(thrown.cause)
         assertEquals("VP token construction failed", cause.message)
