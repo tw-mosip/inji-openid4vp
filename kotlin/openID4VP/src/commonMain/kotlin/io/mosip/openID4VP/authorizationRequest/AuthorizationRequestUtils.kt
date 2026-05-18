@@ -96,6 +96,8 @@ fun extractClientIdPrefix(authorizationRequestParameters: Map<String, Any>): Str
         if (ClientIdPrefix.fromValue(prefix) != null) {
             return prefix
         }
+        // Treat unrecognized prefixes as pre-registered and validate against trusted verifier list.
+        return ClientIdPrefix.PRE_REGISTERED.value
     }
 
     // Backward compat for draft-21: fall back to client_id_scheme parameter
@@ -111,7 +113,7 @@ fun extractClientIdPrefix(authorizationRequestParameters: Map<String, Any>): Str
         }
     }
 
-    return if (components.size > 1) components[0] else ClientIdPrefix.PRE_REGISTERED.value
+    return ClientIdPrefix.PRE_REGISTERED.value
 }
 
 fun extractClientIdPartOnly(authorizationRequestParameters: Map<String, Any>): String {
