@@ -35,7 +35,7 @@ import io.mosip.openID4VP.testData.requestParams
 import io.mosip.openID4VP.testData.requestUrl
 import io.mosip.openID4VP.testData.responseUrl
 import io.mosip.openID4VP.testData.trustedVerifiers
-import io.mosip.openID4VP.testData.walletMetadata
+import io.mosip.openID4VP.testData.walletConfig
 import io.mosip.openID4VP.testData.walletNonce
 import kotlin.test.*
 
@@ -786,7 +786,7 @@ class AuthorizationRequestTest {
             authorizationRequestParameters = (requestParams + clientIdOfPreRegistered + mapOf(
                 "transaction_data" to "some_value",
             )) as MutableMap<String, Any>,
-            walletMetadata = walletMetadata,
+            walletConfig = walletConfig,
             shouldValidateClient = true,
             setResponseUri = setResponseUri,
             walletNonce = walletNonce
