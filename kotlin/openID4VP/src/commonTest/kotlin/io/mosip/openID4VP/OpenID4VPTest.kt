@@ -290,7 +290,7 @@ class OpenID4VPTest {
 
         every {
             mockHandler.constructUnsignedVPToken(any(), any(), any(), any(), any(), any())
-        } throws OpenID4VPExceptions.VerifiablePresentationConstructionFailure("", innerException)
+        } throws OpenID4VPExceptions.VerifiablePresentationConstructionFailure(innerException, "")
 
         setField(openID4VP, "authorizationResponseHandler", mockHandler)
 

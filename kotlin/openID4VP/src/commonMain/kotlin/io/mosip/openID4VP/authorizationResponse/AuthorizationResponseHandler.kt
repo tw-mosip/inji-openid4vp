@@ -93,7 +93,7 @@ internal class AuthorizationResponseHandler(
                     unsignedVPTokenResults[format]!!.second
                 }
         } catch (exception: Exception) {
-            throw OpenID4VPExceptions.VerifiablePresentationConstructionFailure(className, exception)
+            throw OpenID4VPExceptions.VerifiablePresentationConstructionFailure(exception, className)
         }
     }
 
@@ -143,7 +143,7 @@ internal class AuthorizationResponseHandler(
                     unsignedVPTokenResults[format]!!.second
                 }
         } catch (exception: Exception) {
-            throw OpenID4VPExceptions.VerifiablePresentationConstructionFailure(className, exception)
+            throw OpenID4VPExceptions.VerifiablePresentationConstructionFailure(exception, className)
         }
     }
 
@@ -158,7 +158,7 @@ internal class AuthorizationResponseHandler(
                 vpTokenSigningResults = reconstructedResults
             )
         } catch (exception: Exception) {
-            throw OpenID4VPExceptions.AuthorizationResponseConstructionFailure(className, exception)
+            throw OpenID4VPExceptions.AuthorizationResponseConstructionFailure(exception, className)
         }
     }
 
@@ -266,7 +266,7 @@ internal class AuthorizationResponseHandler(
                 vpTokenSigningResults = reconstructSigningResults(vpTokenSigningResults)
             )
         } catch (exception: Exception) {
-            throw OpenID4VPExceptions.AuthorizationResponseConstructionFailure(className, exception)
+            throw OpenID4VPExceptions.AuthorizationResponseConstructionFailure(exception, className)
         }
         val networkResponse = sendAuthorizationResponse(
             authorizationResponse = authorizationResponse,

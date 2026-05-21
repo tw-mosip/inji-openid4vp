@@ -156,7 +156,7 @@ class OpenID4VPErrorDispatchTest {
         val innerException = OpenID4VPExceptions.InvalidData("Remote context loading issue", "test")
         every {
             mockHandler.constructUnsignedVPToken(any(), any(), any(), any(), any(), any())
-        } throws OpenID4VPExceptions.VerifiablePresentationConstructionFailure("test", innerException)
+        } throws OpenID4VPExceptions.VerifiablePresentationConstructionFailure(innerException, "test")
 
         every {
             mockHandler.sendAuthorizationError(any(), any(), any())

@@ -68,7 +68,7 @@ class AuthorizationResponseHandlerV1Test {
         val innerException = OpenID4VPExceptions.InvalidData("No credentials", "test")
         every {
             mockHandler.constructUnsignedVPToken(any(), any(), any(), any(), any(), any())
-        } throws OpenID4VPExceptions.VerifiablePresentationConstructionFailure("test", innerException)
+        } throws OpenID4VPExceptions.VerifiablePresentationConstructionFailure(innerException, "test")
 
         every {
             mockHandler.sendAuthorizationError(any(), any(), any())
@@ -93,7 +93,7 @@ class AuthorizationResponseHandlerV1Test {
         val innerException = OpenID4VPExceptions.InvalidData("bad signing result", "test")
         every {
             mockHandler.constructVPResponse(any(), any())
-        } throws OpenID4VPExceptions.AuthorizationResponseConstructionFailure("test", innerException)
+        } throws OpenID4VPExceptions.AuthorizationResponseConstructionFailure(innerException, "test")
 
         val capturedEx = slot<Exception>()
         every {
@@ -177,7 +177,7 @@ class AuthorizationResponseHandlerV1Test {
         val innerException = OpenID4VPExceptions.InvalidData("VP token construction failed", "test")
         every {
             mockHandler.constructAndSendAuthorizationResponseToVerifier(any(), any(), any())
-        } throws OpenID4VPExceptions.AuthorizationResponseConstructionFailure("test", innerException)
+        } throws OpenID4VPExceptions.AuthorizationResponseConstructionFailure(innerException, "test")
 
         every {
             mockHandler.sendAuthorizationError(any(), any(), any())
