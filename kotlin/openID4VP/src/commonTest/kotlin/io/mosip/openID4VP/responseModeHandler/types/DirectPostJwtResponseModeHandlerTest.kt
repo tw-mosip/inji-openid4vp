@@ -654,4 +654,368 @@ class DirectPostJwtResponseModeHandlerTest {
             )
         )
     }
+
+    /** Tests for ResponseDispatchInfo-based methods **/
+
+    @Test
+    fun `getAuthorizationErrorResponse with ResponseDispatchInfo should return encrypted JWT`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val mockJwk = Jwk(
+            kty = "EC",
+            crv = "P-256",
+            x = "test-x",
+            y = "test-y",
+            alg = "ECDH-ES"
+        )
+        
+        val encryptionSpec = io.mosip.openID4VP.responseModeHandler.ResponseEncryptionSpecification(
+            keyEncryptionAlg = "ECDH-ES",
+            contentEncryptionAlg = "A256GCM",
+            verifierPublicKey = mockJwk
+        )
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = "test-nonce",
+            state = "test-state",
+            clientId = "test-client",
+            responseEncryptionSpecification = encryptionSpec
+        )
+
+        every { 
+            anyConstructed<JWEHandler>().generateEncryptedResponse(any()) 
+        } returns "encrypted-jwt-token"
+
+        val result = handler.getAuthorizationErrorResponse(
+            dispatchInfo = dispatchInfo,
+            error = "access_denied",
+            errorDescription = "User rejected the consent"
+        )
+
+        assertEquals(1, result.size)
+        assertTrue(result.containsKey("response"))
+        assertEquals("encrypted-jwt-token", result["response"])
+        
+        verify {
+            anyConstructed<JWEHandler>().generateEncryptedResponse(
+                match { 
+                    it["error"] == "access_denied" && 
+                    it["error_description"] == "User rejected the consent" &&
+                    it["state"] == "test-state"
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `getAuthorizationErrorResponse with ResponseDispatchInfo without encryption should return plain map`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = "test-nonce",
+            state = "test-state",
+            clientId = "test-client",
+            responseEncryptionSpecification = null
+        )
+
+        val result = handler.getAuthorizationErrorResponse(
+            dispatchInfo = dispatchInfo,
+            error = "invalid_request",
+            errorDescription = "Missing required parameter"
+        )
+
+        assertEquals(3, result.size)
+        assertEquals("invalid_request", result["error"])
+        assertEquals("Missing required parameter", result["error_description"])
+        assertEquals("test-state", result["state"])
+    }
+
+    @Test
+    fun `getAuthorizationErrorResponse with ResponseDispatchInfo should include state and nonce`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val mockJwk = Jwk(
+            kty = "EC",
+            crv = "P-256",
+            x = "test-x",
+            y = "test-y",
+            alg = "ECDH-ES"
+        )
+        
+        val encryptionSpec = io.mosip.openID4VP.responseModeHandler.ResponseEncryptionSpecification(
+            keyEncryptionAlg = "ECDH-ES",
+            contentEncryptionAlg = "A256GCM",
+            verifierPublicKey = mockJwk
+        )
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = "verifier-nonce-123",
+            state = "state-abc",
+            clientId = "test-client",
+            responseEncryptionSpecification = encryptionSpec
+        )
+
+        every { 
+            anyConstructed<JWEHandler>().generateEncryptedResponse(any()) 
+        } returns "encrypted-jwt"
+
+        val result = handler.getAuthorizationErrorResponse(
+            dispatchInfo = dispatchInfo,
+            error = "access_denied",
+            errorDescription = null
+        )
+
+        assertEquals(1, result.size)
+        assertTrue(result.containsKey("response"))
+        assertEquals("encrypted-jwt", result["response"])
+    }
+
+    @Test
+    fun `getAuthorizationErrorResponse with ResponseDispatchInfo should handle null optional fields`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = null,
+            state = null,
+            clientId = "test-client",
+            responseEncryptionSpecification = null
+        )
+
+        val result = handler.getAuthorizationErrorResponse(
+            dispatchInfo = dispatchInfo,
+            error = "invalid_scope",
+            errorDescription = null
+        )
+
+        assertEquals(1, result.size)
+        assertEquals("invalid_scope", result["error"])
+        assertFalse(result.containsKey("error_description"))
+        assertFalse(result.containsKey("state"))
+    }
+
+    @Test
+    fun `sendAuthorizationError with ResponseDispatchInfo should post to responseUri`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val mockJwk = Jwk(
+            kty = "EC",
+            crv = "P-256",
+            x = "test-x",
+            y = "test-y",
+            alg = "ECDH-ES"
+        )
+        
+        val encryptionSpec = io.mosip.openID4VP.responseModeHandler.ResponseEncryptionSpecification(
+            keyEncryptionAlg = "ECDH-ES",
+            contentEncryptionAlg = "A256GCM",
+            verifierPublicKey = mockJwk
+        )
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = "test-nonce",
+            state = "test-state",
+            clientId = "test-client",
+            responseEncryptionSpecification = encryptionSpec
+        )
+
+        val mockNetworkResponse = NetworkResponse(
+            statusCode = 200,
+            body = """{"status":"ok"}""",
+            headers = emptyMap()
+        )
+
+        every { 
+            anyConstructed<JWEHandler>().generateEncryptedResponse(any()) 
+        } returns "encrypted-jwt-error"
+
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                url = "https://verifier.example.com/callback",
+                method = HttpMethod.POST,
+                bodyParams = any(),
+                headers = any()
+            )
+        } returns mockNetworkResponse
+
+        val result = handler.sendAuthorizationError(
+            dispatchInfo = dispatchInfo,
+            error = "access_denied",
+            errorDescription = "User declined",
+            responseUri = "https://verifier.example.com/callback"
+        )
+
+        assertEquals(200, result.statusCode)
+        verify {
+            NetworkManagerClient.sendHTTPRequest(
+                url = "https://verifier.example.com/callback",
+                method = HttpMethod.POST,
+                bodyParams = match { it["response"] == "encrypted-jwt-error" },
+                headers = match { it["Content-Type"] == ContentType.APPLICATION_FORM_URL_ENCODED.value }
+            )
+        }
+    }
+
+    @Test
+    fun `getAuthorizationResponse with ResponseDispatchInfo should return encrypted JWT`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val mockJwk = Jwk(
+            kty = "EC",
+            crv = "P-256",
+            x = "test-x",
+            y = "test-y",
+            alg = "ECDH-ES"
+        )
+        
+        val encryptionSpec = io.mosip.openID4VP.responseModeHandler.ResponseEncryptionSpecification(
+            keyEncryptionAlg = "ECDH-ES",
+            contentEncryptionAlg = "A256GCM",
+            verifierPublicKey = mockJwk
+        )
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = "verifier-nonce",
+            state = "request-state",
+            clientId = "test-client",
+            responseEncryptionSpecification = encryptionSpec
+        )
+
+        every { 
+            anyConstructed<JWEHandler>().generateEncryptedResponse(any()) 
+        } returns "encrypted-success-jwt"
+
+        val result = handler.getAuthorizationResponse(
+            dispatchInfo = dispatchInfo,
+            vpToken = "vp-token-value",
+            presentationSubmission = """{"descriptor_map":[]}""",
+            walletNonce = "wallet-nonce-123"
+        )
+
+        assertEquals(1, result.size)
+        assertTrue(result.containsKey("response"))
+        assertEquals("encrypted-success-jwt", result["response"])
+    }
+
+    @Test
+    fun `getAuthorizationResponse with ResponseDispatchInfo should throw exception without encryption spec`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = "test-nonce",
+            state = "test-state",
+            clientId = "test-client",
+            responseEncryptionSpecification = null
+        )
+
+        assertFailsWith<InvalidData> {
+            handler.getAuthorizationResponse(
+                dispatchInfo = dispatchInfo,
+                vpToken = "vp-token",
+                presentationSubmission = null,
+                walletNonce = "wallet-nonce"
+            )
+        }
+    }
+
+    @Test
+    fun `sendAuthorizationResponse with ResponseDispatchInfo should post to responseUri`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val mockJwk = Jwk(
+            kty = "EC",
+            crv = "P-256",
+            x = "test-x",
+            y = "test-y",
+            alg = "ECDH-ES"
+        )
+        
+        val encryptionSpec = io.mosip.openID4VP.responseModeHandler.ResponseEncryptionSpecification(
+            keyEncryptionAlg = "ECDH-ES",
+            contentEncryptionAlg = "A256GCM",
+            verifierPublicKey = mockJwk
+        )
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = "test-nonce",
+            state = "test-state",
+            clientId = "test-client",
+            responseEncryptionSpecification = encryptionSpec
+        )
+
+        val mockNetworkResponse = NetworkResponse(
+            statusCode = 200,
+            body = """{"redirect_uri":"https://wallet.example.com/success"}""",
+            headers = emptyMap()
+        )
+
+        every { 
+            anyConstructed<JWEHandler>().generateEncryptedResponse(any()) 
+        } returns "encrypted-success-response"
+
+        every {
+            NetworkManagerClient.sendHTTPRequest(
+                url = "https://verifier.example.com/response",
+                method = HttpMethod.POST,
+                bodyParams = any(),
+                headers = any()
+            )
+        } returns mockNetworkResponse
+
+        val result = handler.sendAuthorizationResponse(
+            dispatchInfo = dispatchInfo,
+            vpToken = "vp-token-data",
+            presentationSubmission = """{"id":"submission-1"}""",
+            walletNonce = "wallet-nonce-xyz",
+            responseUri = "https://verifier.example.com/response"
+        )
+
+        assertEquals(200, result.statusCode)
+        verify {
+            NetworkManagerClient.sendHTTPRequest(
+                url = "https://verifier.example.com/response",
+                method = HttpMethod.POST,
+                bodyParams = match { it["response"] == "encrypted-success-response" },
+                headers = match { it["Content-Type"] == ContentType.APPLICATION_FORM_URL_ENCODED.value }
+            )
+        }
+    }
+
+    @Test
+    fun `getAuthorizationErrorResponse should support different error types`() {
+        val handler = DirectPostJwtResponseModeHandler()
+        
+        val dispatchInfo = io.mosip.openID4VP.responseModeHandler.ResponseDispatchInfo(
+            responseMode = "direct_post.jwt",
+            nonce = null,
+            state = null,
+            clientId = "test-client",
+            responseEncryptionSpecification = null
+        )
+
+        val errorTypes = listOf(
+            "access_denied" to "User rejected",
+            "invalid_request" to "Missing parameter",
+            "invalid_scope" to "Unsupported scope",
+            "server_error" to "Internal error"
+        )
+
+        errorTypes.forEach { (error, description) ->
+            val result = handler.getAuthorizationErrorResponse(
+                dispatchInfo = dispatchInfo,
+                error = error,
+                errorDescription = description
+            )
+
+            assertEquals(error, result["error"])
+            assertEquals(description, result["error_description"])
+        }
+    }
 }
